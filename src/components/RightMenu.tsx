@@ -21,6 +21,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom'
 import { PATH_HYPOTHESES, PATH_LOIS } from 'constants/routes';
+import { AccountCircle } from '@mui/icons-material';
 
 
 const drawerWidth = 240;
@@ -126,7 +127,11 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
+        <DrawerHeader sx={{justifyContent:"space-between"}}>
+          <Box sx={{display:"inline-flex", alignItems:"center"}}>
+            <img alt='DISK Logo' src='/logo256.png' style={{width:"auto", height: "38px", padding: "0 15px 0 5px"}} />
+            <Typography variant='h4' sx={{display:"inline-block", fontWeight: 700, color: "gray"}} >DISK</Typography>
+          </Box>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
@@ -155,7 +160,10 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         </List>
         <Box sx={{height: "100%", display:"flex", justifyContent: "end", flexDirection: "column"}}>
           <Divider />
-          LOGIN
+          <Box sx={{height: "50px", display: "flex", alignItems: "center"}}>
+            <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}}/>
+            LOGIN
+          </Box>
         </Box>
       </Drawer>
 

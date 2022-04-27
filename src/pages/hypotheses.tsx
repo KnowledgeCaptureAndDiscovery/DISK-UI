@@ -1,8 +1,9 @@
-import { Box, Card, InputAdornment, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";
+import { Box, Card, InputAdornment, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis } from "DISK/interfaces";
 import React, { useEffect } from "react";
 import SearchIcon from '@mui/icons-material/Search';
+import { HypothesisPreview } from "components/HypothesisPreview";
 
 type OrderType = 'date'|'author';
 
@@ -35,10 +36,7 @@ export const Hypotheses = () => {
                 </Select>
             </Box>
             <Card variant="outlined" sx={{height: "calc(100vh - 157px)"}}>
-                {hypotheses.map((h:Hypothesis) => <Box key={h.id}>
-                    <Typography variant="h6"> {h.name} </Typography>
-                    <Typography> {h.description} </Typography>
-                </Box>)}
+                {hypotheses.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h}/>)}
             </Card>
         </Box>
     )
