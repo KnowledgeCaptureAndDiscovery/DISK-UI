@@ -1,50 +1,85 @@
-import { Autocomplete, AutocompleteChangeReason, Box, CircularProgress, FormHelperText, styled, TextField } from "@mui/material"
-import { idPattern, Question, QuestionVariable, varPattern } from "DISK/interfaces"
-import { SyntheticEvent } from "react";
+import { Autocomplete, Box, CircularProgress, FormHelperText, styled, TextField } from "@mui/material"
+import { Hypothesis, idPattern, Question, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
+import { RootState } from "redux/store";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions } from "redux/questions";
 
 interface QuestionProps {
-    selected? : string
+    hypothesis? : Hypothesis | null
 }
 
-export const QuestionSelector = ({selected:selectedQuestionId} : QuestionProps) => {
-    const [open, setOpen] = React.useState(false);
-    const [options, setOptions] = React.useState<readonly Question[]>([]);
-    const [selectedQuestion, setSelectedQuestion] = React.useState<Question>();
+const TextPart = styled(Box)(({ theme }) => ({
+    display: 'inline-block',
+    borderBottom: "1px solid #c9c9c9",
+    padding: "4px",
+    whiteSpace: "nowrap"
+}));
+
+export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps) => {
+    const dispatch = useAppDispatch();
+    const error = useAppSelector((state:RootState) => state.question.errorAll);
+    const loading = useAppSelector((state:RootState) => state.question.loadingAll);
+    const options = useAppSelector((state:RootState) => state.question.questions);
+    const varOptions = useAppSelector((state:RootState) => state.question.options);
+
+    const [nameToId, setNameToId] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
-    const loading = open && options.length === 0;
+    const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
+    const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
-
-    const [openVars, setOpenVars] = React.useState<{[id:string]: boolean}>({});
-    const [loadingVars, setLoadingVars] = React.useState<{[id:string]: boolean}>({});
-    const [varOptions, setVarOptions] = React.useState<{[id:string]: string[][]}>({});
+    const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : string[]|null}>({});
+    const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
   
     React.useEffect(() => {
-        let active = true;
-        if (!loading) return undefined;
-  
-        (async () => {
-            let questions : Question[] = await DISKAPI.getQuestions();
-            if (active) setOptions([...questions]);
-        })();
-  
-        return () => { active = false; };
-    }, [loading]);
-  
-    /*React.useEffect(() => {
-        if (!open) setOptions([]);
-    }, [open]);*/
+        if (options.length === 0 && !loading && !error) {
+            dispatch(setLoadingAll());
+            DISKAPI.getQuestions()
+                .then((questions:Question[]) => {
+                    dispatch(setQuestions(questions))
+                    if (selectedHypothesis && selectedHypothesis.question) {
+                        let selectedQuestion : Question = questions.filter((q) => q.id === selectedHypothesis.question)?.[0];
+                        if (selectedQuestion)
+                            onQuestionChange(selectedQuestion);
+                        else
+                            console.warn("Selected question not found on question catalog")
+                    }
+                })
+                .catch(() => {
+                    dispatch(setErrorAll())
+                })
+        }
+    })
 
-    const onQuestionChange = (event: SyntheticEvent<Element, Event>, value: Question | null, reason: AutocompleteChangeReason) => {
+    React.useEffect(() => {
+        if (selectedHypothesis && selectedHypothesis.question && options.length > 0) {
+            let selectedQuestion : Question = options.filter((q) => q.id === selectedHypothesis.question)?.[0];
+            if (selectedQuestion) {
+                onQuestionChange(selectedQuestion);
+                console.log(selectedHypothesis)
+            } else
+                console.warn("Selected question not found on question catalog")
+        }
+    }, [selectedHypothesis])
+  
+    const onQuestionChange = (value: Question | null) => {
         if (value) {
+            setSelectedQuestion(value);
             loadQuestionOptions(value);
             updateQuestionFiller(value);
-            setSelectedQuestion(value);
         }
     }
 
     const updateQuestionFiller = (q:Question) => {
+        //Create map varname -> id;
+        let map : {[id:string] : string} = {};
+        q.variables.forEach((qv:QuestionVariable) => {
+            map[qv.varName] = qv.id;
+        });
+        setNameToId(map);
+        
+        //Split question template in text and inputs
         let textParts : string[] = q.template.split(varPattern);
         let varParts : string [] = [];
         let varIterator : RegExpMatchArray | null = q.template.match(varPattern);
@@ -64,57 +99,33 @@ export const QuestionSelector = ({selected:selectedQuestionId} : QuestionProps) 
 
         } while (cur);
 
-        console.log(ordered);
         setQuestionParts(ordered);
     }
 
     const loadQuestionOptions = (question:Question) => {
         if (question.variables && question.variables.length > 0) {
-            let loading : {[id:string]: boolean} = { ...loadingVars };
-            let options : {[id:string]: string[][]} = { ...varOptions };
-            question.variables.forEach((qv:QuestionVariable) => {
-                loading[qv.varName] = true;
-                options[qv.varName] = [];
-            });
-            setLoadingVars(loading);
-            setVarOptions(options);
-
-            question.variables.forEach((qv:QuestionVariable) => {
+            question.variables.forEach((qv:QuestionVariable) => dispatch(setLoadingOptions(qv.id)));
+            question.variables.forEach((qv:QuestionVariable) => 
                 DISKAPI.getVariableOptions(qv.id.replace(idPattern,""))
-                    .then((options:string[][]) => {
-                        console.log(qv.varName + ":", options);
-                        setVarOptions((prev) => {
-                            let newOptions = { ...prev };
-                            newOptions[qv.varName] = options;
-                            return newOptions;
-                        });
-                        setLoadingVars((prev) => {
-                            let newLoading = { ...prev };
-                            newLoading[qv.varName] = false;
-                            return newLoading;
-                        });
-                    })
-                    .catch(() => {
-                        //Handle error
-                    });
-            });
+                    .then((options:string[][]) => dispatch(setOptions({id:qv.id, options:options})))
+                    .catch(() => dispatch(setErrorOptions(qv.id)))
+            );
         }
     }
 
     const onQuestionVariableChange = (varname:string, value:string[] | null) => {
         console.log(value);
         console.log(varOptions);
-        console.log(loadingVars);
     }
 
     return <Box>
         <Box>
             <FormHelperText sx={{margin: "2px"}}> Select the type of question your hypothesis will address: </FormHelperText>
             <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
-                onChange={onQuestionChange}
-                open={open}
-                onOpen={() => { setOpen(true); }}
-                onClose={() => { setOpen(false); }}
+                value={selectedQuestion}
+                onChange={(_,newQ) => onQuestionChange(newQ)}
+                inputValue={selectedQuestionLabel}
+                onInputChange={(_,newIn) => setSelectedQuestionLabel(newIn)}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 getOptionLabel={(option) => option.name}
                 options={options}
@@ -137,24 +148,31 @@ export const QuestionSelector = ({selected:selectedQuestionId} : QuestionProps) 
         <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
             {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                 part.charAt(0) !== '?' ? 
-                    <Box key={`qPart${i}`} sx={{display: 'inline-block', borderBottom: "1px solid #c9c9c9", padding: "4px", whiteSpace: "nowrap"}}>
-                        {part} 
-                    </Box>
+                    <TextPart key={`qPart${i}`}> {part} </TextPart>
                 :
                     <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                        onChange={(event: SyntheticEvent<Element, Event>, value: string[] | null) => {
-                            onQuestionVariableChange(part, value)
-                        }}
+                        value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
+                        onChange={(_, value: string[] | null) => setSelectedOptionValues((values) => {
+                            let newValues = { ...values };
+                            newValues[nameToId[part]] = value;
+                            return newValues;
+                        })}
+                        inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
+                        onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
+                            let newMap = { ...map };
+                            newMap[nameToId[part]] = newIn;
+                            return newMap;
+                        })}
                         isOptionEqualToValue={(option, value) => option[0] === value[0]}
                         getOptionLabel={(option) => option[1]}
-                        options={varOptions[part]}
-                        loading={loadingVars[part]}
+                        options={varOptions[nameToId[part]].values}
+                        loading={varOptions[nameToId[part]].loading}
                         renderInput={(params) => (
                             <TextField {...params} label={part} variant="standard" InputProps={{
                                 ...params.InputProps,
                                 endAdornment: (
                                     <React.Fragment>
-                                        {loadingVars[part] ? <CircularProgress color="inherit" size={20} /> : null}
+                                        {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
                                         {params.InputProps.endAdornment}
                                     </React.Fragment>
                                 ),

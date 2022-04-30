@@ -1,14 +1,17 @@
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import { ReactKeycloakProvider } from '@react-keycloak/web';
+//import { ReactKeycloakProvider } from '@react-keycloak/web';
+//import Keycloak from 'keycloak-js';
+//import { UserContextProvider } from 'redux/UserContext';
 import { AppRouter } from 'AppRouter';
-import Keycloak from 'keycloak-js';
+import { Provider } from 'react-redux';
+import { store } from 'redux/store';
 
-// Setup Keycloak instance as needed
+/* Setup Keycloak instance as needed
 const keycloak = new Keycloak({
   url: 'https://auth.mint.isi.edu/auth',
   realm: 'production',
-  clientId: 'mint-ui',
-});
+  clientId: 'enigma-disk',
+});*/
 
 // Theme
 const theme = createTheme({
@@ -26,14 +29,28 @@ const theme = createTheme({
   },*/
 }); 
 
+/*const eventLogger = (event: unknown, error: unknown) => {
+  console.log('onKeycloakEvent', event, error)
+}
+
+const tokenLogger = (tokens: unknown) => {
+  console.log('onKeycloakTokens', tokens)
+}*/
+
+/*
+        <ReactKeycloakProvider authClient={keycloak}
+              onEvent={eventLogger}
+              onTokens={tokenLogger}>
+        </ReactKeycloakProvider>
+ */
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ReactKeycloakProvider authClient={keycloak}>
+      <Provider store={store}>
         <AppRouter/>
-      </ReactKeycloakProvider>
+      </Provider>
     </ThemeProvider>
   );
 }

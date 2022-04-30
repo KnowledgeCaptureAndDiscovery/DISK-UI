@@ -23,7 +23,6 @@ import { useLocation } from 'react-router-dom'
 import { PATH_HYPOTHESES, PATH_LOIS } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 
-
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -98,6 +97,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 export default function MiniDrawer(props: { children: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) {
   const theme = useTheme();
   const location = useLocation();
+  //const { keycloak, initialized } = useKeycloak();
   const [open, setOpen] = React.useState(true);
 
   const handleDrawerOpen = () => {
@@ -111,6 +111,10 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const inLocation = (loc:string) => {
       return location.pathname === loc;
   }
+
+  /*const onLoginClicked = useCallback(() => {
+    keycloak?.login()
+  }, [keycloak])*/
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -162,7 +166,9 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           <Divider />
           <Box sx={{height: "50px", display: "flex", alignItems: "center"}}>
             <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}}/>
-            LOGIN
+              <button type="button">
+                LOGIN
+              </button>
           </Box>
         </Box>
       </Drawer>

@@ -1,11 +1,14 @@
 import { Box, Card, Divider, IconButton, Skeleton, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis, idPattern } from "DISK/interfaces";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
+import { setSelectedHypothesis, setLoadingSelected, setErrorSelected } from 'redux/hypothesis';
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -26,29 +29,30 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 export const HypothesisView = () => {
     const location = useLocation();
 
-    const [hypothesis, setHypothesis] = React.useState<Hypothesis>();
-    const [loadingHypothesis, setLoadingHypothesis] = React.useState<boolean>(true);
-    const [error, setError] = React.useState<boolean>(false);
+    const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
+    const selectedId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
+    const loading = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
+    const error = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
+    const dispatch = useAppDispatch();
 
     const loadHypothesis = () => {
-        setLoadingHypothesis(true);
-        setError(false);
         let id : string = location.pathname.replace(idPattern, '');
-        let hypP : Promise<Hypothesis> = DISKAPI.getHypothesis(id);
-        hypP.then((hypothesis:Hypothesis) => {
-            setHypothesis(hypothesis);
-            setLoadingHypothesis(false);
-        });
-        hypP.catch(() => {
-            setLoadingHypothesis(false);
-            setError(true);
-        });
+        if (!!id && !loading && !error && selectedId !== id) {
+            dispatch(setLoadingSelected(id));
+            DISKAPI.getHypothesis(id)
+                .then((hypothesis:Hypothesis) => {
+                    dispatch(setSelectedHypothesis(hypothesis));
+                })
+                .catch(() => {
+                    dispatch(setErrorSelected());
+                });
+        }
     }
 
-    useEffect(loadHypothesis, []);
+    useEffect(loadHypothesis);
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)"}}>
-        {loadingHypothesis ? 
+        {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
             <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
@@ -65,7 +69,7 @@ export const HypothesisView = () => {
             <Box>
                 <TypographyLabel>Description: </TypographyLabel>
                 <TypographyInline>
-                    {!loadingHypothesis && !!hypothesis ? hypothesis.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
+                    {!loading && !!hypothesis ? hypothesis.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
                 </TypographyInline>
             </Box>
             {!!hypothesis && hypothesis.notes ? <Box>
