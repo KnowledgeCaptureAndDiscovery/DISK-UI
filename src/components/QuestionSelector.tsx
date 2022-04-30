@@ -1,10 +1,10 @@
 import { Autocomplete, Box, CircularProgress, FormHelperText, styled, TextField } from "@mui/material"
-import { Hypothesis, idPattern, Question, QuestionVariable, varPattern } from "DISK/interfaces"
+import { Hypothesis, idPattern, Question, QuestionBinding, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions } from "redux/questions";
+import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
 
 interface QuestionProps {
     hypothesis? : Hypothesis | null
@@ -29,7 +29,7 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
-    const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : string[]|null}>({});
+    const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
     const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
   
     React.useEffect(() => {
@@ -55,11 +55,23 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
     React.useEffect(() => {
         if (selectedHypothesis && selectedHypothesis.question && options.length > 0) {
             let selectedQuestion : Question = options.filter((q) => q.id === selectedHypothesis.question)?.[0];
-            if (selectedQuestion) {
+            if (selectedQuestion)
                 onQuestionChange(selectedQuestion);
-                console.log(selectedHypothesis)
-            } else
+            else
                 console.warn("Selected question not found on question catalog")
+
+            if (selectedHypothesis.questionBindings) {
+                selectedHypothesis.questionBindings.forEach((qb) => {
+                    let curOpt: Option = options.filter((opt) => opt.id === qb.binding)?.[0];
+                    if (curOpt) {
+                        setSelectedOptionValues((values) => {
+                            let newValues = { ...values };
+                            newValues[qb.variable] = curOpt;
+                            return newValues;
+                        })
+                    }
+                });
+            }
         }
     }, [selectedHypothesis])
   
@@ -107,15 +119,27 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
             question.variables.forEach((qv:QuestionVariable) => dispatch(setLoadingOptions(qv.id)));
             question.variables.forEach((qv:QuestionVariable) => 
                 DISKAPI.getVariableOptions(qv.id.replace(idPattern,""))
-                    .then((options:string[][]) => dispatch(setOptions({id:qv.id, options:options})))
+                    .then((varOptions:string[][]) => {
+                        dispatch(setOptions({id:qv.id, options:varOptions}))
+                        if (selectedHypothesis && selectedHypothesis.questionBindings) {
+                            let curVarBind : QuestionBinding = selectedHypothesis.questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
+                            let curOpt : Option = varOptions
+                                    .filter((opt) => opt[0] === curVarBind.binding)
+                                    .map((opt) => { 
+                                        return {id: opt[0], name: opt[1]} as Option 
+                                    })?.[0];
+                            if (curOpt) {
+                                setSelectedOptionValues((values) => {
+                                    let newValues = { ...values };
+                                    newValues[qv.id] = curOpt;
+                                    return newValues;
+                                })
+                            }
+                        }
+                    })
                     .catch(() => dispatch(setErrorOptions(qv.id)))
             );
         }
-    }
-
-    const onQuestionVariableChange = (varname:string, value:string[] | null) => {
-        console.log(value);
-        console.log(varOptions);
     }
 
     return <Box>
@@ -152,7 +176,7 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
                 :
                     <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
                         value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                        onChange={(_, value: string[] | null) => setSelectedOptionValues((values) => {
+                        onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
                             let newValues = { ...values };
                             newValues[nameToId[part]] = value;
                             return newValues;
@@ -163,8 +187,8 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
                             newMap[nameToId[part]] = newIn;
                             return newMap;
                         })}
-                        isOptionEqualToValue={(option, value) => option[0] === value[0]}
-                        getOptionLabel={(option) => option[1]}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        getOptionLabel={(option) => option.name}
                         options={varOptions[nameToId[part]].values}
                         loading={varOptions[nameToId[part]].loading}
                         renderInput={(params) => (
