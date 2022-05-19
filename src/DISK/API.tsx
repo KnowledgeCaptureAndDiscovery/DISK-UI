@@ -1,7 +1,8 @@
-import { Hypothesis, Question } from "./interfaces";
+import { Hypothesis, LineOfInquiry, Question, TriggeredLineOfInquiry } from "./interfaces";
 
 export class DISKAPI {
-    private static url : string = "http://localhost:9090/disk-project-server/";
+    //private static url : string = "http://localhost:9090/disk-project-server/";
+    private static url : string = "http://localhost:8080/disk-project-server-2.5.2/";
 
 
     private static async get (url:string) : Promise<any> {
@@ -32,5 +33,21 @@ export class DISKAPI {
 
     public static async getVariableOptions (id:string, username?:string) : Promise<string[][]> {
         return await DISKAPI.get(DISKAPI.url + "question/" + id + "/options") as string[][];
+    }
+
+    public static async getLOIs (username?:string) : Promise<LineOfInquiry[]> {
+        return await DISKAPI.get(DISKAPI.url + "lois") as LineOfInquiry[];
+    }
+
+    public static async getLOI (id:string, username?:string) : Promise<LineOfInquiry> {
+        return await DISKAPI.get(DISKAPI.url + "lois/" + id) as LineOfInquiry;
+    }
+
+    public static async getTLOIs (username?:string) : Promise<TriggeredLineOfInquiry[]> {
+        return await DISKAPI.get(DISKAPI.url + "tlois") as TriggeredLineOfInquiry[];
+    }
+
+    public static async getTLOI (id:string, username?:string) : Promise<TriggeredLineOfInquiry> {
+        return await DISKAPI.get(DISKAPI.url + "tlois/" + id) as TriggeredLineOfInquiry;
     }
 }

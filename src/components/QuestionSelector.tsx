@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Card, CircularProgress, FormHelperText, styled, TextField } from "@mui/material"
-import { Hypothesis, idPattern, Question, QuestionBinding, QuestionVariable, varPattern } from "DISK/interfaces"
+import { Hypothesis, idPattern, Question, VariableBinding, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
 import { RootState } from "redux/store";
@@ -122,7 +122,7 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
                     .then((varOptions:string[][]) => {
                         dispatch(setOptions({id:qv.id, options:varOptions}))
                         if (selectedHypothesis && selectedHypothesis.questionBindings) {
-                            let curVarBind : QuestionBinding = selectedHypothesis.questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
+                            let curVarBind : VariableBinding = selectedHypothesis.questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
                             let curOpt : Option = varOptions
                                     .filter((opt) => opt[0] === curVarBind.binding)
                                     .map((opt) => { 
