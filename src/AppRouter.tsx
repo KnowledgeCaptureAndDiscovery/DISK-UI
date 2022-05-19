@@ -1,5 +1,5 @@
 import RightMenu from "components/RightMenu";
-import { PATH_HOME, PATH_HYPOTHESES, PATH_LOIS } from "constants/routes";
+import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS } from "constants/routes";
 import { Home } from "pages/Home";
 import { Hypotheses } from "pages/Hypotheses";
 import { HypothesisEditor } from "pages/HypothesisEditor";
@@ -17,9 +17,9 @@ export const AppRouter = () => {
           <Route path={PATH_HYPOTHESES} element={<Hypotheses/>}></Route>
           <Route path={PATH_LOIS} element={<LinesOfInquiry/>}></Route>
 
-          <Route path={PATH_HYPOTHESES+"/new"} element={<HypothesisEditor/>}></Route>
-          <Route path={PATH_HYPOTHESES+"/:hypothesisId"} element={<HypothesisView/>}></Route>
-          <Route path={PATH_HYPOTHESES+"/:hypothesisId/edit"} element={<HypothesisEditor/>}></Route>
+          <Route path={PATH_HYPOTHESIS_NEW} element={<HypothesisEditor/>}></Route>
+          <Route path={PATH_HYPOTHESIS_ID} element={<HypothesisView/>}></Route>
+          <Route path={PATH_HYPOTHESIS_ID_EDIT} element={<HypothesisEditor/>}></Route>
         </Routes>
       </RightMenu>
     </BrowserRouter>

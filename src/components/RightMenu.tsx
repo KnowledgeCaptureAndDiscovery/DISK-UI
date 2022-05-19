@@ -20,8 +20,12 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom'
-import { PATH_HYPOTHESES, PATH_LOIS } from 'constants/routes';
+import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
+
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
+import { Hypothesis } from 'DISK/interfaces';
 
 const drawerWidth = 240;
 
@@ -67,14 +71,16 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
+  [theme.breakpoints.up('md')]: {
+    ...(open && {
+      marginLeft: drawerWidth,
+      width: `calc(100% - ${drawerWidth}px)`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
     }),
-  }),
+  },
 }));
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -91,12 +97,61 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
       ...closedMixin(theme),
       '& .MuiDrawer-paper': closedMixin(theme),
     }),
+    [theme.breakpoints.down('md')]: {
+      ...closedMixin(theme),
+      '& .MuiDrawer-paper': closedMixin(theme),
+    }
   }),
 );
+
+const AutohideIconButton = styled(IconButton)(
+  ({ theme }) => ({
+    marginRight: 5,
+    [theme.breakpoints.down('md')]: {
+      display: 'unset',
+    }
+  }),
+);
+
+const MainBox = styled(Box)(
+  ({ theme }) => ({
+    flexGrow: 1,
+    padding: '24px',
+    [theme.breakpoints.up('lg')]: {
+      maxWidth: '1090px',
+      margin: 'auto',
+    }
+  }),
+);
+
+
+const renderTitle = (url:string, selectedHypothesis:Hypothesis|null) => {
+  if (PATH_HYPOTHESIS_ID_RE.test(url)) {
+    return <Box>Hypothesis: { selectedHypothesis ? selectedHypothesis.name : "..."}</Box>
+  } else if (PATH_HYPOTHESIS_ID_EDIT_RE.test(url)) {
+    return <Box>Editing hypothesis: { selectedHypothesis ? selectedHypothesis.name : "..."}</Box>
+  }
+
+  switch (url) {
+    case PATH_HOME:
+      return <Box>DISK Home</Box>;
+    case PATH_HYPOTHESES:
+      return <Box>Hypotheses</Box>;
+    case PATH_HYPOTHESIS_NEW:
+      return <Box>Creating new hypothesis</Box>;
+    case PATH_LOIS:
+      return <Box>Lines of Inquiry</Box>
+    default: {
+      return <Box>{url}</Box>;
+    }
+  }
+}
 
 export default function MiniDrawer(props: { children: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) {
   const theme = useTheme();
   const location = useLocation();
+  const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
+
   //const { keycloak, initialized } = useKeycloak();
   const [open, setOpen] = React.useState(true);
 
@@ -121,18 +176,18 @@ export default function MiniDrawer(props: { children: string | number | boolean 
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
-          <IconButton color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} edge="start"
-            sx={{ marginRight: 5, ...(open && { display: 'none' }), }}>
+          <AutohideIconButton color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} edge="start"
+            sx={{ ...(open && { display: 'none' }) }}>
             <MenuIcon />
-          </IconButton>
+          </AutohideIconButton>
           <Typography variant="h6" noWrap component="div">
-            DISK {location.pathname}
+            { renderTitle(location.pathname, selectedHypothesis) }
           </Typography>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader sx={{justifyContent:"space-between"}}>
-          <Box sx={{display:"inline-flex", alignItems:"center"}}>
+          <Box sx={{display:"inline-flex", alignItems:"center", textDecoration: 'unset'}} component={Link} to={PATH_HOME}>
             <img alt='DISK Logo' src='/logo256.png' style={{width:"auto", height: "38px", padding: "0 15px 0 5px"}} />
             <Typography variant='h4' sx={{display:"inline-block", fontWeight: 700, color: "gray"}} >DISK</Typography>
           </Box>
@@ -173,10 +228,10 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         </Box>
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <MainBox component="main">
         <DrawerHeader />
         { props.children }
-      </Box>
+      </MainBox>
     </Box>
   );
 }

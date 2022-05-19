@@ -1,4 +1,4 @@
-import { Autocomplete, Box, CircularProgress, FormHelperText, styled, TextField } from "@mui/material"
+import { Autocomplete, Box, Card, CircularProgress, FormHelperText, styled, TextField } from "@mui/material"
 import { Hypothesis, idPattern, Question, QuestionBinding, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
@@ -169,42 +169,45 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
                 )}
             />
         </Box>
-        <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
-            {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
-                part.charAt(0) !== '?' ? 
-                    <TextPart key={`qPart${i}`}> {part} </TextPart>
-                :
-                    <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                        value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                        onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
-                            let newValues = { ...values };
-                            newValues[nameToId[part]] = value;
-                            return newValues;
-                        })}
-                        inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
-                        onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
-                            let newMap = { ...map };
-                            newMap[nameToId[part]] = newIn;
-                            return newMap;
-                        })}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        getOptionLabel={(option) => option.name}
-                        options={varOptions[nameToId[part]].values}
-                        loading={varOptions[nameToId[part]].loading}
-                        renderInput={(params) => (
-                            <TextField {...params} label={part} variant="standard" InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <React.Fragment>
-                                        {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                        {params.InputProps.endAdornment}
-                                    </React.Fragment>
-                                ),
-                            }}/>
-                        )}
-                    />
-                )
-            : ""}
-        </Box>
+        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse")}}>
+            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Fill the following question template: </FormHelperText>
+            <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
+                {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
+                    part.charAt(0) !== '?' ? 
+                        <TextPart key={`qPart${i}`}> {part} </TextPart>
+                    :
+                        <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
+                            value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
+                            onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
+                                let newValues = { ...values };
+                                newValues[nameToId[part]] = value;
+                                return newValues;
+                            })}
+                            inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
+                            onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
+                                let newMap = { ...map };
+                                newMap[nameToId[part]] = newIn;
+                                return newMap;
+                            })}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            getOptionLabel={(option) => option.name}
+                            options={varOptions[nameToId[part]].values}
+                            loading={varOptions[nameToId[part]].loading}
+                            renderInput={(params) => (
+                                <TextField {...params} label={part} variant="standard" InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <React.Fragment>
+                                            {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {params.InputProps.endAdornment}
+                                        </React.Fragment>
+                                    ),
+                                }}/>
+                            )}
+                        />
+                    )
+                : ""}
+            </Box>
+        </Card>
     </Box>;
 }

@@ -12,13 +12,15 @@ interface HypothesisPreviewProps {
 
 export const HypothesisPreview = ({hypothesis:h} : HypothesisPreviewProps) => {
     return <Card variant="outlined" sx={{margin: "10px", height: "90px"}}>
-        <Box component={Link} to={PATH_HYPOTHESES + "/" + h.id}
-             sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center", textDecoration: "none"}}>
-            <Box sx={{display:"inline-flex", alignItems:"center"}}>
+        <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+            <Box component={Link} to={PATH_HYPOTHESES + "/" + h.id}
+                    sx={{display:"inline-flex", alignItems:"center", textDecoration: "none"}}>
                 <ScienceIcon sx={{color: "orange"}} />
                 <Typography variant="h6" sx={{display: "inline-block", color:"black"}}>{h.name} </Typography>
             </Box>
-            <EditIcon />
+            <Box component={Link} to={PATH_HYPOTHESES + "/" + h.id + "/edit"}>
+                <EditIcon/>
+            </Box>
         </Box>
         <Divider/>
         <Typography sx={{padding: "0 10px"}}> {h.description} </Typography>
