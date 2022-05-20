@@ -2,10 +2,12 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { hypothesisSlice } from './hypothesis';
 import { loisSlice } from './lois';
 import { questionSlice } from './questions';
+import { serverSlice } from './server';
 
 
 export const store = configureStore({
   reducer: {
+    server: serverSlice.reducer,
     hypotheses: hypothesisSlice.reducer,
     question: questionSlice.reducer,
     lois: loisSlice.reducer,

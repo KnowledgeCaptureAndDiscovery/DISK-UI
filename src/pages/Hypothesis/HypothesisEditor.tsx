@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import { styled } from '@mui/material/styles';
-import { PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW } from "constants/routes";
+import { PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { QuestionSelector } from "components/QuestionSelector";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
@@ -36,7 +36,7 @@ export const HypothesisEditor = () => {
 
     useEffect(() => {
         let match = PATH_HYPOTHESIS_ID_EDIT_RE.exec(location.pathname);
-        if (match != null && match.length == 2) {
+        if (match != null && match.length === 2) {
             let id : string = match[1];
             if (!loading && !error && selectedId !== id) {
                 dispatch(setLoadingSelected(id));
@@ -46,13 +46,14 @@ export const HypothesisEditor = () => {
                     })
                     .catch(() => {
                         dispatch(setErrorSelected());
-                    });
+                    }); 
             }
         } else if (location.pathname === PATH_HYPOTHESIS_NEW) {
             dispatch(setSelectedHypothesis(null));
         }
-    }, [location]);
+    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    //TODO: Fix this, should clean the form when on /new
     useEffect(() => {
         if (!selectedId && !fakeLoading) {
             setFakeLoading(true);
@@ -60,9 +61,9 @@ export const HypothesisEditor = () => {
                 setFakeLoading(false);
             }, 100);
         }
-    }, [selectedId])
+    }, [selectedId])  // eslint-disable-line react-hooks/exhaustive-deps
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'scroll'}}>
+    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
             {!loading && !fakeLoading? 
                 <TextField fullWidth size="small" id="hypothesisName" label="Hypothesis Name" required

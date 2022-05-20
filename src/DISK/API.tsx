@@ -50,4 +50,8 @@ export class DISKAPI {
     public static async getTLOI (id:string, username?:string) : Promise<TriggeredLineOfInquiry> {
         return await DISKAPI.get(DISKAPI.url + "tlois/" + id) as TriggeredLineOfInquiry;
     }
+
+    public static async getEndpoints () : Promise<{[name:string] : string }> {
+        return await DISKAPI.get(DISKAPI.url + "server/endpoints") as {[name:string] : string };
+    }
 }
