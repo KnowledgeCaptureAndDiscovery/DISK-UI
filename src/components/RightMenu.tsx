@@ -20,12 +20,12 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom'
-import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS } from 'constants/routes';
+import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { Hypothesis } from 'DISK/interfaces';
+import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
 
 const drawerWidth = 240;
 
@@ -125,11 +125,15 @@ const MainBox = styled(Box)(
 );
 
 
-const renderTitle = (url:string, selectedHypothesis:Hypothesis|null) => {
+const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI:LineOfInquiry|null) => {
   if (PATH_HYPOTHESIS_ID_RE.test(url)) {
     return <Box>Hypothesis: { selectedHypothesis ? selectedHypothesis.name : "..."}</Box>
   } else if (PATH_HYPOTHESIS_ID_EDIT_RE.test(url)) {
     return <Box>Editing hypothesis: { selectedHypothesis ? selectedHypothesis.name : "..."}</Box>
+  } else if (PATH_LOI_ID_RE.test(url)) {
+    return <Box>Line of Inquiry: { selectedLOI ? selectedLOI.name : "..."}</Box>
+  } else if (PATH_LOI_ID_EDIT_RE.test(url)) {
+    return <Box>Editing Line of Inquiry: { selectedLOI ? selectedLOI.name : "..."}</Box>
   }
 
   switch (url) {
@@ -151,6 +155,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const theme = useTheme();
   const location = useLocation();
   const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
+  const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
 
   //const { keycloak, initialized } = useKeycloak();
   const [open, setOpen] = React.useState(true);
@@ -164,7 +169,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   };
 
   const inLocation = (loc:string) => {
-      return location.pathname === loc;
+      return location.pathname.includes(loc);
   }
 
   /*const onLoginClicked = useCallback(() => {
@@ -181,7 +186,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             <MenuIcon />
           </AutohideIconButton>
           <Typography variant="h6" noWrap component="div">
-            { renderTitle(location.pathname, selectedHypothesis) }
+            { renderTitle(location.pathname, selectedHypothesis, selectedLOI) }
           </Typography>
         </Toolbar>
       </AppBar>

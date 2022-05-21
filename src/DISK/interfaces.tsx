@@ -117,4 +117,18 @@ export interface TriggeredLineOfInquiry {
     dataSource: string,
 }
 
+export type MethodInputType = 'input' | 'parameter' | 'none' ;
+
+export interface MethodInput {
+    name: string,
+    type: MethodInputType
+}
+
+export interface Method {
+    id?: string,
+    name: string,
+    link: string,
+    inputs?: MethodInput[]
+}
+
 export default {};

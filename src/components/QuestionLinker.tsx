@@ -103,7 +103,7 @@ export const QuestionLinker = ({selected:selectedId} : QuestionLinkerProps) => {
 
     return <Box>
         <Box>
-            <FormHelperText sx={{margin: "2px"}}> Select the type of question your hypothesis will address: </FormHelperText>
+            <FormHelperText sx={{margin: "2px", fontSize: "0.9rem"}}> Select the type of question your hypothesis will address: </FormHelperText>
             <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
                 value={selectedQuestion}
                 onChange={(_,newQ) => onQuestionChange(newQ)}
@@ -128,7 +128,7 @@ export const QuestionLinker = ({selected:selectedId} : QuestionLinkerProps) => {
                 )}
             />
         </Box>
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse")}}>
+        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis will follow this question template: </FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 

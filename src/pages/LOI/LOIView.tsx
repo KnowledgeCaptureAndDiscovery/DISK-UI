@@ -55,7 +55,7 @@ export const LOIView = () => {
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
-            <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+            <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
                 <Typography variant="h5">
                     {error ? "Error loading LOI" : LOI?.name}
                 </Typography>

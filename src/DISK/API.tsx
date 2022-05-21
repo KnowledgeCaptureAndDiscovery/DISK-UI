@@ -1,4 +1,4 @@
-import { Hypothesis, LineOfInquiry, Question, TriggeredLineOfInquiry } from "./interfaces";
+import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry } from "./interfaces";
 
 export class DISKAPI {
     //private static url : string = "http://localhost:9090/disk-project-server/";
@@ -53,5 +53,19 @@ export class DISKAPI {
 
     public static async getEndpoints () : Promise<{[name:string] : string }> {
         return await DISKAPI.get(DISKAPI.url + "server/endpoints") as {[name:string] : string };
+    }
+
+    public static async getWorkflows () : Promise<Method[]> {
+        return await DISKAPI.get(DISKAPI.url + "workflows") as Method[];
+    }
+
+    public static async getWorkflowVariables (id:string) : Promise<MethodInput[]>{
+        let inputsRaw = await DISKAPI.get(DISKAPI.url + "workflows/" + id);
+        let inputs : MethodInput[] = inputsRaw.map((i:any) => {return {
+            name: i.name,
+            type: i["input"] ? "input" : (i["param"] ? "parameter" : "none"),
+        }})
+        console.log(inputs);
+        return inputs;
     }
 }

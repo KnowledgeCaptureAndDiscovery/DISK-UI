@@ -169,7 +169,7 @@ export const QuestionSelector = ({hypothesis:selectedHypothesis} : QuestionProps
                 )}
             />
         </Box>
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse")}}>
+        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Fill the following question template: </FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 

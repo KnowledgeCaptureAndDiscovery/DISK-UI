@@ -64,9 +64,9 @@ export const HypothesisEditor = () => {
     }, [selectedId])  // eslint-disable-line react-hooks/exhaustive-deps
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
-        <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+        <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading && !fakeLoading? 
-                <TextField fullWidth size="small" id="hypothesisName" label="Hypothesis Name" required
+                <TextField fullWidth size="small" id="hypothesisName" label="Hypothesis Name" required sx={{backgroundColor: "white"}}
                     defaultValue={!!hypothesis ? hypothesis.name : ''}/>
             : <Skeleton/> }
 
