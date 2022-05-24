@@ -9,6 +9,7 @@ import { PATH_HYPOTHESES } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setSelectedHypothesis, setLoadingSelected, setErrorSelected } from 'redux/hypothesis';
+import { QuestionPreview } from "components/QuestionPreview";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -80,6 +81,14 @@ export const HypothesisView = () => {
             <TypographySubtitle>
                 Hypothesis question:
             </TypographySubtitle>
+            {!loading && !!hypothesis ? 
+            <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
+            : <Skeleton/>}
+
+            <TypographySubtitle>
+                Hypothesis testing executions:
+            </TypographySubtitle>
+            <Skeleton/>
 
         </Box>
         

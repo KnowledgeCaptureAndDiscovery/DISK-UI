@@ -22,7 +22,7 @@ import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
 import { WorkflowEditor } from "components/WorkflowEditor";
 
-const TextFieldBlock = styled(TextField)(({ theme }) => ({
+export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
     margin: "6px 0",
 }));
@@ -232,7 +232,6 @@ export const LOIEditor = () => {
             </Box>
         </Box>
         <Box sx={{display: 'flex', justifyContent: 'flex-end', padding: "10px"}}>
-
             <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
                 <CancelIcon/> Cancel
             </Button>

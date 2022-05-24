@@ -7,7 +7,8 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
 
 interface QuestionLinkerProps {
-    selected: string
+    selected: string,
+    disabled?: boolean
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -17,7 +18,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionLinker = ({selected:selectedId} : QuestionLinkerProps) => {
+export const QuestionLinker = ({selected:selectedId, disabled:disabled} : QuestionLinkerProps) => {
 
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
@@ -102,6 +103,7 @@ export const QuestionLinker = ({selected:selectedId} : QuestionLinkerProps) => {
     }
 
     return <Box>
+        {disabled? "" :
         <Box>
             <FormHelperText sx={{margin: "2px", fontSize: "0.9rem"}}> Select the type of question your hypothesis will address: </FormHelperText>
             <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
@@ -128,9 +130,10 @@ export const QuestionLinker = ({selected:selectedId} : QuestionLinkerProps) => {
                 )}
             />
         </Box>
+        }
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis will follow this question template: </FormHelperText>
-            <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
+            <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: (disabled ? "5px": 0)}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>

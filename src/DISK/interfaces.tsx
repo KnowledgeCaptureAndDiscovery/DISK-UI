@@ -24,7 +24,7 @@ export interface VariableBinding {
 }
 
 export interface Triple {
-    details:    string,
+    details?:    string,
     subject:    string,
     predicate:  string, 
     object: {

@@ -21,6 +21,13 @@ interface QuestionState {
   options: OptionMap
 }
 
+interface PartialQuestionState {
+  questions?: Question[],
+  loadingAll?: boolean,
+  errorAll?: boolean,
+  options?: OptionMap
+}
+
 export const questionSlice = createSlice({
     name: 'question',
     initialState: {
@@ -31,44 +38,59 @@ export const questionSlice = createSlice({
     } as QuestionState,
     reducers: {
         setQuestions: (state:QuestionState, action: PayloadAction<Question[]>) => {
-            state.questions = action.payload;
-            state.loadingAll = false;
-            state.errorAll = false;
+            let newState : PartialQuestionState = {
+                questions: action.payload,
+                loadingAll: false,
+                errorAll: false
+            }
+            return  { ...state , ...newState };
         },
         setLoadingAll: (state:QuestionState) => {
-            state.loadingAll = true;
-            state.errorAll = false;
-            state.questions = [];
+            let newState : PartialQuestionState = {
+                questions: [],
+                loadingAll: true,
+                errorAll: false,
+            }
+            return  { ...state , ...newState };
         },
         setErrorAll: (state:QuestionState) => {
-            state.errorAll = true;
-            state.loadingAll = false;
-            state.questions = [];
+            let newState : PartialQuestionState = {
+                questions: [],
+                loadingAll: false,
+                errorAll: true,
+            }
+            return  { ...state , ...newState };
         },
         setOptions: (state:QuestionState, action:PayloadAction<{id:string, options:string[][]}>) => {
             let newOpts : Option[] = []
             action.payload.options.forEach((opt:string[]) => 
                 newOpts.push({id: opt[0], name:opt[1]})
             );
-            state.options[action.payload.id] = {
+            let newOptionMap : OptionMap = { ...state.options };
+            newOptionMap[action.payload.id] = {
                 values: newOpts,
                 loading: false,
                 error: false
-            }
+            };
+            return { ...state, options: newOptionMap };
         },
         setLoadingOptions: (state:QuestionState, action: PayloadAction<string>) => {
-            state.options[action.payload] = {
+            let newOptionMap : OptionMap = { ...state.options };
+            newOptionMap[action.payload] = {
                 values: [],
                 loading: true,
                 error: false
             }
+            return { ...state, options: newOptionMap };
         },
         setErrorOptions: (state:QuestionState, action: PayloadAction<string>) => {
-            state.options[action.payload] = {
+            let newOptionMap : OptionMap = { ...state.options };
+            newOptionMap[action.payload] = {
                 values: [],
                 loading: false,
                 error: true
             }
+            return { ...state, options: newOptionMap };
         }
     },
 });
