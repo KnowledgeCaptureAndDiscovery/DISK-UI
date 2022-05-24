@@ -3,6 +3,7 @@ import { hypothesisSlice } from './hypothesis';
 import { loisSlice } from './lois';
 import { questionSlice } from './questions';
 import { serverSlice } from './server';
+import { tloisSlice } from './tlois';
 import { workflowSlice } from './workflows';
 
 
@@ -13,6 +14,7 @@ export const store = configureStore({
     question: questionSlice.reducer,
     lois: loisSlice.reducer,
     workflows: workflowSlice.reducer,
+    tlois: tloisSlice.reducer,
   },
 });
 
