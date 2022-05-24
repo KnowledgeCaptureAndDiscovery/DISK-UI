@@ -1,6 +1,6 @@
 import RightMenu from "components/RightMenu";
 import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW } from "constants/routes";
-import { Home } from "pages/Home";
+import Home from "pages/Home";
 import { Hypotheses } from "pages/Hypothesis/Hypotheses";
 import { HypothesisEditor } from "pages/Hypothesis/HypothesisEditor";
 import { HypothesisView } from "pages/Hypothesis/HypothesisView";
