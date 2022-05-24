@@ -8,7 +8,7 @@ import { RootState } from 'redux/store';
 import { setErrorAll, setLoadingAll, setHypotheses } from 'redux/hypothesis';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW } from "constants/routes";
+import { PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
 
 type OrderType = 'date'|'author';

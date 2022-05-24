@@ -65,7 +65,6 @@ export class DISKAPI {
             name: i.name,
             type: i["input"] ? "input" : (i["param"] ? "parameter" : "none"),
         }})
-        console.log(inputs);
         return inputs;
     }
 }

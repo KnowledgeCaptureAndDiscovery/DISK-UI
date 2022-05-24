@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { styled } from '@mui/material/styles';
@@ -47,7 +49,7 @@ export const LOIEditor = () => {
     const [fakeLoading, setFakeLoading] = React.useState(false);
     const [addingWorkflow, setAddingWorkflow] = React.useState(false);
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
-    const [selectedWorkflow, setSelectedWorkflow] = React.useState("");
+    const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow>();
 
     useEffect(() => {
         let match = PATH_LOI_ID_EDIT_RE.exec(location.pathname);
@@ -93,14 +95,16 @@ export const LOIEditor = () => {
         }
     }
 
-    const onWorkflowChange = (event:SelectChangeEvent<string>) => {
-        if (event && event.target.value) {
-            setSelectedWorkflow(event.target.value);
-        }
-    }
-
     const toggleAddWorkflow = () => {
         setAddingWorkflow(!addingWorkflow);
+    } 
+
+    const onEnableWorkflowEdit = (wf:Workflow) => {
+        setSelectedWorkflow(wf);
+    }
+
+    const onSaveButtonClicked = () => {
+        console.log("save clicked");
     }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
@@ -110,7 +114,7 @@ export const LOIEditor = () => {
                     defaultValue={!!LOI ? LOI.name : ''}/>
             : <Skeleton/> }
 
-            <IconButton component={Link} to={PATH_LOIS + (LOI && LOI.id ? "/" + LOI.id : "")}>
+            <IconButton component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
                 <CancelIcon /> 
             </IconButton>
         </Box>
@@ -184,7 +188,7 @@ export const LOIEditor = () => {
                     : ""}
                 </Box>
             </Box> 
-            {addingWorkflow ?  <WorkflowEditor></WorkflowEditor> : ""}
+            {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow}></WorkflowEditor> : ""}
             <Box>
                 {loading ? <Skeleton/> : (LOI && LOI.workflows && LOI.workflows.length > 0 ? 
                     <Box>
@@ -193,30 +197,28 @@ export const LOIEditor = () => {
                         </FormHelperText>
                         { LOI.workflows.map((wf:Workflow) => <Card key={`wf_${wf.workflow}`} variant="outlined">
                             <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                                <a target="_blank" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
+                                <a target="_blank" rel="noreferrer" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
                                     <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />
                                     <Typography sx={{padding:"0 10px", fontWeight: 500}}>{wf.workflow}</Typography>
                                     <OpenInNewIcon sx={{fontSize: "1rem"}}/>
                                 </a>
+                                <Button size="small" sx={{mr:"5px"}} onClick={() => {onEnableWorkflowEdit(wf)}}>
+                                    <EditIcon></EditIcon> Edit
+                                </Button>
                             </Box>
                             <Divider/>
-                            <Grid container spacing={2} sx={{padding: "0 10px", fontSize: "0.85rem"}}>
-                                <Grid item xs={3} md={2} sx={{textAlign: "right", color: "#444"}}>
-                                    <b>DATA BINDINGS:</b>
-                                </Grid>
-                                <Grid item xs={9} md={10}>
-                                    { wf.bindings.map((binding:VariableBinding) =>
-                                        <Grid key={`var_${binding.variable}`} container spacing={1}>
-                                            <Grid item xs={3} md={2}>
-                                                <b>{binding.variable}: </b>
-                                            </Grid>
-                                            <Grid item xs={9} md={10}>
-                                                {binding.binding}
-                                            </Grid>
+                            <Box sx={{fontSize:".85rem"}}>
+                                { wf.bindings.map((binding:VariableBinding) =>
+                                    <Grid key={`var_${binding.variable}`} container spacing={1}>
+                                        <Grid item xs={3} md={2} sx={{textAlign: "right"}}>
+                                            <b>{binding.variable}: </b>
                                         </Grid>
-                                    )}
-                                </Grid>
-                            </Grid>
+                                        <Grid item xs={9} md={10}>
+                                            {binding.binding}
+                                        </Grid>
+                                    </Grid>
+                                )}
+                            </Box>
                         </Card>)}
                     </Box>
                 : 
@@ -228,6 +230,15 @@ export const LOIEditor = () => {
                 )}
 
             </Box>
+        </Box>
+        <Box sx={{display: 'flex', justifyContent: 'flex-end', padding: "10px"}}>
+
+            <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
+                <CancelIcon/> Cancel
+            </Button>
+            <Button variant="contained" color="success" onClick={onSaveButtonClicked}>
+                <SaveIcon/> Save
+            </Button>
         </Box>
     </Card>
 }

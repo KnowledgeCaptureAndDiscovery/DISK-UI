@@ -23,7 +23,7 @@ import { useLocation } from 'react-router-dom'
 import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
 
