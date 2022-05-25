@@ -85,7 +85,7 @@ export const HypothesisView = () => {
             <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
             : <Skeleton/>}
 
-            <TypographySubtitle>
+            <TypographySubtitle sx={{mt: "10px"}}>
                 Hypothesis testing executions:
             </TypographySubtitle>
             <Skeleton/>

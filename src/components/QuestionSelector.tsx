@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Card, CircularProgress, FormHelperText, styled, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material"
+import { Autocomplete, Box, breadcrumbsClasses, Card, CircularProgress, FormHelperText, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material"
 import { idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
@@ -34,7 +34,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
     const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
 
-    const [triplePattern, setTriplePattern] = React.useState<string[][]>([]);
+    const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
   
     React.useEffect(() => {
         if (options.length === 0 && !loading && !error) {
@@ -155,35 +155,65 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     useEffect(() => {
         // Update pattern
         if (selectedQuestion) {
-            console.log(questionBindings);
             let pattern:string[] = selectedQuestion.pattern.split(/\s/);
-            let triples:string[][] = [];
-            let curArr:string[] = [];
+            //let triples:string[][] = [];
+            //let curArr:string[] = [];
             let newBindings: VariableBinding[] = [];
             let updatedGraph: Triple[] = [];
-            //let curTriple: Triple = {}
+
+            let emptyTriple: Triple = {
+                subject: "",
+                predicate: "",
+                object: {
+                    type: 'LITERAL',
+                    value: '',
+                    datatype: ''
+                }
+            };
+            let curTriple: Triple = emptyTriple;
+
             for (let i:number=0; i<pattern.length; i++){
                 let part : string = pattern[i];
+                let value : string = "";
                 // The map should exist already, but if not, we can generate it here.
                 if (nameToId && nameToId[part] && selectedOptionValues[nameToId[part]] != null) {
-                    newBindings.push({variable: nameToId[part], binding:selectedOptionValues[nameToId[part]]!.id, collection: false});
-                    part = "(" + selectedOptionValues[nameToId[part]]!.name + ")";
-                }
+                    value = selectedOptionValues[nameToId[part]]!.id;
+                    newBindings.push({variable: nameToId[part], binding:value});
+                } else 
+                    value = part;
 
-                curArr.push(part);
-                if (curArr.length === 3) {
-                    triples.push(curArr);
-                    curArr = [];
+                let c : number = i%3;
+                switch (c) {
+                    case 0:
+                        curTriple = { ...emptyTriple };
+                        curTriple.subject = value;
+                        break;
+                    case 1:
+                        curTriple.predicate = value;
+                        break;
+                    case 2:
+                        let isURI:boolean = value.startsWith("http") || value.startsWith("www");
+                        curTriple.object = {
+                            type: isURI ? 'URI' : 'LITERAL',
+                            value: value,
+                            datatype: isURI ? undefined : "http://www.w3.org/2001/XMLSchema#string"
+                        }
+                        updatedGraph.push(curTriple);
+                        break;
                 }
             }
-            if (curArr.length != 0) {
-                console.warn("Something when wrong creating the triple representation")
-            }
-            setTriplePattern(triples);
-
+            setTriplePattern(updatedGraph);
             sendQuestionChange(selectedQuestion.id, newBindings, updatedGraph);
         }
     }, [selectedQuestion, selectedOptionValues]);
+
+    const displayURI = (uri:string) => {
+        return (uri.startsWith("http") || uri.startsWith("www")) ? uri.replace(idPattern, "") : uri;
+    }
+
+    const displayObj = (obj:Triple["object"]) => {
+        return obj.type === 'URI' ? displayURI(obj.value) : obj.value;
+    }
 
     return <Box>
         <Box>
@@ -255,12 +285,15 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Semantic question pattern: </FormHelperText>
             <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
-                <TableBody>
-                    {triplePattern.map((triple:string[], index:number) => <TableRow key={`row_${index}`}>
-                        {triple.map((res:string) => <TableCell sx={{padding: "2px 10px"}}> {res} </TableCell>)}
-                    </TableRow>)}
-
-                </TableBody>
+                <Table aria-label="Hypothesis graph" sx={{width: "auto"}}>
+                    <TableBody>
+                        {triplePattern.map((triple:Triple, index:number) => <TableRow key={`row_${index}`}>
+                            <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.subject)} </TableCell>
+                            <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.predicate)} </TableCell>
+                            <TableCell sx={{padding: "2px 10px"}}> {displayObj(triple.object)} </TableCell>
+                        </TableRow>)}
+                    </TableBody>
+                </Table>
             </TableContainer>
         </Card>
     </Box>;

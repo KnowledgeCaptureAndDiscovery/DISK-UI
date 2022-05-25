@@ -86,8 +86,25 @@ export const hypothesisSlice = createSlice({
         errorSelected : true,
       };
       return { ...state, ...newState };
-    }
+    },
+    remove: (state:HypothesisState, action:PayloadAction<string>) => {
+      let newHypothesisArr : Hypothesis[] = [];
+      state.hypotheses.forEach((h:Hypothesis) => {
+        if (h.id !== action.payload) newHypothesisArr.push(h);
+      });
+      console.log(state.hypotheses);
+      console.log(newHypothesisArr);
+      return { ...state, hypotheses: newHypothesisArr};
+    },
+    add: (state:HypothesisState, action:PayloadAction<Hypothesis>) => {
+      let newHypothesisArr : Hypothesis[] = [];
+      state.hypotheses.forEach((h:Hypothesis) => {
+        if (h.id !== action.payload.id) newHypothesisArr.push(h);
+      });
+      newHypothesisArr.push(action.payload);
+      return { ...state, hypotheses: newHypothesisArr};
+    },
   },
 });
 
-export const { setHypotheses, setLoadingAll, setErrorAll, setSelectedHypothesis, setLoadingSelected, setErrorSelected } = hypothesisSlice.actions;
+export const { setHypotheses, setLoadingAll, setErrorAll, setSelectedHypothesis, setLoadingSelected, setErrorSelected, remove, add } = hypothesisSlice.actions;

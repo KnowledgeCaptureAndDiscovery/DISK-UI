@@ -1,6 +1,7 @@
 
-import { Box, Card, Divider, Typography } from "@mui/material"
+import { Box, Card, Divider, IconButton, Typography } from "@mui/material"
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from "react-router-dom";
 
 export interface PreviewInfo {
@@ -15,10 +16,11 @@ export interface PreviewInfo {
 
 interface PreviewItemProps {
     item: PreviewInfo,
-    icon: JSX.Element
+    icon: JSX.Element,
+    onDelete?: () => void;
 }
 
-export const PreviewItem = ({item:item, icon:icon} : PreviewItemProps) => {
+export const PreviewItem = ({item:item, icon:icon, onDelete:onDelete} : PreviewItemProps) => {
     return <Card variant="outlined" sx={{margin: "10px", height: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
             <Box component={Link} to={item.path + "/" + item.id}
@@ -26,9 +28,11 @@ export const PreviewItem = ({item:item, icon:icon} : PreviewItemProps) => {
                 {icon}
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{item.name}</Typography>
             </Box>
-            <Box component={Link} to={item.path + "/" + item.id + "/edit"}
-                 sx={{display:"inline-flex", alignItems:"center", textDecoration: "none"}}>
-                <EditIcon/>
+            <Box>
+                <IconButton component={Link} to={item.path + "/" + item.id + "/edit"} sx={{padding: "4px"}}>
+                    <EditIcon/>
+                </IconButton>
+                {onDelete ? <IconButton onClick={() => onDelete()} sx={{padding: "4px"}}><DeleteIcon/></IconButton> : ""}
             </Box>
         </Box>
         <Divider/>

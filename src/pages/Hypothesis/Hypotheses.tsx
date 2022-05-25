@@ -1,11 +1,11 @@
-import { Box, Button, Card, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, TextField } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis } from "DISK/interfaces";
 import React, { useEffect } from "react";
 import { HypothesisPreview } from "components/HypothesisPreview";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from 'redux/store';
-import { setErrorAll, setLoadingAll, setHypotheses } from 'redux/hypothesis';
+import { setErrorAll, setLoadingAll, setHypotheses, remove } from 'redux/hypothesis';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { PATH_HYPOTHESIS_NEW } from "constants/routes";
@@ -19,6 +19,11 @@ export const Hypotheses = () => {
     const loading = useAppSelector((state:RootState) => state.hypotheses.loadingAll);
     const error = useAppSelector((state:RootState) => state.hypotheses.errorAll);
     const dispatch = useAppDispatch();
+
+    const [waiting, setWaiting] = React.useState<boolean>(false);;
+    const [deleteNotification, setDeleteNotification] = React.useState<boolean>(false);
+    const [lastDeletedName, setLastDeletedNamed] = React.useState<string>("");
+
 
     useEffect(() => {
         if (hypotheses.length === 0 && !loading && !error) {
@@ -38,8 +43,44 @@ export const Hypotheses = () => {
         if (order) setOrder(order);
     }
 
+    const deleteHypothesis = (hypothesis:Hypothesis) => {
+        console.log("DELETE: ", hypothesis.id);
+        setWaiting(true);
+        setLastDeletedNamed(hypothesis.name);
+        DISKAPI.deleteHypothesis(hypothesis.id)
+            .then((b:boolean) => {
+                if (b) {
+                    dispatch(remove(hypothesis.id));
+                }
+                setWaiting(false);
+                setDeleteNotification(true);
+            })
+            .catch((e) => {
+                //TODO
+                console.warn(e);
+                setWaiting(false);
+            })
+    }
+
+    const handleDeleteNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setDeleteNotification(false);
+        setLastDeletedNamed("");
+    };
+
     return (
         <Box>
+            <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
+            <Snackbar open={deleteNotification} autoHideDuration={3000} onClose={handleDeleteNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+                <Alert severity="info" sx={{ width: '100%' }} onClose={handleDeleteNotificationClose}>
+                    Hypothesis {lastDeletedName} was deleted!
+                </Alert>
+            </Snackbar>
+
             <Box sx={{display:'flex', paddingBottom: "5px"}}>
                 <TextField id="input-text-search" label="Search hypotheses" variant="outlined" size="small" 
                     sx={{width:'100%', paddingRight:'5px'}} InputProps={{
@@ -53,14 +94,14 @@ export const Hypotheses = () => {
                     <AddIcon/>
                 </Button>
             </Box>
-            <Card variant="outlined" sx={{height: "calc(100vh - 157px)"}}>
+            <Card variant="outlined" sx={{height: "calc(100vh - 157px)", overflowY: "auto"}}>
                 {loading ?
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :
                     (error ? 
                         <Box> Error loading Hypotheses </Box>
                     :
-                        hypotheses.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h}/>)
+                        hypotheses.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => deleteHypothesis(h)}/>)
                     )
                 }
             </Card>

@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Card, CircularProgress, FormHelperText, MenuItem, Select, styled, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material"
+import { Autocomplete, Box, Card, CircularProgress, FormHelperText, MenuItem, Select, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material"
 import { Hypothesis, idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
@@ -139,12 +139,13 @@ export const QuestionPreview = ({selected:selectedId, bindings:bindings} : Quest
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Semantic question pattern: </FormHelperText>
             <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
-                <TableBody>
-                    {triplePattern.map((triple:string[], index:number) => <TableRow key={`row_${index}`}>
-                        {triple.map((res:string) => <TableCell sx={{padding: "2px 10px"}}> {res} </TableCell>)}
-                    </TableRow>)}
-
-                </TableBody>
+                <Table sx={{width:"unset"}}>
+                    <TableBody>
+                        {triplePattern.map((triple:string[], index:number) => <TableRow key={`row_${index}`}>
+                            {triple.map((res:string) => <TableCell key={`cell${index}${res}`} sx={{padding: "2px 10px"}}> {res} </TableCell>)}
+                        </TableRow>)}
+                    </TableBody>
+                </Table>
             </TableContainer>
         </Card>
     </Box>;

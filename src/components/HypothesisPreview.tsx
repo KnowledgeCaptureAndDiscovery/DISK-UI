@@ -5,10 +5,11 @@ import { PreviewInfo, PreviewItem } from "./PreviewItem";
 
 
 interface HypothesisPreviewProps {
-    hypothesis : Hypothesis
+    hypothesis : Hypothesis,
+    onDelete?: (h:Hypothesis) => void,
 }
 
-export const HypothesisPreview = ({hypothesis:h} : HypothesisPreviewProps) => {
+export const HypothesisPreview = ({hypothesis:h, onDelete:onDelete} : HypothesisPreviewProps) => {
     const HypothesisToItem = (hyp:Hypothesis) => {
         return {
             path: PATH_HYPOTHESES,
@@ -22,5 +23,5 @@ export const HypothesisPreview = ({hypothesis:h} : HypothesisPreviewProps) => {
     }
 
 
-    return <PreviewItem icon={ <ScienceIcon sx={{color: "orange"}}/> } item ={HypothesisToItem(h)}></PreviewItem>;
+    return <PreviewItem icon={ <ScienceIcon sx={{color: "orange"}}/> } item ={HypothesisToItem(h)} onDelete={onDelete? () => onDelete(h) : undefined}></PreviewItem>;
 }

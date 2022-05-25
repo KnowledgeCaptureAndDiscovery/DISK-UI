@@ -1,8 +1,8 @@
-import { Box, Button, Card, Divider, IconButton, Skeleton, TextField, Typography } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, IconButton, Skeleton, Snackbar, TextField, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { Hypothesis, Triple, VariableBinding } from "DISK/interfaces";
+import { Hypothesis, idPattern, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import { styled } from '@mui/material/styles';
@@ -10,8 +10,9 @@ import { PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_NEW, PATH_
 import { QuestionSelector } from "components/QuestionSelector";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { setErrorSelected, setLoadingSelected, setSelectedHypothesis } from "redux/hypothesis";
+import { setErrorSelected, setLoadingSelected, setSelectedHypothesis, add as addHypothesis } from "redux/hypothesis";
 import React from "react";
+import { HypothesisRequest } from "DISK/requests";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -26,6 +27,7 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 
 export const HypothesisEditor = () => {
     const location = useLocation();
+    let navigate = useNavigate();
 
     const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
     const selectedId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
@@ -43,6 +45,8 @@ export const HypothesisEditor = () => {
     const [editedQuestionBindings, setEditedQuestionBindings] = React.useState<VariableBinding[]>([]);
     const [editedGraph, setEditedGraph] = React.useState<Triple[]>([]);
 
+    const [waiting, setWaiting] = React.useState<boolean>(false);;
+    const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
 
     useEffect(() => {
         let match = PATH_HYPOTHESIS_ID_EDIT_RE.exec(location.pathname);
@@ -87,14 +91,15 @@ export const HypothesisEditor = () => {
     const onSaveButtonClicked = () => {
         console.log("save clicked");
         // Check required fields;
-        if (!name || !description || !questionId) {
-            //show errors
+        if (!name || !description || !editedQuestionId) {
             return;
         }
 
+        let newHypothesis : Hypothesis | HypothesisRequest;
+        //TODO: fix dates and author!!
         if (hypothesis) {
             // Edit existing hypothesis:
-            let editedHypothesis : Hypothesis = {
+            newHypothesis = {
                 ... hypothesis,
                 name: name,
                 description: description,
@@ -103,9 +108,32 @@ export const HypothesisEditor = () => {
                 questionBindings: editedQuestionBindings,
                 graph: { triples: editedGraph }
             };
-            console.log("SEND:", editedHypothesis);
         } else {
             // Create new hypothesis.
+            newHypothesis = {
+                name: name,
+                description: description,
+                notes: notes,
+                question: editedQuestionId,
+                questionBindings: editedQuestionBindings,
+                graph: { triples: editedGraph }
+            };
+        }
+        if (newHypothesis) {
+            setWaiting(true);
+            console.log("SEND:", newHypothesis);
+            DISKAPI.postHypothesis(newHypothesis)
+                .then((savedHypothesis) => {
+                    setSaveNotification(true);
+                    dispatch(addHypothesis(savedHypothesis));
+                    setWaiting(false);
+                    navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                })
+                .catch((e) => {
+                    //TODO: show some kind of error.
+                    console.warn(e);
+                    setWaiting(false);
+                });
         }
     }
 
@@ -115,7 +143,24 @@ export const HypothesisEditor = () => {
         setEditedGraph(pattern);
     };
 
+    const handleSaveNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setWaiting(false);
+    };
+
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
+        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
+            <CircularProgress color="inherit" />
+        </Backdrop>
+        <Snackbar open={saveNotification} autoHideDuration={2000} onClose={handleSaveNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+            <Alert severity="success" sx={{ width: '100%' }} onClose={handleSaveNotificationClose}>
+                Saved!
+            </Alert>
+        </Snackbar>
+
+
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
                 <TextField fullWidth size="small" label="Hypothesis Name" required sx={{backgroundColor: "white"}}

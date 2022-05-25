@@ -1,4 +1,5 @@
 import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry } from "./interfaces";
+import { HypothesisRequest } from "./requests";
 
 export class DISKAPI {
     //private static url : string = "http://localhost:9090/disk-project-server/";
@@ -19,12 +20,47 @@ export class DISKAPI {
         return response.json();
     }
 
-    public static async getHypotheses (username?:string) : Promise<Hypothesis[]> {
+    private static async post (url:string, obj:any) : Promise<any> {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+                //"Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(obj),
+        });
+        if (!response.ok) 
+            throw new Error(response.statusText);
+        return response.json();
+    }
+
+    private static async delete (url:string) : Promise<boolean> {
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+                //"Authorization": `Bearer ${token}`,
+            },
+        });
+        if (!response.ok) 
+            throw new Error(response.statusText);
+        return true;
+    }
+
+    public static async getHypotheses () : Promise<Hypothesis[]> {
         return await DISKAPI.get(DISKAPI.url + "hypotheses") as Hypothesis[];
     }
 
-    public static async getHypothesis (id:string, username?:string) : Promise<Hypothesis> {
+    public static async getHypothesis (id:string) : Promise<Hypothesis> {
         return await DISKAPI.get(DISKAPI.url + "hypotheses/" + id) as Hypothesis;
+    }
+
+    public static async postHypothesis (hypothesis:Hypothesis|HypothesisRequest, username?:string) : Promise<Hypothesis> {
+        return await DISKAPI.post(DISKAPI.url + "hypotheses", hypothesis) as Hypothesis;
+    }
+
+    public static async deleteHypothesis (hypothesisId:string) : Promise<boolean> {
+        return await DISKAPI.delete(DISKAPI.url + "hypotheses/" + hypothesisId) as boolean;
     }
 
     public static async getQuestions (username?:string) : Promise<Question[]> {

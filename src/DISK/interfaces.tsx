@@ -20,7 +20,7 @@ export interface Hypothesis {
 export interface VariableBinding {
     variable:   string,
     binding:    string,
-    collection: boolean,
+    collection?: boolean,
 }
 
 export interface Triple {
