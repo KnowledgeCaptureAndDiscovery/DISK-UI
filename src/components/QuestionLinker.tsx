@@ -8,7 +8,8 @@ import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOpti
 
 interface QuestionLinkerProps {
     selected: string,
-    disabled?: boolean
+    disabled?: boolean,
+    onQuestionChange?: (questionId:string, variables:string[]) => void,
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -18,22 +19,17 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionLinker = ({selected:selectedId, disabled:disabled} : QuestionLinkerProps) => {
+export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuestionChange:notifyChange} : QuestionLinkerProps) => {
 
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
     const options = useAppSelector((state:RootState) => state.question.questions);
-    const varOptions = useAppSelector((state:RootState) => state.question.options);
 
-    const [nameToId, setNameToId] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
-    const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
-    const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
-  
     React.useEffect(() => {
         if (options.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());
@@ -69,16 +65,12 @@ export const QuestionLinker = ({selected:selectedId, disabled:disabled} : Questi
             setSelectedQuestion(value);
             updateQuestionFiller(value);
         }
+        if (notifyChange)
+            if (value) notifyChange(value.id, value.variables.map((v:QuestionVariable) => v.varName));
+            else notifyChange("", []);
     }
 
     const updateQuestionFiller = (q:Question) => {
-        //Create map varname -> id;
-        let map : {[id:string] : string} = {};
-        q.variables.forEach((qv:QuestionVariable) => {
-            map[qv.varName] = qv.id;
-        });
-        setNameToId(map);
-        
         //Split question template in text and inputs
         let textParts : string[] = q.template.split(varPattern);
         let varParts : string [] = [];

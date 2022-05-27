@@ -72,7 +72,6 @@ export const HypothesisEditor = () => {
     }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const loadForm = (hypothesis:Hypothesis) => {
-        //--
         setName(hypothesis.name);
         setDescription(hypothesis.description);
         setNotes(hypothesis.notes ? hypothesis.notes : "");
@@ -92,6 +91,7 @@ export const HypothesisEditor = () => {
         console.log("save clicked");
         // Check required fields;
         if (!name || !description || !editedQuestionId) {
+            //TODO: show errors
             return;
         }
 
@@ -144,9 +144,8 @@ export const HypothesisEditor = () => {
     };
 
     const handleSaveNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
+        if (reason === 'clickaway')
             return;
-        }
         setWaiting(false);
     };
 

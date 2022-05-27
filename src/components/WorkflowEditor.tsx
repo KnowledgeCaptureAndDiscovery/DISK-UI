@@ -1,19 +1,21 @@
-import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, Select, Typography, Skeleton, Grid, Checkbox, FormControlLabel, FormGroup } from "@mui/material"
+import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, Select, Typography, Skeleton, Grid, Checkbox, FormControlLabel, FormGroup, MenuItem, Button } from "@mui/material"
 import { DISKAPI } from "DISK/API";
-import { Method, MethodInput, Workflow } from "DISK/interfaces";
+import { Method, MethodInput, VariableBinding, Workflow } from "DISK/interfaces";
 import React, { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setErrorAll, setErrorInput, setInputs, setLoadingAll, setLoadingInput, setWorkflow } from "redux/workflows";
+import AddIcon from '@mui/icons-material/Add';
 
 interface WorkflowEditorProps {
+    options: string[],
     workflow?: Workflow;
 }
 
 
-export const WorkflowEditor = ({workflow:workflow} : WorkflowEditorProps) => {
+export const WorkflowEditor = ({options:options, workflow:workflow} : WorkflowEditorProps) => {
     const dispatch = useAppDispatch();
-    const [selected, setSelected] = React.useState<Method>();
+    const [selected, setSelected] = React.useState<Method|null>(null);
     const [selectedLabel, setSelectedLabel] = React.useState("");
 
     const methods = useAppSelector((state:RootState) => state.workflows.workflows);
@@ -24,26 +26,32 @@ export const WorkflowEditor = ({workflow:workflow} : WorkflowEditorProps) => {
     const varLoadingMap = useAppSelector((state:RootState) => state.workflows.loading);
     const varErrorMap = useAppSelector((state:RootState) => state.workflows.errored);
 
+    //form
+    const [selectedVariableValues, setSelectedVariableValues] = React.useState<{[id:string]: string}>({});
+    const [selectedCollectionValues, setSelectedCollectionValues] = React.useState<{[id:string]: boolean}>({});
+
     const loadWorkflows = () => {
         if (methods.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());
             DISKAPI.getWorkflows()
-                .then((wfs:Method[]) => dispatch(setWorkflow(wfs)))
+                .then((methods:Method[]) => {
+                    dispatch(setWorkflow(methods));
+                    if (workflow) {
+                        let selectedMethod : Method = methods.filter(m => m.name === workflow.workflow)![0];
+                        if (selectedMethod) {
+                            onWorkflowChange(selectedMethod);
+                        }
+                    }
+                })
                 .catch(() => dispatch(setErrorAll()))
         }
     }
 
     useEffect(loadWorkflows)
 
-    useEffect(() => {
-        console.log("1>", workflow)
-    }, [workflow]);
-
-    const onWorkflowIdChange = (method:Method|null) => {
-        if (!!method) {
-            setSelected(method);
-            loadMethodInputs(method);
-        }
+    const onWorkflowChange = (method:Method|null) => {
+        setSelected(method);
+        if (!!method) loadMethodInputs(method);
     }
 
     const loadMethodInputs = (method:Method) => {
@@ -53,12 +61,82 @@ export const WorkflowEditor = ({workflow:workflow} : WorkflowEditorProps) => {
         if (!loading && !error && (!inputs || inputs.length === 0)) {
             dispatch(setLoadingInput(method.name));
             DISKAPI.getWorkflowVariables(method.name)
-                .then((inputs:MethodInput[]) => dispatch(setInputs({id: method.name, values: inputs})))
+                .then((inputs:MethodInput[]) => {
+                    registerInputs(inputs);
+                    dispatch(setInputs({id: method.name, values: inputs}));
+                })
                 .catch(() => dispatch(setErrorInput(method.name)));
         }
     }
 
-    return <Card variant="outlined" sx={{padding: "5px 10px", position: "relative", overflow: "visible"}}>
+    const registerInputs = (inputs:MethodInput[]) => {
+        // Adds all not registered inputs.
+        let newInputs : string[] = inputs.map(i => i.name);
+        setSelectedVariableValues((values) => {
+            let newValues = { ...values };
+            newInputs.forEach(i => newValues[i] = newValues[i] ? newValues[i] : "");
+            return newValues;
+        });
+        setSelectedCollectionValues((values) => {
+            let newValues = { ...values };
+            newInputs.forEach(i => newValues[i] = newValues[i] ? newValues[i] : false);
+            return newValues;
+        });
+    }
+    
+    const onValueChange = (inputId:string, value:string) => {
+        setSelectedVariableValues((values) => {
+            let newValues = { ...values };
+            newValues[inputId] = value;
+            return newValues;
+        });
+    };
+
+    const onCollectionChange = (inputId:string, value:any) => {
+        setSelectedCollectionValues((values) => {
+            let newValues = { ...values };
+            newValues[inputId] = value;
+            return newValues;
+        });
+    };
+
+    useEffect(() => {
+        if (!workflow) {
+            clearForm();
+            return;
+        }
+        if (!loading && methods.length > 0) {
+            let m = methods.filter(m => m.name === workflow.workflow)![0];
+            if (m) onWorkflowChange(m);
+        }
+        let allBindings = [ ...workflow.bindings, ...workflow.parameters, ...workflow.optionalParameters];
+        if (allBindings.length > 0) {
+            setSelectedVariableValues((values) => {
+                let newValues = { ... values };
+                allBindings.forEach(vb => {
+                    newValues[vb.variable] = vb.collection ? vb.binding.substring(1).slice(0, -1) : vb.binding;
+                });
+                return newValues;
+            })
+            setSelectedCollectionValues((values) => {
+                let newValues = { ...values };
+                allBindings.forEach(vb => {
+                    newValues[vb.variable] = vb.collection ? true:false;
+                });
+                return newValues;
+            });
+        }
+    }, [workflow]);
+
+    const clearForm = () => {
+        onWorkflowChange(null);
+    }
+
+    const onWorkflowSave = () => {
+        //SAVE
+    }
+
+    return <Card variant="outlined" sx={{padding: "5px 10px", position: "relative", overflow: "visible", mb: "5px"}}>
         <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-14px 0 0 0'}}> Configure a new workflow: </FormHelperText>
         <Grid container spacing={1} sx={{alignItems: "center", height: "68px"}}>
             <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", color: "#444", fontSize: "0.85rem"}}>
@@ -67,7 +145,7 @@ export const WorkflowEditor = ({workflow:workflow} : WorkflowEditorProps) => {
             <Grid item xs={10} md={9} sm={8}>
                 <Autocomplete id="select-workflow" size="small" fullWidth
                     value={selected}
-                    onChange={(_,newQ) => onWorkflowIdChange(newQ)}
+                    onChange={(_,newQ) => onWorkflowChange(newQ)}
                     inputValue={selectedLabel}
                     onInputChange={(_,newIn) => setSelectedLabel(newIn)}
                     isOptionEqualToValue={(option, value) => option.name === value.name}
@@ -103,14 +181,20 @@ export const WorkflowEditor = ({workflow:workflow} : WorkflowEditorProps) => {
                         </Grid>
                     </Grid>
                     { inputMap[selected.name].filter((i) => i.type === 'input').map((inp:MethodInput) =>
-                        <Grid container spacing={1}  sx={{alignItems: "center"}}>
+                        <Grid container spacing={1}  sx={{alignItems: "center"}} key={`inp_${inp.name}`}>
                             <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", color: "#444", fontSize: "0.85rem"}}>{inp.name}:</Grid>
                             <Grid item xs={8} md={7} sm={6}>
-                                <TextField size="small" label={"Set binding"}></TextField>
+                                <Select size="small" sx={{display: 'inline-block', minWidth: "200px"}} variant="standard"  label="Set binding"
+                                        value={selectedVariableValues[inp.name]} onChange={(e) => onValueChange(inp.name, e.target.value)}>
+                                    <MenuItem value=""> None </MenuItem>
+                                    { options.map((name:string,i:number) => <MenuItem key={`varopt_${i}`} value={name}>{name}</MenuItem>) }
+                                </Select>
                             </Grid>
                             <Grid item xs={2} md={2} sm={2}>
                                 <FormGroup>
-                                    <FormControlLabel sx={{fontSize: "0.85rem"}} control={<Checkbox />} label="Use as array" />
+                                    <FormControlLabel sx={{fontSize: "0.85rem"}} label="Use as array" control={
+                                        <Checkbox checked={selectedCollectionValues[inp.name]} onChange={(e) => onCollectionChange(inp.name, e.target.checked)}/>
+                                    }/>
                                 </FormGroup>
                             </Grid>
                         </Grid>)}
@@ -121,5 +205,10 @@ export const WorkflowEditor = ({workflow:workflow} : WorkflowEditorProps) => {
                 </Grid>)
             : <Skeleton height={"60px"}/>)
         : <Box/>}
+        <Box sx={{display:"flex", justifyContent:"end", alignItems: "center"}}>
+            <Button variant="contained" color="success" onClick={onWorkflowSave} disabled={!selected}>
+                <AddIcon sx={{mr: "5px"}}/> Add workflow
+            </Button>
+        </Box>
     </Card>;
 }

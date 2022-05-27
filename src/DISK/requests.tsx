@@ -1,4 +1,4 @@
-import { Triple, VariableBinding } from "./interfaces";
+import { Triple, VariableBinding, Workflow } from "./interfaces";
 
 export interface HypothesisRequest { 
     // Mandatory
@@ -14,6 +14,27 @@ export interface HypothesisRequest {
     graph: {
         triples:        Triple[]
     }
+    dateCreated?:       string,
+    dateModified?:      string | null,
+}
+
+export interface LineOfInquiryRequest {
+    // Mandatory
+    name:               string,
+    description:        string,
+    dataQuery:          string,
+    question:           string,
+    dataSource:         string,
+    // Optional
+    id?:                string,
+    notes?:             string,
+    workflows?:         Workflow[],
+    metaworkflows?:     Workflow[],
+    relevantVariables?: string,
+    explanation?:       string,
+    hypothesisQuery?:   string, //should be the question id?
+    // Could be generated server side.
+    author?:            string,
     dateCreated?:       string,
     dateModified?:      string | null,
 }

@@ -1,5 +1,5 @@
 import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry } from "./interfaces";
-import { HypothesisRequest } from "./requests";
+import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
 
 export class DISKAPI {
     //private static url : string = "http://localhost:9090/disk-project-server/";
@@ -77,6 +77,10 @@ export class DISKAPI {
 
     public static async getLOI (id:string, username?:string) : Promise<LineOfInquiry> {
         return await DISKAPI.get(DISKAPI.url + "lois/" + id) as LineOfInquiry;
+    }
+
+    public static async postLOI (loi:LineOfInquiry|LineOfInquiryRequest) : Promise<LineOfInquiry> {
+        return await DISKAPI.post(DISKAPI.url + "lois/", loi) as LineOfInquiry;
     }
 
     public static async getTLOIs (username?:string) : Promise<TriggeredLineOfInquiry[]> {

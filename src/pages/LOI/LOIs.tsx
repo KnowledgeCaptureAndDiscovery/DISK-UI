@@ -32,8 +32,8 @@ export const LinesOfInquiry = () => {
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {
         let order : OrderType = event.target!.value as OrderType;
         if (order) setOrder(order);
-        console.log(LOIs);
     }
+
     return (
         <Box>
             <Box sx={{display:'flex', paddingBottom: "5px"}}>

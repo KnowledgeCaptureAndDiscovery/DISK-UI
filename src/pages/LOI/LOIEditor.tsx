@@ -1,26 +1,23 @@
 import React from "react";
-import { Box, Button, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, SelectChangeEvent, Skeleton, TextField, Typography } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { LineOfInquiry, VariableBinding, Workflow } from "DISK/interfaces";
+import { idPattern, LineOfInquiry, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { setErrorSelected, setLoadingSelected, setSelectedLOI } from "redux/lois";
+import { setErrorSelected, setLoadingSelected, setSelectedLOI, add as addLOI } from "redux/lois";
 import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server";
 import { QuestionLinker } from "components/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
-import { WorkflowEditor } from "components/WorkflowEditor";
+import { WorkflowList } from "components/WorkflowList";
+import { LineOfInquiryRequest } from "DISK/requests";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -35,6 +32,7 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 
 export const LOIEditor = () => {
     const location = useLocation();
+    let navigate = useNavigate();
     const dispatch = useAppDispatch();
 
     const LOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
@@ -46,10 +44,47 @@ export const LOIEditor = () => {
     const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
     const errorEndpoints = useAppSelector((state:RootState) => state.server.errorEndpoints);
 
-    const [fakeLoading, setFakeLoading] = React.useState(false);
-    const [addingWorkflow, setAddingWorkflow] = React.useState(false);
+    const [sparqlVariableNames, setSparqlVariableNames] = React.useState<string[]>([]);
+    const [sparqlVariableOptions, setSparqlVariableOptions] = React.useState<string[]>([]);
+    const [editingWorkflows, setEditingWorkflows] = React.useState<boolean>(false);
+
+    //FORM
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
-    const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow>();
+    const [name, setName] = React.useState("");
+    const [description, setDescription] = React.useState("");
+    const [notes, setNotes] = React.useState("");
+    const [dataQuery, setDataQuery] = React.useState("");
+    const [explanation, setExplanation] = React.useState("");
+    const [relevantVariables, setRelevantVariables] = React.useState("");
+    const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
+    const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
+    const [questionId, setQuestionID] = React.useState<string>("");
+
+    const [waiting, setWaiting] = React.useState<boolean>(false);;
+    const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
+
+    useEffect(() => {
+        let candidates : Set<string> = new Set<string>();
+        sparqlVariableNames.forEach((varName:string) => candidates.add(varName));
+        let dataVars : RegExpMatchArray | null = dataQuery.match(/\?[\w\d]+/g);
+        if (dataVars) {
+            dataVars.forEach((varName:string) => candidates.add(varName));
+        }
+        setSparqlVariableOptions(Array.from(candidates));
+    }, [sparqlVariableNames, dataQuery]);
+    
+    const loadEndpoints = () => {
+        if (endpoints == null && !loadingEndpoints && !errorEndpoints) {
+            dispatch(setLoadingEndpoints());
+            DISKAPI.getEndpoints()
+                .then((endpointMap:{[name:string]: string}) => {
+                    dispatch(setEndpoint(endpointMap))
+                })
+                .catch(() => dispatch(setErrorEndpoint()));
+        }
+    };
+
+    useEffect(loadEndpoints);
 
     useEffect(() => {
         let match = PATH_LOI_ID_EDIT_RE.exec(location.pathname);
@@ -59,59 +94,102 @@ export const LOIEditor = () => {
                 dispatch(setLoadingSelected(id));
                 DISKAPI.getLOI(id)
                     .then((LOI:LineOfInquiry) => {
-                        console.log(LOI);
                         dispatch(setSelectedLOI(LOI));
-                        if (LOI.dataSource) setSelectedDataSource(LOI.dataSource);
+                        loadForm(LOI);
                     })
                     .catch(() => dispatch(setErrorSelected())); 
-            } else if (LOI && LOI.dataSource) {
-                setSelectedDataSource(LOI.dataSource);
+            } else if (LOI && selectedId === id) {
+                loadForm(LOI);
             }
         } else if (location.pathname === PATH_LOI_NEW) {
             dispatch(setSelectedLOI(null));
+            clearForm();
         }
-        if (endpoints == null && !loadingEndpoints && !errorEndpoints) {
-            dispatch(setLoadingEndpoints());
-            DISKAPI.getEndpoints()
-                .then((endpointMap:{[name:string]: string}) => {
-                    dispatch(setEndpoint(endpointMap))
-                })
-                .catch(() => dispatch(setErrorEndpoint()));
-        }
-    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [location]);
 
-    useEffect(() => {
-        if (!selectedId && !fakeLoading) {
-            setFakeLoading(true);
-            setTimeout(() => {
-                setFakeLoading(false);
-            }, 100);
-        }
-    }, [selectedId])  // eslint-disable-line react-hooks/exhaustive-deps
+    const loadForm = (loi:LineOfInquiry) => {
+        setName(loi.name);
+        setDescription(loi.description);
+        setNotes(loi.notes ? loi.notes : "");
+        setSelectedDataSource(loi.dataSource);
+        setDataQuery(loi.dataQuery);
+        setExplanation(loi.explanation);
+        setRelevantVariables(loi.relevantVariables);
+        setWorkflows(loi.workflows);
+        setMetaWorkflows(loi.metaworkflows ? loi.metaworkflows : []);
+    };
 
-    const onDataSourceChange = (event:SelectChangeEvent<string>) => {
-        if (event && event.target.value) {
-            setSelectedDataSource(event.target.value);
-        }
-    }
-
-    const toggleAddWorkflow = () => {
-        setAddingWorkflow(!addingWorkflow);
-    } 
-
-    const onEnableWorkflowEdit = (wf:Workflow) => {
-        setSelectedWorkflow(wf);
-    }
+    const clearForm = () => {
+        setName("");
+        setDescription("");
+        setNotes("");
+        setSelectedDataSource("");
+        setDataQuery("");
+        setExplanation("");
+        setRelevantVariables("");
+        setWorkflows([]);
+        setMetaWorkflows([]);
+    };
 
     const onSaveButtonClicked = () => {
         console.log("save clicked");
-    }
+        if (!name || !description || !selectedDataSource || !dataQuery) {
+            //TODO: show errors
+            return;
+        }
+
+        let newLOI : LineOfInquiry | LineOfInquiryRequest;
+        //TODO: fix dates and author!! server-side
+        if (LOI) {
+            // Edit existing hypothesis:
+            newLOI  = { ... LOI, };
+        }
+        newLOI = {
+            name: name,
+            description: description,
+            notes: notes,
+            question: questionId,
+            dataQuery: dataQuery,
+            dataSource: selectedDataSource,
+        };
+        if (newLOI) {
+            setWaiting(true);
+            console.log("SEND:", newLOI);
+            DISKAPI.postLOI(newLOI)
+                .then((savedLOI) => {
+                    setSaveNotification(true);
+                    dispatch(addLOI(savedLOI));
+                    setWaiting(false);
+                    navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+                })
+                .catch((e) => {
+                    //TODO: show some kind of error.
+                    console.warn(e);
+                    setWaiting(false);
+                });
+        }
+    };
+
+    const handleSaveNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway')
+            return;
+        setWaiting(false);
+    };
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
+        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
+            <CircularProgress color="inherit" />
+        </Backdrop>
+        <Snackbar open={saveNotification} autoHideDuration={2000} onClose={handleSaveNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+            <Alert severity="success" sx={{ width: '100%' }} onClose={handleSaveNotificationClose}>
+                Saved!
+            </Alert>
+        </Snackbar>
+
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
-            {!loading && !fakeLoading? 
+            {!loading ? 
                 <TextField fullWidth size="small" id="LOIName" label="LOI Name" required sx={{backgroundColor: "white"}}
-                    defaultValue={!!LOI ? LOI.name : ''}/>
+                    value={name} onChange={(e) => setName(e.target.value)}/>
             : <Skeleton/> }
 
             <IconButton component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
@@ -122,20 +200,20 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Description:</TypographySubtitle>
-            {!loading && !fakeLoading?
+            {!loading ?
                 <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="LOI Description"
-                    defaultValue={!!LOI ? LOI.description : ""}/>
+                    value={description} onChange={(e) => setDescription(e.target.value)}/>
             : <Skeleton/> }
-            {!loading && !fakeLoading ?
+            {!loading ?
                 <TextFieldBlock multiline fullWidth required size="small" id="LOINotes" label="LOI Notes"
-                    defaultValue={!!LOI ? LOI.notes : ""}/>
+                    value={notes} onChange={(e) => setNotes(e.target.value)}/>
             : <Skeleton/> }
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} />
+            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={(_, vars) => setSparqlVariableNames(vars)}/>
         </Box>
         <Divider/>
 
@@ -143,99 +221,44 @@ export const LOIEditor = () => {
             <TypographySubtitle>Data extraction:</TypographySubtitle>
             <Box sx={{display: "inline-flex", alignItems: "center"}}>
                 <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
-                <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard" value={selectedDataSource} label={"Data source:"} onChange={onDataSourceChange}>
-                    {loadingEndpoints ? 
-                        <MenuItem value={selectedDataSource}> Loading ... </MenuItem> 
-                    : (
-                        endpoints ? 
-                            Object.keys(endpoints).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints[name]}>{name}</MenuItem>)
-                        :
-                            <MenuItem value={selectedDataSource}>{selectedDataSource}</MenuItem>
-                    )}
-                </Select>
+                {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/>
+                    :
+                    <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} 
+                            value={selectedDataSource} onChange={(e) => setSelectedDataSource(e.target.value)}>
+                        <MenuItem value="" disabled> None </MenuItem>
+                        { Object.keys(endpoints || []).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints![name]}>{name}</MenuItem>) }
+                    </Select>
+                }
             </Box>
             <Box sx={{fontSize: "0.94rem"}} >
-                <CodeMirror value={!!LOI? LOI.dataQuery : ""}
+                <CodeMirror value={dataQuery}
                     extensions={[StreamLanguage.define(sparql)]}
                     onChange={(value, viewUpdate) => {
-                    console.log('value:', value);
+                        setDataQuery(value);
+                        console.log('value:', value);
                     }}
+                    onBlur={console.log}
                 />
             </Box>
             <Box>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     We can generate a table with the metadata obtained, please add variables of interest and a small description:
                 </FormHelperText>
-                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Metadata table description" defaultValue={!!LOI ? LOI.explanation : ''}/>
-                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Table variables" placeholder="?var1 ?var2 ..." defaultValue={!!LOI ? LOI.relevantVariables : ''}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Metadata table description" value={explanation} onChange={(e) => setExplanation(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Table variables" placeholder="?var1 ?var2 ..." value={relevantVariables} onChange={(e) => setRelevantVariables(e.target.value)}/>
             </Box>
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <Box sx={{display: "flex", justifyContent: "space-between", marginBottom: "4px"}}>
-                <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
-                <Box>
-                    <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={toggleAddWorkflow} color={addingWorkflow? "error" : "primary"}>
-                        {addingWorkflow ? <CancelIcon sx={{marginRight: "4px"}}/> : <AddIcon/>}
-                        {addingWorkflow ? <Box>Cancel</Box> : <Box>Add Workflow</Box>}
-                    </Button>
-                    {LOI && LOI.workflows && LOI.workflows.length > 0 && false ? 
-                        <Button sx={{padding: "3px 6px", marginLeft: "6px"}} variant="outlined">
-                            <AddIcon></AddIcon>
-                            Add Meta-workflow
-                        </Button>
-                    : ""}
-                </Box>
-            </Box> 
-            {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow}></WorkflowEditor> : ""}
-            <Box>
-                {loading ? <Skeleton/> : (LOI && LOI.workflows && LOI.workflows.length > 0 ? 
-                    <Box>
-                        <FormHelperText sx={{fontSize: ".9rem"}}>
-                            Workflows to run: 
-                        </FormHelperText>
-                        { LOI.workflows.map((wf:Workflow) => <Card key={`wf_${wf.workflow}`} variant="outlined">
-                            <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                                <a target="_blank" rel="noreferrer" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
-                                    <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />
-                                    <Typography sx={{padding:"0 10px", fontWeight: 500}}>{wf.workflow}</Typography>
-                                    <OpenInNewIcon sx={{fontSize: "1rem"}}/>
-                                </a>
-                                <Button size="small" sx={{mr:"5px"}} onClick={() => {onEnableWorkflowEdit(wf)}}>
-                                    <EditIcon></EditIcon> Edit
-                                </Button>
-                            </Box>
-                            <Divider/>
-                            <Box sx={{fontSize:".85rem"}}>
-                                { wf.bindings.map((binding:VariableBinding) =>
-                                    <Grid key={`var_${binding.variable}`} container spacing={1}>
-                                        <Grid item xs={3} md={2} sx={{textAlign: "right"}}>
-                                            <b>{binding.variable}: </b>
-                                        </Grid>
-                                        <Grid item xs={9} md={10}>
-                                            {binding.binding}
-                                        </Grid>
-                                    </Grid>
-                                )}
-                            </Box>
-                        </Card>)}
-                    </Box>
-                : 
-                    <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
-                        <Typography>
-                            No workflows to run
-                        </Typography>
-                    </Card>
-                )}
-
-            </Box>
+            <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
+            <WorkflowList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions} onWorkflowEditChange={setEditingWorkflows}></WorkflowList>
         </Box>
         <Box sx={{display: 'flex', justifyContent: 'flex-end', padding: "10px"}}>
             <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
                 <CancelIcon/> Cancel
             </Button>
-            <Button variant="contained" color="success" onClick={onSaveButtonClicked}>
+            <Button variant="contained" color="success" onClick={onSaveButtonClicked} disabled={editingWorkflows}>
                 <SaveIcon/> Save
             </Button>
         </Box>
