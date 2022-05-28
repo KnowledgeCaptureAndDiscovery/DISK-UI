@@ -113,10 +113,10 @@ export const LOIEditor = () => {
         setNotes(loi.notes ? loi.notes : "");
         setSelectedDataSource(loi.dataSource);
         setDataQuery(loi.dataQuery);
-        setExplanation(loi.explanation);
-        setRelevantVariables(loi.relevantVariables);
+        setExplanation(loi.explanation? loi.description : "");
+        setRelevantVariables(loi.relevantVariables ? loi.relevantVariables : "");
         setWorkflows(loi.workflows);
-        setMetaWorkflows(loi.metaworkflows ? loi.metaworkflows : []);
+        setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
     };
 
     const clearForm = () => {
@@ -151,6 +151,14 @@ export const LOIEditor = () => {
             question: questionId,
             dataQuery: dataQuery,
             dataSource: selectedDataSource,
+            workflows: workflows.map(w => {return {
+                ...w,
+                bindings: w.bindings.map(b => {return {
+                    ... b,
+                    collection: undefined,
+                }})
+            }}),
+            metaWorkflows: metaWorkflows,
         };
         if (newLOI) {
             setWaiting(true);
@@ -174,6 +182,11 @@ export const LOIEditor = () => {
         if (reason === 'clickaway')
             return;
         setWaiting(false);
+    };
+
+    const onWorkflowListChange = (wfs:Workflow[], mwfs:Workflow[]) => {
+        setWorkflows(wfs);
+        setMetaWorkflows(mwfs);
     };
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
@@ -213,7 +226,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={(_, vars) => setSparqlVariableNames(vars)}/>
+            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={(id, vars) => {setSparqlVariableNames(vars);setQuestionID(id);}}/>
         </Box>
         <Divider/>
 
@@ -252,7 +265,8 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
-            <WorkflowList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions} onWorkflowEditChange={setEditingWorkflows}></WorkflowList>
+            <WorkflowList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions}
+                    onEditStateChange={setEditingWorkflows} onChange={onWorkflowListChange}></WorkflowList>
         </Box>
         <Box sx={{display: 'flex', justifyContent: 'flex-end', padding: "10px"}}>
             <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>

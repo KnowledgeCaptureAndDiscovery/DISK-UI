@@ -8,12 +8,13 @@ import { setErrorAll, setErrorInput, setInputs, setLoadingAll, setLoadingInput, 
 import AddIcon from '@mui/icons-material/Add';
 
 interface WorkflowEditorProps {
-    options: string[],
-    workflow?: Workflow;
+    options:    string[],
+    workflow?:  Workflow,
+    onSave?:    (workflow:Workflow) => void,
 }
 
 
-export const WorkflowEditor = ({options:options, workflow:workflow} : WorkflowEditorProps) => {
+export const WorkflowEditor = ({options:options, workflow:workflow, onSave:notifyParent} : WorkflowEditorProps) => {
     const dispatch = useAppDispatch();
     const [selected, setSelected] = React.useState<Method|null>(null);
     const [selectedLabel, setSelectedLabel] = React.useState("");
@@ -100,16 +101,12 @@ export const WorkflowEditor = ({options:options, workflow:workflow} : WorkflowEd
         });
     };
 
-    useEffect(() => {
-        if (!workflow) {
-            clearForm();
-            return;
-        }
+    const loadForm = (wf:Workflow) => {
         if (!loading && methods.length > 0) {
-            let m = methods.filter(m => m.name === workflow.workflow)![0];
+            let m = methods.filter(m => m.name === wf.workflow)![0];
             if (m) onWorkflowChange(m);
         }
-        let allBindings = [ ...workflow.bindings, ...workflow.parameters, ...workflow.optionalParameters];
+        let allBindings = [ ...wf.bindings, ...wf.parameters, ...wf.optionalParameters];
         if (allBindings.length > 0) {
             setSelectedVariableValues((values) => {
                 let newValues = { ... values };
@@ -126,6 +123,13 @@ export const WorkflowEditor = ({options:options, workflow:workflow} : WorkflowEd
                 return newValues;
             });
         }
+    };
+
+    useEffect(() => {
+        if (workflow)
+            loadForm(workflow)
+        else
+            clearForm();
     }, [workflow]);
 
     const clearForm = () => {
@@ -134,6 +138,27 @@ export const WorkflowEditor = ({options:options, workflow:workflow} : WorkflowEd
 
     const onWorkflowSave = () => {
         //SAVE
+        if (selected) {
+            let newWorkflow : Workflow = {
+                workflow: selected.name,
+                workflowLink: selected.link,
+                bindings: 
+                    inputMap[selected.name]
+                            .filter((i) => i.type === 'input' && selectedCollectionValues[i.name])
+                            .map((i:MethodInput) => {
+                        return {
+                            variable: i.name,
+                            binding: selectedCollectionValues[i.name] ? "[" + selectedVariableValues[i.name] + "]" : selectedVariableValues[i.name],
+                            collection: selectedCollectionValues[i.name],
+                        } as VariableBinding;
+                    }),
+                parameters: [],
+                optionalParameters: [],
+            };
+
+            loadForm(newWorkflow);
+            if (notifyParent) notifyParent(newWorkflow);
+        }
     }
 
     return <Card variant="outlined" sx={{padding: "5px 10px", position: "relative", overflow: "visible", mb: "5px"}}>

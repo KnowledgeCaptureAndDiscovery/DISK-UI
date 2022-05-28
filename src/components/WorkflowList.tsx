@@ -14,14 +14,18 @@ interface WorkflowListProps {
     workflows: Workflow[],
     metaworkflows: Workflow[],
     options: string[],
-    onWorkflowEditChange?: (state:boolean) => void;
+    onEditStateChange?: (state:boolean) => void;
+    onChange?: (workflows:Workflow[], metaWorkflows:Workflow[]) => void;
 }
 
-export const WorkflowList = ({editable:editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options:options, onWorkflowEditChange:sendEditChange} : WorkflowListProps) => {
+export const WorkflowList = ({editable:editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options:options, onEditStateChange:sendEditChange, onChange:notifyChange} : WorkflowListProps) => {
     const [addingWorkflow, setAddingWorkflow] = React.useState(false);
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
     const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow>();
+
+    const [editingIndex, setEditingIndex] = React.useState<number>(-1);
+    const [editingMeta, setEditingMeta] = React.useState<boolean>(false);
 
     useEffect(() => {
         setWorkflows(inputWorkflows);
@@ -34,14 +38,35 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
     const toggleEdition = () => {
         if (addingWorkflow && selectedWorkflow) {
             setSelectedWorkflow(undefined);
+            setEditingIndex(-1);
+            setEditingMeta(false);
         }
         if (sendEditChange) sendEditChange(!addingWorkflow);
         setAddingWorkflow(!addingWorkflow)
     };
 
-    const onEditButtonClicked = (wf:Workflow) => {
+    const onEditButtonClicked = (wf:Workflow, index:number, isMeta:boolean=false) => {
         setSelectedWorkflow(wf);
         setAddingWorkflow(true);
+        setEditingIndex(index);
+        setEditingMeta(isMeta);
+    }
+
+    const onWorkflowSave = (wf:Workflow) => {
+        if (notifyChange) {
+            let curWfs : Workflow[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
+            if (selectedWorkflow) curWfs[editingIndex] = wf; //Editing
+            else curWfs.push(wf); //NEW
+            notifyChange(editingMeta ? workflows : curWfs, editingMeta ? curWfs : metaWorkflows);
+        } else {
+            (editingMeta ? setMetaWorkflows : setWorkflows)((currentWorkflows) => {
+                let newWfs = [ ...currentWorkflows ];
+                if (selectedWorkflow) newWfs[editingIndex] = wf; //Editing
+                else newWfs.push(wf); //New
+                return newWfs;
+            });
+        }
+        toggleEdition();
     }
 
     return <Box>
@@ -67,12 +92,12 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
             }
         </Box> 
 
-        {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow} options={options}></WorkflowEditor> : ""}
+        {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow} options={options} onSave={onWorkflowSave}></WorkflowEditor> : ""}
         {workflows.length > 0 ? 
             <Box>
-                {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow) => 
+                {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
                     <WorkflowPreview key={`wf_${wf.workflow}`} workflow={wf} button={editable && !addingWorkflow? 
-                        <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf)}}>
+                        <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
                             <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
                         </Button>
                     : undefined}/>
@@ -81,9 +106,9 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
                     <FormHelperText sx={{fontSize: ".9rem"}}>
                         Meta-Workflows to run: 
                     </FormHelperText>
-                    {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow) => 
+                    {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
                         <WorkflowPreview key={`mwf_${wf.workflow}`} workflow={wf} button={editable && !addingWorkflow ? 
-                            <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf)}}>
+                            <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i,true)}}>
                                 <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
                             </Button>
                         : undefined}/>

@@ -69,8 +69,8 @@ export interface Workflow {
     bindings: VariableBinding[],
     parameters: VariableBinding[],
     optionalParameters: VariableBinding[],
-    run: WorkflowRun,
-    meta: {
+    run?: WorkflowRun,
+    meta?: {
         hypothesis: MetaInfo,
         revisedHypothesis: MetaInfo,
     }
@@ -83,7 +83,7 @@ export interface LineOfInquiry {
     hypothesisQuery: string,
     dataQuery: string,
     workflows: Workflow[],
-    metaworkflows: Workflow[],
+    metaWorkflows: Workflow[],
     notes: string,
     author: string,
     dateCreated: string,
