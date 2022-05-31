@@ -9,7 +9,7 @@ import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOpti
 interface QuestionLinkerProps {
     selected: string,
     disabled?: boolean,
-    onQuestionChange?: (questionId:string, variables:string[]) => void,
+    onQuestionChange?: (question:Question|null, variables:string[]) => void,
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -66,8 +66,8 @@ export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuesti
             updateQuestionFiller(value);
         }
         if (notifyChange)
-            if (value) notifyChange(value.id, value.variables.map((v:QuestionVariable) => v.varName));
-            else notifyChange("", []);
+            if (value) notifyChange(value, value.variables.map((v:QuestionVariable) => v.varName));
+            else notifyChange(null, []);
     }
 
     const updateQuestionFiller = (q:Question) => {

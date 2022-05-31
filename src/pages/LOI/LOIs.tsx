@@ -49,7 +49,7 @@ export const LinesOfInquiry = () => {
                     <AddIcon/>
                 </Button>
             </Box>
-            <Card variant="outlined" sx={{height: "calc(100vh - 157px)"}}>
+            <Card variant="outlined" sx={{height: "calc(100vh - 157px)", overflowY:"auto"}}>
                 {loading ?
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :

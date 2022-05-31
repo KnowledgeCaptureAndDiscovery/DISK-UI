@@ -96,7 +96,7 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
         {workflows.length > 0 ? 
             <Box>
                 {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
-                    <WorkflowPreview key={`wf_${wf.workflow}`} workflow={wf} button={editable && !addingWorkflow? 
+                    <WorkflowPreview key={`wf_${wf.workflow}-${i}`} workflow={wf} button={editable && !addingWorkflow? 
                         <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
                             <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
                         </Button>
@@ -107,7 +107,7 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
                         Meta-Workflows to run: 
                     </FormHelperText>
                     {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
-                        <WorkflowPreview key={`mwf_${wf.workflow}`} workflow={wf} button={editable && !addingWorkflow ? 
+                        <WorkflowPreview key={`mwf_${wf.workflow}${i}`} workflow={wf} button={editable && !addingWorkflow ? 
                             <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i,true)}}>
                                 <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
                             </Button>

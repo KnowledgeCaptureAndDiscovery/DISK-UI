@@ -1,9 +1,10 @@
-import { Box, Card, Divider, IconButton, Skeleton, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, IconButton, Skeleton, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis, idPattern } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
+import PlayIcon from '@mui/icons-material/PlayArrow';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -84,10 +85,17 @@ export const HypothesisView = () => {
             {!loading && !!hypothesis ? 
             <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
             : <Skeleton/>}
+        </Box>
 
-            <TypographySubtitle sx={{mt: "10px"}}>
-                Hypothesis testing executions:
-            </TypographySubtitle>
+        <Box sx={{padding:"10px"}}>
+            <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                <TypographySubtitle sx={{mt: "10px"}}>
+                    Hypothesis testing executions:
+                </TypographySubtitle>
+                <Button variant="outlined">
+                    <PlayIcon/> Test hypothesis
+                </Button>
+            </Box>
             <Skeleton/>
 
         </Box>

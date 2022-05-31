@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { idPattern, LineOfInquiry, Workflow } from "DISK/interfaces";
+import { idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -58,7 +58,8 @@ export const LOIEditor = () => {
     const [relevantVariables, setRelevantVariables] = React.useState("");
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
-    const [questionId, setQuestionID] = React.useState<string>("");
+    const [questionId, setQuestionId] = React.useState<string>("");
+    const [hypothesisQuery, setHypothesisQuery] = React.useState<string>("");
 
     const [waiting, setWaiting] = React.useState<boolean>(false);;
     const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
@@ -139,43 +140,48 @@ export const LOIEditor = () => {
         }
 
         let newLOI : LineOfInquiry | LineOfInquiryRequest;
+        let previous : any = {};
+        let editing : boolean = false;
         //TODO: fix dates and author!! server-side
         if (LOI) {
             // Edit existing hypothesis:
-            newLOI  = { ... LOI, };
+            previous  = { ... LOI, };
+            editing = true;
         }
         newLOI = {
+            ...previous,
             name: name,
             description: description,
             notes: notes,
             question: questionId,
             dataQuery: dataQuery,
+            hypothesisQuery: hypothesisQuery,
             dataSource: selectedDataSource,
             workflows: workflows.map(w => {return {
                 ...w,
                 bindings: w.bindings.map(b => {return {
                     ... b,
                     collection: undefined,
-                }})
+                    bindingAsArray: undefined,
+                }}),
             }}),
             metaWorkflows: metaWorkflows,
         };
-        if (newLOI) {
-            setWaiting(true);
-            console.log("SEND:", newLOI);
-            DISKAPI.postLOI(newLOI)
-                .then((savedLOI) => {
-                    setSaveNotification(true);
-                    dispatch(addLOI(savedLOI));
-                    setWaiting(false);
-                    navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
-                })
-                .catch((e) => {
-                    //TODO: show some kind of error.
-                    console.warn(e);
-                    setWaiting(false);
-                });
-        }
+
+        setWaiting(true);
+        console.log("SEND:", newLOI);
+        (editing&&false?DISKAPI.updateLOI:DISKAPI.createLOI)(newLOI) //FIXME: PUT SERVERSIDE
+            .then((savedLOI) => {
+                setSaveNotification(true);
+                dispatch(addLOI(savedLOI));
+                setWaiting(false);
+                navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+            })
+            .catch((e) => {
+                //TODO: show some kind of error.
+                console.warn(e);
+                setWaiting(false);
+            });
     };
 
     const handleSaveNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -184,10 +190,21 @@ export const LOIEditor = () => {
         setWaiting(false);
     };
 
-    const onWorkflowListChange = (wfs:Workflow[], mwfs:Workflow[]) => {
+    const onWorkflowListChange = (wfs:Workflow[], metaWfs:Workflow[]) => {
         setWorkflows(wfs);
-        setMetaWorkflows(mwfs);
+        setMetaWorkflows(metaWfs);
     };
+
+    const onQuestionChange = (q:Question|null, vars:string[]) => {
+        setSparqlVariableNames(vars);
+        setQuestionId(q ? q.id : "");
+        if (q!=null) {
+            // Replace all sub-resources (:example) for variables (?example) for hypothesis matching.
+            setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\z]+)/g, "?$2") );
+        } else {
+            setHypothesisQuery("");
+        }
+    }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
         <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
@@ -226,7 +243,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={(id, vars) => {setSparqlVariableNames(vars);setQuestionID(id);}}/>
+            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={ onQuestionChange  }/>
         </Box>
         <Divider/>
 

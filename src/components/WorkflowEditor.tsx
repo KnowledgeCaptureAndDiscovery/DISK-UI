@@ -144,7 +144,7 @@ export const WorkflowEditor = ({options:options, workflow:workflow, onSave:notif
                 workflowLink: selected.link,
                 bindings: 
                     inputMap[selected.name]
-                            .filter((i) => i.type === 'input' && selectedCollectionValues[i.name])
+                            .filter((i) => i.type === 'input' && selectedVariableValues[i.name])
                             .map((i:MethodInput) => {
                         return {
                             variable: i.name,

@@ -96,45 +96,48 @@ export const HypothesisEditor = () => {
         }
 
         let newHypothesis : Hypothesis | HypothesisRequest;
-        //TODO: fix dates and author!!
+        let previous : any = {};
+        let editing : boolean = false;
+        //TODO: fix dates and author!! (server side)
         if (hypothesis) {
+            previous = {...hypothesis};
+            editing = true;
             // Edit existing hypothesis:
-            newHypothesis = {
-                ... hypothesis,
-                name: name,
-                description: description,
-                notes: notes,
-                question: editedQuestionId,
-                questionBindings: editedQuestionBindings,
-                graph: { triples: editedGraph }
-            };
-        } else {
-            // Create new hypothesis.
-            newHypothesis = {
-                name: name,
-                description: description,
-                notes: notes,
-                question: editedQuestionId,
-                questionBindings: editedQuestionBindings,
-                graph: { triples: editedGraph }
-            };
+            //newHypothesis = {
+            //    ... hypothesis,
+            //    name: name,
+            //    description: description,
+            //    notes: notes,
+            //    question: editedQuestionId,
+            //    questionBindings: editedQuestionBindings,
+            //    graph: { triples: editedGraph }
+            //};
         }
-        if (newHypothesis) {
-            setWaiting(true);
-            console.log("SEND:", newHypothesis);
-            DISKAPI.postHypothesis(newHypothesis)
-                .then((savedHypothesis) => {
-                    setSaveNotification(true);
-                    dispatch(addHypothesis(savedHypothesis));
-                    setWaiting(false);
-                    navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
-                })
-                .catch((e) => {
-                    //TODO: show some kind of error.
-                    console.warn(e);
-                    setWaiting(false);
-                });
-        }
+        // Add form data
+        newHypothesis = {
+            ...previous ,
+            name: name,
+            description: description,
+            notes: notes,
+            question: editedQuestionId,
+            questionBindings: editedQuestionBindings,
+            graph: { triples: editedGraph }
+        };
+
+        setWaiting(true);
+        console.log("SEND:", newHypothesis);
+        (editing&&false?DISKAPI.updateHypothesis:DISKAPI.createHypothesis)(newHypothesis) //FIXME
+            .then((savedHypothesis) => {
+                setSaveNotification(true);
+                dispatch(addHypothesis(savedHypothesis));
+                setWaiting(false);
+                navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+            })
+            .catch((e) => {
+                //TODO: show some kind of error.
+                console.warn(e);
+                setWaiting(false);
+            });
     }
 
     const onQuestionChange = (selectedQuestionId: string, bindings: VariableBinding[], pattern: Triple[]) => {

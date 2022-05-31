@@ -34,6 +34,20 @@ export class DISKAPI {
         return response.json();
     }
 
+    private static async put (url:string, obj:any) : Promise<any> {
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+                //"Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(obj),
+        });
+        if (!response.ok) 
+            throw new Error(response.statusText);
+        return response.json();
+    }
+
     private static async delete (url:string) : Promise<boolean> {
         const response = await fetch(url, {
             method: 'DELETE',
@@ -47,6 +61,9 @@ export class DISKAPI {
         return true;
     }
 
+    // HYPOTHESES
+    //=======================
+
     public static async getHypotheses () : Promise<Hypothesis[]> {
         return await DISKAPI.get(DISKAPI.url + "hypotheses") as Hypothesis[];
     }
@@ -55,13 +72,21 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "hypotheses/" + id) as Hypothesis;
     }
 
-    public static async postHypothesis (hypothesis:Hypothesis|HypothesisRequest, username?:string) : Promise<Hypothesis> {
+    public static async createHypothesis (hypothesis:Hypothesis|HypothesisRequest) : Promise<Hypothesis> {
         return await DISKAPI.post(DISKAPI.url + "hypotheses", hypothesis) as Hypothesis;
+    }
+
+    public static async updateHypothesis (hypothesis:Hypothesis|HypothesisRequest) : Promise<Hypothesis> {
+        console.log("PUT")
+        return await DISKAPI.put(DISKAPI.url + "hypotheses", hypothesis) as Hypothesis;
     }
 
     public static async deleteHypothesis (hypothesisId:string) : Promise<boolean> {
         return await DISKAPI.delete(DISKAPI.url + "hypotheses/" + hypothesisId) as boolean;
     }
+
+    // QUESTIONS
+    //=======================
 
     public static async getQuestions (username?:string) : Promise<Question[]> {
         return await DISKAPI.get(DISKAPI.url + "questions") as Question[];
@@ -71,6 +96,9 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "question/" + id + "/options") as string[][];
     }
 
+    // LINES OF INQUIRY
+    //=======================
+
     public static async getLOIs (username?:string) : Promise<LineOfInquiry[]> {
         return await DISKAPI.get(DISKAPI.url + "lois") as LineOfInquiry[];
     }
@@ -79,9 +107,21 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "lois/" + id) as LineOfInquiry;
     }
 
-    public static async postLOI (loi:LineOfInquiry|LineOfInquiryRequest) : Promise<LineOfInquiry> {
+    public static async createLOI (loi:LineOfInquiry|LineOfInquiryRequest) : Promise<LineOfInquiry> {
         return await DISKAPI.post(DISKAPI.url + "lois/", loi) as LineOfInquiry;
     }
+
+    public static async updateLOI (loi:LineOfInquiry|LineOfInquiryRequest) : Promise<LineOfInquiry> {
+        console.log("PUT")
+        return await DISKAPI.put(DISKAPI.url + "lois/", loi) as LineOfInquiry;
+    }
+
+    public static async deleteLOI (id:string) : Promise<boolean> {
+        return await DISKAPI.delete(DISKAPI.url + "lois/" + id) as boolean;
+    }
+
+    // TRIGGERED LINES OF INQUIRY
+    //=======================
 
     public static async getTLOIs (username?:string) : Promise<TriggeredLineOfInquiry[]> {
         return await DISKAPI.get(DISKAPI.url + "tlois") as TriggeredLineOfInquiry[];
