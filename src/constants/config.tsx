@@ -1,0 +1,1 @@
+export const DISK_API : string = process.env.REACT_APP_DISK_API ? process.env.REACT_APP_DISK_API : "http://localhost:8080/disk-project-server-2.5.2/";
