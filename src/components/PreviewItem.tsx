@@ -1,5 +1,5 @@
 
-import { Box, Card, Divider, IconButton, Typography } from "@mui/material"
+import { Box, Card, Divider, IconButton, styled, Typography } from "@mui/material"
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from "react-router-dom";
@@ -20,7 +20,18 @@ interface PreviewItemProps {
     onDelete?: () => void;
 }
 
-export const PreviewItem = ({item:item, icon:icon, onDelete:onDelete} : PreviewItemProps) => {
+const TwoLines = styled(Typography)(({ theme }) => ({
+    display: "-webkit-box",
+    WebkitLineClamp: "2",
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    fontSize: "0.9rem",
+    lineHeight: "1rem",
+    color:"#444",
+    height: "2rem"
+}));
+
+export const PreviewItem = ({item, icon, onDelete} : PreviewItemProps) => {
     return <Card variant="outlined" sx={{margin: "10px", height: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
             <Box component={Link} to={item.path + "/" + item.id}
@@ -37,9 +48,7 @@ export const PreviewItem = ({item:item, icon:icon, onDelete:onDelete} : PreviewI
         </Box>
         <Divider/>
         <Box sx={{padding: "5px 10px 0"}}>
-            <Typography sx={{display: "-webkit-box","-webkit-line-clamp": "2", "-webkit-box-orient": "vertical", overflow: "hidden", fontSize: "0.9rem", lineHeight: "1rem", color:"#444", height: "2rem"}}>
-                {item.description} 
-            </Typography>
+            <TwoLines> {item.description} </TwoLines>
         </Box>
         <Box sx={{display: "inline-flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "0 10px", fontSize: "0.85rem"}}>
             <Box>

@@ -61,8 +61,19 @@ export const LOIEditor = () => {
     const [questionId, setQuestionId] = React.useState<string>("");
     const [hypothesisQuery, setHypothesisQuery] = React.useState<string>("");
 
-    const [waiting, setWaiting] = React.useState<boolean>(false);;
+    // State errors...
+    const [waiting, setWaiting] = React.useState<boolean>(false);
     const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
+    const [errorSaveNotification, setErrorSaveNotification] = React.useState<boolean>(false);;
+    const [errorName, setErrorName] = React.useState<boolean>(false);
+    const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
+    const [errorDataSource, setErrorDataSource] = React.useState<boolean>(false);
+    const [errorQuery, setErrorQuery] = React.useState<boolean>(false);
+    const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
+
+    const onNameChange = (name:string) => { setName(name); setErrorName(name.length === 0); }
+    const onDescChange = (desc:string) => { setDescription(desc); setErrorDesc(desc.length === 0); }
+    const onDataSourceChange = (ds:string) => { setSelectedDataSource(ds); setErrorDataSource(ds.length === 0); }
 
     useEffect(() => {
         let candidates : Set<string> = new Set<string>();
@@ -133,9 +144,12 @@ export const LOIEditor = () => {
     };
 
     const onSaveButtonClicked = () => {
-        console.log("save clicked");
-        if (!name || !description || !selectedDataSource || !dataQuery) {
-            //TODO: show errors
+        if (!name || !description || !selectedDataSource || !dataQuery || !questionId) {
+            if (!name) setErrorName(true);
+            if (!description) setErrorDesc(true);
+            if (!selectedDataSource) setErrorDataSource(true);
+            if (!dataQuery) setErrorQuery(true);
+            if (!questionId) setErrorQuestion(true);
             return;
         }
 
@@ -170,15 +184,15 @@ export const LOIEditor = () => {
 
         setWaiting(true);
         console.log("SEND:", newLOI);
-        (editing&&false?DISKAPI.updateLOI:DISKAPI.createLOI)(newLOI) //FIXME: PUT SERVERSIDE
+        (editing?DISKAPI.updateLOI:DISKAPI.createLOI)(newLOI)
             .then((savedLOI) => {
                 setSaveNotification(true);
-                dispatch(addLOI(savedLOI));
                 setWaiting(false);
+                dispatch(addLOI(savedLOI));
                 navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
             })
             .catch((e) => {
-                //TODO: show some kind of error.
+                setErrorSaveNotification(true);
                 console.warn(e);
                 setWaiting(false);
             });
@@ -198,6 +212,7 @@ export const LOIEditor = () => {
     const onQuestionChange = (q:Question|null, vars:string[]) => {
         setSparqlVariableNames(vars);
         setQuestionId(q ? q.id : "");
+        setErrorQuestion(q === null || q.id.length ===0);
         if (q!=null) {
             // Replace all sub-resources (:example) for variables (?example) for hypothesis matching.
             setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\z]+)/g, "?$2") );
@@ -210,6 +225,20 @@ export const LOIEditor = () => {
         <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
             <CircularProgress color="inherit" />
         </Backdrop>
+        <Snackbar open={saveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+            <Alert severity="success" sx={{ width: '100%' }} onClose={() => setSaveNotification(false)}>
+                Successfully saved
+            </Alert>
+        </Snackbar>
+        <Snackbar open={errorSaveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setErrorSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+            <Alert severity="error" sx={{ width: '100%' }} onClose={() => setErrorSaveNotification(false)}>
+                Error saving Line of Inquiry. Please try again
+            </Alert>
+        </Snackbar>
+
+        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
+            <CircularProgress color="inherit" />
+        </Backdrop>
         <Snackbar open={saveNotification} autoHideDuration={2000} onClose={handleSaveNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
             <Alert severity="success" sx={{ width: '100%' }} onClose={handleSaveNotificationClose}>
                 Saved!
@@ -219,7 +248,7 @@ export const LOIEditor = () => {
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
                 <TextField fullWidth size="small" id="LOIName" label="LOI Name" required sx={{backgroundColor: "white"}}
-                    value={name} onChange={(e) => setName(e.target.value)}/>
+                    value={name} error={errorName} onChange={(e) => onNameChange(e.target.value)}/>
             : <Skeleton/> }
 
             <IconButton component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
@@ -232,10 +261,10 @@ export const LOIEditor = () => {
             <TypographySubtitle>Description:</TypographySubtitle>
             {!loading ?
                 <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="LOI Description"
-                    value={description} onChange={(e) => setDescription(e.target.value)}/>
+                    value={description} error={errorDesc} onChange={(e) => onDescChange(e.target.value)}/>
             : <Skeleton/> }
             {!loading ?
-                <TextFieldBlock multiline fullWidth required size="small" id="LOINotes" label="LOI Notes"
+                <TextFieldBlock multiline fullWidth size="small" id="LOINotes" label="LOI Notes"
                     value={notes} onChange={(e) => setNotes(e.target.value)}/>
             : <Skeleton/> }
         </Box>
@@ -243,7 +272,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={ onQuestionChange  }/>
+            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={onQuestionChange} error={errorQuestion}/>
         </Box>
         <Divider/>
 
@@ -253,22 +282,31 @@ export const LOIEditor = () => {
                 <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
                 {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/>
                     :
-                    <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} 
-                            value={selectedDataSource} onChange={(e) => setSelectedDataSource(e.target.value)}>
+                    <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
+                            error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
                         <MenuItem value="" disabled> None </MenuItem>
                         { Object.keys(endpoints || []).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints![name]}>{name}</MenuItem>) }
                     </Select>
                 }
             </Box>
             <Box sx={{fontSize: "0.94rem"}} >
-                <CodeMirror value={dataQuery}
-                    extensions={[StreamLanguage.define(sparql)]}
-                    onChange={(value, viewUpdate) => {
-                        setDataQuery(value);
-                        console.log('value:', value);
-                    }}
-                    onBlur={console.log}
-                />
+                <Card variant="outlined" sx={{
+                        ...{mt: "8px", p: "0px", position: "relative", overflow:"visible", pt:"10px"},
+                        ...(errorQuery ? {borderColor:"#d32f2f", } : {})
+                    }}>
+                    <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-19px 0 0 10px', color:(errorQuery?"#d32f2f":'rgba(0, 0, 0, 0.6);')}}>
+                        Data query *
+                    </FormHelperText>
+                    <CodeMirror value={dataQuery}
+                        extensions={[StreamLanguage.define(sparql)]}
+                        onChange={(value, viewUpdate) => {
+                            setDataQuery(value);
+                            setErrorQuery(value.length === 0);
+                            console.log('value:', value);
+                        }}
+                        onBlur={console.log}
+                    />
+                </Card>
             </Box>
             <Box>
                 <FormHelperText sx={{fontSize: ".9rem"}}>

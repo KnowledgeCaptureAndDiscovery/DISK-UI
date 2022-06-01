@@ -10,6 +10,7 @@ interface QuestionLinkerProps {
     selected: string,
     disabled?: boolean,
     onQuestionChange?: (question:Question|null, variables:string[]) => void,
+    error?: boolean
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -19,7 +20,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuestionChange:notifyChange} : QuestionLinkerProps) => {
+export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuestionChange:notifyChange, error:exError=false} : QuestionLinkerProps) => {
 
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
@@ -98,7 +99,7 @@ export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuesti
         {disabled? "" :
         <Box>
             <FormHelperText sx={{margin: "2px", fontSize: "0.9rem"}}> Select the type of question your hypothesis will address: </FormHelperText>
-            <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
+            <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}}
                 value={selectedQuestion}
                 onChange={(_,newQ) => onQuestionChange(newQ)}
                 inputValue={selectedQuestionLabel}
@@ -108,7 +109,7 @@ export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuesti
                 options={options}
                 loading={loading}
                 renderInput={(params) => (
-                    <TextField {...params} label="Hypothesis Question"
+                    <TextField {...params} error={exError} label="Hypothesis Question"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (
@@ -123,7 +124,7 @@ export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuesti
             />
         </Box>
         }
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
+        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis will follow this question template: </FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: (disabled ? "6px": 0)}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 

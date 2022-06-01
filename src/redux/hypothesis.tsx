@@ -92,9 +92,7 @@ export const hypothesisSlice = createSlice({
       state.hypotheses.forEach((h:Hypothesis) => {
         if (h.id !== action.payload) newHypothesisArr.push(h);
       });
-      console.log(state.hypotheses);
-      console.log(newHypothesisArr);
-      return { ...state, hypotheses: newHypothesisArr};
+      return { ...state, hypotheses: newHypothesisArr, selectedId: ""};
     },
     add: (state:HypothesisState, action:PayloadAction<Hypothesis>) => {
       let newHypothesisArr : Hypothesis[] = [];
@@ -102,7 +100,7 @@ export const hypothesisSlice = createSlice({
         if (h.id !== action.payload.id) newHypothesisArr.push(h);
       });
       newHypothesisArr.push(action.payload);
-      return { ...state, hypotheses: newHypothesisArr};
+      return { ...state, hypotheses: newHypothesisArr, selectedId: ""};
     },
   },
 });

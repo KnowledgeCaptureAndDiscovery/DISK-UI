@@ -5,10 +5,11 @@ import { PreviewInfo, PreviewItem } from "./PreviewItem";
 
 
 interface LOIPreviewProps {
-    LOI: LineOfInquiry
+    LOI: LineOfInquiry,
+    onDelete?: (loi:LineOfInquiry) => void,
 }
 
-export const LOIPreview = ({LOI:loi} : LOIPreviewProps) => {
+export const LOIPreview = ({LOI:loi, onDelete} : LOIPreviewProps) => {
     const LOItoItem = (loi:LineOfInquiry) => {
         return {
             path: PATH_LOIS,
@@ -21,5 +22,5 @@ export const LOIPreview = ({LOI:loi} : LOIPreviewProps) => {
         } as PreviewInfo;
     }
 
-    return <PreviewItem icon={ <SettingsIcon sx={{color: "green"}}/> } item ={LOItoItem(loi)}></PreviewItem>;
+    return <PreviewItem icon={ <SettingsIcon sx={{color: "green"}}/> } item ={LOItoItem(loi)} onDelete={onDelete? () => onDelete(loi) : undefined}></PreviewItem>;
 }

@@ -1,7 +1,7 @@
 import { Box, Button, Card, Divider, IconButton, Skeleton, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { Hypothesis, idPattern } from "DISK/interfaces";
-import { useEffect } from "react";
+import { Hypothesis, idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setSelectedHypothesis, setLoadingSelected, setErrorSelected } from 'redux/hypothesis';
 import { QuestionPreview } from "components/QuestionPreview";
+import { setTLOIs, setLoadingAll, setErrorAll } from 'redux/tlois';
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -37,6 +38,12 @@ export const HypothesisView = () => {
     const error = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
     const dispatch = useAppDispatch();
 
+    const TLOIs = useAppSelector((state:RootState) => state.tlois.TLOIs);
+    const TLOIloading = useAppSelector((state:RootState) => state.tlois.loadingAll);
+    const TLOIerror = useAppSelector((state:RootState) => state.tlois.errorAll);
+
+    const [myTLOIs, setMyTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
+
     const loadHypothesis = () => {
         let id : string = location.pathname.replace(idPattern, '');
         if (!!id && !loading && !error && selectedId !== id) {
@@ -51,9 +58,28 @@ export const HypothesisView = () => {
         }
     }
 
-    useEffect(loadHypothesis);
+    const loadTLOIs = () => {
+        if (!TLOIloading && !TLOIerror && TLOIs.length === 0) {
+            dispatch(setLoadingAll());
+            DISKAPI.getTLOIs()
+                .then((tlois) => {
+                    dispatch(setTLOIs(tlois));
+                })
+                .catch(() => dispatch(setErrorAll()))
+        }
+    }
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)"}}>
+    //useEffect(loadHypothesis);
+    useEffect(() => {
+        loadHypothesis();
+        loadTLOIs();
+    });
+
+    useEffect(() => {
+        setMyTLOIs(TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId));
+    }, [TLOIs, selectedId])
+
+    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
@@ -96,8 +122,15 @@ export const HypothesisView = () => {
                     <PlayIcon/> Test hypothesis
                 </Button>
             </Box>
-            <Skeleton/>
-
+            {TLOIloading ? 
+                <Skeleton/>
+                : (myTLOIs.length === 0 ? <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
+                    No executions
+                </Card>
+                :   myTLOIs.map((tloi) => <Card variant="outlined" key={tloi.id}>
+                    <Box sx={{borderBottom:"2px"}}>{tloi.name}</Box>
+                </Card>))
+            }
         </Box>
         
     </Card>

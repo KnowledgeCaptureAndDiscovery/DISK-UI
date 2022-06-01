@@ -23,6 +23,7 @@ export const Hypotheses = () => {
     const [waiting, setWaiting] = React.useState<boolean>(false);;
     const [deleteNotification, setDeleteNotification] = React.useState<boolean>(false);
     const [lastDeletedName, setLastDeletedNamed] = React.useState<string>("");
+    const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
 
 
     useEffect(() => {
@@ -44,19 +45,21 @@ export const Hypotheses = () => {
     }
 
     const deleteHypothesis = (hypothesis:Hypothesis) => {
-        console.log("DELETE: ", hypothesis.id);
+        console.log("DELETING: ", hypothesis.id);
         setWaiting(true);
         setLastDeletedNamed(hypothesis.name);
         DISKAPI.deleteHypothesis(hypothesis.id)
             .then((b:boolean) => {
                 if (b) {
                     dispatch(remove(hypothesis.id));
+                    setDeleteNotification(true);
+                } else {
+                    setErrorNotification(true);
                 }
                 setWaiting(false);
-                setDeleteNotification(true);
             })
             .catch((e) => {
-                //TODO
+                setErrorNotification(true);
                 console.warn(e);
                 setWaiting(false);
             })
@@ -67,6 +70,7 @@ export const Hypotheses = () => {
             return;
         }
         setDeleteNotification(false);
+        setErrorNotification(false);
         setLastDeletedNamed("");
     };
 
@@ -77,7 +81,12 @@ export const Hypotheses = () => {
             </Backdrop>
             <Snackbar open={deleteNotification} autoHideDuration={3000} onClose={handleDeleteNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
                 <Alert severity="info" sx={{ width: '100%' }} onClose={handleDeleteNotificationClose}>
-                    Hypothesis {lastDeletedName} was deleted!
+                    Hypothesis {lastDeletedName} was deleted
+                </Alert>
+            </Snackbar>
+            <Snackbar open={errorNotification} autoHideDuration={3000} onClose={handleDeleteNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+                <Alert severity="error" sx={{ width: '100%' }} onClose={handleDeleteNotificationClose}>
+                    Error trying to delete {lastDeletedName}. The hypothesis was not deleted
                 </Alert>
             </Snackbar>
 

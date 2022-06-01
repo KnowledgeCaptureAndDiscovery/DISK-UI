@@ -26,6 +26,7 @@ import { AccountCircle } from '@mui/icons-material';
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
+import { useKeycloak } from '@react-keycloak/web';
 
 const drawerWidth = 240;
 
@@ -156,8 +157,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const location = useLocation();
   const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
   const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
+  const { keycloak } = useKeycloak();
 
-  //const { keycloak, initialized } = useKeycloak();
   const [open, setOpen] = React.useState(true);
 
   const handleDrawerOpen = () => {
@@ -171,10 +172,6 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const inLocation = (loc:string) => {
       return location.pathname.includes(loc);
   }
-
-  /*const onLoginClicked = useCallback(() => {
-    keycloak?.login()
-  }, [keycloak])*/
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -226,9 +223,16 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           <Divider />
           <Box sx={{height: "50px", display: "flex", alignItems: "center"}}>
             <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}}/>
-              <button type="button">
+            {keycloak && !keycloak.authenticated &&
+              (<button type="button" onClick={() => keycloak.login()}>
                 LOGIN
-              </button>
+              </button>)
+            }
+            {keycloak && keycloak.authenticated &&
+              (<button type="button" onClick={() => keycloak.logout()}>
+                LOGOUT
+              </button>)
+            }
           </Box>
         </Box>
       </Drawer>

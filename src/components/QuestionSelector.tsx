@@ -10,6 +10,7 @@ interface QuestionProps {
     questionId: string,
     bindings: VariableBinding[],
     onQuestionChange: (selectedId:string, bindings:VariableBinding[], updatedPattern:Triple[]) => void,
+    error?: boolean
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -19,7 +20,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questionBindings, onQuestionChange:sendQuestionChange} : QuestionProps) => {
+export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questionBindings, onQuestionChange:sendQuestionChange, error:exError=false} : QuestionProps) => {
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
@@ -156,8 +157,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         // Update pattern
         if (selectedQuestion) {
             let pattern:string[] = selectedQuestion.pattern.split(/\s/);
-            //let triples:string[][] = [];
-            //let curArr:string[] = [];
             let newBindings: VariableBinding[] = [];
             let updatedGraph: Triple[] = [];
 
@@ -228,7 +227,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 options={options}
                 loading={loading}
                 renderInput={(params) => (
-                    <TextField {...params} label="Hypothesis Question"
+                    <TextField {...params} error={exError} label="Hypothesis Question"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (
@@ -242,7 +241,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 )}
             />
         </Box>
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
+        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Fill the following question template: </FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
@@ -282,7 +281,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 : ""}
             </Box>
         </Card>
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
+        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Semantic question pattern: </FormHelperText>
             <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
                 <Table aria-label="Hypothesis graph" sx={{width: "auto"}}>

@@ -1,10 +1,10 @@
-import { Autocomplete, Box, Card, CircularProgress, FormHelperText, MenuItem, Select, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material"
-import { Hypothesis, idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple } from "DISK/interfaces"
+import { Box, Card, FormHelperText, styled, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material"
+import { idPattern, Question, VariableBinding, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
+import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -18,7 +18,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionPreview = ({selected:selectedId, bindings:bindings} : QuestionPreviewProps) => {
+export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPreviewProps) => {
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
@@ -48,7 +48,7 @@ export const QuestionPreview = ({selected:selectedId, bindings:bindings} : Quest
     const setFromQuestionList = (list:Question[], id:string) => {
         if (list.length > 0 && !!id) {
             let cur : Question = list.filter((q) => q.id === id)?.[0];
-            if (cur != selectedQuestion) {
+            if (cur !== selectedQuestion) {
                 updateQuestionFiller(cur);
                 setSelectedQuestion(cur);
             }
@@ -77,8 +77,6 @@ export const QuestionPreview = ({selected:selectedId, bindings:bindings} : Quest
             let triples:string[][] = [];
             let curArr:string[] = [];
             let newBindings: VariableBinding[] = [];
-            let updatedGraph: Triple[] = [];
-            //let curTriple: Triple = {}
             for (let i:number=0; i<pattern.length; i++){
                 let part : string = pattern[i];
                 if (map2[part]) {
@@ -92,9 +90,22 @@ export const QuestionPreview = ({selected:selectedId, bindings:bindings} : Quest
                     curArr = [];
                 }
             }
-            if (curArr.length != 0) {
+            if (curArr.length !== 0)
                 console.warn("Something when wrong creating the triple representation")
-            }
+            setTriplePattern(triples);
+        } else if (selectedQuestion && bindings.length === 0) {
+            let pattern:string[] = selectedQuestion.pattern.split(/\s/);
+            let triples : string[][] = [];
+            let cur : string[] = [];
+            pattern.forEach((part:string, i:number) => {
+                cur.push(part);
+                if (cur.length === 3) {
+                    triples.push(cur);
+                    cur = [];
+                }
+            });
+            if (cur.length !== 0) 
+                console.warn("Something when wrong creating the triple representation")
             setTriplePattern(triples);
         }
     }, [bindings, selectedQuestion])
@@ -131,7 +142,7 @@ export const QuestionPreview = ({selected:selectedId, bindings:bindings} : Quest
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
-                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500"}}> &lt; {nameToValue[part]} &gt; </TextPart>
+                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500"}}> &lt; {nameToValue[part] ? nameToValue[part] : "any" } &gt; </TextPart>
                     )
                 : ""}
             </Box>

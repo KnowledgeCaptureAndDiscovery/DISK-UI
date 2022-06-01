@@ -87,15 +87,22 @@ export const loisSlice = createSlice({
       };
       return { ...state, ...newState };
     },
+    remove: (state:LOIsState, action:PayloadAction<string>) => {
+      let newHypothesisArr : LineOfInquiry[] = [];
+      state.LOIs.forEach((loi:LineOfInquiry) => {
+        if (loi.id !== action.payload) newHypothesisArr.push(loi);
+      });
+      return { ...state, LOIs: newHypothesisArr, selectedId: ""};
+    },
     add: (state:LOIsState, action:PayloadAction<LineOfInquiry>) => {
       let newLineOfInquiryArr : LineOfInquiry[] = [];
       state.LOIs.forEach((loi:LineOfInquiry) => {
         if (loi.id !== action.payload.id) newLineOfInquiryArr.push(loi);
       });
       newLineOfInquiryArr.push(action.payload);
-      return { ...state, hypotheses: newLineOfInquiryArr};
+      return { ...state, LOIs: newLineOfInquiryArr, selectedId: ""};
     },
   },
 });
 
-export const { setLOIs, setLoadingAll, setErrorAll, setSelectedLOI, setLoadingSelected, setErrorSelected, add } = loisSlice.actions;
+export const { setLOIs, setLoadingAll, setErrorAll, setSelectedLOI, setLoadingSelected, setErrorSelected, add, remove } = loisSlice.actions;
