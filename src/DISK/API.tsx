@@ -1,9 +1,9 @@
 import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
+import { DISK_API } from "../constants/config";
 
 export class DISKAPI {
-    //private static url : string = "http://localhost:9090/disk-project-server/";
-    private static url : string = "http://localhost:8080/disk-project-server-2.5.2/";
+    private static url : string = DISK_API;
 
 
     private static async get (url:string) : Promise<any> {
