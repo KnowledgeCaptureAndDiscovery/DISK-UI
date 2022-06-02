@@ -4,15 +4,27 @@ import { DISK_API } from "../constants/config";
 
 export class DISKAPI {
     private static url : string = DISK_API;
+    private static headers : RequestInit["headers"] = {
+        "Content-Type": "application/json;charset=UTF-8",
+    };
 
+    public static setToken (tkn:string) {
+        if (tkn) {
+            DISKAPI.headers = {
+                "Content-Type": "application/json;charset=UTF-8",
+                "Authorization": `Bearer ${tkn}`,
+            }
+        } else {
+            DISKAPI.headers = {
+                "Content-Type": "application/json;charset=UTF-8",
+            }
+        }
+    }
 
     private static async get (url:string) : Promise<any> {
         const response = await fetch(url, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                //"Authorization": `Bearer ${token}`,
-            }
+            headers: DISKAPI.headers,
         });
 
         if (!response.ok) 
@@ -23,10 +35,7 @@ export class DISKAPI {
     private static async post (url:string, obj:any) : Promise<any> {
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'content-type': 'application/json;charset=UTF-8',
-                //"Authorization": `Bearer ${token}`,
-            },
+            headers: DISKAPI.headers,
             body: JSON.stringify(obj),
         });
         if (!response.ok) 
@@ -37,10 +46,7 @@ export class DISKAPI {
     private static async put (url:string, obj:any) : Promise<any> {
         const response = await fetch(url, {
             method: 'PUT',
-            headers: {
-                'content-type': 'application/json;charset=UTF-8',
-                //"Authorization": `Bearer ${token}`,
-            },
+            headers: DISKAPI.headers,
             body: JSON.stringify(obj),
         });
         if (!response.ok) 
@@ -51,10 +57,7 @@ export class DISKAPI {
     private static async delete (url:string) : Promise<boolean> {
         const response = await fetch(url, {
             method: 'DELETE',
-            headers: {
-                'content-type': 'application/json;charset=UTF-8',
-                //"Authorization": `Bearer ${token}`,
-            },
+            headers: DISKAPI.headers,
         });
         if (!response.ok) 
             throw new Error(response.statusText);
