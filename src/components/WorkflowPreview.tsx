@@ -1,19 +1,19 @@
-import { Box, Button, Skeleton, FormHelperText, Card, Typography, Divider, Grid } from "@mui/material"
+import { Box, Button, Skeleton, FormHelperText, Card, Typography, Divider, Grid, IconButton } from "@mui/material"
 import { Workflow, VariableBinding } from "DISK/interfaces"
 import { WorkflowEditor } from "./WorkflowEditor"
-import CancelIcon from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import React from "react";
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 interface WorkflowPreviewProps {
     workflow: Workflow,
     button?: JSX.Element,
+    onDelete?: (wf:Workflow) => void
 }
 
-export const WorkflowPreview = ({workflow:wf, button:externalButton} : WorkflowPreviewProps) => {
+export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} : WorkflowPreviewProps) => {
     return <Box>
         <Card key={`wf_${wf.workflow}`} variant="outlined">
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
@@ -22,7 +22,10 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton} : WorkflowP
                     <Typography sx={{padding:"0 10px", fontWeight: 500}}>{wf.workflow}</Typography>
                     <OpenInNewIcon sx={{fontSize: "1rem"}}/>
                 </a>
-                {externalButton ? externalButton : ""}
+                <Box>
+                    {externalButton ? externalButton : ""}
+                    {onDelete ? <IconButton onClick={() => onDelete(wf)} sx={{padding: "0 3px"}}><DeleteIcon/></IconButton> : ""}
+                </Box>
             </Box>
             <Divider/>
             <Box sx={{fontSize:".85rem"}}>

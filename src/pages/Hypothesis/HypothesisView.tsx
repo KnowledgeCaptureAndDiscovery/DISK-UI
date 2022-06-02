@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
+import ErrorIcon from '@mui/icons-material/ErrorOutline';
+import WaitIcon from '@mui/icons-material/HourglassBottom';
+import CheckIcon from '@mui/icons-material/Check';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -127,8 +130,18 @@ export const HypothesisView = () => {
                 : (myTLOIs.length === 0 ? <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
                     No executions
                 </Card>
-                :   myTLOIs.map((tloi) => <Card variant="outlined" key={tloi.id}>
-                    <Box sx={{borderBottom:"2px"}}>{tloi.name}</Box>
+                :   myTLOIs.map((tloi:TriggeredLineOfInquiry) => 
+                <Card variant="outlined" key={tloi.id} sx={{marginBottom: "5px", padding: "2px 10px"}}>
+                    <Box sx={{display:"flex"}}>
+                        {tloi.status === 'FAILED' ? 
+                            <ErrorIcon sx={{color:"red"}}/> 
+                            : (tloi.status === 'SUCCESSFUL' ?
+                                <CheckIcon sx={{color:"green"}}/> 
+                                : <WaitIcon sx={{color:(tloi.status === 'RUNNING' ? "green" : "yellow")}}/>)}
+                        <Box sx={{marginLeft: "5px"}}>
+                            {tloi.name}
+                        </Box>
+                    </Box>
                 </Card>))
             }
         </Box>

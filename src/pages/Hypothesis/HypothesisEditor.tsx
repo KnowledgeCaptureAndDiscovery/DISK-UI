@@ -50,9 +50,9 @@ export const HypothesisEditor = () => {
     const [waiting, setWaiting] = React.useState<boolean>(false);
     const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
     const [errorSaveNotification, setErrorSaveNotification] = React.useState<boolean>(false);;
-    const [errorQuestionNotification, setErrorQuestionNotification] = React.useState<boolean>(false);;
     const [errorName, setErrorName] = React.useState<boolean>(false);
     const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
+    const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
 
     const onNameChange = (name:string) => { setName(name); setErrorName(name.length === 0); }
     const onDescChange = (desc:string) => { setDescription(desc); setErrorDesc(desc.length === 0); }
@@ -101,7 +101,7 @@ export const HypothesisEditor = () => {
         if (!name || !description || !editedQuestionId) {
             if (!name) setErrorName(true);
             if (!description) setErrorDesc(true);
-            if (!editedQuestionId) setErrorQuestionNotification(true);
+            if (!editedQuestionId) setErrorQuestion(true);
             return;
         }
 
@@ -161,11 +161,6 @@ export const HypothesisEditor = () => {
                 Error saving hypothesis. Please try again
             </Alert>
         </Snackbar>
-        <Snackbar open={errorQuestionNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setErrorQuestionNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="error" sx={{ width: '100%' }} onClose={() => setErrorQuestionNotification(false)}>
-                You must choose a question to ask
-            </Alert>
-        </Snackbar>
 
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
@@ -197,7 +192,7 @@ export const HypothesisEditor = () => {
                 Hypothesis question:
             </TypographySubtitle>
             {!loading ?
-                <QuestionSelector questionId={questionId} bindings={questionBindings} onQuestionChange={onQuestionChange}/>
+                <QuestionSelector questionId={questionId} bindings={questionBindings} onQuestionChange={onQuestionChange} error={errorQuestion}/>
             : <Skeleton/>}
         </Box>
 

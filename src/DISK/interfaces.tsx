@@ -98,7 +98,7 @@ export interface TriggeredLineOfInquiry {
     id: string,
     name: string,
     description: string,
-    status: string, 
+    status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL',
     loiId: string,
     parentHypothesisId: string,
     resultingHypothesisIds: string[],

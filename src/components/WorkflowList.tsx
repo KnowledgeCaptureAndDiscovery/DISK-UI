@@ -1,4 +1,4 @@
-import { Box, Button, Skeleton, FormHelperText, Card, Typography, Divider, Grid } from "@mui/material"
+import { Box, Button, Skeleton, FormHelperText, Card, Typography, Divider, Grid, IconButton } from "@mui/material"
 import { Workflow, VariableBinding } from "DISK/interfaces"
 import { WorkflowEditor } from "./WorkflowEditor"
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -69,6 +69,16 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
         toggleEdition();
     }
 
+    const onRemoveWorkflow = (wf:Workflow, meta:boolean=false) => {
+        let index : number = (meta?metaWorkflows:workflows).indexOf(wf);
+        //TODO: Add an alert here to confirm.
+        setWorkflows((wfs:Workflow[]) => {
+            let newWfs : Workflow[] = [ ...wfs ];
+            newWfs.splice(index, 1);
+            return newWfs;
+        });
+    };
+
     return <Box>
         <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mb:"5px"}}>
             <FormHelperText sx={{fontSize: ".9rem"}}>
@@ -96,17 +106,18 @@ export const WorkflowList = ({editable:editable, workflows: inputWorkflows, meta
         {workflows.length > 0 ? 
             <Box>
                 {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
-                    <WorkflowPreview key={`wf_${wf.workflow}-${i}`} workflow={wf} button={editable && !addingWorkflow? 
-                        <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
-                            <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
-                        </Button>
+                    <WorkflowPreview key={`wf_${wf.workflow}-${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? onRemoveWorkflow : undefined}
+                        button={editable && !addingWorkflow? 
+                        <IconButton sx={{padding: "0 3px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
+                            <EditIcon></EditIcon>
+                        </IconButton>
                     : undefined}/>
                 )}
                 {metaWorkflows.length > 0 ? <Box>
                     <FormHelperText sx={{fontSize: ".9rem"}}>
                         Meta-Workflows to run: 
                     </FormHelperText>
-                    {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
+                    {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
                         <WorkflowPreview key={`mwf_${wf.workflow}${i}`} workflow={wf} button={editable && !addingWorkflow ? 
                             <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i,true)}}>
                                 <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
