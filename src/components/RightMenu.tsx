@@ -28,7 +28,6 @@ import { RootState } from "redux/store";
 import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
 import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
-import Keycloak from 'keycloak-js';
 import { setToken } from 'redux/keycloak';
 
 const drawerWidth = 240;
