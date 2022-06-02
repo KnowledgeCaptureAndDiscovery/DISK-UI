@@ -1,4 +1,4 @@
-FROM tiangolo/node-frontend:12 as build-stage
+FROM tiangolo/node-frontend:14 as build-stage
 WORKDIR /app
 COPY package*.json /app/
 RUN npm install
