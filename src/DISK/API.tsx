@@ -87,6 +87,10 @@ export class DISKAPI {
         return await DISKAPI.delete(DISKAPI.url + "hypotheses/" + hypothesisId) as boolean;
     }
 
+    public static async queryHypothesis (hypothesisId:string) : Promise<TriggeredLineOfInquiry[]> {
+        return await DISKAPI.get(DISKAPI.url + "hypotheses/" + hypothesisId + '/query') as TriggeredLineOfInquiry[];
+    }
+
     // QUESTIONS
     //=======================
 

@@ -14,11 +14,11 @@ import { LOIPreview } from "components/LOIPreview";
 type OrderType = 'date'|'author';
 
 export const LinesOfInquiry = () => {
+    const dispatch = useAppDispatch();
     const [order, setOrder] = React.useState<OrderType>('date');
     const LOIs = useAppSelector((state:RootState) => state.lois.LOIs);
     const loading = useAppSelector((state:RootState) => state.lois.loadingAll);
     const error = useAppSelector((state:RootState) => state.lois.errorAll);
-    const dispatch = useAppDispatch();
 
     //deleting
     const [waiting, setWaiting] = React.useState<boolean>(false);;

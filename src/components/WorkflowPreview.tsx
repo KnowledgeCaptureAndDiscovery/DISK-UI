@@ -12,8 +12,8 @@ interface WorkflowPreviewProps {
 }
 
 export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} : WorkflowPreviewProps) => {
-    return <Box>
-        <Card key={`wf_${wf.workflow}`} variant="outlined">
+    return (
+        <Card key={`wf_${wf.workflow}`} variant="outlined" sx={{mb: "5px"}}>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
                 <a target="_blank" rel="noreferrer" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
                     <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />
@@ -39,5 +39,5 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 )}
             </Box>
         </Card>
-    </Box>
+    );
 }

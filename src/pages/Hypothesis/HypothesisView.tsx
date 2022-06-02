@@ -1,6 +1,5 @@
 import { Box, Button, Card, Divider, IconButton, Skeleton, Typography } from "@mui/material";
-import { DISKAPI } from "DISK/API";
-import { Hypothesis, idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
+import { idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
@@ -12,9 +11,9 @@ import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { setSelectedHypothesis, setLoadingSelected, setErrorSelected } from 'redux/hypothesis';
 import { QuestionPreview } from "components/QuestionPreview";
-import { setTLOIs, setLoadingAll, setErrorAll } from 'redux/tlois';
+import { loadTLOIs, loadHypothesis } from "redux/loader";
+import { DISKAPI } from "DISK/API";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -47,40 +46,28 @@ export const HypothesisView = () => {
 
     const [myTLOIs, setMyTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
 
-    const loadHypothesis = () => {
+    useEffect(() => {
         let id : string = location.pathname.replace(idPattern, '');
         if (!!id && !loading && !error && selectedId !== id) {
-            dispatch(setLoadingSelected(id));
-            DISKAPI.getHypothesis(id)
-                .then((hypothesis:Hypothesis) => {
-                    dispatch(setSelectedHypothesis(hypothesis));
-                })
-                .catch(() => {
-                    dispatch(setErrorSelected());
-                });
+            loadHypothesis(dispatch, id);
         }
-    }
+    }, [location, dispatch, error, loading, selectedId]);
 
-    const loadTLOIs = () => {
-        if (!TLOIloading && !TLOIerror && TLOIs.length === 0) {
-            dispatch(setLoadingAll());
-            DISKAPI.getTLOIs()
-                .then((tlois) => {
-                    dispatch(setTLOIs(tlois));
-                })
-                .catch(() => dispatch(setErrorAll()))
-        }
-    }
-
-    //useEffect(loadHypothesis);
     useEffect(() => {
-        loadHypothesis();
-        loadTLOIs();
+        if (!TLOIloading && !TLOIerror && TLOIs.length === 0)
+            loadTLOIs(dispatch);
     });
 
     useEffect(() => {
         setMyTLOIs(TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId));
-    }, [TLOIs, selectedId])
+    }, [TLOIs, selectedId]);
+
+    const queryHypothesis = () => {
+        DISKAPI.queryHypothesis(selectedId)
+            .then((tlois:TriggeredLineOfInquiry[]) => {
+                console.log(tlois);
+            });
+    };
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
         {loading ? 
@@ -121,7 +108,7 @@ export const HypothesisView = () => {
                 <TypographySubtitle sx={{mt: "10px"}}>
                     Hypothesis testing executions:
                 </TypographySubtitle>
-                <Button variant="outlined">
+                <Button variant="outlined" onClick={() => queryHypothesis()}>
                     <PlayIcon/> Test hypothesis
                 </Button>
             </Box>

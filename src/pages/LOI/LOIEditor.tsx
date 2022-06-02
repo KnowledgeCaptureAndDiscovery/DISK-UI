@@ -215,7 +215,7 @@ export const LOIEditor = () => {
         setErrorQuestion(q === null || q.id.length ===0);
         if (q!=null) {
             // Replace all sub-resources (:example) for variables (?example) for hypothesis matching.
-            setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\d]+)/g, "?$2") );
+            setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\d]+)/g, "$1?$2") );
         } else {
             setHypothesisQuery("");
         }

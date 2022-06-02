@@ -157,7 +157,7 @@ export const LOIView = () => {
                         <FormHelperText sx={{fontSize: ".9rem"}}>
                             Workflows to run: 
                         </FormHelperText>
-                        { LOI.workflows.map((wf:Workflow, i) => <Card key={`wf_${wf.workflow}-${i}`} variant="outlined">
+                        { LOI.workflows.map((wf:Workflow, i) => <Card key={`wf_${wf.workflow}-${i}`} variant="outlined" sx={{mb:"5px"}}>
                             <Box sx={{display: "flex", justifyContent: "space-between"}}>
                                 <a target="_blank" rel="noreferrer" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
                                     <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />

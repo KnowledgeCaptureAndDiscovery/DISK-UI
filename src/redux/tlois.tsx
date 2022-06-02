@@ -22,7 +22,7 @@ interface PartialTLOIsState {
 }
 
 export const tloisSlice = createSlice({
-  name: 'lois',
+  name: 'tlois',
   initialState: {
     TLOIs: [],
     loadingAll: false,
