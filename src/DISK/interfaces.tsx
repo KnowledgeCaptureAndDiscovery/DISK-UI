@@ -131,4 +131,6 @@ export interface Method {
     inputs?: MethodInput[]
 }
 
-export default {};
+const _names = {}
+
+export default _names;

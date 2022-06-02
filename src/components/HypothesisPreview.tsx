@@ -9,7 +9,7 @@ interface HypothesisPreviewProps {
     onDelete?: (h:Hypothesis) => void,
 }
 
-export const HypothesisPreview = ({hypothesis:h, onDelete:onDelete} : HypothesisPreviewProps) => {
+export const HypothesisPreview = ({hypothesis:h, onDelete} : HypothesisPreviewProps) => {
     const HypothesisToItem = (hyp:Hypothesis) => {
         return {
             path: PATH_HYPOTHESES,

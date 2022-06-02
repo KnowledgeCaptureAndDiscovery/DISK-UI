@@ -159,7 +159,7 @@ export const LOIEditor = () => {
         //TODO: fix dates and author!! server-side
         if (LOI) {
             // Edit existing hypothesis:
-            previous  = { ... LOI, };
+            previous  = { ...LOI };
             editing = true;
         }
         newLOI = {
@@ -174,7 +174,7 @@ export const LOIEditor = () => {
             workflows: workflows.map(w => {return {
                 ...w,
                 bindings: w.bindings.map(b => {return {
-                    ... b,
+                    ...b,
                     collection: undefined,
                     bindingAsArray: undefined,
                 }}),
@@ -215,7 +215,7 @@ export const LOIEditor = () => {
         setErrorQuestion(q === null || q.id.length ===0);
         if (q!=null) {
             // Replace all sub-resources (:example) for variables (?example) for hypothesis matching.
-            setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\z]+)/g, "?$2") );
+            setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\d]+)/g, "?$2") );
         } else {
             setHypothesisQuery("");
         }

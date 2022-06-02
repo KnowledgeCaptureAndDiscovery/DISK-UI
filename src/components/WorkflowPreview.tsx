@@ -1,7 +1,5 @@
-import { Box, Button, Skeleton, FormHelperText, Card, Typography, Divider, Grid, IconButton } from "@mui/material"
+import { Box, Card, Typography, Divider, Grid, IconButton } from "@mui/material"
 import { Workflow, VariableBinding } from "DISK/interfaces"
-import { WorkflowEditor } from "./WorkflowEditor"
-import EditIcon from '@mui/icons-material/Edit';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';

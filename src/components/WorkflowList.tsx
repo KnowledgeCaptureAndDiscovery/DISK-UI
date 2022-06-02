@@ -1,11 +1,9 @@
-import { Box, Button, Skeleton, FormHelperText, Card, Typography, Divider, Grid, IconButton } from "@mui/material"
-import { Workflow, VariableBinding } from "DISK/interfaces"
+import { Box, Button, FormHelperText, Card, Typography, IconButton } from "@mui/material"
+import { Workflow } from "DISK/interfaces"
 import { WorkflowEditor } from "./WorkflowEditor"
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React, { useEffect } from "react";
 import { WorkflowPreview } from "./WorkflowPreview";
 
@@ -18,7 +16,7 @@ interface WorkflowListProps {
     onChange?: (workflows:Workflow[], metaWorkflows:Workflow[]) => void;
 }
 
-export const WorkflowList = ({editable:editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options:options, onEditStateChange:sendEditChange, onChange:notifyChange} : WorkflowListProps) => {
+export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options, onEditStateChange:sendEditChange, onChange:notifyChange} : WorkflowListProps) => {
     const [addingWorkflow, setAddingWorkflow] = React.useState(false);
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);

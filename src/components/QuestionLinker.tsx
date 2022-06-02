@@ -1,10 +1,10 @@
 import { Autocomplete, Box, Card, CircularProgress, FormHelperText, MenuItem, Select, styled, TextField } from "@mui/material"
-import { Hypothesis, idPattern, Question, VariableBinding, QuestionVariable, varPattern } from "DISK/interfaces"
+import { Question, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
+import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
 
 interface QuestionLinkerProps {
     selected: string,
@@ -20,7 +20,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionLinker = ({selected:selectedId, disabled:disabled, onQuestionChange:notifyChange, error:exError=false} : QuestionLinkerProps) => {
+export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:notifyChange, error:exError=false} : QuestionLinkerProps) => {
 
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);

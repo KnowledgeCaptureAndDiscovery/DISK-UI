@@ -1,4 +1,4 @@
-import { Box, Button, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Typography } from "@mui/material";
+import { Box, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { LineOfInquiry, idPattern, VariableBinding, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
@@ -13,10 +13,8 @@ import { RootState } from "redux/store";
 import { setSelectedLOI, setLoadingSelected, setErrorSelected } from 'redux/lois';
 import { QuestionLinker } from "components/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
-import { WorkflowEditor } from "components/WorkflowEditor";
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
-import { TextFieldBlock } from "./LOIEditor";
 import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server";
 import React from "react";
 

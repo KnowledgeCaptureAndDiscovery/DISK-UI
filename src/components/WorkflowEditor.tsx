@@ -14,7 +14,7 @@ interface WorkflowEditorProps {
 }
 
 
-export const WorkflowEditor = ({options:options, workflow:workflow, onSave:notifyParent} : WorkflowEditorProps) => {
+export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : WorkflowEditorProps) => {
     const dispatch = useAppDispatch();
     const [selected, setSelected] = React.useState<Method|null>(null);
     const [selectedLabel, setSelectedLabel] = React.useState("");
@@ -109,7 +109,7 @@ export const WorkflowEditor = ({options:options, workflow:workflow, onSave:notif
         let allBindings = [ ...wf.bindings, ...wf.parameters, ...wf.optionalParameters];
         if (allBindings.length > 0) {
             setSelectedVariableValues((values) => {
-                let newValues = { ... values };
+                let newValues = { ...values };
                 allBindings.forEach(vb => {
                     newValues[vb.variable] = vb.collection ? vb.binding.substring(1).slice(0, -1) : vb.binding;
                 });
