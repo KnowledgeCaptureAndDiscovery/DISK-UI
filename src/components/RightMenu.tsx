@@ -23,10 +23,13 @@ import { useLocation } from 'react-router-dom'
 import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
 import { useKeycloak } from '@react-keycloak/web';
+import { Button } from '@mui/material';
+import Keycloak from 'keycloak-js';
+import { setToken } from 'redux/keycloak';
 
 const drawerWidth = 240;
 
@@ -155,9 +158,24 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
 export default function MiniDrawer(props: { children: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) {
   const theme = useTheme();
   const location = useLocation();
+  const dispatch = useAppDispatch();
+
   const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
   const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
-  const { keycloak } = useKeycloak();
+  const username = useAppSelector((state:RootState) => state.keycloak.username);
+  const { keycloak, initialized } = useKeycloak();
+
+  React.useEffect(() => {
+  dispatch(setToken(
+    (initialized && keycloak && keycloak.authenticated && keycloak.token && keycloak.tokenParsed) ?
+      {
+        token: keycloak.token,
+        parsedToken: keycloak.tokenParsed,
+      } : {
+        token: "",
+      }
+  ));
+  }, [keycloak, initialized]);
 
   const [open, setOpen] = React.useState(true);
 
@@ -224,14 +242,17 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           <Box sx={{height: "50px", display: "flex", alignItems: "center"}}>
             <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}}/>
             {keycloak && !keycloak.authenticated &&
-              (<button type="button" onClick={() => keycloak.login()}>
+              (<Button onClick={() => keycloak.login()}>
                 LOGIN
-              </button>)
+              </Button>)
             }
-            {keycloak && keycloak.authenticated &&
-              (<button type="button" onClick={() => keycloak.logout()}>
-                LOGOUT
-              </button>)
+            {keycloak && keycloak.authenticated && username &&
+              (<Box>
+                {username}
+                <Button onClick={() => keycloak.logout()}>
+                  LOGOUT
+                </Button>
+              </Box>)
             }
           </Box>
         </Box>

@@ -1,11 +1,9 @@
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
-//import { UserContextProvider } from 'redux/UserContext';
 import { AppRouter } from 'AppRouter';
 import { Provider } from 'react-redux';
 import { store } from 'redux/store';
 import keycloak from "./keycloak";
-// Setup Keycloak instance as needed
 
 // Theme
 const theme = createTheme({
@@ -23,37 +21,12 @@ const theme = createTheme({
   },*/
 }); 
 
-/*const eventLogger = (event: unknown, error: unknown) => {
-  console.log('onKeycloakEvent', event, error)
-}
-
-const tokenLogger = (tokens: unknown) => {
-  console.log('onKeycloakTokens', tokens)
-}*/
-
-/*
-        <ReactKeycloakProvider authClient={keycloak}
-              onEvent={eventLogger}
-              onTokens={tokenLogger}>
-        </ReactKeycloakProvider>
- */
-
 function App() {
-  const eventLogger = (e:any) => {
-    console.log("1>", e);
-  }
-
-  const tokenLogger = (e:any) => {
-    console.log("2>", e);
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Provider store={store}>
-        <ReactKeycloakProvider authClient={keycloak}
-              onEvent={eventLogger}
-              onTokens={tokenLogger}>
+        <ReactKeycloakProvider authClient={keycloak}>
           <AppRouter/>
         </ReactKeycloakProvider>
       </Provider>

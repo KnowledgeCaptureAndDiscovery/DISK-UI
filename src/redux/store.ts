@@ -1,5 +1,6 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { hypothesisSlice } from './hypothesis';
+import { keycloakSlice } from './keycloak';
 import { loisSlice } from './lois';
 import { questionSlice } from './questions';
 import { serverSlice } from './server';
@@ -15,6 +16,7 @@ export const store = configureStore({
     lois: loisSlice.reducer,
     workflows: workflowSlice.reducer,
     tlois: tloisSlice.reducer,
+    keycloak: keycloakSlice.reducer,
   },
 });
 
