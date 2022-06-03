@@ -19,6 +19,7 @@ import SettingIcon from '@mui/icons-material/Settings';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
+import { Link as MuiLink } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
@@ -29,6 +30,7 @@ import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
 import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
 import { setToken } from 'redux/keycloak';
+import { VERSION } from 'constants/config';
 
 const drawerWidth = 240;
 
@@ -253,6 +255,12 @@ export default function MiniDrawer(props: { children: string | number | boolean 
                 </Button>
               </Box>)
             }
+          </Box>
+          <Divider />
+          <Box>
+            <Typography variant="body2" color="textSecondary" align="center">
+              <MuiLink  underline="none" href={`https://github.com/mintproject/DISK-UI/releases/tag/${VERSION}`}>   {VERSION} </MuiLink>
+            </Typography>
           </Box>
         </Box>
       </Drawer>
