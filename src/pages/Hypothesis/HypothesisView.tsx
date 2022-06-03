@@ -64,7 +64,7 @@ export const HypothesisView = () => {
     useEffect(() => {
         if (!TLOIloading && !TLOIerror && TLOIs.length === 0)
             loadTLOIs(dispatch);
-    });
+    }, []);
 
     useEffect(() => {
         let map : TLOIMap = {};

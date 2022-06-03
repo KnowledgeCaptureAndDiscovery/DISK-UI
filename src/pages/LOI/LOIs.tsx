@@ -33,7 +33,7 @@ export const LinesOfInquiry = () => {
                 .then((lois:LineOfInquiry[]) => dispatch(setLOIs(lois)))
                 .catch(() => dispatch(setErrorAll()) );
         }
-    });
+    }, []);
 
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {
         let order : OrderType = event.target!.value as OrderType;

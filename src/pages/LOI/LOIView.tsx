@@ -71,7 +71,7 @@ export const LOIView = () => {
         }
     }
 
-    useEffect(loadLOI);
+    useEffect(loadLOI, []);
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
         {loading ? 

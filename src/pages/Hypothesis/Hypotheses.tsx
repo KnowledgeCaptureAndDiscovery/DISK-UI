@@ -25,7 +25,6 @@ export const Hypotheses = () => {
     const [lastDeletedName, setLastDeletedNamed] = React.useState<string>("");
     const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
 
-
     useEffect(() => {
         if (hypotheses && hypotheses.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());

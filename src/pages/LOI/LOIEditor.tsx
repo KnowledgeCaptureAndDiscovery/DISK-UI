@@ -96,7 +96,7 @@ export const LOIEditor = () => {
         }
     };
 
-    useEffect(loadEndpoints);
+    useEffect(loadEndpoints, [endpoints]);
 
     useEffect(() => {
         let match = PATH_LOI_ID_EDIT_RE.exec(location.pathname);
