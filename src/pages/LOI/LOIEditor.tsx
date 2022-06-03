@@ -214,8 +214,10 @@ export const LOIEditor = () => {
         setQuestionId(q ? q.id : "");
         setErrorQuestion(q === null || q.id.length ===0);
         if (q!=null) {
+            //TODO: removing optional parameters, this should be handled server side.
+            let noOptPattern : string = q.pattern.replace(/optional\s*\{.+\}/g, '').trim();
             // Replace all sub-resources (:example) for variables (?example) for hypothesis matching.
-            setHypothesisQuery( q.pattern.replaceAll(/([\s]|^):([\w\d]+)/g, "$1?$2") );
+            setHypothesisQuery( noOptPattern.replaceAll(/([\s]|^):([\w\d]+)/g, "$1?$2") );
         } else {
             setHypothesisQuery("");
         }

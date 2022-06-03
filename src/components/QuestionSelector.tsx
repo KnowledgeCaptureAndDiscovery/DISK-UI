@@ -156,7 +156,9 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     useEffect(() => {
         // Update pattern
         if (selectedQuestion) {
-            let pattern:string[] = selectedQuestion.pattern.split(/\s/);
+            let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
+            //let pattern:string[] = selectedQuestion.pattern.split(/\s/);
+            let pattern:string[] = noOptionalsPattern.split(/\s/);
             let newBindings: VariableBinding[] = [];
             let updatedGraph: Triple[] = [];
 
@@ -207,7 +209,15 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }, [selectedQuestion, selectedOptionValues]);
 
     const displayURI = (uri:string) => {
-        return (uri.startsWith("http") || uri.startsWith("www")) ? uri.replace(idPattern, "") : uri;
+        if (uri.startsWith("http") || uri.startsWith("www")) 
+            uri = uri.replace(idPattern, "");
+        
+        //WIKI Specific 
+        if (uri.startsWith("Property-3A"))
+            uri = uri.replace("Property-3A","").replace("-28E-29","");
+
+        uri = uri.replaceAll("_","");
+        return uri;
     }
 
     const displayObj = (obj:Triple["object"]) => {

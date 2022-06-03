@@ -73,7 +73,9 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
             })
             setNameToValue(map2);
 
-            let pattern:string[] = selectedQuestion.pattern.split(/\s/);
+            let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
+
+            let pattern:string[] = noOptionalsPattern.split(/\s/);
             let triples:string[][] = [];
             let curArr:string[] = [];
             let newBindings: VariableBinding[] = [];
@@ -81,7 +83,7 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
                 let part : string = pattern[i];
                 if (map2[part]) {
                     newBindings.push({variable: map[part], binding:map2[part], collection: false});
-                    part = "(" + map2[part] + ")";
+                    part = map2[part];
                 }
 
                 curArr.push(part);
@@ -134,6 +136,18 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
         setQuestionParts(ordered);
     }
 
+    const displayURI = (uri:string) => {
+        if (uri.startsWith("http") || uri.startsWith("www")) 
+            uri = uri.replace(idPattern, "");
+        
+        //WIKI Specific 
+        if (uri.startsWith("Property-3A"))
+            uri = uri.replace("Property-3A","").replace("-28E-29","");
+
+        uri = uri.replaceAll("_","");
+        return uri;
+    }
+
     return <Box>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis will follow this question template: </FormHelperText>
@@ -153,7 +167,7 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
                 <Table sx={{width:"unset"}}>
                     <TableBody>
                         {triplePattern.map((triple:string[], index:number) => <TableRow key={`row_${index}`}>
-                            {triple.map((res:string) => <TableCell key={`cell${index}${res}`} sx={{padding: "2px 10px"}}> {res} </TableCell>)}
+                            {triple.map((res:string) => <TableCell key={`cell${index}${res}`} sx={{padding: "2px 10px"}}> {displayURI(res)} </TableCell>)}
                         </TableRow>)}
                     </TableBody>
                 </Table>

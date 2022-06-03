@@ -1,4 +1,4 @@
-import { Box, Button, Card, Divider, IconButton, Skeleton, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, IconButton, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
@@ -7,6 +7,8 @@ import PlayIcon from '@mui/icons-material/PlayArrow';
 import ErrorIcon from '@mui/icons-material/ErrorOutline';
 import WaitIcon from '@mui/icons-material/HourglassBottom';
 import CheckIcon from '@mui/icons-material/Check';
+import SettingsIcon from '@mui/icons-material/Settings';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -31,20 +33,26 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
     fontSize: "1.2em"
 }));
 
+type TLOIMap = {[id:string]: {
+    value: TriggeredLineOfInquiry[],
+    name: string,
+}};
+
 export const HypothesisView = () => {
     const location = useLocation();
+    const dispatch = useAppDispatch();
 
     const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
     const selectedId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
     const loading = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
     const error = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
-    const dispatch = useAppDispatch();
 
     const TLOIs = useAppSelector((state:RootState) => state.tlois.TLOIs);
     const TLOIloading = useAppSelector((state:RootState) => state.tlois.loadingAll);
     const TLOIerror = useAppSelector((state:RootState) => state.tlois.errorAll);
 
-    const [myTLOIs, setMyTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
+    const [myTLOIs, setMyTLOIs] = useState<TLOIMap>({});
+    const [newTlOIs, setNewTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
 
     useEffect(() => {
         let id : string = location.pathname.replace(idPattern, '');
@@ -59,15 +67,45 @@ export const HypothesisView = () => {
     });
 
     useEffect(() => {
-        setMyTLOIs(TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId));
+        let map : TLOIMap = {};
+        TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
+            if (!map[tloi.loiId]) {
+                map[tloi.loiId] = {
+                    value: [],
+                    name: tloi.name.replace("Triggered: ",""),
+                }
+            }
+            let cur = map[tloi.loiId].value;
+            cur.push(tloi);
+        });
+        setMyTLOIs(map);
     }, [TLOIs, selectedId]);
 
     const queryHypothesis = () => {
         DISKAPI.queryHypothesis(selectedId)
             .then((tlois:TriggeredLineOfInquiry[]) => {
-                console.log(tlois);
+                setNewTLOIs(tlois);
             });
     };
+
+    const getColorStatus = (status:TriggeredLineOfInquiry["status"]) => {
+        if (status === 'FAILED')
+            return 'red';
+        if (status === 'SUCCESSFUL' || status === 'RUNNING')
+            return 'green';
+        if (status === 'QUEUED')
+            return 'yellow';
+        return 'unset';
+    }
+
+    const getIconStatus = (status:TriggeredLineOfInquiry["status"]) => {
+        if (status === 'FAILED')
+            return <ErrorIcon/>;
+        if (status === 'SUCCESSFUL')
+            return <CheckIcon/>;
+        if (status === 'QUEUED' || status === 'RUNNING')
+            return <WaitIcon/>;
+    }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
         {loading ? 
@@ -104,20 +142,15 @@ export const HypothesisView = () => {
         </Box>
 
         <Box sx={{padding:"10px"}}>
-            <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                <TypographySubtitle sx={{mt: "10px"}}>
+            <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', mb: "10px"}}>
+                <TypographySubtitle>
                     Hypothesis testing executions:
                 </TypographySubtitle>
                 <Button variant="outlined" onClick={() => queryHypothesis()}>
                     <PlayIcon/> Test hypothesis
                 </Button>
             </Box>
-            {TLOIloading ? 
-                <Skeleton/>
-                : (myTLOIs.length === 0 ? <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
-                    No executions
-                </Card>
-                :   myTLOIs.map((tloi:TriggeredLineOfInquiry) => 
+            {newTlOIs.map((tloi:TriggeredLineOfInquiry) => 
                 <Card variant="outlined" key={tloi.id} sx={{marginBottom: "5px", padding: "2px 10px"}}>
                     <Box sx={{display:"flex"}}>
                         {tloi.status === 'FAILED' ? 
@@ -129,6 +162,64 @@ export const HypothesisView = () => {
                             {tloi.name}
                         </Box>
                     </Box>
+                </Card>
+            )}
+            {TLOIloading ? 
+                <Skeleton/>
+                : (Object.keys(myTLOIs).length === 0 ? <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
+                    No executions
+                </Card>
+                :   Object.keys(myTLOIs).map((loiId:string) => 
+                <Card variant="outlined" key={loiId} sx={{marginBottom: "5px", padding: "2px 10px"}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent:"space-between"}}>
+                        <Box sx={{display: 'flex', alignItems: 'center'}}>
+                            <SettingsIcon sx={{color: "green", mr: "5px"}}/>
+                            <b>{myTLOIs[loiId].name}</b>
+                        </Box>
+                        <Box>{myTLOIs[loiId].value.length} runs</Box>
+                    </Box>
+                    <Divider/>
+                    <TableContainer sx={{display: "flex", justifyContent: "center"}}>
+                        <Table sx={{width:"unset"}}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{padding: "0 10px"}}> # </TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Status</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Inputs</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Outputs</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>p-value</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {myTLOIs[loiId].value.map((tloi, index) => <TableRow key={tloi.id}>
+                                    <TableCell sx={{padding: "0 10px"}}>{index+1}</TableCell>
+                                    <TableCell sx={{padding: "0 10px", color: getColorStatus(tloi.status)}}>
+                                        <Box sx={{display:'flex', alignItems:'center'}}>
+                                            {getIconStatus(tloi.status)}
+                                            <Box sx={{marginLeft: '6px'}}>
+                                                {tloi.status}
+                                            </Box>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>
+                                        {tloi.inputFiles.length}
+                                    </TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>
+                                        {tloi.status !== 'SUCCESSFUL' ? "" : tloi.outputFiles.length}
+                                    </TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>
+                                        {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue}
+                                    </TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>
+                                        <Box sx={{display:'flex', alignItems:'center'}}>
+                                            <DeleteIcon/>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>)}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Card>))
             }
         </Box>
