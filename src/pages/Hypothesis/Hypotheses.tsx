@@ -27,7 +27,7 @@ export const Hypotheses = () => {
 
 
     useEffect(() => {
-        if (hypotheses.length === 0 && !loading && !error) {
+        if (hypotheses && hypotheses.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());
             DISKAPI.getHypotheses()
                 .then((hypotheses:Hypothesis[]) => {
@@ -37,7 +37,8 @@ export const Hypotheses = () => {
                     dispatch(setErrorAll());
                 });
         }
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {
         let order : OrderType = event.target!.value as OrderType;
