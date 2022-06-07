@@ -1,4 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis } from "DISK/interfaces";
 import React, { useEffect } from "react";
@@ -25,6 +25,9 @@ export const Hypotheses = () => {
     const [lastDeletedName, setLastDeletedNamed] = React.useState<string>("");
     const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
 
+    const [confirmDialogOpen, setConfirmDialogOpen] = React.useState<boolean>(false);
+    const [hypothesisToDelete, setHypothesisToDelete] = React.useState<Hypothesis|null>(null);
+
     useEffect(() => {
         if (hypotheses && hypotheses.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());
@@ -44,25 +47,30 @@ export const Hypotheses = () => {
         if (order) setOrder(order);
     }
 
-    const deleteHypothesis = (hypothesis:Hypothesis) => {
-        console.log("DELETING: ", hypothesis.id);
+    const onDeleteConfirmed = () => {
+        if (hypothesisToDelete === null) return;
+        
+        console.log("DELETING: ", hypothesisToDelete.id);
         setWaiting(true);
-        setLastDeletedNamed(hypothesis.name);
-        DISKAPI.deleteHypothesis(hypothesis.id)
+        setLastDeletedNamed(hypothesisToDelete.name);
+        DISKAPI.deleteHypothesis(hypothesisToDelete.id)
             .then((b:boolean) => {
                 if (b) {
-                    dispatch(remove(hypothesis.id));
+                    dispatch(remove(hypothesisToDelete.id));
                     setDeleteNotification(true);
                 } else {
                     setErrorNotification(true);
                 }
-                setWaiting(false);
             })
             .catch((e) => {
                 setErrorNotification(true);
                 console.warn(e);
-                setWaiting(false);
             })
+            .finally(() => {
+                setWaiting(false);
+            });
+        setHypothesisToDelete(null);
+        setConfirmDialogOpen(false);
     }
 
     const handleDeleteNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -90,6 +98,26 @@ export const Hypotheses = () => {
                 </Alert>
             </Snackbar>
 
+            <Dialog open={confirmDialogOpen}>
+                <DialogTitle id="alert-hyp-delete-title">
+                    {"Delete this Hypothesis?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-hyp-delete-description">
+                        Are you sure you want to delete the hypothesis "{hypothesisToDelete?.name}"?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setConfirmDialogOpen(false);
+                        setHypothesisToDelete(null);
+                    }}>Cancel</Button>
+                    <Button color="error" autoFocus onClick={onDeleteConfirmed}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Box sx={{display:'flex', paddingBottom: "5px"}}>
                 <TextField id="input-text-search" label="Search hypotheses" variant="outlined" size="small" 
                     sx={{width:'100%', paddingRight:'5px'}} InputProps={{
@@ -110,7 +138,10 @@ export const Hypotheses = () => {
                     (error ? 
                         <Box> Error loading Hypotheses </Box>
                     :
-                        hypotheses.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => deleteHypothesis(h)}/>)
+                        hypotheses.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => {
+                            setHypothesisToDelete(h);
+                            setConfirmDialogOpen(true);
+                        }}/>)
                     )
                 }
             </Card>

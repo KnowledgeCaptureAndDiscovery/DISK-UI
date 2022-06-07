@@ -1,15 +1,16 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField } from "@mui/material";
 import { PATH_LOI_NEW } from "constants/routes";
 import { DISKAPI } from "DISK/API";
 import { LineOfInquiry } from "DISK/interfaces";
 import React, { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "redux/hooks";
-import { setLOIs, setLoadingAll, setErrorAll, remove } from "redux/lois";
+import { remove } from "redux/lois";
 import { RootState } from "redux/store";
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router-dom";
 import { LOIPreview } from "components/LOIPreview";
+import { loadLOIs } from "redux/loader";
 
 type OrderType = 'date'|'author';
 
@@ -26,39 +27,44 @@ export const LinesOfInquiry = () => {
     const [lastDeletedName, setLastDeletedNamed] = React.useState<string>("");
     const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
 
+    const [confirmDialogOpen, setConfirmDialogOpen] = React.useState<boolean>(false);
+    const [LOIToDelete, setLOIToDelete] = React.useState<LineOfInquiry|null>(null);
+
     useEffect(() => {
         if (LOIs.length === 0 && !loading && !error) {
-            dispatch(setLoadingAll());
-            DISKAPI.getLOIs()
-                .then((lois:LineOfInquiry[]) => dispatch(setLOIs(lois)))
-                .catch(() => dispatch(setErrorAll()) );
+            loadLOIs(dispatch);
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {
         let order : OrderType = event.target!.value as OrderType;
         if (order) setOrder(order);
     }
 
-    const deleteLOI = (loi:LineOfInquiry) => {
-        console.log("DELETING: ", loi.id);
+    const onDeleteConfirmed = () => {
+        if (LOIToDelete === null) return;
+        const loiId : string = LOIToDelete.id;
+        console.log("DELETING: ", loiId);
         setWaiting(true);
-        setLastDeletedNamed(loi.name);
-        DISKAPI.deleteLOI(loi.id)
+        setLastDeletedNamed(LOIToDelete.name);
+        DISKAPI.deleteLOI(loiId)
             .then((b:boolean) => {
                 if (b) {
-                    dispatch(remove(loi.id));
+                    dispatch(remove(loiId));
                     setDeleteNotification(true);
                 } else {
                     setErrorNotification(true);
                 }
-                setWaiting(false);
             })
             .catch((e) => {
                 setErrorNotification(true);
                 console.warn(e);
-                setWaiting(false);
             })
+            .finally(() => {
+                setWaiting(false);
+            });
+        setLOIToDelete(null);
+        setConfirmDialogOpen(false);
     }
 
     const handleDeleteNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -87,6 +93,26 @@ export const LinesOfInquiry = () => {
                 </Alert>
             </Snackbar>
 
+            <Dialog open={confirmDialogOpen}>
+                <DialogTitle id="alert-loi-delete-title">
+                    {"Delete this Line of Inquiry?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-loi-delete-description">
+                        Are you sure you want to delete the Line of Inquiry "{LOIToDelete?.name}"?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setConfirmDialogOpen(false);
+                        setLOIToDelete(null);
+                    }}>Cancel</Button>
+                    <Button color="error" autoFocus onClick={onDeleteConfirmed}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Box sx={{display:'flex', paddingBottom: "5px"}}>
                 <TextField id="input-text-search" label="Search lines of inquiry" variant="outlined" size="small" 
                     sx={{width:'100%', paddingRight:'5px'}} InputProps={{
@@ -107,7 +133,10 @@ export const LinesOfInquiry = () => {
                     (error ? 
                         <Box> Error loading Lines of Inquiry </Box>
                     :
-                        LOIs.map((loi:LineOfInquiry) => <LOIPreview key={loi.id} LOI={loi} onDelete={deleteLOI}/>)
+                        LOIs.map((loi:LineOfInquiry) => <LOIPreview key={loi.id} LOI={loi} onDelete={() => {
+                            setConfirmDialogOpen(true);
+                            setLOIToDelete(loi);
+                        }}/>)
                     )
                 }
             </Card>

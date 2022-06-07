@@ -52,11 +52,11 @@ export const PreviewItem = ({item, icon, onDelete} : PreviewItemProps) => {
         </Box>
         <Box sx={{display: "inline-flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "0 10px", fontSize: "0.85rem"}}>
             <Box>
-                <b>Date {item.dateModified ? "modified:" : "created:"}</b>
+                <b>Date {item.dateModified ? "modified: " : "created: "}</b>
                 {item.dateModified ? item.dateModified : item.dateCreated}
             </Box>
             <Box>
-                <b>Author:</b>
+                <b>Author: </b>
                 {item.author}
             </Box>
         </Box>

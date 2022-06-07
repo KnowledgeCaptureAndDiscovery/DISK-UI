@@ -78,7 +78,7 @@ export const HypothesisEditor = () => {
             dispatch(setSelectedHypothesis(null));
             clearForm();
         }
-    }, [location]);
+    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const loadForm = (hypothesis:Hypothesis) => {
         setName(hypothesis.name);

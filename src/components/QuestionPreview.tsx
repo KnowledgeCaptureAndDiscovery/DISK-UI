@@ -57,7 +57,7 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
 
     React.useEffect(() => {
         setFromQuestionList(questions, selectedId);
-    }, [selectedId])
+    }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     React.useEffect(() => {
         if (selectedQuestion && bindings.length > 0) {

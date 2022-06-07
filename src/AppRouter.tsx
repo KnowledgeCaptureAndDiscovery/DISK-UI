@@ -1,5 +1,5 @@
 import RightMenu from "components/RightMenu";
-import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW } from "constants/routes";
+import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_TLOI_ID } from "constants/routes";
 import { Home } from "pages/Home";
 import { Hypotheses } from "pages/Hypothesis/Hypotheses";
 import { HypothesisEditor } from "pages/Hypothesis/HypothesisEditor";
@@ -7,6 +7,7 @@ import { HypothesisView } from "pages/Hypothesis/HypothesisView";
 import { LOIEditor } from "pages/LOI/LOIEditor";
 import { LinesOfInquiry } from "pages/LOI/LOIs";
 import { LOIView } from "pages/LOI/LOIView";
+import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 export const AppRouter = () => {
@@ -26,6 +27,8 @@ export const AppRouter = () => {
           <Route path={PATH_LOI_NEW} element={<LOIEditor/>}></Route>
           <Route path={PATH_LOI_ID} element={<LOIView/>}></Route>
           <Route path={PATH_LOI_ID_EDIT} element={<LOIEditor/>}></Route>
+
+          <Route path={PATH_TLOI_ID} element={<TLOIView/>}></Route>
         </Routes>
       </RightMenu>
     </BrowserRouter>

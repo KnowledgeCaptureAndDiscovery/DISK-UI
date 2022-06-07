@@ -176,7 +176,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         token: "",
       }
   ));
-  }, [keycloak, initialized]);
+  }, [keycloak, initialized]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [open, setOpen] = React.useState(true);
 

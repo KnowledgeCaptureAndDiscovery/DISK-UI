@@ -1,6 +1,5 @@
-import { Box, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Typography } from "@mui/material";
-import { DISKAPI } from "DISK/API";
-import { LineOfInquiry, idPattern, VariableBinding, Workflow } from "DISK/interfaces";
+import { Box, Card, Divider, FormHelperText, Grid, IconButton, Skeleton, Typography } from "@mui/material";
+import { idPattern, VariableBinding, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
@@ -10,13 +9,10 @@ import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { setSelectedLOI, setLoadingSelected, setErrorSelected } from 'redux/lois';
-import { QuestionLinker } from "components/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
-import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server";
-import React from "react";
+import { loadTLOI } from "redux/loader";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -34,44 +30,21 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
     fontSize: "1.2em"
 }));
 
-export const LOIView = () => {
+export const TLOIView = () => {
     const location = useLocation();
-
-    const LOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
-    const selectedId = useAppSelector((state:RootState) => state.lois.selectedId);
-    const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
-    const error = useAppSelector((state:RootState) => state.lois.errorSelected);
     const dispatch = useAppDispatch();
 
-    const endpoints = useAppSelector((state:RootState) => state.server.endpoints);
-    const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
-    const errorEndpoints = useAppSelector((state:RootState) => state.server.errorEndpoints);
-    const [selectedDataSource, setSelectedDataSource] = React.useState("");
+    const TLOI = useAppSelector((state:RootState) => state.tlois.selectedTLOI);
+    const selectedId = useAppSelector((state:RootState) => state.tlois.selectedId);
+    const loading = useAppSelector((state:RootState) => state.tlois.loadingSelected);
+    const error = useAppSelector((state:RootState) => state.tlois.errorSelected);
 
-    const loadLOI = () => {
+    useEffect(() => {
         let id : string = location.pathname.replace(idPattern, '');
         if (!!id && !loading && !error && selectedId !== id) {
-            dispatch(setLoadingSelected(id));
-            DISKAPI.getLOI(id)
-                .then((LOI:LineOfInquiry) => {
-                    dispatch(setSelectedLOI(LOI));
-                        setSelectedDataSource(LOI.dataSource)
-                })
-                .catch(() => {
-                    dispatch(setErrorSelected());
-                });
+            loadTLOI(dispatch, id);
         }
-        if (endpoints == null && !loadingEndpoints && !errorEndpoints) {
-            dispatch(setLoadingEndpoints());
-            DISKAPI.getEndpoints()
-                .then((endpointMap:{[name:string]: string}) => {
-                    dispatch(setEndpoint(endpointMap))
-                })
-                .catch(() => dispatch(setErrorEndpoint()));
-        }
-    }
-
-    useEffect(loadLOI, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [location, dispatch, error, loading, selectedId]);
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
         {loading ? 
@@ -79,9 +52,9 @@ export const LOIView = () => {
         :
             <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
                 <Typography variant="h5">
-                    {error ? "Error loading LOI" : LOI?.name}
+                    {error ? "Error loading LOI" : TLOI?.name}
                 </Typography>
-                <IconButton component={Link} to={PATH_LOIS + "/" + LOI?.id + "/edit"}>
+                <IconButton component={Link} to={PATH_LOIS + "/" + TLOI?.id + "/edit"}>
                     <EditIcon />
                 </IconButton>
             </Box>
@@ -91,41 +64,24 @@ export const LOIView = () => {
             <Box>
                 <TypographyLabel>Description: </TypographyLabel>
                 <TypographyInline>
-                    {!loading && !!LOI ? LOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
+                    {!loading && !!TLOI ? TLOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
                 </TypographyInline>
             </Box>
-            {!!LOI && LOI.notes ? <Box>
+            {!!TLOI && TLOI.notes ? <Box>
                 <TypographyLabel>Notes: </TypographyLabel>
-                <TypographyInline>{LOI.notes}</TypographyInline>
+                <TypographyInline>{TLOI.notes}</TypographyInline>
             </Box> : ""}
 
-        </Box>
-        <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} disabled={true}/>
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data extraction:</TypographySubtitle>
-            <Box sx={{display: "inline-flex", alignItems: "center"}}>
-                <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
-                <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard" value={selectedDataSource} label={"Data source:"} disabled>
-                    {loadingEndpoints ? 
-                        <MenuItem value={selectedDataSource}> Loading ... </MenuItem> 
-                    : (
-                        endpoints ? 
-                            Object.keys(endpoints).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints[name]}>{name}</MenuItem>)
-                        :
-                            <MenuItem value={selectedDataSource}>{selectedDataSource}</MenuItem>
-                    )}
-                </Select>
-            </Box>
+            <TypographySubtitle>Data query:</TypographySubtitle>
             <Box sx={{fontSize: "0.94rem"}} >
-                <CodeMirror value={!!LOI? LOI.dataQuery : ""}
+                <CodeMirror value={!!TLOI? TLOI.dataQuery : ""}
                     extensions={[StreamLanguage.define(sparql)]}
                     onChange={(value, viewUpdate) => {
-                    console.log('value:', value);
+                        console.log('value:', value);
                     }}
                 />
             </Box>
@@ -136,13 +92,13 @@ export const LOIView = () => {
                 <Box>
                     <TypographyLabel>Description for the metadata table: </TypographyLabel>
                     <TypographyInline>
-                        {!loading && !!LOI ? LOI.explanation : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
+                        {!loading && !!TLOI ? TLOI.explanation : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
                     </TypographyInline>
                 </Box>
                 <Box>
                     <TypographyLabel>Variables to show on table: </TypographyLabel>
                     <TypographyInline>
-                        {!loading && !!LOI ? LOI.relevantVariables : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
+                        {!loading && !!TLOI ? TLOI.relevantVariables : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
                     </TypographyInline>
                 </Box>
             </Box>
@@ -152,12 +108,12 @@ export const LOIView = () => {
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
             <Box>
-                {loading ? <Skeleton/> : (LOI && LOI.workflows && LOI.workflows.length > 0 ? 
+                {loading ? <Skeleton/> : (TLOI && TLOI.workflows && TLOI.workflows.length > 0 ? 
                     <Box>
                         <FormHelperText sx={{fontSize: ".9rem"}}>
                             Workflows to run: 
                         </FormHelperText>
-                        { LOI.workflows.map((wf:Workflow, i) => <Card key={`wf_${wf.workflow}-${i}`} variant="outlined" sx={{mb:"5px"}}>
+                        { TLOI.workflows.map((wf:Workflow, i) => <Card key={`wf_${wf.workflow}-${i}`} variant="outlined" sx={{mb:"5px"}}>
                             <Box sx={{display: "flex", justifyContent: "space-between"}}>
                                 <a target="_blank" rel="noreferrer" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
                                     <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />

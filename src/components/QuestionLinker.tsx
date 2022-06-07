@@ -59,7 +59,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
             else
                 console.warn("Selected question not found on question catalog")
         }
-    }, [selectedId])
+    }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const onQuestionChange = (value: Question | null) => {
         if (value) {

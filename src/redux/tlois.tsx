@@ -86,8 +86,23 @@ export const tloisSlice = createSlice({
         errorSelected : true,
       };
       return { ...state, ...newState };
-    }
+    },
+    remove: (state:TLOIsState, action:PayloadAction<string>) => {
+      let newTLOIArr : TriggeredLineOfInquiry[] = [];
+      state.TLOIs.forEach((tloi:TriggeredLineOfInquiry) => {
+        if (tloi.id !== action.payload) newTLOIArr.push(tloi);
+      });
+      return { ...state, TLOIs: newTLOIArr, selectedId: ""};
+    },
+    add: (state:TLOIsState, action:PayloadAction<TriggeredLineOfInquiry>) => {
+      let newTLOIArr : TriggeredLineOfInquiry[] = [];
+      state.TLOIs.forEach((tloi:TriggeredLineOfInquiry) => {
+        if (tloi.id !== action.payload.id) newTLOIArr.push(tloi);
+      });
+      newTLOIArr.push(action.payload);
+      return { ...state, TLOIs: newTLOIArr, selectedId: ""};
+    },
   },
 });
 
-export const { setTLOIs, setLoadingAll, setErrorAll, setSelectedTLOI, setLoadingSelected, setErrorSelected } = tloisSlice.actions;
+export const { setTLOIs, setLoadingAll, setErrorAll, setSelectedTLOI, setLoadingSelected, setErrorSelected, remove, add } = tloisSlice.actions;

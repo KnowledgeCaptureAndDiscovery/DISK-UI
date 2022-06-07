@@ -65,7 +65,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             else
                 console.warn("Selected question not found on question catalog")
         }
-    }, [selectedQuestionId]);
+    }, [selectedQuestionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     React.useEffect(() => {
         if (questionBindings.length > 0) {
@@ -80,8 +80,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 }
             });
         }
-
-    }, [questionBindings]);
+    }, [questionBindings]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const onQuestionChange = (value: Question | null) => {
         if (value) {
@@ -206,7 +205,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             setTriplePattern(updatedGraph);
             sendQuestionChange(selectedQuestion.id, newBindings, updatedGraph);
         }
-    }, [selectedQuestion, selectedOptionValues]);
+    }, [selectedQuestion, selectedOptionValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const displayURI = (uri:string) => {
         if (uri.startsWith("http") || uri.startsWith("www")) 

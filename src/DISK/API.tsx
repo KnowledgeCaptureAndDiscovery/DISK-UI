@@ -136,6 +136,13 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "tlois/" + id) as TriggeredLineOfInquiry;
     }
 
+    public static async deleteTLOI (id:string) : Promise<boolean> {
+        return await DISKAPI.delete(DISKAPI.url + "tlois/" + id) as boolean;
+    }
+
+    // OTHER STUFF
+    //=======================
+
     public static async getEndpoints () : Promise<{[name:string] : string }> {
         return await DISKAPI.get(DISKAPI.url + "server/endpoints") as {[name:string] : string };
     }

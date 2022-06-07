@@ -13,3 +13,6 @@ export const PATH_LOI_ID = '/lois/:loiId';
 export const PATH_LOI_ID_RE = new RegExp(/\/lois\/([\w-]{8,36})$/);
 export const PATH_LOI_ID_EDIT = '/lois/:loiId/edit';
 export const PATH_LOI_ID_EDIT_RE = new RegExp(/\/lois\/([\w-]{8,36})\/edit$/);
+
+export const PATH_TLOIS = '/tlois';
+export const PATH_TLOI_ID = '/tlois/:tloiId';

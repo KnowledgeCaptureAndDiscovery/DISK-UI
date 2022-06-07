@@ -130,7 +130,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
             loadForm(workflow)
         else
             clearForm();
-    }, [workflow]);
+    }, [workflow]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const clearForm = () => {
         onWorkflowChange(null);

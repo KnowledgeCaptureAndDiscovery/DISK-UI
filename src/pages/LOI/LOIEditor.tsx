@@ -96,7 +96,7 @@ export const LOIEditor = () => {
         }
     };
 
-    useEffect(loadEndpoints, [endpoints]);
+    useEffect(loadEndpoints, [endpoints]);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         let match = PATH_LOI_ID_EDIT_RE.exec(location.pathname);
@@ -117,7 +117,7 @@ export const LOIEditor = () => {
             dispatch(setSelectedLOI(null));
             clearForm();
         }
-    }, [location]);
+    }, [location]);// eslint-disable-line react-hooks/exhaustive-deps
 
     const loadForm = (loi:LineOfInquiry) => {
         setName(loi.name);
