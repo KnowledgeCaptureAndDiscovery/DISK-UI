@@ -259,7 +259,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           <Divider />
           <Box>
             <Typography variant="body2" color="textSecondary" align="center">
-              <MuiLink  underline="none" href={`https://github.com/mintproject/DISK-UI/releases/tag/${VERSION}`}>   {VERSION} </MuiLink>
+              <MuiLink  underline="none" href={`https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/releases`}>   v{VERSION} </MuiLink>
             </Typography>
           </Box>
         </Box>
