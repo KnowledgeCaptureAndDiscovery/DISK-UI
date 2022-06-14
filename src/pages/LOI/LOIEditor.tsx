@@ -18,6 +18,7 @@ import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
 import { WorkflowList } from "components/WorkflowList";
 import { LineOfInquiryRequest } from "DISK/requests";
+import { QueryTester } from "components/QueryTester";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -156,7 +157,6 @@ export const LOIEditor = () => {
         let newLOI : LineOfInquiry | LineOfInquiryRequest;
         let previous : any = {};
         let editing : boolean = false;
-        //TODO: fix dates and author!! server-side
         if (LOI) {
             // Edit existing hypothesis:
             previous  = { ...LOI };
@@ -280,16 +280,19 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data extraction:</TypographySubtitle>
-            <Box sx={{display: "inline-flex", alignItems: "center"}}>
-                <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
-                {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/>
-                    :
-                    <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
-                            error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
-                        <MenuItem value="" disabled> None </MenuItem>
-                        { Object.keys(endpoints || []).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints![name]}>{name}</MenuItem>) }
-                    </Select>
-                }
+            <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                <Box sx={{display: "inline-flex", alignItems: "center"}}>
+                    <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
+                    {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/>
+                        :
+                        <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
+                                error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
+                            <MenuItem value="" disabled> None </MenuItem>
+                            { Object.keys(endpoints || []).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints![name]}>{name}</MenuItem>) }
+                        </Select>
+                    }
+                </Box>
+                <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
             <Box sx={{fontSize: "0.94rem"}} >
                 <Card variant="outlined" sx={{

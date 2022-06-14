@@ -159,4 +159,12 @@ export class DISKAPI {
         }})
         return inputs;
     }
+
+    public static async testQuery (dataSource:string, query:string, variables:string[]) : Promise<{[varName:string] : string[]}> {
+        return await DISKAPI.get(DISKAPI.url + "externalQuery?" + new URLSearchParams({
+            endpoint: dataSource,
+            query: query,
+            variables: variables.length === 0 ? "*" : variables.join(",")
+        })) as {[varName:string] : string[]};
+    }
 }

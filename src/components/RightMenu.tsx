@@ -14,12 +14,14 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
 import MenuIcon from '@mui/icons-material/Menu';
+import LogoutIcon from '@mui/icons-material/Logout';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingIcon from '@mui/icons-material/Settings';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
-import { Link as MuiLink } from '@mui/material';
+import { Link as MuiLink, Menu, MenuItem } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
@@ -161,10 +163,20 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const location = useLocation();
   const dispatch = useAppDispatch();
 
+  const { keycloak, initialized } = useKeycloak();
   const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
   const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
   const username = useAppSelector((state:RootState) => state.keycloak.username);
-  const { keycloak, initialized } = useKeycloak();
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const logoutDialogOpen = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   React.useEffect(() => {
   dispatch(setToken(
@@ -241,7 +253,9 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         <Box sx={{height: "100%", display:"flex", justifyContent: "end", flexDirection: "column"}}>
           <Divider />
           <Box sx={{height: "50px", display: "flex", alignItems: "center"}}>
-            <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}}/>
+            <Box onClick={open ? undefined : (e) => keycloak && keycloak.authenticated ? setAnchorEl(e.currentTarget) : (keycloak ? keycloak.login() : undefined)}>
+              <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}} color={keycloak && keycloak.authenticated ? 'success' : 'info'}/>
+            </Box>
             {keycloak && !keycloak.authenticated &&
               (<Button onClick={() => keycloak.login()}>
                 LOGIN
@@ -249,17 +263,23 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             }
             {keycloak && keycloak.authenticated && username &&
               (<Box>
-                {username}
-                <Button onClick={() => keycloak.logout()}>
-                  LOGOUT
+                <Button onClick={(e) =>  setAnchorEl(e.currentTarget)  } endIcon={<KeyboardArrowDownIcon/>}>
+                  {username}
                 </Button>
               </Box>)
             }
+            <Menu open={logoutDialogOpen} anchorEl={anchorEl} onClose={() => setAnchorEl(null)} >
+              <MenuItem disableRipple>
+                <Button onClick={() => keycloak.logout()}>
+                  <LogoutIcon/> LOGOUT
+                </Button>
+              </MenuItem>
+            </Menu>
           </Box>
           <Divider />
           <Box>
             <Typography variant="body2" color="textSecondary" align="center">
-              <MuiLink  underline="none" href={`https://github.com/mintproject/DISK-UI/releases/tag/${VERSION}`}>   {VERSION} </MuiLink>
+              <MuiLink  underline="none" href={`https://github.com/mintproject/DISK-UI/releases/tag/${VERSION}`}>   v{VERSION} </MuiLink>
             </Typography>
           </Box>
         </Box>
