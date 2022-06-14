@@ -1,6 +1,6 @@
 {
   "name": "disk-ui",
-  "version": "0.1.0",
+  "version": "3.0.0",
   "private": true,
   "dependencies": {
     "@codemirror/legacy-modes": "^0.20.0",
