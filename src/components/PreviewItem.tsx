@@ -3,6 +3,8 @@ import { Box, Card, Divider, IconButton, styled, Typography } from "@mui/materia
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from "react-router-dom";
+import { useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
 
 export interface PreviewInfo {
     path: string,
@@ -32,6 +34,8 @@ const TwoLines = styled(Typography)(({ theme }) => ({
 }));
 
 export const PreviewItem = ({item, icon, onDelete} : PreviewItemProps) => {
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+
     return <Card variant="outlined" sx={{margin: "10px", height: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
             <Box component={Link} to={item.path + "/" + item.id}
@@ -40,10 +44,10 @@ export const PreviewItem = ({item, icon, onDelete} : PreviewItemProps) => {
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{item.name}</Typography>
             </Box>
             <Box>
-                <IconButton component={Link} to={item.path + "/" + item.id + "/edit"} sx={{padding: "4px"}}>
+                <IconButton component={Link} to={item.path + "/" + item.id + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
                     <EditIcon/>
                 </IconButton>
-                {onDelete ? <IconButton onClick={() => onDelete()} sx={{padding: "4px"}}><DeleteIcon/></IconButton> : ""}
+                {onDelete ? <IconButton onClick={() => onDelete()} sx={{padding: "4px"}} disabled={!authenticated}><DeleteIcon/></IconButton> : ""}
             </Box>
         </Box>
         <Divider/>

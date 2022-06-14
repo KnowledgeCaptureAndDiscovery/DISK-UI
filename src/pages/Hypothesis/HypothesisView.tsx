@@ -51,6 +51,7 @@ export const HypothesisView = () => {
     const TLOIs = useAppSelector((state:RootState) => state.tlois.TLOIs);
     const TLOIloading = useAppSelector((state:RootState) => state.tlois.loadingAll);
     const TLOIerror = useAppSelector((state:RootState) => state.tlois.errorAll);
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     const [myTLOIs, setMyTLOIs] = useState<TLOIMap>({});
     const [newTlOIs, setNewTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
@@ -208,8 +209,6 @@ export const HypothesisView = () => {
             </DialogActions>
       </Dialog>
 
-
-
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
@@ -217,9 +216,11 @@ export const HypothesisView = () => {
                 <Typography variant="h5">
                     {error ? "Error loading hypothesis" : hypothesis?.name}
                 </Typography>
+                {authenticated ? 
                 <IconButton component={Link} to={PATH_HYPOTHESES + "/" + hypothesis?.id + "/edit"}>
                     <EditIcon />
                 </IconButton>
+                : null }
             </Box>
         }
         <Divider/>

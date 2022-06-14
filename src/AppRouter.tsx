@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import RightMenu from "components/RightMenu";
 import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_TLOI_ID } from "constants/routes";
 import { Home } from "pages/Home";
@@ -9,9 +10,18 @@ import { LinesOfInquiry } from "pages/LOI/LOIs";
 import { LOIView } from "pages/LOI/LOIView";
 import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
+
+const notAuthMsg = () => {
+  return (<Box sx={{display: 'flex', width: "100%", alignItems: 'center', justifyContent: 'center', height: "75vh", fontSize: "1.2em", color: "#777"}}>
+    Unauthorized. You must log in to see this page.
+  </Box>)
+}
 
 export const AppRouter = () => {
-  //const { initialized } = useKeycloak();
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+
   return (
     <BrowserRouter>
       <RightMenu>
@@ -20,13 +30,13 @@ export const AppRouter = () => {
           <Route path={PATH_HYPOTHESES} element={<Hypotheses/>}></Route>
           <Route path={PATH_LOIS} element={<LinesOfInquiry/>}></Route>
 
-          <Route path={PATH_HYPOTHESIS_NEW} element={<HypothesisEditor/>}></Route>
+          <Route path={PATH_HYPOTHESIS_NEW} element={authenticated ? <HypothesisEditor/> : notAuthMsg() }></Route>
           <Route path={PATH_HYPOTHESIS_ID} element={<HypothesisView/>}></Route>
-          <Route path={PATH_HYPOTHESIS_ID_EDIT} element={<HypothesisEditor/>}></Route>
+          <Route path={PATH_HYPOTHESIS_ID_EDIT} element={authenticated ? <HypothesisEditor/> : notAuthMsg()}></Route>
 
-          <Route path={PATH_LOI_NEW} element={<LOIEditor/>}></Route>
+          <Route path={PATH_LOI_NEW} element={authenticated ? <LOIEditor/> : notAuthMsg() }></Route>
           <Route path={PATH_LOI_ID} element={<LOIView/>}></Route>
-          <Route path={PATH_LOI_ID_EDIT} element={<LOIEditor/>}></Route>
+          <Route path={PATH_LOI_ID_EDIT} element={authenticated ? <LOIEditor/> : notAuthMsg() }></Route>
 
           <Route path={PATH_TLOI_ID} element={<TLOIView/>}></Route>
         </Routes>

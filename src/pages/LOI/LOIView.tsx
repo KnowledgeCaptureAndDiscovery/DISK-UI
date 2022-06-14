@@ -47,6 +47,7 @@ export const LOIView = () => {
     const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
     const errorEndpoints = useAppSelector((state:RootState) => state.server.errorEndpoints);
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     const loadLOI = () => {
         let id : string = location.pathname.replace(idPattern, '');
@@ -81,9 +82,10 @@ export const LOIView = () => {
                 <Typography variant="h5">
                     {error ? "Error loading LOI" : LOI?.name}
                 </Typography>
+                {authenticated ? 
                 <IconButton component={Link} to={PATH_LOIS + "/" + LOI?.id + "/edit"}>
                     <EditIcon />
-                </IconButton>
+                </IconButton> : null}
             </Box>
         }
         <Divider/>

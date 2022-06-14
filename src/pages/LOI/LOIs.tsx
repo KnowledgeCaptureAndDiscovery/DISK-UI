@@ -29,6 +29,7 @@ export const LinesOfInquiry = () => {
 
     const [confirmDialogOpen, setConfirmDialogOpen] = React.useState<boolean>(false);
     const [LOIToDelete, setLOIToDelete] = React.useState<LineOfInquiry|null>(null);
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     useEffect(() => {
         if (LOIs.length === 0 && !loading && !error) {
@@ -122,7 +123,7 @@ export const LinesOfInquiry = () => {
                     <MenuItem value={'date'}>Date</MenuItem>
                     <MenuItem value={'author'}>Author</MenuItem>
                 </Select>
-                <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_LOI_NEW}>
+                <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_LOI_NEW} disabled={!authenticated}>
                     <AddIcon/>
                 </Button>
             </Box>

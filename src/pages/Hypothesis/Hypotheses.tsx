@@ -27,6 +27,7 @@ export const Hypotheses = () => {
 
     const [confirmDialogOpen, setConfirmDialogOpen] = React.useState<boolean>(false);
     const [hypothesisToDelete, setHypothesisToDelete] = React.useState<Hypothesis|null>(null);
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     useEffect(() => {
         if (hypotheses && hypotheses.length === 0 && !loading && !error) {
@@ -127,7 +128,7 @@ export const Hypotheses = () => {
                     <MenuItem value={'date'}>Date</MenuItem>
                     <MenuItem value={'author'}>Author</MenuItem>
                 </Select>
-                <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_HYPOTHESIS_NEW}>
+                <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_HYPOTHESIS_NEW} disabled={!authenticated}>
                     <AddIcon/>
                 </Button>
             </Box>
