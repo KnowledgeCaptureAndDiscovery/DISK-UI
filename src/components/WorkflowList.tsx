@@ -69,12 +69,18 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
 
     const onRemoveWorkflow = (wf:Workflow, meta:boolean=false) => {
         let index : number = (meta?metaWorkflows:workflows).indexOf(wf);
-        //TODO: Add an alert here to confirm.
-        setWorkflows((wfs:Workflow[]) => {
-            let newWfs : Workflow[] = [ ...wfs ];
-            newWfs.splice(index, 1);
-            return newWfs;
-        });
+        //TODO: Add an alert here to confirm. ?
+        if (notifyChange) {
+            let curWfs : Workflow[] = [ ...(meta ? metaWorkflows : workflows) ];
+            curWfs.splice(index, 1);
+            notifyChange(meta ? workflows : curWfs, meta ? curWfs : metaWorkflows);
+        } else {
+            (meta ? setMetaWorkflows : setWorkflows)((currentWorkflows) => {
+                let newWfs = [ ...currentWorkflows ];
+                newWfs.splice(index, 1);
+                return newWfs;
+            });
+        }
     };
 
     return <Box>
