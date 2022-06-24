@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
+import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -198,6 +199,41 @@ export const LOIEditor = () => {
             });
     };
 
+    const onDuplicateClicked = () => {
+        if (!LOI) {
+            return;
+        }
+        let newLOI : LineOfInquiry = { 
+            ...LOI,
+            id: '',
+            name: LOI.name + " (copy)",
+            //Remove stuff added in the response
+            workflows: workflows.map(w => {return {
+                ...w,
+                bindings: w.bindings.map(b => {return {
+                    ...b,
+                    collection: undefined,
+                    bindingAsArray: undefined,
+                }}),
+            }}),
+        };
+
+        setWaiting(true);
+        console.log("SEND:", newLOI);
+        DISKAPI.createLOI(newLOI)
+            .then((savedLOI) => {
+                setSaveNotification(true);
+                setWaiting(false);
+                dispatch(addLOI(savedLOI));
+                navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+            })
+            .catch((e) => {
+                setErrorSaveNotification(true);
+                console.warn(e);
+                setWaiting(false);
+            });
+    };
+
     const handleSaveNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway')
             return;
@@ -328,13 +364,20 @@ export const LOIEditor = () => {
             <WorkflowList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions}
                     onEditStateChange={setEditingWorkflows} onChange={onWorkflowListChange}></WorkflowList>
         </Box>
-        <Box sx={{display: 'flex', justifyContent: 'flex-end', padding: "10px"}}>
-            <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
-                <CancelIcon/> Cancel
-            </Button>
-            <Button variant="contained" color="success" onClick={onSaveButtonClicked} disabled={editingWorkflows}>
-                <SaveIcon/> Save
-            </Button>
+        <Box sx={{display: 'flex', justifyContent: 'space-between', padding: "10px"}}>
+            {LOI?
+                <Button color="info" sx={{mr:"10px"}} onClick={onDuplicateClicked}>
+                    <CopyIcon/> Duplicate
+                </Button> : <Box/>
+            }
+            <Box>
+                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
+                    <CancelIcon/> Cancel
+                </Button>
+                <Button variant="contained" color="success" onClick={onSaveButtonClicked} disabled={editingWorkflows}>
+                    <SaveIcon/> Save
+                </Button>
+            </Box>
         </Box>
     </Card>
 }

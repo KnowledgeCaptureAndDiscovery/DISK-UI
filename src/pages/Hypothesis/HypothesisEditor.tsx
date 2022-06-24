@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
+import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { QuestionSelector } from "components/QuestionSelector";
@@ -147,6 +148,37 @@ export const HypothesisEditor = () => {
         setEditedGraph(pattern);
     };
 
+    const onDuplicateClicked = () => {
+        if (!hypothesis) {
+            return;
+        }
+        let newHypothesis : Hypothesis = { 
+            ...hypothesis,
+            id: '',
+            name: hypothesis.name + " (copy)",
+            questionBindings: hypothesis.questionBindings.map((qv) => {return {
+                ...qv,
+                collection: undefined,
+                bindingAsArray: undefined,
+            }})
+        };
+
+        setWaiting(true);
+        console.log("SEND:", newHypothesis);
+        DISKAPI.createHypothesis(newHypothesis)
+            .then((savedHypothesis) => {
+                setSaveNotification(true);
+                setWaiting(false);
+                dispatch(addHypothesis(savedHypothesis));
+                navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+            })
+            .catch((e) => {
+                setErrorSaveNotification(true);
+                console.warn(e);
+                setWaiting(false);
+            });
+    };
+
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
         <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
             <CircularProgress color="inherit" />
@@ -196,13 +228,20 @@ export const HypothesisEditor = () => {
             : <Skeleton/>}
         </Box>
 
-        <Box sx={{display: 'flex', justifyContent: 'flex-end', padding: "10px"}}>
-            <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_HYPOTHESES + (hypothesis ? "/" + hypothesis.id : "")}>
-                <CancelIcon/> Cancel
-            </Button>
-            <Button variant="contained" color="success" onClick={onSaveButtonClicked}>
-                <SaveIcon/> Save
-            </Button>
+        <Box sx={{display: 'flex', justifyContent: 'space-between', padding: "10px"}}>
+            {hypothesis?
+                <Button color="info" sx={{mr:"10px"}} onClick={onDuplicateClicked}>
+                    <CopyIcon/> Duplicate
+                </Button> : <Box/>
+            }
+            <Box>
+                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_HYPOTHESES + (hypothesis ? "/" + hypothesis.id : "")}>
+                    <CancelIcon/> Cancel
+                </Button>
+                <Button variant="contained" color="success" onClick={onSaveButtonClicked}>
+                    <SaveIcon/> Save
+                </Button>
+            </Box>
         </Box>
     </Card>
 }
