@@ -1,0 +1,36 @@
+site_name: DISK User guide
+extra_css:
+- assets/versions.css
+- assets/extra.css
+extra_javascript:
+- assets/versions.js
+
+
+
+nav:
+  - Introduction: index.md
+  - Ontologies:
+    - Overview: ontology.md
+    - Question Template Ontology: question-ontology.md
+  - DISK Resources:
+    - Resource definitions: resources.md
+    - REST API: rest.md
+  - Developer:
+    - API Adapters: adapters.md
+    - Data Adapter: data-adapter.md
+    - Method Adapter: method-adapter.md
+
+theme:
+  name: material
+  logo: figures/logo.png
+  favicon: figures/favicon.ico
+  palette:
+    primary: teal
+
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
