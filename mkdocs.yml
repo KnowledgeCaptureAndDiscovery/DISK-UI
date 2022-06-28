@@ -1,11 +1,9 @@
-site_name: DISK User guide
+site_name: DISK
 extra_css:
 - assets/versions.css
 - assets/extra.css
 extra_javascript:
 - assets/versions.js
-
-
 
 nav:
   - Introduction: index.md
