@@ -7,7 +7,7 @@ The same is true for each method provider (workflow systems), a [Method Adapter]
 
 To understand how this is done we could look how the data interacts in the system.
 
-![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
+![Disk API interactions](../figures/DISK-adapters.png "DISK API interactions")
 
 DISK provides an abstract classes to implement both, [method adapters](method-adapter) and [data adapters](data-adapter).
 Check their respective page for a detailed explanation on how to create a new adapter.

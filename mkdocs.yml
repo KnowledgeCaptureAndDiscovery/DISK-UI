@@ -6,18 +6,22 @@ extra_javascript:
 - assets/versions.js
 
 nav:
-  - Introduction: index.md
-  - Ontologies:
-    - Overview: ontology.md
-    - Question Template Ontology: question-ontology.md
-  - DISK Resources:
-    - Resource definitions: resources.md
-    - REST API: rest.md
-  - Developer:
-    - API Adapters: adapters.md
-    - Data Adapter: data-adapter.md
-    - Method Adapter: method-adapter.md
+  - Overview: index.md
+  - Concepts: concepts.md
+  - Getting Started: getting-started.md
+  - User Guide: 
+    - user-guide/index.md
+    - user-guide/write-hypothesis.md
+    - Data Extraction:
+      - Overview: user-guide/data-extraction.md
+      - SPARQL: user-guide/data-extraction-sparql.md
+    - Running Workflows: user-guide/running-workflows.md
 
+  - Developer Guide: 
+    - developer-guide/index.md
+  - Operator Manual: 
+    - operator-manual/index.md
+  - FAQ: faq.md
 theme:
   name: material
   logo: figures/logo.png

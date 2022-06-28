@@ -4,7 +4,7 @@ The DISK system uses several ontologies to store and produce data.
 
 The following diagram shows the ontologies used on the DISK system.
 
-![Disk Ontologies](figures/DISK-ontologies.png "DISK Ontologies")
+![Disk Ontologies](../figures/DISK-ontologies.png "DISK Ontologies")
 
  - **On blue:** Commonly used ontologies. These ontologies contribute the vocabulary used to store metadata on the DISK system.
 
