@@ -12,15 +12,14 @@ nav:
   - User Guide: 
     - user-guide/index.md
     - user-guide/write-hypothesis.md
+  - Operator Manual: 
+    - operator-manual/index.md
     - Data Extraction:
       - Overview: user-guide/data-extraction.md
       - SPARQL: user-guide/data-extraction-sparql.md
     - Running Workflows: user-guide/running-workflows.md
-
   - Developer Guide: 
     - developer-guide/index.md
-  - Operator Manual: 
-    - operator-manual/index.md
   - FAQ: faq.md
 theme:
   name: material
@@ -36,3 +35,6 @@ markdown_extensions:
       guess_lang: false
   - toc:
       permalink: true
+
+plugins:
+  - mkdocs-video
