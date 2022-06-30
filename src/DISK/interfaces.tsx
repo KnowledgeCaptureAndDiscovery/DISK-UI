@@ -64,6 +64,7 @@ export interface MetaInfo {
 }
 
 export interface Workflow {
+    source: string,
     workflow: string, //Same as method id
     workflowLink: string,
     bindings: VariableBinding[],
@@ -128,6 +129,7 @@ export interface Method {
     id?: string,
     name: string,
     link: string,
+    source: string,
     inputs?: MethodInput[]
 }
 

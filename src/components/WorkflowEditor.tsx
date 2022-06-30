@@ -61,7 +61,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         let error = varErrorMap[method.name];
         if (!loading && !error && (!inputs || inputs.length === 0)) {
             dispatch(setLoadingInput(method.name));
-            DISKAPI.getWorkflowVariables(method.name)
+            DISKAPI.getWorkflowVariables(method.source, method.name) //The name could be the same on two diff sources... FIXME
                 .then((inputs:MethodInput[]) => {
                     registerInputs(inputs);
                     dispatch(setInputs({id: method.name, values: inputs}));
@@ -140,6 +140,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         //SAVE
         if (selected) {
             let newWorkflow : Workflow = {
+                source: selected.source,
                 workflow: selected.name,
                 workflowLink: selected.link,
                 bindings: 
@@ -177,6 +178,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                     getOptionLabel={(option) => option.name}
                     options={methods}
                     loading={loading}
+                    groupBy={(option) => option.source.replace("_", " ")}
                     renderInput={(params) => (
                         <TextField {...params} label="Selected workflow"
                             InputProps={{
