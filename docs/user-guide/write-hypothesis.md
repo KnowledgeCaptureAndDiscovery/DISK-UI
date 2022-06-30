@@ -1,4 +1,4 @@
-# Hypothesis and Question
+# Create hypothesis and questions
 
 
 The aim of an investigation is to answer a **question**, which is
@@ -15,7 +15,7 @@ DISK starts with a hypothesis, and then a question.
 
 ### Create a Hypothesis
 
-To do create a new hypothesis, you need to click the **New Hypothesis** button.
+You can create a hypothesis by clicking on the **Create Hypothesis** button.
 
 ![New Hypothesis](../figures/user-guide/button.png "New Hypothesis")
 
@@ -30,13 +30,13 @@ For example, here we have created a new hypothesis called **"The effect of the w
 ![New Hypothesis](../figures/user-guide/new-hypothesis.png "New Hypothesis")
 
 
-## Question
+## Question 
+
+Questions can be posed as testing a hypothesis,
 
 ### Create a Question
 
-To test your hypothesis, you need to select a question.
-
-To display the questions available on DISK, click the **Select Hypothesis Question** drop down list.
+You can display the questions available by clicking on the **Select Hypothesis Question** drop down list.
 Then, select a question from the list.
 
 !!! Info
@@ -51,8 +51,6 @@ Some questions have to do with associations between observed variables.
     is associated with a **disorder** such as *ADHD (Attention-deficit/hyperactivity disorder)*.
 
 ### Select a Question Variable
-
-
 
 To select the variables, you need to click in TextField of each **Variables** button.
 In our bike example, we can ask if the number of bikes rented is associated with the weather.
