@@ -4,7 +4,7 @@
 
 The DISK is a system that automates the execution of scientific workflows triggered on data changes. 
 
-![DISK](../figures/user-guide/web.gif "DISK")
+![DISK](figures/user-guide/web.gif "DISK")
 
 
 ## Why DISK?
@@ -19,14 +19,11 @@ discoveries as new data becomes available
 
 ### Quick Start
 
-You can start by creating a new [DISK account](https://disk.isi.edu).
-
-Follow our [getting started guide](getting-started.md). 
-Further user oriented [documentation](user-guide/) describe how to create and test hypothesis.
-Expert user [documentation](expert-user/) describe how to find 
+You can using DISK [here](https://disk.isi.edu).
+[User documentation](user-guide/) describe how to create and test hypothesis.
+Further expert user oriented [documentation](expert-user/) describe how to find 
 data and run analysis. Additionally, Developer oriented [documentation](developer-guide/) 
 is available for people interested in building third-party integrations.
-
 
 
 ## How it works
@@ -36,7 +33,13 @@ To do this DISK collects data from different data repositories and defines metho
 User defined goals are periodically check for new data/methods available. When a method detects new data, a new workflow execution will be send.
 Each experiment execution is stored with its metadata and outputs for posterior analysis.
 
+## Architecture
 
+![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
+
+DISK is implemented as a service which continuously monitors new data/methods available with existing user goals.
+Furthermore, DISK System can obtain data from different data repositories and send runs to different workflow systems.
+For more information about the DISK architecture, please check the [architecture](developer-guide/architecture/) page.
 
 ## Features
 

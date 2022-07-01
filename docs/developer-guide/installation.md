@@ -1,4 +1,4 @@
-You can install DISK using Docker or [building from source](./building.md)
+You can install DISK using Docker or [building from source](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/building.md)
 We recommend to use `docker` to install DISK. 
 
 ## Requirements
