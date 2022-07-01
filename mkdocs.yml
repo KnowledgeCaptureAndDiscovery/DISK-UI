@@ -5,6 +5,7 @@ extra_javascript:
 - assets/versions.js
 
 repo_url: https://github.com/KnowledgeCaptureAndDiscovery/DISK-UI
+edit_uri: edit/main/docs/
 nav:
   - Overview: index.md
   - Concepts: concepts.md
