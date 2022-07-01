@@ -4,7 +4,7 @@ Questions can be posed as testing a hypothesis, which would be a statement that 
 
 This document shows how DISK runs the data analysis.
 
-## Line of inquiry
+## Line of inquiry (LOI)
 
 A line of inquiry (LOI) is the mechanism that DISK use to trigger
 workflows to answer questions and test the hypothesis.
@@ -40,10 +40,6 @@ The following image shows the execution narrative for the first LOI. The workflo
 
 ![Narrative](../figures/user-guide/narrative.png "Narrative")
 
-## Next section
+## Next steps
 
-Next section describes the Operator user actions:
-
-- creates Line of Inquiry
-- collects data from different data repositories 
-- uses existing workflow engines.
+You can learn about the Expert User actions.

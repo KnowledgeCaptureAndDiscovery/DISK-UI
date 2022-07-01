@@ -14,3 +14,14 @@ Given a science question, NeuroDISK autonomously determines what data is needed,
 We are developing NeuroDISK in collaboration with researchers from the ENIGMA consortium who study different neuroscience questions.
 
 This project uses Semantic Media Wikis as data repository and WINGS as Workflow system.
+
+### Ontologies
+
+You can read a detailed explanation of the ENIGMA ontologies on their [documentation page](https://knowledgecaptureanddiscovery.github.io/EnigmaOntology/release/)
+
+The DISK ontologies aims to help scientists to test and discover new hypothesis from existing datasets.
+Scientists define lines of inquiry that represent generic research questions, like the proteins associated to a type of cancer.
+The lines of inquiry may have multiple hypothesis associated to them, which define a particular instance or aspect of the line of inquiry (e.g., the EGFR protein is associated to colon cancer).
+Each hypothesis is represented as a connected graph, where the nodes are the different terms that compose the hypothesis and the edges represent the relationships among those terms.
+
+Each of the statements represented in the hypothesis graph can be supported by the results obtained after running an experiment. In fact, the hypothesis has a confidence value, which varies depending on the results of the experiments run to test it. 

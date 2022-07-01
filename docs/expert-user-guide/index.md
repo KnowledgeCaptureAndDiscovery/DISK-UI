@@ -8,7 +8,7 @@ This guide is for Expert users wanting to create a Line of Inquiry
 
 ## Create a Line of Inquiry
 
-Five steps are required to create a Line of Inquiry:
+Three steps are required to create a Line of Inquiry:
 
 1. Describe the Line of Inquiry info and select the question to be asked.
 2. Select the Data Source and write the query to obtain the data required by the workflow.

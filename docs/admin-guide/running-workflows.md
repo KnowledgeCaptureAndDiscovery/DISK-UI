@@ -4,4 +4,4 @@ DISK can execute workflows on different workflows systems as long as a [method a
 Each LOI defines how any parameters and data obtained as result of the *data query* will be used when creating one or more workflow executions.
 The outputs and metadata generated on this process is stored as a TLOI.
 
-Aditionally, A LOI can define a meta workflow to run using as input the result of the workflow executions.
+Additionally, A LOI can define a meta workflow to run using as input the result of the workflow executions.

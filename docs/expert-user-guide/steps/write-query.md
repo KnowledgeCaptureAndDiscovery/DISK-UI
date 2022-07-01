@@ -18,7 +18,7 @@ You can write the query click in the **Query** text area.
 
 ### Example
 
-From the Neuro Disk Implementation, we can see a **data query** in the following image.
+The next example has been taken from the Neuro Disk Implementation, we can see a **data query** in the following image.
 
 The steps to obtain the data are:
 

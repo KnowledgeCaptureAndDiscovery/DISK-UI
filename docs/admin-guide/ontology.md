@@ -1,38 +1,39 @@
 # Ontologies Overview
 
+## What is a ontology?
+
+Ontology is a term borrowed from philosophy that refers to the science of describing 
+the kinds of entities in the world and how they are related. 
+An OWL ontology may include descriptions of classes, properties and their instances.
+
+
+## Disk Ontologies
+
 The DISK system uses several ontologies to store and produce data.
-
-The following diagram shows the ontologies used on the DISK system.
-
-![Disk Ontologies](../figures/DISK-ontologies.png "DISK Ontologies")
-
- - **On blue:** Commonly used ontologies. These ontologies contribute the vocabulary used to store metadata on the DISK system.
-
- - **On yellow:** Imported ontologies. Categorized on three types:
-
-    - Ontologies to interact with data repositories. Defined as part of [Data Adapters](/data-adapter)
-
-    - Ontologies to intercat with workflows systems. Defined as part of [Method Adapters](/method-adapter)
-
-    - Ontologies imported to help on the creation of *hypotheses* and *data queries*. Domain specific.
-
- - **On green:** Internal ontologies created for DISK:
-
-    - **DISK Core:** Basic DISK definitions, such as *Hypothesis*, *Line of inquiry* and so on.
-    Please check the [Disk vocabulary](http://disk-project.org/ontology/disk#) for more information.
-
-    - **DISK Hypothesis:** Basic properties to define general hypothesis. Contains terms as `associatedWith` and so on.
-    Please check the [hypothesis vocabulary](http://disk-project.org/ontology/hypothesis#) for more information.
+However, we are going to focus on only one ontology: Question Template Ontology. 
  
-    - **Question Template:** Ontology to help on the creation of hypothesis, defines *Hypothesis Questions* and how to customize them. [More info here](/question-ontology).
+ **Question Template:** Ontology to help on the creation of hypothesis, defines *Hypothesis Questions* and how to customize them. 
 
-## DISK Ontologies
 
-You can read a detailed explanation of the ENIGMA ontologies on their [documentation page](https://knowledgecaptureanddiscovery.github.io/EnigmaOntology/release/)
+### Question Template Ontology
 
-The DISK ontologies aims to help scientists to test and discover new hypothesis from existing datasets.
-Scientists define lines of inquiry that represent generic research questions, like the proteins associated to a type of cancer.
-The lines of inquiry may have multiple hypothesis associated to them, which define a particular instance or aspect of the line of inquiry (e.g., the EGFR protein is associated to colon cancer).
-Each hypothesis is represented as a connected graph, where the nodes are the different terms that compose the hypothesis and the edges represent the relationships among those terms.
 
-Each of the statements represented in the hypothesis graph can be supported by the results obtained after running an experiment. In fact, the hypothesis has a confidence value, which varies depending on the results of the experiments run to test it. 
+The question ontology aims to help users on the creation of semantic representations for scientific questions (hypothesis).
+
+The ontology defines the `Question` resource with the following properties:
+
+ - `hasQuestionTemplate`: Text representation of the question. Includes `SPARQL` variable names that will be replaced for appropriate options.
+ 
+ - `hasQuestionPattern`: `SPARQL` like pattern that defines the semantic representation of this *Question*.
+ 
+ - `hasQuestionVariable`: list of `QuestionVariable` for this *Question*. These appear as `SPARQL` variables on the template and pattern.
+ 
+and the `QuestionVariable` resource:
+ 
+ - `hasVariableName`: `SPARQL` name of this variable. Is used on the question pattern and template.
+ 
+ - `hasConstraints`: `SPARQL` query that will determine the options for this variable.
+ 
+ - `hasFixedOptions`: list of fixed options for this variable, use this or `hasConstraints`.
+
+As each question defines a "part" of a `SPARQL` query, we can compose multiple simple questions to create complex ones.

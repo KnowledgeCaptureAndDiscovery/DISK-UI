@@ -32,7 +32,7 @@ For example, here we have created a new hypothesis called **"The effect of the w
 
 ## Question 
 
-Questions can be posed as testing a hypothesis,
+Questions can be posed as testing a hypothesis.
 
 ### Create a Question
 
@@ -40,7 +40,7 @@ You can display the questions available by clicking on the **Select Hypothesis Q
 Then, select a question from the list.
 
 !!! Info
-    The questions are created by the Operator user.
+    The questions are created by the Expert User.
 
 ## Question Variables
 
@@ -52,9 +52,13 @@ Some questions have to do with associations between observed variables.
 
 ### Select a Question Variable
 
-To select the variables, you need to click in TextField of each **Variables** button.
+To select the question variables, you need to click in TextField of each **Variables** button.
 In our bike example, we can ask if the number of bikes rented is associated with the weather.
 
 ![Select Question](../figures/user-guide/select-variable.png "Select Question")
 
 Finally, you can click in the **Save ** button to save the hypothesis and question.
+
+## Next step
+
+In the step, we show how to test a hypothesis using Line of Inquiry.
