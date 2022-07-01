@@ -1,7 +1,6 @@
 site_name: DISK
 extra_css:
 - assets/versions.css
-- assets/extra.css
 extra_javascript:
 - assets/versions.js
 
@@ -13,15 +12,16 @@ nav:
     - user-guide/index.md
     - user-guide/write-hypothesis.md
     - user-guide/test-hypothesis.md
-  - Operator Manual: 
-    - operator-manual/index.md
-    - Data Extraction:
-      - Overview: user-guide/data-extraction.md
-      - SPARQL: user-guide/data-extraction-sparql.md
-    - Running Workflows: user-guide/running-workflows.md
+  - Expert User Guide: 
+    - expert-user-guide/index.md
+    - expert-user-guide/steps/add-basic-info.md
+    - expert-user-guide/steps/write-query.md
+    - expert-user-guide/steps/select-workflow.md
+
   - Developer Guide: 
     - developer-guide/index.md
   - FAQ: faq.md
+
 theme:
   name: material
   logo: figures/logo.png
@@ -36,6 +36,3 @@ markdown_extensions:
       guess_lang: false
   - toc:
       permalink: true
-
-plugins:
-  - mkdocs-video
