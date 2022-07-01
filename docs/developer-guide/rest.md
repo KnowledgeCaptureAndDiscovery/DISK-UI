@@ -3,7 +3,7 @@
 The main resources of DISK are exposed through the REST API.
 Common REST operations are available, but some may be restricted to authenticated users.
 
-Each resource can be publically listed (`GET`), but creating (`POST`) or editing (`PUT`) needs authentication.
+Each resource can be listed (`GET`), but creating (`POST`) or editing (`PUT`) needs authentication.
 
 ## Authentication
 
