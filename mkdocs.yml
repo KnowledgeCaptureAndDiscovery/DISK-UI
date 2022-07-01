@@ -14,10 +14,10 @@ nav:
     - user-guide/index.md
     - user-guide/write-hypothesis.md
     - user-guide/test-hypothesis.md
-  - Expert User Guide: 
-    - expert-user-guide/index.md
-    - expert-user-guide/steps/add-basic-info.md
-    - expert-user-guide/steps/write-query.md
+  - Advanced User Guide: 
+    - advanced-user-guide/index.md
+    - advanced-user-guide/steps/add-basic-info.md
+    - advanced-user-guide/steps/write-query.md
   - Administrator Guide:
     - admin-guide/index.md
     - admin-guide/ontology.md

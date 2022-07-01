@@ -21,7 +21,7 @@ discoveries as new data becomes available
 
 You can using DISK [here](https://disk.isi.edu).
 [User documentation](user-guide/) describe how to create and test hypothesis.
-Further expert user oriented [documentation](expert-user/) describe how to find 
+Further advanced user oriented [documentation](advanced-user/) describe how to find 
 data and run analysis. Additionally, Developer oriented [documentation](developer-guide/) 
 is available for people interested in building third-party integrations.
 

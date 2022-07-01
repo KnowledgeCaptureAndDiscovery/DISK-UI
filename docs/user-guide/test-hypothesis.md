@@ -42,4 +42,4 @@ The following image shows the execution narrative for the first LOI. The workflo
 
 ## Next steps
 
-You can learn about the Expert User actions.
+You can learn about the Advanced User actions.

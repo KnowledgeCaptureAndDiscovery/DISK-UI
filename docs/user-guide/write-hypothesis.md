@@ -40,7 +40,7 @@ You can display the questions available by clicking on the **Select Hypothesis Q
 Then, select a question from the list.
 
 !!! Info
-    The questions are created by the Expert User.
+    The questions are created by the Advanced User.
 
 ## Question Variables
 
