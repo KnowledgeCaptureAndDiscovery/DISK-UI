@@ -9,7 +9,6 @@ a new workflow execution will be send. Each experiment execution is stored with 
 metadata and outputs for posterior analysis.
 
 
-
 ## Documentation
 
-All the documentation how to use it is available at [https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB)
+Full documentation is available at [https://disk.readthedocs.io](https://disk.readthedocs.io)
