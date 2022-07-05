@@ -1,23 +1,34 @@
 site_name: DISK
 extra_css:
 - assets/versions.css
-- assets/extra.css
 extra_javascript:
 - assets/versions.js
 
+repo_url: https://github.com/KnowledgeCaptureAndDiscovery/DISK-UI
+edit_uri: edit/main/docs/
 nav:
-  - Introduction: index.md
-  - Ontologies:
-    - Overview: ontology.md
-    - Question Template Ontology: question-ontology.md
-  - DISK Resources:
-    - Resource definitions: resources.md
-    - REST API: rest.md
-  - Developer:
-    - API Adapters: adapters.md
-    - Data Adapter: data-adapter.md
-    - Method Adapter: method-adapter.md
-
+  - Overview: index.md
+  - Concepts: concepts.md
+ # - Getting Started: getting-started.md
+  - User Guide: 
+    - user-guide/index.md
+    - user-guide/write-hypothesis.md
+    - user-guide/test-hypothesis.md
+  - Advanced User Guide: 
+    - advanced-user-guide/index.md
+    - advanced-user-guide/steps/add-basic-info.md
+    - advanced-user-guide/steps/write-query.md
+  - Administrator Guide:
+    - admin-guide/index.md
+    - admin-guide/ontology.md
+    - admin-guide/extending-ontology.md
+  - Developer Guide: 
+    - developer-guide/index.md
+    - developer-guide/architecture.md
+    - developer-guide/data-adapter.md
+    - developer-guide/method-adapter.md
+    - developer-guide/installation.md 
+  - Adoptions: adoptions.md
 theme:
   name: material
   logo: figures/logo.png
@@ -27,8 +38,7 @@ theme:
 
 
 markdown_extensions:
-  - admonition
-  - codehilite:
-      guess_lang: false
-  - toc:
-      permalink: true
+- codehilite
+- admonition
+- toc:
+    permalink: true
