@@ -252,7 +252,7 @@ export const HypothesisView = () => {
                     Analyses executed to test the hypothesis or answer the question:
                 </TypographySubtitle>
                 <Button variant="outlined" onClick={onTestHypothesisClicked}>
-                    <PlayIcon/> Test hypothesis
+                    <PlayIcon/> Run analysis 
                 </Button>
             </Box>
             {/*newTlOIs.map((tloi:TriggeredLineOfInquiry) => 
