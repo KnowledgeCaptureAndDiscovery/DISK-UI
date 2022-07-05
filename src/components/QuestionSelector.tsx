@@ -225,7 +225,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     return <Box>
         <Box>
-            <FormHelperText sx={{margin: "2px"}}>Select a pattern that can express your hypothesis or question:</FormHelperText>
+            <FormHelperText sx={{margin: "2px"}}>Select a template that can express your hypothesis or question:</FormHelperText>
             <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
                 value={selectedQuestion}
                 onChange={(_,newQ) => onQuestionChange(newQ)}
