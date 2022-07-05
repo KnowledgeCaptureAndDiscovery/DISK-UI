@@ -1,4 +1,4 @@
-import { Box, Card, Typography, Divider, Grid, IconButton } from "@mui/material"
+import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip } from "@mui/material"
 import { Workflow, VariableBinding } from "DISK/interfaces"
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -22,7 +22,10 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 </a>
                 <Box>
                     {externalButton ? externalButton : ""}
-                    {onDelete ? <IconButton onClick={() => onDelete(wf)} sx={{padding: "0 3px"}}><DeleteIcon/></IconButton> : ""}
+                    {onDelete ? 
+                    <Tooltip arrow title="Delete">
+                        <IconButton onClick={() => onDelete(wf)} sx={{padding: "0 3px"}}><DeleteIcon/></IconButton>
+                    </Tooltip> : ""}
                 </Box>
             </Box>
             <Divider/>

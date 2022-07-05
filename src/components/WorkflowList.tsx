@@ -1,4 +1,4 @@
-import { Box, Button, FormHelperText, Card, Typography, IconButton } from "@mui/material"
+import { Box, Button, FormHelperText, Card, Typography, IconButton, Tooltip } from "@mui/material"
 import { Workflow } from "DISK/interfaces"
 import { WorkflowEditor } from "./WorkflowEditor"
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -112,9 +112,11 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
                 {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
                     <WorkflowPreview key={`wf_${wf.workflow}-${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? onRemoveWorkflow : undefined}
                         button={editable && !addingWorkflow? 
-                        <IconButton sx={{padding: "0 3px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
-                            <EditIcon></EditIcon>
-                        </IconButton>
+                        <Tooltip arrow title="Edit">
+                            <IconButton sx={{padding: "0 3px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
+                                <EditIcon></EditIcon>
+                            </IconButton>
+                        </Tooltip>
                     : undefined}/>
                 )}
                 {metaWorkflows.length > 0 ? <Box>

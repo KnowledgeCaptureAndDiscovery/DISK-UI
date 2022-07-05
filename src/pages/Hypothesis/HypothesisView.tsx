@@ -1,4 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import { idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
@@ -217,9 +217,11 @@ export const HypothesisView = () => {
                     {error ? "Error loading hypothesis" : hypothesis?.name}
                 </Typography>
                 {authenticated ? 
-                <IconButton component={Link} to={PATH_HYPOTHESES + "/" + hypothesis?.id + "/edit"}>
-                    <EditIcon />
-                </IconButton>
+                <Tooltip arrow title="Edit">
+                    <IconButton component={Link} to={PATH_HYPOTHESES + "/" + hypothesis?.id + "/edit"}>
+                        <EditIcon />
+                    </IconButton>
+                </Tooltip>
                 : null }
             </Box>
         }
@@ -316,12 +318,14 @@ export const HypothesisView = () => {
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center'}}>
-                                            <IconButton sx={{padding:"0"}} onClick={() => {
-                                                setConfirmDialogOpen(true);
-                                                setTLOIToDelete(tloi);
-                                            }}>
-                                                <DeleteIcon/>
-                                            </IconButton>
+                                            <Tooltip arrow placement="top" title="Delete">
+                                                <IconButton sx={{padding:"0"}} onClick={() => {
+                                                    setConfirmDialogOpen(true);
+                                                    setTLOIToDelete(tloi);
+                                                }}>
+                                                    <DeleteIcon/>
+                                                </IconButton>
+                                            </Tooltip>
                                         </Box>
                                     </TableCell>
                                 </TableRow>)}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Typography } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
@@ -289,9 +289,11 @@ export const LOIEditor = () => {
                     value={name} error={errorName} onChange={(e) => onNameChange(e.target.value)}/>
             : <Skeleton/> }
 
-            <IconButton component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
-                <CancelIcon /> 
-            </IconButton>
+            <Tooltip arrow title="Cancel">
+                <IconButton component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
+                    <CancelIcon /> 
+                </IconButton>
+            </Tooltip>
         </Box>
         <Divider/>
 

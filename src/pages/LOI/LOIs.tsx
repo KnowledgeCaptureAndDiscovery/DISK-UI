@@ -1,4 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField, Tooltip } from "@mui/material";
 import { PATH_LOI_NEW } from "constants/routes";
 import { DISKAPI } from "DISK/API";
 import { LineOfInquiry } from "DISK/interfaces";
@@ -123,9 +123,13 @@ export const LinesOfInquiry = () => {
                     <MenuItem value={'date'}>Date</MenuItem>
                     <MenuItem value={'author'}>Author</MenuItem>
                 </Select>
-                <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_LOI_NEW} disabled={!authenticated}>
-                    <AddIcon/>
-                </Button>
+                <Tooltip arrow title={authenticated? "Create a new line of inquiry" : "You need to log in to create a new line of inquiry"}>
+                    <Box sx={{display:"inline-flex"}}>
+                        <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_LOI_NEW} disabled={!authenticated}>
+                            <AddIcon/>
+                        </Button>
+                    </Box>
+                </Tooltip>
             </Box>
             <Card variant="outlined" sx={{height: "calc(100vh - 157px)", overflowY:"auto"}}>
                 {loading ?

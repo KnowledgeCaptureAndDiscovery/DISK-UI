@@ -1,4 +1,4 @@
-import { Box, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Typography } from "@mui/material";
+import { Box, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { LineOfInquiry, idPattern, VariableBinding, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
@@ -83,9 +83,12 @@ export const LOIView = () => {
                     {error ? "Error loading LOI" : LOI?.name}
                 </Typography>
                 {authenticated ? 
-                <IconButton component={Link} to={PATH_LOIS + "/" + LOI?.id + "/edit"}>
-                    <EditIcon />
-                </IconButton> : null}
+                <Tooltip arrow title="Edit">
+                    <IconButton component={Link} to={PATH_LOIS + "/" + LOI?.id + "/edit"}>
+                        <EditIcon />
+                    </IconButton>
+                </Tooltip>
+                : null}
             </Box>
         }
         <Divider/>

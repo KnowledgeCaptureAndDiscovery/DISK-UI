@@ -1,5 +1,5 @@
 
-import { Box, Card, Divider, IconButton, styled, Typography } from "@mui/material"
+import { Box, Card, Divider, IconButton, styled, Tooltip, Typography } from "@mui/material"
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from "react-router-dom";
@@ -44,10 +44,20 @@ export const PreviewItem = ({item, icon, onDelete} : PreviewItemProps) => {
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{item.name}</Typography>
             </Box>
             <Box>
-                <IconButton component={Link} to={item.path + "/" + item.id + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
-                    <EditIcon/>
-                </IconButton>
-                {onDelete ? <IconButton onClick={() => onDelete()} sx={{padding: "4px"}} disabled={!authenticated}><DeleteIcon/></IconButton> : ""}
+                <Tooltip arrow title={authenticated? "Edit" : "You need to log in to edit"}>
+                    <Box sx={{display:"inline-block"}}>
+                        <IconButton component={Link} to={item.path + "/" + item.id + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
+                            <EditIcon/>
+                        </IconButton>
+                    </Box>
+                </Tooltip>
+                {onDelete ? 
+                <Tooltip arrow title={authenticated? "Delete" : "You need to log in to delete"}>
+                    <Box sx={{display:"inline-block"}}>
+                        <IconButton onClick={() => onDelete()} sx={{padding: "4px"}} disabled={!authenticated}><DeleteIcon/></IconButton>
+                    </Box>
+                </Tooltip>
+                : null}
             </Box>
         </Box>
         <Divider/>

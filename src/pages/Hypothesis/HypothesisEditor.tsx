@@ -1,4 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, IconButton, Skeleton, Snackbar, TextField, Typography } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis, idPattern, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
@@ -202,9 +202,11 @@ export const HypothesisEditor = () => {
                     onChange={(ev) => onNameChange(ev.target.value)}/>
             : <Skeleton/> }
 
-            <IconButton component={Link} to={PATH_HYPOTHESES + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}>
-                <CancelIcon /> 
-            </IconButton>
+            <Tooltip arrow title="Cancel">
+                <IconButton component={Link} to={PATH_HYPOTHESES + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}>
+                    <CancelIcon /> 
+                </IconButton>
+            </Tooltip>
         </Box>
         <Divider/>
         <Box sx={{padding:"10px"}}>
