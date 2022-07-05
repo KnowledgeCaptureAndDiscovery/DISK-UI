@@ -86,7 +86,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     return <Box>
         <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mb:"5px"}}>
             <FormHelperText sx={{fontSize: ".9rem"}}>
-                Workflows to run: 
+                The data analysis methods are represented in the following workflows:
             </FormHelperText>
             {addingWorkflow ? 
                 <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={toggleEdition} color="error">
@@ -95,11 +95,11 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
             :
                 <Box>
                     <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={toggleEdition} color="primary">
-                        <AddIcon sx={{marginRight: "4px"}}/> Add Workflow
+                        <AddIcon sx={{marginRight: "4px"}}/> Save Workflow
                     </Button>
                     {workflows.length > 0 && false ?
                     <Button sx={{padding: "3px 6px", marginLeft: "6px"}} variant="outlined">
-                        <AddIcon sx={{marginRight: "4px"}}/> Add Meta-workflow
+                        <AddIcon sx={{marginRight: "4px"}}/> Save Meta-workflow
                     </Button>
                     : ""}
                 </Box>
@@ -119,7 +119,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
                 )}
                 {metaWorkflows.length > 0 ? <Box>
                     <FormHelperText sx={{fontSize: ".9rem"}}>
-                        Meta-Workflows to run: 
+                        The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
                     </FormHelperText>
                     {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
                         <WorkflowPreview key={`mwf_${wf.workflow}${i}`} workflow={wf} button={editable && !addingWorkflow ? 

@@ -166,7 +166,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-14px 0 0 0'}}> Configure a new workflow: </FormHelperText>
         <Grid container spacing={1} sx={{alignItems: "center", height: "68px"}}>
             <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", color: "#444", fontSize: "0.85rem"}}>
-                <Typography> Select a workflow template: </Typography>
+                <Typography>Specify a workflow to be used in this LOI:</Typography>
             </Grid>
             <Grid item xs={10} md={9} sm={8}>
                 <Autocomplete id="select-workflow" size="small" fullWidth
@@ -201,10 +201,13 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                 <Box>
                     <Grid container spacing={1}  sx={{alignItems: "center"}}>
                         <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
-                            Input name
+                            Workflow input
                         </Grid>
-                        <Grid item xs={10} md={9} sm={8} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
-                            Variable binding
+                        <Grid item xs={8} md={7} sm={6} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                            Dataset information
+                        </Grid>
+                        <Grid item xs={2} md={2} sm={2} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                            Single or multiple
                         </Grid>
                     </Grid>
                     { inputMap[selected.name].filter((i) => i.type === 'input').map((inp:MethodInput) =>
@@ -219,7 +222,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                             </Grid>
                             <Grid item xs={2} md={2} sm={2}>
                                 <FormGroup>
-                                    <FormControlLabel sx={{fontSize: "0.85rem"}} label="Use as array" control={
+                                    <FormControlLabel sx={{fontSize: "0.85rem"}} label="Multiple" control={
                                         <Checkbox checked={selectedCollectionValues[inp.name]} onChange={(e) => onCollectionChange(inp.name, e.target.checked)}/>
                                     }/>
                                 </FormGroup>

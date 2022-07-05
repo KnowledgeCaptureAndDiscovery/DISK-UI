@@ -285,7 +285,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
-                <TextField fullWidth size="small" id="LOIName" label="LOI Name" required sx={{backgroundColor: "white"}}
+                <TextField fullWidth size="small" id="LOIName" label="Short name" required sx={{backgroundColor: "white"}}
                     value={name} error={errorName} onChange={(e) => onNameChange(e.target.value)}/>
             : <Skeleton/> }
 
@@ -298,24 +298,24 @@ export const LOIEditor = () => {
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Description:</TypographySubtitle>
             {!loading ?
-                <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="LOI Description"
+                <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="Brief description"
                     value={description} error={errorDesc} onChange={(e) => onDescChange(e.target.value)}/>
             : <Skeleton/> }
             {!loading ?
-                <TextFieldBlock multiline fullWidth size="small" id="LOINotes" label="LOI Notes"
+                <TextFieldBlock multiline fullWidth size="small" id="LOINotes" label="Additional notes"
                     value={notes} onChange={(e) => setNotes(e.target.value)}/>
             : <Skeleton/> }
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
+            <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
             <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={onQuestionChange} error={errorQuestion}/>
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data extraction:</TypographySubtitle>
+            <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                 <Box sx={{display: "inline-flex", alignItems: "center"}}>
                     <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
@@ -351,16 +351,16 @@ export const LOIEditor = () => {
             </Box>
             <Box>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
-                    We can generate a table with the metadata obtained, please add variables of interest and a small description:
+                    When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>
-                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Metadata table description" value={explanation} onChange={(e) => setExplanation(e.target.value)}/>
-                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Table variables" placeholder="?var1 ?var2 ..." value={relevantVariables} onChange={(e) => setRelevantVariables(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="List of variables to show on table:" placeholder="?var1 ?var2 ..." value={relevantVariables} onChange={(e) => setRelevantVariables(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Information to show on the table:" value={explanation} onChange={(e) => setExplanation(e.target.value)}/>
             </Box>
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
+            <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
             <WorkflowList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions}
                     onEditStateChange={setEditingWorkflows} onChange={onWorkflowListChange}></WorkflowList>
         </Box>

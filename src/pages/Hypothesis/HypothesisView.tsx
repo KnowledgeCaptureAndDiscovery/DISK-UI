@@ -237,7 +237,7 @@ export const HypothesisView = () => {
             </Box> : ""}
 
             <TypographySubtitle>
-                Hypothesis question:
+                Hypothesis or question:
             </TypographySubtitle>
             {!loading && !!hypothesis ? 
             <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
@@ -247,7 +247,7 @@ export const HypothesisView = () => {
         <Box sx={{padding:"10px"}}>
             <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', mb: "10px"}}>
                 <TypographySubtitle>
-                    Hypothesis testing executions:
+                    Analyses executed to test the hypothesis or answer the question:
                 </TypographySubtitle>
                 <Button variant="outlined" onClick={onTestHypothesisClicked}>
                     <PlayIcon/> Test hypothesis

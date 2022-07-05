@@ -225,7 +225,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     return <Box>
         <Box>
-            <FormHelperText sx={{margin: "2px"}}> Select the type of question your hypothesis will address: </FormHelperText>
+            <FormHelperText sx={{margin: "2px"}}>Select a pattern that can express your hypothesis or question:</FormHelperText>
             <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
                 value={selectedQuestion}
                 onChange={(_,newQ) => onQuestionChange(newQ)}
@@ -236,7 +236,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 options={options}
                 loading={loading}
                 renderInput={(params) => (
-                    <TextField {...params} error={exError} label="Hypothesis Question"
+                    <TextField {...params} error={exError} label="Patterns"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (
@@ -251,7 +251,9 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             />
         </Box>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Fill the following question template: </FormHelperText>
+            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
+                Fill in the template:
+            </FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 
@@ -291,7 +293,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             </Box>
         </Card>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Semantic question pattern: </FormHelperText>
+            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Formal expression: </FormHelperText>
             <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
                 <Table aria-label="Hypothesis graph" sx={{width: "auto"}}>
                     <TableBody>

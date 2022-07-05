@@ -103,13 +103,13 @@ export const LOIView = () => {
 
         </Box>
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Hypothesis linking:</TypographySubtitle>
+            <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
             <QuestionLinker selected={LOI? LOI.question : ""} disabled={true}/>
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data extraction:</TypographySubtitle>
+            <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
             <Box sx={{display: "inline-flex", alignItems: "center"}}>
                 <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
                 <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard" value={selectedDataSource} label={"Data source:"} disabled>
@@ -131,33 +131,34 @@ export const LOIView = () => {
                     }}
                 />
             </Box>
-            <Box>
-                <FormHelperText sx={{fontSize: ".9rem"}}>
-                    When this LOI is executed, a table will be generated with the values defined here:
-                </FormHelperText>
-                <Box>
-                    <TypographyLabel>Description for the metadata table: </TypographyLabel>
-                    <TypographyInline>
-                        {!loading && !!LOI ? LOI.explanation : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
-                    </TypographyInline>
-                </Box>
-                <Box>
-                    <TypographyLabel>Variables to show on table: </TypographyLabel>
-                    <TypographyInline>
-                        {!loading && !!LOI ? LOI.relevantVariables : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
-                    </TypographyInline>
-                </Box>
-            </Box>
+            {loading?
+                <Skeleton sx={{display:"inline-block", width: "400px"}}/>
+                : (!!LOI && (LOI.relevantVariables || LOI.explanation) ?
+                    <Box>
+                        <FormHelperText sx={{fontSize: ".9rem"}}>
+                            When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
+                        </FormHelperText>
+                        <Box>
+                            <TypographyLabel>List of variables to show on table:</TypographyLabel>
+                            <TypographyInline> {LOI.relevantVariables} </TypographyInline>
+                        </Box>
+                        <Box>
+                            <TypographyLabel>Information to show on the table:</TypographyLabel>
+                            <TypographyInline> {LOI.explanation} </TypographyInline>
+                        </Box>
+                    </Box> : null
+                )
+            }
         </Box>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
+            <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
             <Box>
                 {loading ? <Skeleton/> : (LOI && LOI.workflows && LOI.workflows.length > 0 ? 
                     <Box>
                         <FormHelperText sx={{fontSize: ".9rem"}}>
-                            Workflows to run: 
+                            The data analysis methods are represented in the following workflows:
                         </FormHelperText>
                         { LOI.workflows.map((wf:Workflow, i) => <Card key={`wf_${wf.workflow}-${i}`} variant="outlined" sx={{mb:"5px"}}>
                             <Box sx={{display: "flex", justifyContent: "space-between"}}>

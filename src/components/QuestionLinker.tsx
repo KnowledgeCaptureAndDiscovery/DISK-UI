@@ -98,7 +98,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
     return <Box>
         {disabled? "" :
         <Box>
-            <FormHelperText sx={{margin: "2px", fontSize: "0.9rem"}}> Select the type of question your hypothesis will address: </FormHelperText>
+            <FormHelperText sx={{margin: "2px", fontSize: "0.9rem"}}>Select a pattern that this line of inquiry will investigate:</FormHelperText>
             <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}}
                 value={selectedQuestion}
                 onChange={(_,newQ) => onQuestionChange(newQ)}
@@ -109,7 +109,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
                 options={options}
                 loading={loading}
                 renderInput={(params) => (
-                    <TextField {...params} error={exError} label="Hypothesis Question"
+                    <TextField {...params} error={exError} label="Patterns"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (
@@ -125,7 +125,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
         </Box>
         }
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position: "relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis will follow this question template: </FormHelperText>
+            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>This line of inquiry can be used to investigate the following hypothesis or question:</FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: (disabled ? "6px": 0)}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 

@@ -196,7 +196,7 @@ export const HypothesisEditor = () => {
 
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
-                <TextField fullWidth size="small" label="Hypothesis Name" required sx={{backgroundColor: "white"}}
+                <TextField fullWidth size="small" label="Short name" required sx={{backgroundColor: "white"}}
                     value={name}
                     error={errorName}
                     onChange={(ev) => onNameChange(ev.target.value)}/>
@@ -209,19 +209,19 @@ export const HypothesisEditor = () => {
         <Divider/>
         <Box sx={{padding:"10px"}}>
             {!loading ?
-                <TextFieldBlock multiline fullWidth required size="small" label="Hypothesis Description" sx={{marginTop: "5px"}}
+                <TextFieldBlock multiline fullWidth required size="small" label="Brief description" sx={{marginTop: "5px"}}
                     value={description}
                     error={errorDesc}
                     onChange={(ev) => onDescChange(ev.target.value)}/>
             : <Skeleton/> }
             {!loading ?
-                <TextFieldBlock multiline fullWidth size="small" label="Hypothesis Notes" sx={{marginTop: "10px"}}
+                <TextFieldBlock multiline fullWidth size="small" label="Additional notes" sx={{marginTop: "10px"}}
                     value={notes}
                     onChange={(ev) => setNotes(ev.target.value)}/>
             : <Skeleton/> }
             <Divider/>
             <TypographySubtitle>
-                Hypothesis question:
+                Hypothesis or question:
             </TypographySubtitle>
             {!loading ?
                 <QuestionSelector questionId={questionId} bindings={questionBindings} onQuestionChange={onQuestionChange} error={errorQuestion}/>
