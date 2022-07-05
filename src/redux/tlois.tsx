@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { TriggeredLineOfInquiry } from "DISK/interfaces";
 
 interface TLOIsState {
+  initialized: boolean,
   TLOIs: TriggeredLineOfInquiry[],
   loadingAll: boolean,
   errorAll: boolean,
@@ -12,6 +13,7 @@ interface TLOIsState {
 }
 
 interface PartialTLOIsState {
+  initialized?: boolean,
   TLOIs?: TriggeredLineOfInquiry[],
   loadingAll?: boolean,
   errorAll?: boolean,
@@ -24,6 +26,7 @@ interface PartialTLOIsState {
 export const tloisSlice = createSlice({
   name: 'tlois',
   initialState: {
+    initialized: false,
     TLOIs: [],
     loadingAll: false,
     errorAll: false,
@@ -36,6 +39,7 @@ export const tloisSlice = createSlice({
     setTLOIs: (state:TLOIsState, action: PayloadAction<TriggeredLineOfInquiry[]>) => {
       let newState  : PartialTLOIsState = {
         TLOIs: action.payload,
+        initialized: true,
         loadingAll: false,
         errorAll: false,
       };

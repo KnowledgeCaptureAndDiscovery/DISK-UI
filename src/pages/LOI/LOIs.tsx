@@ -21,6 +21,7 @@ export const LinesOfInquiry = () => {
     const LOIs = useAppSelector((state:RootState) => state.lois.LOIs);
     const loading = useAppSelector((state:RootState) => state.lois.loadingAll);
     const error = useAppSelector((state:RootState) => state.lois.errorAll);
+    const initializedLOIs = useAppSelector((state:RootState) => state.lois.initialized);
 
     //deleting
     const [waiting, setWaiting] = React.useState<boolean>(false);;
@@ -33,9 +34,8 @@ export const LinesOfInquiry = () => {
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     useEffect(() => {
-        if (LOIs.length === 0 && !loading && !error) {
+        if (!initializedLOIs)
             loadLOIs(dispatch);
-        }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {

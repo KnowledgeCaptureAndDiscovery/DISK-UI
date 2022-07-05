@@ -5,11 +5,12 @@ import React, { useEffect } from "react";
 import { HypothesisPreview } from "components/HypothesisPreview";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from 'redux/store';
-import { setErrorAll, setLoadingAll, setHypotheses, remove } from 'redux/hypothesis';
+import { remove } from 'redux/hypothesis';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
+import { loadHypotheses } from "redux/loader";
 
 type OrderType = 'date'|'author';
 
@@ -20,6 +21,7 @@ export const Hypotheses = () => {
     const hypotheses = useAppSelector((state:RootState) => state.hypotheses.hypotheses);
     const loading = useAppSelector((state:RootState) => state.hypotheses.loadingAll);
     const error = useAppSelector((state:RootState) => state.hypotheses.errorAll);
+    const initializedHypotheses = useAppSelector((state:RootState) => state.hypotheses.initialized);
 
     const [waiting, setWaiting] = React.useState<boolean>(false);;
     const [deleteNotification, setDeleteNotification] = React.useState<boolean>(false);
@@ -31,16 +33,7 @@ export const Hypotheses = () => {
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     useEffect(() => {
-        if (hypotheses && hypotheses.length === 0 && !loading && !error) {
-            dispatch(setLoadingAll());
-            DISKAPI.getHypotheses()
-                .then((hypotheses:Hypothesis[]) => {
-                    dispatch(setHypotheses(hypotheses));
-                })
-                .catch(() => {
-                    dispatch(setErrorAll());
-                });
-        }
+        if (!initializedHypotheses) loadHypotheses(dispatch);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

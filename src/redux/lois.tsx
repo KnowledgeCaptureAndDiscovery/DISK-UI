@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { LineOfInquiry } from "DISK/interfaces";
 
 interface LOIsState {
+  initialized: boolean,
   LOIs: LineOfInquiry[],
   loadingAll: boolean,
   errorAll: boolean,
@@ -12,6 +13,7 @@ interface LOIsState {
 }
 
 interface PartialLOIsState {
+  initialized?: boolean,
   LOIs?: LineOfInquiry[],
   loadingAll?: boolean,
   errorAll?: boolean,
@@ -24,6 +26,7 @@ interface PartialLOIsState {
 export const loisSlice = createSlice({
   name: 'lois',
   initialState: {
+    initialized: false,
     LOIs: [],
     loadingAll: false,
     errorAll: false,
@@ -36,6 +39,7 @@ export const loisSlice = createSlice({
     setLOIs: (state:LOIsState, action: PayloadAction<LineOfInquiry[]>) => {
       let newState  : PartialLOIsState = {
         LOIs: action.payload,
+        initialized: true,
         loadingAll: false,
         errorAll: false,
       };

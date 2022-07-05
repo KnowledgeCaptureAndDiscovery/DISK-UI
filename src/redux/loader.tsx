@@ -1,12 +1,20 @@
 import { DISKAPI } from 'DISK/API';
 import { Hypothesis, LineOfInquiry, TriggeredLineOfInquiry } from 'DISK/interfaces';
-import { setLoadingSelected as setLoadingHypothesis, setSelectedHypothesis, setErrorSelected as setErrorHypothesis } from './hypothesis';
+import { setLoadingSelected as setLoadingHypothesis, setSelectedHypothesis, setErrorSelected as setErrorHypothesis, setLoadingAll as setLoadingHypotheses,
+        setHypotheses, setErrorAll as setErrorHypotheses} from './hypothesis';
 import type { AppDispatch } from './store';
 import {setLoadingAll as setLoadingTLOIs, setErrorAll as setErrorTLOIs, setTLOIs, setLoadingSelected as setLoadingTLOI,
         setSelectedTLOI, setErrorSelected as setErrorTLOI } from './tlois';
 import {setLoadingAll as setLoadingLOIs, setErrorAll as setErrorLOIs, setLOIs, setLoadingSelected as setLoadingLOI, setSelectedLOI, setErrorSelected as setErrorLOI } from './lois';
 
 // Hypothesis
+export const loadHypotheses = (dispatch:AppDispatch) => {
+    dispatch(setLoadingHypotheses());
+    return DISKAPI.getHypotheses()
+        .then((hyps:Hypothesis[]) => dispatch(setHypotheses(hyps)))
+        .catch(() => dispatch(setErrorHypotheses()));
+};
+
 export const loadHypothesis = (dispatch:AppDispatch, id:string) => {
     dispatch(setLoadingHypothesis(id));
     return DISKAPI.getHypothesis(id)

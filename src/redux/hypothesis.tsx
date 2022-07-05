@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Hypothesis } from "DISK/interfaces";
 
 interface HypothesisState {
+  initialized: boolean,
   hypotheses: Hypothesis[],
   loadingAll: boolean,
   errorAll: boolean,
@@ -12,6 +13,7 @@ interface HypothesisState {
 }
 
 interface PartialHypothesisState {
+  initialized?: boolean,
   hypotheses?: Hypothesis[],
   loadingAll?: boolean,
   errorAll?: boolean,
@@ -24,6 +26,7 @@ interface PartialHypothesisState {
 export const hypothesisSlice = createSlice({
   name: 'hypothesis',
   initialState: {
+    initialized: false,
     hypotheses: [],
     loadingAll: false,
     errorAll: false,
@@ -36,6 +39,7 @@ export const hypothesisSlice = createSlice({
     setHypotheses: (state:HypothesisState, action: PayloadAction<Hypothesis[]>) => {
       let newState  : PartialHypothesisState = {
         hypotheses: action.payload,
+        initialized: true,
         loadingAll: false,
         errorAll: false,
       };
