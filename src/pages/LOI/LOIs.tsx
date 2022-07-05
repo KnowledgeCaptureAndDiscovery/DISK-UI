@@ -17,6 +17,7 @@ type OrderType = 'date'|'author';
 export const LinesOfInquiry = () => {
     const dispatch = useAppDispatch();
     const [order, setOrder] = React.useState<OrderType>('date');
+    const [searchTerm, setSearchTerm] = React.useState<string>("");
     const LOIs = useAppSelector((state:RootState) => state.lois.LOIs);
     const loading = useAppSelector((state:RootState) => state.lois.loadingAll);
     const error = useAppSelector((state:RootState) => state.lois.errorAll);
@@ -77,6 +78,13 @@ export const LinesOfInquiry = () => {
         setLastDeletedNamed("");
     };
 
+    const textFilter = (loi:LineOfInquiry) => {
+        let t : string = loi.name + loi.description + loi.author;
+        if (loi.notes) t += loi.notes;
+        if (loi.dateCreated) t += loi.dateCreated;
+        if (loi.dateModified) t += loi.dateModified;
+        return t.toLowerCase().includes(searchTerm.toLowerCase());
+    }
 
     return (
         <Box>
@@ -116,6 +124,7 @@ export const LinesOfInquiry = () => {
 
             <Box sx={{display:'flex', paddingBottom: "5px"}}>
                 <TextField id="input-text-search" label="Search lines of inquiry" variant="outlined" size="small" 
+                    value={searchTerm} onChange={(ev) => setSearchTerm(ev.target.value)}
                     sx={{width:'100%', paddingRight:'5px'}} InputProps={{
                     startAdornment: <InputAdornment position="start"> <SearchIcon/> </InputAdornment>
                 }}/>
@@ -138,7 +147,7 @@ export const LinesOfInquiry = () => {
                     (error ? 
                         <Box> Error loading Lines of Inquiry </Box>
                     :
-                        LOIs.map((loi:LineOfInquiry) => <LOIPreview key={loi.id} LOI={loi} onDelete={() => {
+                        LOIs.filter(textFilter).map((loi:LineOfInquiry) => <LOIPreview key={loi.id} LOI={loi} onDelete={() => {
                             setConfirmDialogOpen(true);
                             setLOIToDelete(loi);
                         }}/>)

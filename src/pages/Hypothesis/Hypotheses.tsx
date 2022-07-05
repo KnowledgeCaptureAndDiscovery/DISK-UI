@@ -14,11 +14,12 @@ import { Link } from "react-router-dom";
 type OrderType = 'date'|'author';
 
 export const Hypotheses = () => {
+    const dispatch = useAppDispatch();
     const [order, setOrder] = React.useState<OrderType>('date');
+    const [searchTerm, setSearchTerm] = React.useState<string>("");
     const hypotheses = useAppSelector((state:RootState) => state.hypotheses.hypotheses);
     const loading = useAppSelector((state:RootState) => state.hypotheses.loadingAll);
     const error = useAppSelector((state:RootState) => state.hypotheses.errorAll);
-    const dispatch = useAppDispatch();
 
     const [waiting, setWaiting] = React.useState<boolean>(false);;
     const [deleteNotification, setDeleteNotification] = React.useState<boolean>(false);
@@ -83,6 +84,14 @@ export const Hypotheses = () => {
         setLastDeletedNamed("");
     };
 
+    const textFilter = (hypothesis:Hypothesis) => {
+        let t : string = hypothesis.name + hypothesis.description + hypothesis.author;
+        if (hypothesis.notes) t += hypothesis.notes;
+        if (hypothesis.dateCreated) t += hypothesis.dateCreated;
+        if (hypothesis.dateModified) t += hypothesis.dateModified;
+        return t.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+
     return (
         <Box>
             <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
@@ -121,6 +130,7 @@ export const Hypotheses = () => {
 
             <Box sx={{display:'flex', paddingBottom: "5px"}}>
                 <TextField id="input-text-search" label="Search hypotheses" variant="outlined" size="small" 
+                    value={searchTerm} onChange={(ev) => setSearchTerm(ev.target.value)}
                     sx={{width:'100%', paddingRight:'5px'}} InputProps={{
                     startAdornment: <InputAdornment position="start"> <SearchIcon/> </InputAdornment>
                 }}/>
@@ -143,7 +153,7 @@ export const Hypotheses = () => {
                     (error ? 
                         <Box> Error loading Hypotheses </Box>
                     :
-                        hypotheses.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => {
+                        hypotheses.filter(textFilter).map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => {
                             setHypothesisToDelete(h);
                             setConfirmDialogOpen(true);
                         }}/>)
