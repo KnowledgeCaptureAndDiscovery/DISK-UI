@@ -10,7 +10,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
-import { PATH_HYPOTHESES } from "constants/routes";
+import { PATH_HYPOTHESES, PATH_TLOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionPreview } from "components/QuestionPreview";
@@ -27,6 +27,11 @@ const TypographyLabel = styled(Typography)(({ theme }) => ({
 
 const TypographyInline = styled(Typography)(({ theme }) => ({
     display: "inline",
+}));
+
+const InfoInline = styled(Typography)(({ theme }) => ({
+    display: "inline",
+    color: "darkgray"
 }));
 
 const TypographySubtitle = styled(Typography)(({ theme }) => ({
@@ -230,20 +235,26 @@ export const HypothesisView = () => {
             <Box>
                 <TypographyLabel>Description: </TypographyLabel>
                 <TypographyInline>
-                    {!loading && !!hypothesis ? hypothesis.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
+                    {!loading && !!hypothesis ? hypothesis.description : <Skeleton sx={{display:"inline-block", width: "200px"}}/>}
                 </TypographyInline>
             </Box>
-            {!!hypothesis && hypothesis.notes ? <Box>
-                <TypographyLabel>Notes: </TypographyLabel>
-                <TypographyInline>{hypothesis.notes}</TypographyInline>
-            </Box> : ""}
+            <Box>
+                <TypographyLabel>Additional notes: </TypographyLabel>
+                    {loading ? 
+                        <Skeleton sx={{display:"inline-block", width: "200px"}}/> :
+                        (!!hypothesis && hypothesis.notes ? 
+                            <TypographyInline>{hypothesis.notes}</TypographyInline> : 
+                            <InfoInline> None specified </InfoInline>
+                        )
+                    }
+            </Box>
 
             <TypographySubtitle>
                 Hypothesis or question:
             </TypographySubtitle>
             {!loading && !!hypothesis ? 
-            <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
-            : <Skeleton/>}
+                <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
+                : <Skeleton/>}
         </Box>
 
         <Box sx={{padding:"10px"}}>
@@ -255,20 +266,6 @@ export const HypothesisView = () => {
                     <PlayIcon/> Run analysis 
                 </Button>
             </Box>
-            {/*newTlOIs.map((tloi:TriggeredLineOfInquiry) => 
-                <Card variant="outlined" key={tloi.id} sx={{marginBottom: "5px", padding: "2px 10px"}}>
-                    <Box sx={{display:"flex"}}>
-                        {tloi.status === 'FAILED' ? 
-                            <ErrorIcon sx={{color:"red"}}/> 
-                            : (tloi.status === 'SUCCESSFUL' ?
-                                <CheckIcon sx={{color:"green"}}/> 
-                                : <WaitIcon sx={{color:(tloi.status === 'RUNNING' ? "green" : "yellow")}}/>)}
-                        <Box sx={{marginLeft: "5px"}}>
-                            {tloi.name}
-                        </Box>
-                    </Box>
-                </Card>
-            )*/}
             {TLOIloading ? 
                 <Skeleton/>
                 : (Object.keys(myTLOIs).length === 0 ? <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
@@ -289,21 +286,27 @@ export const HypothesisView = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{padding: "0 10px"}}> # </TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>Status</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>Inputs</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>Outputs</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>p-value</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Date</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Run Status</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Input Files</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Output Files</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>Result</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {myTLOIs[loiId].value.map((tloi, index) => <TableRow key={tloi.id}>
                                     <TableCell sx={{padding: "0 10px"}}>{index+1}</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>
+                                        <Link to={PATH_TLOIS + "/" + tloi.id}>
+                                            {tloi.dateCreated} 
+                                        </Link>
+                                    </TableCell>
                                     <TableCell sx={{padding: "0 10px", color: getColorStatus(tloi.status)}}>
                                         <Box sx={{display:'flex', alignItems:'center'}}>
                                             {getIconStatus(tloi.status)}
                                             <Box sx={{marginLeft: '6px'}}>
-                                                {tloi.status}
+                                                {tloi.status === 'SUCCESSFUL' ? 'DONE' : tloi.status}
                                             </Box>
                                         </Box>
                                     </TableCell>
@@ -335,6 +338,5 @@ export const HypothesisView = () => {
                 </Card>))
             }
         </Box>
-        
     </Card>
 }

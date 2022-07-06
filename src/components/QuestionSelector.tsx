@@ -239,7 +239,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 options={options}
                 loading={loading}
                 renderInput={(params) => (
-                    <TextField {...params} error={exError} label="Patterns"
+                    <TextField {...params} error={exError} label="Templates"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (

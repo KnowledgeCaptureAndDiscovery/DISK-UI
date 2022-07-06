@@ -25,6 +25,12 @@ const TypographyLabel = styled(Typography)(({ theme }) => ({
     fontSize: ".9em"
 }));
 
+const InfoInline = styled(Typography)(({ theme }) => ({
+    display: "inline",
+    color: "darkgray"
+}));
+
+
 const TypographyInline = styled(Typography)(({ theme }) => ({
     display: "inline",
 }));
@@ -96,14 +102,18 @@ export const LOIView = () => {
             <Box>
                 <TypographyLabel>Description: </TypographyLabel>
                 <TypographyInline>
-                    {!loading && !!LOI ? LOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
+                    {!loading && !!LOI ? LOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}}/>}
                 </TypographyInline>
             </Box>
-            {!!LOI && LOI.notes ? <Box>
+            <Box>
                 <TypographyLabel>Notes: </TypographyLabel>
-                <TypographyInline>{LOI.notes}</TypographyInline>
-            </Box> : ""}
-
+                {loading ?
+                    <Skeleton sx={{display:"inline-block", width: "200px"}}/> :
+                    (!!LOI && LOI.notes ? 
+                        <TypographyInline>{LOI.notes}</TypographyInline> :
+                        <InfoInline> None specified </InfoInline>
+                    )}
+            </Box>
         </Box>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
@@ -134,24 +144,31 @@ export const LOIView = () => {
                     }}
                 />
             </Box>
-            {loading?
-                <Skeleton sx={{display:"inline-block", width: "400px"}}/>
-                : (!!LOI && (LOI.relevantVariables || LOI.explanation) ?
-                    <Box>
-                        <FormHelperText sx={{fontSize: ".9rem"}}>
-                            When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
-                        </FormHelperText>
-                        <Box>
-                            <TypographyLabel>List of variables to show on table:</TypographyLabel>
-                            <TypographyInline> {LOI.relevantVariables} </TypographyInline>
-                        </Box>
-                        <Box>
-                            <TypographyLabel>Information to show on the table:</TypographyLabel>
-                            <TypographyInline> {LOI.explanation} </TypographyInline>
-                        </Box>
-                    </Box> : null
-                )
-            }
+            <Box>
+                <FormHelperText sx={{fontSize: ".9rem"}}>
+                    When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
+                </FormHelperText>
+                <Box>
+                    <TypographyLabel>List of variables to show on table:</TypographyLabel>
+                    {loading ? 
+                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                        (!!LOI && LOI.relevantVariables ? 
+                            <TypographyInline> {LOI.relevantVariables} </TypographyInline> :
+                            <InfoInline> None specified </InfoInline>
+                        )
+                    }
+                </Box>
+                <Box>
+                    <TypographyLabel>Information to show on the table:</TypographyLabel>
+                    {loading?
+                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                        (!!LOI && LOI.explanation ? 
+                            <TypographyInline> {LOI.explanation} </TypographyInline> :
+                            <InfoInline> None specified </InfoInline>
+                        )
+                    }
+                </Box>
+            </Box>
         </Box>
         <Divider/>
 
