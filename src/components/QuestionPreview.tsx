@@ -1,10 +1,12 @@
-import { Box, Card, FormHelperText, styled, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material"
+import { Box, Card, FormHelperText, IconButton, styled, Table, TableBody, TableCell, TableContainer, TableRow, Tooltip } from "@mui/material"
 import { idPattern, Question, VariableBinding, QuestionVariable, varPattern } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface QuestionPreviewProps {
     selected: string,
@@ -24,6 +26,7 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
     const questions = useAppSelector((state:RootState) => state.question.questions);
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
+    const [formalView, setFormalView] = React.useState<boolean>(false);
 
     const [nameToValue, setNameToValue] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
@@ -151,16 +154,24 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
     return <Box>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis to be tested: </FormHelperText>
-            <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: "6px"}}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: "6px"}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
-                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500"}}> &lt; {nameToValue[part] ? nameToValue[part] : "any" } &gt; </TextPart>
+                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>{nameToValue[part] ? nameToValue[part] : "any" }</TextPart>
                     )
                 : ""}
+                </Box>
+                <Tooltip arrow title={(formalView? "Hide" : "Show") + " formal expression"}>
+                    <IconButton onClick={() => setFormalView(!formalView)}>
+                        {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}
+                    </IconButton>
+                </Tooltip>
             </Box>
         </Card>
+        {formalView ?
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Formal expression: </FormHelperText>
             <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
@@ -173,5 +184,6 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
                 </Table>
             </TableContainer>
         </Card>
+        : null }
     </Box>;
 }

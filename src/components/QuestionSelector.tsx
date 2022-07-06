@@ -1,10 +1,12 @@
-import { Autocomplete, Box, Card, CircularProgress, FormHelperText, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material"
+import { Autocomplete, Box, Card, CircularProgress, FormHelperText, IconButton, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Tooltip } from "@mui/material"
 import { idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface QuestionProps {
     questionId: string,
@@ -26,6 +28,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
     const options = useAppSelector((state:RootState) => state.question.questions);
     const varOptions = useAppSelector((state:RootState) => state.question.options);
+    const [formalView, setFormalView] = React.useState<boolean>(false);
 
     const [nameToId, setNameToId] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
@@ -254,44 +257,52 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
                 Fill in the template:
             </FormHelperText>
-            <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
-                {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
-                    part.charAt(0) !== '?' ? 
-                        <TextPart key={`qPart${i}`}> {part} </TextPart>
-                    :
-                        <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                            options={varOptions[nameToId[part]].values}
-                            value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                            onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
-                                let newValues = { ...values };
-                                newValues[nameToId[part]] = value;
-                                return newValues;
-                            })}
-                            inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
-                            onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
-                                let newMap = { ...map };
-                                newMap[nameToId[part]] = newIn;
-                                return newMap;
-                            })}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            getOptionLabel={(option) => option.name}
-                            loading={varOptions[nameToId[part]].loading}
-                            renderInput={(params) => (
-                                <TextField {...params} label={part} variant="standard" InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                        <React.Fragment>
-                                            {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                            {params.InputProps.endAdornment}
-                                        </React.Fragment>
-                                    ),
-                                }}/>
-                            )}
-                        />
-                    )
-                : ""}
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
+                    {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
+                        part.charAt(0) !== '?' ? 
+                            <TextPart key={`qPart${i}`}> {part} </TextPart>
+                        :
+                            <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
+                                options={varOptions[nameToId[part]].values}
+                                value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
+                                onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
+                                    let newValues = { ...values };
+                                    newValues[nameToId[part]] = value;
+                                    return newValues;
+                                })}
+                                inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
+                                onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
+                                    let newMap = { ...map };
+                                    newMap[nameToId[part]] = newIn;
+                                    return newMap;
+                                })}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                getOptionLabel={(option) => option.name}
+                                loading={varOptions[nameToId[part]].loading}
+                                renderInput={(params) => (
+                                    <TextField {...params} label={part} variant="standard" InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <React.Fragment>
+                                                {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                {params.InputProps.endAdornment}
+                                            </React.Fragment>
+                                        ),
+                                    }}/>
+                                )}
+                            />
+                        )
+                    : ""}
+                </Box>
+                <Tooltip arrow title={(formalView? "Hide" : "Show") + " formal expression"}>
+                    <IconButton onClick={() => setFormalView(!formalView)}>
+                        {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}
+                    </IconButton>
+                </Tooltip>
             </Box>
         </Card>
+        {formalView ? 
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Formal expression: </FormHelperText>
             <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
@@ -306,5 +317,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 </Table>
             </TableContainer>
         </Card>
+        : null}
     </Box>;
 }
