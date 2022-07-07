@@ -259,39 +259,45 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
-                    {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
+                    {questionParts.length > 0 ? questionParts.map((part:string, i:number, parts: string[]) => 
                         part.charAt(0) !== '?' ? 
                             <TextPart key={`qPart${i}`}> {part} </TextPart>
                         :
-                            <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                                options={varOptions[nameToId[part]].values}
-                                value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                                onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
-                                    let newValues = { ...values };
-                                    newValues[nameToId[part]] = value;
-                                    return newValues;
-                                })}
-                                inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
-                                onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
-                                    let newMap = { ...map };
-                                    newMap[nameToId[part]] = newIn;
-                                    return newMap;
-                                })}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
-                                getOptionLabel={(option) => option.name}
-                                loading={varOptions[nameToId[part]].loading}
-                                renderInput={(params) => (
-                                    <TextField {...params} label={part} variant="standard" InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <React.Fragment>
-                                                {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                {params.InputProps.endAdornment}
-                                            </React.Fragment>
-                                        ),
-                                    }}/>
+                            <>
+                                <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
+                                    options={varOptions[nameToId[part]].values}
+                                    value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
+                                    onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
+                                        let newValues = { ...values };
+                                        newValues[nameToId[part]] = value;
+                                        return newValues;
+                                    })}
+                                    inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
+                                    onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
+                                        let newMap = { ...map };
+                                        newMap[nameToId[part]] = newIn;
+                                        return newMap;
+                                    })}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    getOptionLabel={(option) => option.name}
+                                    loading={varOptions[nameToId[part]].loading}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label={part} variant="standard" InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}/>
+                                    )}
+                                />
+
+                                {i === (parts.length - 1) && (
+                                    <TextPart key={`qPartFinal`}> ? </TextPart>
                                 )}
-                            />
+                            </>
                         )
                     : ""}
                 </Box>
