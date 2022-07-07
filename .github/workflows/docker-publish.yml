@@ -193,7 +193,7 @@ jobs:
       security-events: write
       packages: write
     name: "Scan vulnerabilities in the image"
-    needs: [build]
+    needs: [build, build-climate, build-neuro]
     runs-on: ubuntu-latest
     steps:
       - name: Run Trivy vulnerability scanner
