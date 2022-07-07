@@ -88,6 +88,7 @@ jobs:
         id: exposeValue
         run: |
           echo "::set-output name=docker_tag::${{ env.DOCKER_TAG }}"
+
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -102,6 +103,9 @@ jobs:
           context: .
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           file: ${{ env.DOCKER_FILE}}
+    outputs:
+      docker_tag: ${{ steps.exposeValue.outputs.docker_tag }}
+
 
 
   build-climate:
