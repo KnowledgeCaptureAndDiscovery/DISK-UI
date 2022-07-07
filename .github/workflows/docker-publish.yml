@@ -10,6 +10,8 @@ env:
   #variables related with the docker imager registry
   DOCKER_IMAGE_REPOSITORY: ikcap
   DOCKER_IMAGE_NAME: disk_frontend
+  DOCKER_IMAGE_CLIMATE_NAME: disk_frontend_climate
+  DOCKER_IMAGE_NEURO_NAME: disk_frontend_neuro
   DOCKER_FILE: ".Dockerfile-actions"
   #variables related with the continuous delivery
   MANIFEST_REPOSITORY: KnowledgeCaptureAndDiscovery/k8s
@@ -101,9 +103,90 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }}
           file: ${{ env.DOCKER_FILE}}
 
+
+  build-climate:
+    needs: yarn 
+    name: Create Docker image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: nextjs-build
+          path: build/
+
+      - name: Replace the backend server with the climate server
+        run: |
+          sed -i 's/disk.isi.edu/climate.disk.isi.edu/g' ./build/static/js/main.*.js
+
+      - name: Create value as an environment variable
+        run: |
+          echo "DOCKER_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+      - name: Expose value
+        id: exposeValue
+        run: |
+          echo "::set-output name=docker_tag::${{ env.DOCKER_TAG }}"
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3.0.0
+        if: github.event_name != 'pull_request'
+        with:
+          push: true
+          context: .
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_CLIMATE_NAME }}:${{ env.DOCKER_TAG }}
+          file: ${{ env.DOCKER_FILE}}
     outputs:
       docker_tag: ${{ steps.exposeValue.outputs.docker_tag }}
   
+
+  build-neuro:
+    needs: yarn 
+    name: Create Docker image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: nextjs-build
+          path: build/
+
+      - name: Replace the backend server with the climate server
+        run: |
+          sed -i 's/disk.isi.edu/neuro.disk.isi.edu/g' ./build/static/js/main.*.js
+
+      - name: Create value as an environment variable
+        run: |
+          echo "DOCKER_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+      - name: Expose value
+        id: exposeValue
+        run: |
+          echo "::set-output name=docker_tag::${{ env.DOCKER_TAG }}"
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3.0.0
+        if: github.event_name != 'pull_request'
+        with:
+          push: true
+          context: .
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NEURO_NAME }}:${{ env.DOCKER_TAG }}
+          file: ${{ env.DOCKER_FILE}}
+    outputs:
+      docker_tag: ${{ steps.exposeValue.outputs.docker_tag }}
+
   security:
     permissions:
       contents: read
@@ -159,6 +242,7 @@ jobs:
           cd ${{ env.MANIFEST_REPOSITORY_PATH }}
           kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.build.outputs.docker_tag }}
           cat kustomization.yaml
+
       - name: Commit files
         if: github.event_name != 'pull_request'
         run: |
