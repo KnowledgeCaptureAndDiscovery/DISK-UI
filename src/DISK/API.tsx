@@ -1,4 +1,4 @@
-import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry } from "./interfaces";
+import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
 import { DISK_API } from "../constants/config";
 
@@ -164,7 +164,11 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "externalQuery?" + new URLSearchParams({
             endpoint: dataSource,
             query: query,
-            variables: variables.length === 0 ? "*" : variables.join(",")
+            variables: variables.length === 0 ? "*" : variables.join(" ")
         })) as {[varName:string] : string[]};
+    }
+
+    public static async getVocabulary () : Promise<Vocabularies> {
+        return await DISKAPI.get(DISKAPI.url + "vocabulary") as Vocabularies;
     }
 }

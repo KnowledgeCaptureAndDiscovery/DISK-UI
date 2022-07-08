@@ -109,7 +109,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
                 options={options}
                 loading={loading}
                 renderInput={(params) => (
-                    <TextField {...params} error={exError} label="Patterns"
+                    <TextField {...params} error={exError} label="Templates"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (

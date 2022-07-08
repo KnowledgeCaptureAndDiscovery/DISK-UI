@@ -17,19 +17,19 @@ import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server";
 import React from "react";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
     display: "inline",
     fontWeight: "bold",
-    fontSize: ".9em"
 }));
 
 const InfoInline = styled(Typography)(({ theme }) => ({
     display: "inline",
     color: "darkgray"
 }));
-
 
 const TypographyInline = styled(Typography)(({ theme }) => ({
     display: "inline",
@@ -42,18 +42,20 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 
 export const LOIView = () => {
     const location = useLocation();
+    const dispatch = useAppDispatch();
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     const LOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
     const selectedId = useAppSelector((state:RootState) => state.lois.selectedId);
     const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
     const error = useAppSelector((state:RootState) => state.lois.errorSelected);
-    const dispatch = useAppDispatch();
 
     const endpoints = useAppSelector((state:RootState) => state.server.endpoints);
     const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
     const errorEndpoints = useAppSelector((state:RootState) => state.server.errorEndpoints);
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const [dataSourceLabel, setDataSourceLabel] = React.useState("");
+    const [formalView, setFormalView] = React.useState<boolean>(false);
 
     const loadLOI = () => {
         let id : string = location.pathname.replace(idPattern, '');
@@ -62,7 +64,6 @@ export const LOIView = () => {
             DISKAPI.getLOI(id)
                 .then((LOI:LineOfInquiry) => {
                     dispatch(setSelectedLOI(LOI));
-                        setSelectedDataSource(LOI.dataSource)
                 })
                 .catch(() => {
                     dispatch(setErrorSelected());
@@ -77,6 +78,23 @@ export const LOIView = () => {
                 .catch(() => dispatch(setErrorEndpoint()));
         }
     }
+
+    useEffect(() => {
+        if (LOI) {
+            setSelectedDataSource(LOI.dataSource)
+        }
+    }, [LOI]);
+
+    const updateDataSourceLabel = () => {
+        if (endpoints && selectedDataSource) {
+            Object.keys(endpoints).forEach((name:string) => {
+                if (endpoints[name] === selectedDataSource)
+                    setDataSourceLabel(name);
+            });
+        }
+    }
+
+    useEffect(updateDataSourceLabel, [endpoints, selectedDataSource]);
 
     useEffect(loadLOI, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -124,18 +142,30 @@ export const LOIView = () => {
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
             <Box sx={{display: "inline-flex", alignItems: "center"}}>
-                <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
-                <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard" value={selectedDataSource} label={"Data source:"} disabled>
-                    {loadingEndpoints ? 
-                        <MenuItem value={selectedDataSource}> Loading ... </MenuItem> 
-                    : (
-                        endpoints ? 
-                            Object.keys(endpoints).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints[name]}>{name}</MenuItem>)
-                        :
-                            <MenuItem value={selectedDataSource}>{selectedDataSource}</MenuItem>
-                    )}
-                </Select>
+                <TypographyLabel>Data source: </TypographyLabel>
+                {loadingEndpoints ? 
+                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                    <TypographyInline sx={{ml:"5px"}}> {dataSourceLabel} </TypographyInline>
+                }
             </Box>
+            <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
+                <Box>
+                    <TypographyLabel>Data query explanation:</TypographyLabel>
+                    {loading ? 
+                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                        (!!LOI && LOI.dataQueryExplanation ? 
+                            <TypographyInline> {LOI.dataQueryExplanation} </TypographyInline> :
+                            <InfoInline> None specified </InfoInline>
+                        )
+                    }
+                </Box>
+                <Tooltip arrow title={(formalView? "Hide" : "Show") + " data query"}>
+                    <IconButton onClick={() => setFormalView(!formalView)}>
+                        {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}
+                    </IconButton>
+                </Tooltip>
+            </Box>
+            {formalView ?
             <Box sx={{fontSize: "0.94rem"}} >
                 <CodeMirror value={!!LOI? LOI.dataQuery : ""}
                     extensions={[StreamLanguage.define(sparql)]}
@@ -143,27 +173,28 @@ export const LOIView = () => {
                     console.log('value:', value);
                     }}
                 />
-            </Box>
+            </Box> : null }
             <Box>
+                <Divider/>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>
                 <Box>
-                    <TypographyLabel>List of variables to show on table:</TypographyLabel>
+                    <TypographyLabel>Columns to show on table:</TypographyLabel>
                     {loading ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!LOI && LOI.relevantVariables ? 
-                            <TypographyInline> {LOI.relevantVariables} </TypographyInline> :
+                        (!!LOI && LOI.tableVariables ? 
+                            <TypographyInline> {LOI.tableVariables} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }
                 </Box>
                 <Box>
-                    <TypographyLabel>Information to show on the table:</TypographyLabel>
+                    <TypographyLabel>Description of the table:</TypographyLabel>
                     {loading?
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!LOI && LOI.explanation ? 
-                            <TypographyInline> {LOI.explanation} </TypographyInline> :
+                        (!!LOI && LOI.tableDescription ? 
+                            <TypographyInline> {LOI.tableDescription} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }

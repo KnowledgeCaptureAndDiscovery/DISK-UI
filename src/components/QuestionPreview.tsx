@@ -11,6 +11,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 interface QuestionPreviewProps {
     selected: string,
     bindings: VariableBinding[],
+    label?: string
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -20,7 +21,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPreviewProps) => {
+export const QuestionPreview = ({selected:selectedId, bindings, label} : QuestionPreviewProps) => {
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
@@ -151,16 +152,22 @@ export const QuestionPreview = ({selected:selectedId, bindings} : QuestionPrevie
         return uri;
     }
 
+    const displayValue = (text:string) => {
+        return text.replaceAll('-28','(').replaceAll('-29',')').replaceAll('-3A',': ').replaceAll('_',' ');
+    }
+
     return <Box>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> The hypothesis to be tested: </FormHelperText>
+            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
+                {label? label : "The hypothesis to be tested:"}
+            </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: "6px"}}>
                 {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
-                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>{nameToValue[part] ? nameToValue[part] : "any" }</TextPart>
+                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>{nameToValue[part] ? displayValue(nameToValue[part]) : "any" }</TextPart>
                     )
                 : ""}
                 </Box>

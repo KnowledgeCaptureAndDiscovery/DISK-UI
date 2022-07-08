@@ -33,7 +33,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         setMetaWorkflows(inputMetaworkflows);
     }, [inputMetaworkflows]);
 
-    const toggleEdition = () => {
+    const toggleEdition = (meta:boolean=false) => {
         if (addingWorkflow && selectedWorkflow) {
             setSelectedWorkflow(undefined);
             setEditingIndex(-1);
@@ -41,6 +41,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         }
         if (sendEditChange) sendEditChange(!addingWorkflow);
         setAddingWorkflow(!addingWorkflow)
+        setEditingMeta(meta);
     };
 
     const onEditButtonClicked = (wf:Workflow, index:number, isMeta:boolean=false) => {
@@ -88,21 +89,25 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
             <FormHelperText sx={{fontSize: ".9rem"}}>
                 The data analysis methods are represented in the following workflows:
             </FormHelperText>
-            {addingWorkflow ? 
-                <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={toggleEdition} color="error">
-                    <CancelIcon sx={{marginRight: "4px"}}/> Cancel workflow {selectedWorkflow ? "edition" : "creation"}
-                </Button>
+            {editable ? 
+                (addingWorkflow ? 
+                    <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={() => toggleEdition()} color="error">
+                        <CancelIcon sx={{marginRight: "4px"}}/> Cancel workflow {selectedWorkflow ? "edition" : "creation"}
+                    </Button>
+                :
+                    <Box>
+                        <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={() => toggleEdition()} color="primary">
+                            <AddIcon sx={{marginRight: "4px"}}/> Add Workflow
+                        </Button>
+                        {workflows.length > 0 ?
+                        <Button sx={{padding: "3px 6px", marginLeft: "6px"}} variant="outlined" onClick={() => toggleEdition(true)} color="primary">
+                            <AddIcon sx={{marginRight: "4px"}}/> Add Meta-workflow
+                        </Button>
+                        : null}
+                    </Box>
+                )
             :
-                <Box>
-                    <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={toggleEdition} color="primary">
-                        <AddIcon sx={{marginRight: "4px"}}/> Save Workflow
-                    </Button>
-                    {workflows.length > 0 && false ?
-                    <Button sx={{padding: "3px 6px", marginLeft: "6px"}} variant="outlined">
-                        <AddIcon sx={{marginRight: "4px"}}/> Save Meta-workflow
-                    </Button>
-                    : ""}
-                </Box>
+                null
             }
         </Box> 
 
@@ -111,7 +116,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
             <Box>
                 {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
                     <WorkflowPreview key={`wf_${wf.workflow}-${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? onRemoveWorkflow : undefined}
-                        button={editable && !addingWorkflow? 
+                         button={editable && !addingWorkflow? 
                         <Tooltip arrow title="Edit">
                             <IconButton sx={{padding: "0 3px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
                                 <EditIcon></EditIcon>

@@ -89,8 +89,9 @@ export interface LineOfInquiry {
     author: string,
     dateCreated: string,
     dateModified: string,
-    relevantVariables: string,
-    explanation: string,
+    tableVariables: string,
+    tableDescription: string,
+    dataQueryExplanation: string,
     dataSource: string,
     question: string,
 }
@@ -113,8 +114,9 @@ export interface TriggeredLineOfInquiry {
     author: string,
     dateCreated: string,
     dateModified: string,
-    relevantVariables: string,
-    explanation: string,
+    tableVariables: string,
+    tableDescription: string,
+    dataQueryExplanation: string,
     dataSource: string,
 }
 
@@ -133,6 +135,39 @@ export interface Method {
     inputs?: MethodInput[]
 }
 
+export interface VocabularyType {
+    id: string,
+    name: string,
+    label: string,
+    parent: string | null,
+    children: string[]
+}
+
+export interface VocabularyProperty {
+    id: string,
+    name: string,
+    label: string,
+    domain: string | null,
+    range: string | null,
+}
+
+export interface VocabularyIndividual {
+    id: string,
+    name: string,
+    label: string,
+    type: string,
+}
+
+export interface Vocabulary {
+    namespace: string,
+    types: {[uri:string]: VocabularyType},
+    properties: {[uri:string]: VocabularyProperty},
+    individuals: {[uri:string]: VocabularyIndividual},
+}
+
+export type Vocabularies = {[url:string]: Vocabulary};
+
 const _names = {}
+
 
 export default _names;

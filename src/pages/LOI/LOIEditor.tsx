@@ -56,8 +56,9 @@ export const LOIEditor = () => {
     const [description, setDescription] = React.useState("");
     const [notes, setNotes] = React.useState("");
     const [dataQuery, setDataQuery] = React.useState("");
-    const [explanation, setExplanation] = React.useState("");
-    const [relevantVariables, setRelevantVariables] = React.useState("");
+    const [tableExplanation, setTableDescription] = React.useState("");
+    const [tableVariables, setTableVariables] = React.useState("");
+    const [dataQueryExplanation, setDataQueryExplanation] = React.useState("");
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
     const [questionId, setQuestionId] = React.useState<string>("");
@@ -127,8 +128,9 @@ export const LOIEditor = () => {
         setNotes(loi.notes ? loi.notes : "");
         setSelectedDataSource(loi.dataSource);
         setDataQuery(loi.dataQuery);
-        setExplanation(loi.explanation? loi.description : "");
-        setRelevantVariables(loi.relevantVariables ? loi.relevantVariables : "");
+        setTableDescription(loi.tableDescription? loi.tableDescription : "");
+        setTableVariables(loi.tableVariables? loi.tableVariables : "");
+        setDataQueryExplanation(loi.dataQueryExplanation ? loi.dataQueryExplanation : "");
         setWorkflows(loi.workflows);
         setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
     };
@@ -139,8 +141,9 @@ export const LOIEditor = () => {
         setNotes("");
         setSelectedDataSource("");
         setDataQuery("");
-        setExplanation("");
-        setRelevantVariables("");
+        setTableDescription("");
+        setTableVariables("");
+        setDataQueryExplanation("");
         setWorkflows([]);
         setMetaWorkflows([]);
     };
@@ -181,6 +184,9 @@ export const LOIEditor = () => {
                 }}),
             }}),
             metaWorkflows: metaWorkflows,
+            tableDescription: tableExplanation,
+            tableVariables: tableVariables,
+            dataQueryExplanation: dataQueryExplanation,
         };
 
         setWaiting(true);
@@ -332,6 +338,7 @@ export const LOIEditor = () => {
                 </Box>
                 <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
+            <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
             <Box sx={{fontSize: "0.94rem"}} >
                 <Card variant="outlined" sx={{
                         ...{mt: "8px", p: "0px", position: "relative", overflow:"visible", pt:"10px"},
@@ -355,8 +362,8 @@ export const LOIEditor = () => {
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>
-                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="List of variables to show on table:" placeholder="?var1 ?var2 ..." value={relevantVariables} onChange={(e) => setRelevantVariables(e.target.value)}/>
-                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Information to show on the table:" value={explanation} onChange={(e) => setExplanation(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Columns to show on table:" placeholder="?var1 ?var2 ..." value={tableVariables} onChange={(e) => setTableVariables(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Brief description of the table:" value={tableExplanation} onChange={(e) => setTableDescription(e.target.value)}/>
             </Box>
         </Box>
         <Divider/>

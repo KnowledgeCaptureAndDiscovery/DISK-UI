@@ -47,6 +47,7 @@ type TLOIMap = {[id:string]: {
 export const HypothesisView = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
     const selectedId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
@@ -56,7 +57,7 @@ export const HypothesisView = () => {
     const TLOIs = useAppSelector((state:RootState) => state.tlois.TLOIs);
     const TLOIloading = useAppSelector((state:RootState) => state.tlois.loadingAll);
     const TLOIerror = useAppSelector((state:RootState) => state.tlois.errorAll);
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const TLOIInit = useAppSelector((state:RootState) => state.tlois.initialized);
 
     const [myTLOIs, setMyTLOIs] = useState<TLOIMap>({});
     const [newTlOIs, setNewTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
@@ -76,7 +77,7 @@ export const HypothesisView = () => {
     }, [location, dispatch, error, loading, selectedId]);
 
     useEffect(() => {
-        if (!TLOIloading && !TLOIerror && TLOIs.length === 0)
+        if (!TLOIInit)
             loadTLOIs(dispatch);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -97,13 +98,14 @@ export const HypothesisView = () => {
 
 
     const getColorStatus = (status:TriggeredLineOfInquiry["status"]) => {
-        if (status === 'FAILED')
+        return 'unset';
+        /*if (status === 'FAILED')
             return 'red';
         if (status === 'SUCCESSFUL' || status === 'RUNNING')
             return 'green';
         if (status === 'QUEUED')
             return 'orange';
-        return 'unset';
+        return 'unset';*/
     }
 
     const getIconStatus = (status:TriggeredLineOfInquiry["status"]) => {
@@ -276,7 +278,8 @@ export const HypothesisView = () => {
                     <Box sx={{display: 'flex', alignItems: 'center', justifyContent:"space-between"}}>
                         <Box sx={{display: 'flex', alignItems: 'center'}}>
                             <SettingsIcon sx={{color: "green", mr: "5px"}}/>
-                            <b>{myTLOIs[loiId].name}</b>
+                            <span style={{marginRight: ".5em"}}> Execution of: </span> 
+                            <b> {myTLOIs[loiId].name}</b>
                         </Box>
                         <Box>{myTLOIs[loiId].value.length} runs</Box>
                     </Box>
@@ -290,7 +293,7 @@ export const HypothesisView = () => {
                                     <TableCell sx={{padding: "0 10px"}}>Run Status</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Input Files</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Output Files</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>Result</TableCell>
+                                    <TableCell sx={{padding: "0 10px", minWidth: "120px"}}>P-value</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}></TableCell>
                                 </TableRow>
                             </TableHead>
@@ -298,9 +301,9 @@ export const HypothesisView = () => {
                                 {myTLOIs[loiId].value.map((tloi, index) => <TableRow key={tloi.id}>
                                     <TableCell sx={{padding: "0 10px"}}>{index+1}</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        <Link to={PATH_TLOIS + "/" + tloi.id}>
+                                        <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{textDecoration: "none", color: "black"}}>
                                             {tloi.dateCreated} 
-                                        </Link>
+                                        </Box>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px", color: getColorStatus(tloi.status)}}>
                                         <Box sx={{display:'flex', alignItems:'center'}}>
@@ -317,7 +320,7 @@ export const HypothesisView = () => {
                                         {tloi.status !== 'SUCCESSFUL' ? "" : tloi.outputFiles.length}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue}
+                                        {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue.toFixed(5)}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center'}}>

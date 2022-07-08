@@ -165,10 +165,10 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
     return <Card variant="outlined" sx={{padding: "5px 10px", position: "relative", overflow: "visible", mb: "5px"}}>
         <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-14px 0 0 0'}}> Configure a new workflow: </FormHelperText>
         <Grid container spacing={1} sx={{alignItems: "center", height: "68px"}}>
-            <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", color: "#444", fontSize: "0.85rem"}}>
+            <Grid item xs={3} md={4} sm={5} sx={{textAlign: "right", color: "#444", fontSize: "0.85rem"}}>
                 <Typography>Specify a workflow to be used in this LOI:</Typography>
             </Grid>
-            <Grid item xs={10} md={9} sm={8}>
+            <Grid item xs={9} md={8} sm={7}>
                 <Autocomplete id="select-workflow" size="small" fullWidth
                     value={selected}
                     onChange={(_,newQ) => onWorkflowChange(newQ)}
@@ -237,7 +237,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         : <Box/>}
         <Box sx={{display:"flex", justifyContent:"end", alignItems: "center"}}>
             <Button variant="contained" color="success" onClick={onWorkflowSave} disabled={!selected}>
-                <AddIcon sx={{mr: "5px"}}/> Add workflow
+                <AddIcon sx={{mr: "5px"}}/> Save workflow
             </Button>
         </Box>
     </Card>;

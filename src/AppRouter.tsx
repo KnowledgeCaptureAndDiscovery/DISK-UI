@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import RightMenu from "components/RightMenu";
-import { PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_TLOI_ID } from "constants/routes";
+import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_TERMINOLOGY, PATH_TLOI_ID } from "constants/routes";
 import { Home } from "pages/Home";
 import { Hypotheses } from "pages/Hypothesis/Hypotheses";
 import { HypothesisEditor } from "pages/Hypothesis/HypothesisEditor";
@@ -8,6 +8,8 @@ import { HypothesisView } from "pages/Hypothesis/HypothesisView";
 import { LOIEditor } from "pages/LOI/LOIEditor";
 import { LinesOfInquiry } from "pages/LOI/LOIs";
 import { LOIView } from "pages/LOI/LOIView";
+import { TerminologyView } from "pages/Terminology/TerminologyView";
+import { DataView } from "pages/Data/DataView";
 import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
@@ -39,6 +41,9 @@ export const AppRouter = () => {
           <Route path={PATH_LOI_ID_EDIT} element={authenticated ? <LOIEditor/> : notAuthMsg() }></Route>
 
           <Route path={PATH_TLOI_ID} element={<TLOIView/>}></Route>
+
+          <Route path={PATH_TERMINOLOGY} element={<TerminologyView/>}></Route>
+          <Route path={PATH_DATA} element={<DataView/>}></Route>
         </Routes>
       </RightMenu>
     </BrowserRouter>
