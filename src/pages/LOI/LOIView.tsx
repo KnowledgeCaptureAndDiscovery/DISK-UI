@@ -1,7 +1,7 @@
 import { Box, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { LineOfInquiry, idPattern, VariableBinding, Workflow } from "DISK/interfaces";
-import { useEffect } from "react";
+import { LineOfInquiry, idPattern, VariableBinding, Workflow, DataEndpoint } from "DISK/interfaces";
+import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
@@ -19,6 +19,8 @@ import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { loadDataEndpoints } from "redux/loader";
+import { renderDescription } from "DISK/util";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -50,11 +52,11 @@ export const LOIView = () => {
     const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
     const error = useAppSelector((state:RootState) => state.lois.errorSelected);
 
-    const endpoints = useAppSelector((state:RootState) => state.server.endpoints);
+    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
     const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
-    const errorEndpoints = useAppSelector((state:RootState) => state.server.errorEndpoints);
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
-    const [dataSourceLabel, setDataSourceLabel] = React.useState("");
+    const [dataSource, setDataSource] = React.useState<DataEndpoint|null>();
     const [formalView, setFormalView] = React.useState<boolean>(false);
 
     const loadLOI = () => {
@@ -69,13 +71,8 @@ export const LOIView = () => {
                     dispatch(setErrorSelected());
                 });
         }
-        if (endpoints == null && !loadingEndpoints && !errorEndpoints) {
-            dispatch(setLoadingEndpoints());
-            DISKAPI.getEndpoints()
-                .then((endpointMap:{[name:string]: string}) => {
-                    dispatch(setEndpoint(endpointMap))
-                })
-                .catch(() => dispatch(setErrorEndpoint()));
+        if (!initializedEndpoint) {
+            loadDataEndpoints(dispatch);
         }
     }
 
@@ -87,9 +84,9 @@ export const LOIView = () => {
 
     const updateDataSourceLabel = () => {
         if (endpoints && selectedDataSource) {
-            Object.keys(endpoints).forEach((name:string) => {
-                if (endpoints[name] === selectedDataSource)
-                    setDataSourceLabel(name);
+            endpoints.forEach((endpoint:DataEndpoint) => {
+                if (endpoint.url === selectedDataSource)
+                    setDataSource(endpoint);
             });
         }
     }
@@ -141,11 +138,20 @@ export const LOIView = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
-            <Box sx={{display: "inline-flex", alignItems: "center"}}>
-                <TypographyLabel>Data source: </TypographyLabel>
+            <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
+                <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
                 {loadingEndpoints ? 
                     <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    <TypographyInline sx={{ml:"5px"}}> {dataSourceLabel} </TypographyInline>
+                    (dataSource ?
+                        <Fragment>
+                            <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
+                            <TypographyInline sx={{ml:"5px", fontSize:".85em"}}>
+                                <div dangerouslySetInnerHTML={{__html: renderDescription(dataSource.description)}}/>
+                            </TypographyInline>
+                        </Fragment>
+                    :
+                        null
+                    )
                 }
             </Box>
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>

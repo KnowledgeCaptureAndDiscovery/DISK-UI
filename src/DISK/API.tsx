@@ -1,4 +1,4 @@
-import { Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
+import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
 import { DISK_API } from "../constants/config";
 
@@ -143,8 +143,8 @@ export class DISKAPI {
     // OTHER STUFF
     //=======================
 
-    public static async getEndpoints () : Promise<{[name:string] : string }> {
-        return await DISKAPI.get(DISKAPI.url + "server/endpoints") as {[name:string] : string };
+    public static async getEndpoints () : Promise<DataEndpoint[]> {
+        return await DISKAPI.get(DISKAPI.url + "server/endpoints") as DataEndpoint[];
     }
 
     public static async getWorkflows () : Promise<Method[]> {

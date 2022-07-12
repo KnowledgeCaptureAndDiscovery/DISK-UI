@@ -7,6 +7,7 @@ import { StreamLanguage } from '@codemirror/language';
 import { DISKAPI } from "DISK/API";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
+import { DataEndpoint } from "DISK/interfaces";
 
 interface QueryTesterProps {
     name?: string,
@@ -22,7 +23,7 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
     const [results, setResults] = useState<{[varName:string] : string[]}>({});
     const [total, setTotal] = useState<number>(0);
 
-    const endpoints = useAppSelector((state:RootState) => state.server.endpoints);
+    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
 
     useEffect(() => {
         if (initQuery) setQuery(initQuery);
@@ -71,7 +72,9 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
                         <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
                                 value={dataSource} onChange={(e) => setDataSource(e.target.value)} error={dataSource.length===0} >
                             <MenuItem value="" disabled> None </MenuItem>
-                            { Object.keys(endpoints || []).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints![name]}>{name}</MenuItem>) }
+                            {endpoints.map((endpoint:DataEndpoint) => <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
+                                {endpoint.name}
+                            </MenuItem>) }
                         </Select>
                     </Box>
                     <CodeMirror value={query}

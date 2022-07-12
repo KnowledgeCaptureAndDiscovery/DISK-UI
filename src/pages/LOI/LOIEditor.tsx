@@ -1,7 +1,7 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
+import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -20,6 +20,8 @@ import { StreamLanguage } from '@codemirror/language';
 import { WorkflowList } from "components/WorkflowList";
 import { LineOfInquiryRequest } from "DISK/requests";
 import { QueryTester } from "components/QueryTester";
+import { loadDataEndpoints } from "redux/loader";
+import { renderDescription } from "DISK/util";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -42,9 +44,9 @@ export const LOIEditor = () => {
     const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
     const error = useAppSelector((state:RootState) => state.lois.errorSelected);
 
-    const endpoints = useAppSelector((state:RootState) => state.server.endpoints);
+    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    const initEndpoints : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
     const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
-    const errorEndpoints = useAppSelector((state:RootState) => state.server.errorEndpoints);
 
     const [sparqlVariableNames, setSparqlVariableNames] = React.useState<string[]>([]);
     const [sparqlVariableOptions, setSparqlVariableOptions] = React.useState<string[]>([]);
@@ -52,6 +54,7 @@ export const LOIEditor = () => {
 
     //FORM
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
+    const [dataSourceDescription, setDataSourceDescription] = React.useState("");
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [notes, setNotes] = React.useState("");
@@ -87,15 +90,21 @@ export const LOIEditor = () => {
         }
         setSparqlVariableOptions(Array.from(candidates));
     }, [sparqlVariableNames, dataQuery]);
+
+    useEffect(() => {
+        if (selectedDataSource) {
+            for (let i = 0; i < endpoints.length; i++) {
+                let ds : DataEndpoint = endpoints[i];
+                if (selectedDataSource === ds.url) {
+                    setDataSourceDescription(ds.description);
+                }
+            }
+        }
+    }, [selectedDataSource, endpoints])
     
     const loadEndpoints = () => {
-        if (endpoints == null && !loadingEndpoints && !errorEndpoints) {
-            dispatch(setLoadingEndpoints());
-            DISKAPI.getEndpoints()
-                .then((endpointMap:{[name:string]: string}) => {
-                    dispatch(setEndpoint(endpointMap))
-                })
-                .catch(() => dispatch(setErrorEndpoint()));
+        if (!initEndpoints) {
+            loadDataEndpoints(dispatch);
         }
     };
 
@@ -323,20 +332,30 @@ export const LOIEditor = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
-            <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                <Box sx={{display: "inline-flex", alignItems: "center"}}>
-                    <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
-                    {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/>
-                        :
+            <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+                <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
+                <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
+            </Box>
+            <Box sx={{display: "flex", alignItems: "end"}}>
+                <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
+                {loadingEndpoints ?
+                    <Skeleton sx={{display:"inline-block"}}/>
+                :
+                    <Fragment>
                         <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
                                 error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
                             <MenuItem value="" disabled> None </MenuItem>
-                            { Object.keys(endpoints || []).map((name:string) => <MenuItem key={`endpoint_${name}`} value={endpoints![name]}>{name}</MenuItem>) }
+                            {endpoints.map((endpoint:DataEndpoint) => 
+                                <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
+                                    {endpoint.name}
+                                </MenuItem>)
+                            }
                         </Select>
-                    }
-                </Box>
-                <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
+                        <Typography sx={{display: 'inline', ml:"5px", fontSize:".85em"}}>
+                            <div dangerouslySetInnerHTML={{__html: renderDescription(dataSourceDescription)}}/>
+                        </Typography>
+                    </Fragment>
+                }
             </Box>
             <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
             <Box sx={{fontSize: "0.94rem"}} >

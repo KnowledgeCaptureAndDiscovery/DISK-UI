@@ -1,30 +1,49 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DataEndpoint, Vocabularies } from "DISK/interfaces";
 
 interface ServerState {
-  endpoints: {[name:string]: string} | null,
+  endpoints: DataEndpoint[],
   loadingEndpoints: boolean,
-  errorEndpoints: boolean
+  errorEndpoints: boolean,
+  initializedEndpoints: boolean,
+
+  vocabularies: Vocabularies | null,
+  loadingVocabularies: boolean,
+  errorVocabularies: boolean,
+  initializedVocabularies: boolean,
 }
 
 interface PartialServerState {
-  endpoints?: {[name:string]: string} | null, 
+  endpoints?: DataEndpoint[],
   loadingEndpoints?: boolean,
-  errorEndpoints?: boolean
+  errorEndpoints?: boolean,
+  initializedEndpoints?: boolean,
+  vocabularies?: Vocabularies | null,
+  loadingVocabularies?: boolean,
+  errorVocabularies?: boolean,
+  initializedVocabularies?: boolean,
 }
 
 export const serverSlice = createSlice({
   name: 'server',
   initialState: {
-    endpoints: null,
+    endpoints: [],
     loadingEndpoints: false,
     errorEndpoints: false,
+    initializedEndpoints: false,
+
+    vocabularies: null,
+    loadingVocabularies: false,
+    errorVocabularies: false,
+    initializedVocabularies: false,
   } as ServerState,
   reducers: {
-    setEndpoint: (state:ServerState, action: PayloadAction<{[name:string]: string}>) => {
+    setEndpoint: (state:ServerState, action: PayloadAction<DataEndpoint[]>) => {
       let newState  : PartialServerState = {
         endpoints: action.payload,
         loadingEndpoints: false,
         errorEndpoints: false,
+        initializedEndpoints: true,
       };
       return { ...state, ...newState };
     },
@@ -32,7 +51,7 @@ export const serverSlice = createSlice({
       let newState  : PartialServerState = {
         loadingEndpoints: true,
         errorEndpoints : false,
-        endpoints: null
+        endpoints: []
       };
       return { ...state, ...newState };
     },
@@ -40,11 +59,36 @@ export const serverSlice = createSlice({
       let newState  : PartialServerState = {
         loadingEndpoints: false,
         errorEndpoints : true,
-        endpoints: null
+        endpoints: []
+      };
+      return { ...state, ...newState };
+    },
+    setVocabularies: (state:ServerState, action: PayloadAction<Vocabularies>) => {
+      let newState  : PartialServerState = {
+        vocabularies: action.payload,
+        loadingVocabularies: false,
+        errorVocabularies: false,
+        initializedVocabularies: true,
+      };
+      return { ...state, ...newState };
+    },
+    setLoadingVocabularies: (state:ServerState) => {
+      let newState  : PartialServerState = {
+        loadingVocabularies: true,
+        errorVocabularies : false,
+        vocabularies: null
+      };
+      return { ...state, ...newState };
+    },
+    setErrorVocabularies: (state:ServerState) => {
+      let newState  : PartialServerState = {
+        loadingVocabularies: false,
+        errorVocabularies : true,
+        vocabularies: null
       };
       return { ...state, ...newState };
     },
   },
 });
 
-export const { setEndpoint, setErrorEndpoint, setLoadingEndpoints } = serverSlice.actions;
+export const { setEndpoint, setErrorEndpoint, setLoadingEndpoints, setVocabularies, setErrorVocabularies, setLoadingVocabularies } = serverSlice.actions;

@@ -160,12 +160,21 @@ export interface VocabularyIndividual {
 
 export interface Vocabulary {
     namespace: string,
+    description?: string,
     types: {[uri:string]: VocabularyType},
     properties: {[uri:string]: VocabularyProperty},
     individuals: {[uri:string]: VocabularyIndividual},
 }
 
 export type Vocabularies = {[url:string]: Vocabulary};
+
+export interface DataEndpoint {
+    url:    string,
+    name:   string,
+    prefix: string,
+    namespace: string,
+    description: string;
+}
 
 const _names = {}
 
