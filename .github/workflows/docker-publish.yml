@@ -247,14 +247,14 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           cd ${{ env.NEURO_MANIFEST_REPOSITORY_PATH }}
-          kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.build.outputs.docker_tag }}
+          kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_CLIMATE_NAME }}:${{ needs.build.outputs.docker_tag }}
           cat kustomization.yaml
 
       - name: Update Kubernetes resources climate
         if: github.event_name != 'pull_request'
         run: |
           cd ${{ env.CLIMATE_MANIFEST_REPOSITORY_PATH }}
-          kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.build.outputs.docker_tag }}
+          kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NEURO_NAME }}:${{ needs.build.outputs.docker_tag }}
           cat kustomization.yaml
 
       - name: Commit files
