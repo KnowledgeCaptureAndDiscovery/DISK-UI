@@ -123,7 +123,7 @@ jobs:
 
       - name: Replace the backend server with the climate server
         run: |
-          sed -i 's/disk.isi.edu/climate.disk.mosorio.dev/g' ./build/static/js/main.*.js
+          sed -i 's/disk.isi.edu/climate.disk.isi.edu/g' ./build/static/js/main.*.js
 
       - name: Create value as an environment variable
         run: |
@@ -165,7 +165,7 @@ jobs:
 
       - name: Replace the backend server with the climate server
         run: |
-          sed -i 's/disk.isi.edu/neuro.disk.mosorio.dev/g' ./build/static/js/main.*.js
+          sed -i 's/disk.isi.edu/neuro.disk.isi.edu/g' ./build/static/js/main.*.js
 
       - name: Create value as an environment variable
         run: |
