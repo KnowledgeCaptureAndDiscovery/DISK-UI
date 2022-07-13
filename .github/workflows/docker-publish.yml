@@ -17,7 +17,10 @@ env:
   MANIFEST_REPOSITORY: KnowledgeCaptureAndDiscovery/k8s
   MANIFEST_REPOSITORY_BRANCH: master
   MANIFEST_REPOSITORY_PATH: disk-server/disk/prod
+  NEURO_MANIFEST_REPOSITORY_PATH: disk-server/disk/neuro
+  CLIMATE_MANIFEST_REPOSITORY_PATH: disk-server/disk/climate
   KUSTOMIZE_IMAGE_NAME: frontend-image-prod
+
   #security level
   VULNERABILITY_SCAN_LEVEL: "CRITICAL"
 
@@ -28,9 +31,6 @@ on:
     tags:
       - v*
   pull_request:
-
-
-
 
 jobs:
   yarn:
@@ -106,8 +106,6 @@ jobs:
     outputs:
       docker_tag: ${{ steps.exposeValue.outputs.docker_tag }}
 
-
-
   build-climate:
     needs: yarn 
     name: Create Docker image
@@ -123,7 +121,7 @@ jobs:
 
       - name: Replace the backend server with the climate server
         run: |
-          sed -i 's/disk.isi.edu/climate.disk.mosorio.dev/g' ./build/static/js/main.*.js
+          sed -i 's/disk.isi.edu/climate.disk.isi.edu/g' ./build/static/js/main.*.js
 
       - name: Create value as an environment variable
         run: |
@@ -149,7 +147,6 @@ jobs:
     outputs:
       docker_tag: ${{ steps.exposeValue.outputs.docker_tag }}
   
-
   build-neuro:
     needs: yarn 
     name: Create Docker image
@@ -165,7 +162,7 @@ jobs:
 
       - name: Replace the backend server with the climate server
         run: |
-          sed -i 's/disk.isi.edu/neuro.disk.mosorio.dev/g' ./build/static/js/main.*.js
+          sed -i 's/disk.isi.edu/neuro.disk.isi.edu/g' ./build/static/js/main.*.js
 
       - name: Create value as an environment variable
         run: |
@@ -216,7 +213,6 @@ jobs:
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
-  
 
   update:
     # This job the container running on k8s cluster
@@ -245,6 +241,20 @@ jobs:
         run: |
           cd ${{ env.MANIFEST_REPOSITORY_PATH }}
           kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.build.outputs.docker_tag }}
+          cat kustomization.yaml
+
+      - name: Update Kubernetes resources neuro
+        if: github.event_name != 'pull_request'
+        run: |
+          cd ${{ env.NEURO_MANIFEST_REPOSITORY_PATH }}
+          kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NEURO_NAME }}:${{ needs.build.outputs.docker_tag }}
+          cat kustomization.yaml
+
+      - name: Update Kubernetes resources climate
+        if: github.event_name != 'pull_request'
+        run: |
+          cd ${{ env.CLIMATE_MANIFEST_REPOSITORY_PATH }}
+          kustomize edit set image ${{ env.KUSTOMIZE_IMAGE_NAME }}=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_CLIMATE_NAME }}:${{ needs.build.outputs.docker_tag }}
           cat kustomization.yaml
 
       - name: Commit files
