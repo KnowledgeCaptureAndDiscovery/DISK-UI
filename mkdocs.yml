@@ -41,4 +41,5 @@ markdown_extensions:
 - codehilite
 - admonition
 - toc:
+    toc_depth : "1-1"
     permalink: true
