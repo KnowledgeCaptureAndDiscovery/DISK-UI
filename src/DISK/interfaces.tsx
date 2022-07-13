@@ -160,6 +160,8 @@ export interface VocabularyIndividual {
 
 export interface Vocabulary {
     namespace: string,
+    prefix: string,
+    title: string,
     description?: string,
     types: {[uri:string]: VocabularyType},
     properties: {[uri:string]: VocabularyProperty},

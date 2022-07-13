@@ -23,7 +23,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
 import { Link as MuiLink, Menu, MenuItem } from '@mui/material';
 import { useLocation } from 'react-router-dom'
-import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_TERMINOLOGY, PATH_TLOIS } from 'constants/routes';
+import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -143,6 +143,8 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
     return <Box>Line of Inquiry: { selectedLOI ? selectedLOI.name : "..."}</Box>
   } else if (PATH_LOI_ID_EDIT_RE.test(url)) {
     return <Box>Editing Line of Inquiry: { selectedLOI ? selectedLOI.name : "..."}</Box>
+  } else if (PATH_TLOI_ID_RE.test(url)) {
+    return <Box>Triggered Line of Inquiry:</Box>
   }
 
   switch (url) {

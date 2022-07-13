@@ -1,6 +1,6 @@
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import { idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
@@ -17,6 +17,7 @@ import { QuestionPreview } from "components/QuestionPreview";
 import { loadTLOIs, loadHypothesis } from "redux/loader";
 import { DISKAPI } from "DISK/API";
 import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -299,14 +300,18 @@ export const HypothesisView = () => {
                             </TableHead>
                             <TableBody>
                                 {myTLOIs[loiId].value.map((tloi, index) => <TableRow key={tloi.id}>
-                                    <TableCell sx={{padding: "0 10px"}}>{index+1}</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>
+                                        <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{textDecoration: "none", color: "black"}}>
+                                            {index+1}
+                                        </Box>
+                                    </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{textDecoration: "none", color: "black"}}>
                                             {tloi.dateCreated} 
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px", color: getColorStatus(tloi.status)}}>
-                                        <Box sx={{display:'flex', alignItems:'center'}}>
+                                        <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{textDecoration: "none", color: "black", display:'flex', alignItems:'center'}}>
                                             {getIconStatus(tloi.status)}
                                             <Box sx={{marginLeft: '6px'}}>
                                                 {tloi.status === 'SUCCESSFUL' ? 'DONE' : tloi.status}
@@ -314,16 +319,36 @@ export const HypothesisView = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        {tloi.inputFiles.length}
+                                        {tloi.inputFiles.length === 0 ? 0 : 
+                                        <Box sx={{display:'flex', alignItems: 'center', justifyContent:'flex-end'}}>
+                                            <span>
+                                                {tloi.inputFiles.length}
+                                            </span>
+                                            <FileCopyIcon sx={{}}/>
+                                        </Box>
+                                        }
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        {tloi.status !== 'SUCCESSFUL' ? "" : tloi.outputFiles.length}
+                                        {tloi.status === 'SUCCESSFUL' ? 
+                                            <Box sx={{display:'flex', alignItems: 'center', justifyContent:'flex-end'}}>
+                                                {tloi.outputFiles.length}
+                                                {tloi.outputFiles.length > 0 ? <FileCopyIcon/> : null }
+                                            </Box>
+                                            : null}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue.toFixed(5)}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center'}}>
+                                            {tloi.status === 'SUCCESSFUL' ? 
+                                                <Tooltip arrow placement="top" title="Create new run editing this one">
+                                                    <IconButton sx={{padding:"0"}}>
+                                                        <EditIcon/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                                : null
+                                            }
                                             <Tooltip arrow placement="top" title="Delete">
                                                 <IconButton sx={{padding:"0"}} onClick={() => {
                                                     setConfirmDialogOpen(true);

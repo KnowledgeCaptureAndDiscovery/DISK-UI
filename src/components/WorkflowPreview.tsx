@@ -35,6 +35,15 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
         }
     }, [wf]);
 
+    const renderBinding = (binding:VariableBinding, index:number) => {
+        let value : string = binding.collection ?
+            binding.binding.replace(/[\[\]]/g, '').split(", ")[index]
+            : binding.binding;
+
+        let text = value.replace(/SHA[\d\w]{6}_/,'');
+        return text;
+    }
+
     return (
         <Card key={`wf_${wf.workflow}`} variant="outlined" sx={{mb: "5px"}}>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
@@ -79,11 +88,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                                     </TableCell>
                                     {wf.bindings.map((binding:VariableBinding) =>
                                         <TableCell key={`c_${binding.variable}_${i}`} sx={{padding: "0 10px"}}>
-                                        {binding.collection ?
-                                            binding.binding.replace(/[\[\]]/g, '').split(", ")[i].replace(/SHA[\d\w]{6}_/,'')
-                                        :
-                                            binding.binding
-                                        }
+                                            {renderBinding(binding, i)}
                                         </TableCell>
                                     )}
                                 </TableRow>

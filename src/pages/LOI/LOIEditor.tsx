@@ -351,9 +351,9 @@ export const LOIEditor = () => {
                                 </MenuItem>)
                             }
                         </Select>
-                        <Typography sx={{display: 'inline', ml:"5px", fontSize:".85em"}}>
+                        <Box sx={{display: 'inline', ml:"5px", fontSize:".85em"}}>
                             <div dangerouslySetInnerHTML={{__html: renderDescription(dataSourceDescription)}}/>
-                        </Typography>
+                        </Box>
                     </Fragment>
                 }
             </Box>

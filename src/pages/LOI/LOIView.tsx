@@ -145,9 +145,9 @@ export const LOIView = () => {
                     (dataSource ?
                         <Fragment>
                             <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                            <TypographyInline sx={{ml:"5px", fontSize:".85em"}}>
+                            <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
                                 <div dangerouslySetInnerHTML={{__html: renderDescription(dataSource.description)}}/>
-                            </TypographyInline>
+                            </Box>
                         </Fragment>
                     :
                         null

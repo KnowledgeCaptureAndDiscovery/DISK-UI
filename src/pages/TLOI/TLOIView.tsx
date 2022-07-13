@@ -1,6 +1,6 @@
-import { Box, Button, Card, Divider, FormHelperText, Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { idPattern, VariableBinding, Workflow } from "DISK/interfaces";
-import { useEffect } from "react";
+import { Box, breadcrumbsClasses, Button, Card, Divider, FormHelperText, Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
+import { DataEndpoint, idPattern, VariableBinding, Workflow } from "DISK/interfaces";
+import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -21,6 +21,9 @@ import { WorkflowList } from "components/WorkflowList";
 import { loadHypothesis } from "redux/loader";
 import { QuestionPreview } from "components/QuestionPreview";
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { DISKAPI } from "DISK/API";
+import { loadDataEndpoints } from "redux/loader";
+import { renderDescription } from "DISK/util";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -64,6 +67,17 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const loadingHyp = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
     const errorHyp = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
 
+    const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
+    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
+    const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
+
+    useEffect(() => {
+        if (!initializedEndpoint) {
+            loadDataEndpoints(dispatch);
+        }
+    }, []);
+
     useEffect(() => {
         if (!!TLOI && TLOI.parentHypothesisId && TLOI.parentHypothesisId != selectedHypId && !loadingHyp && !errorHyp) {
             loadHypothesis(dispatch, TLOI.parentHypothesisId);
@@ -72,6 +86,18 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             setNotes(TLOI.notes);
         }
     }, [TLOI]);
+
+    useEffect(() => {
+        if (!!TLOI && TLOI.dataSource && endpoints.length > 0) {
+            for (let i = 0; i < endpoints.length; i++) {
+                let endpoint : DataEndpoint = endpoints[i];
+                if (endpoint.url === TLOI.dataSource) {
+                    setDataSource(endpoint);
+                    break;
+                }
+            }
+        }
+    }, [TLOI, endpoints]);
 
     useEffect(() => {
         let id : string = location.pathname.replace(idPattern, '');
@@ -91,6 +117,39 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             setEditMode(false);
         }
         return;
+    }
+
+    const downloadFile = (url:string) => {
+        if (url && TLOI) {
+            let methodSource : string = "";
+            [ ...(TLOI.workflows||[]), ...(TLOI.metaworkflows||[]) ].forEach((w:Workflow) => {
+                methodSource = w.source;
+            })
+            console.log("Downloading " + url);
+            DISKAPI.getData(methodSource, url)
+                .then((r:string) => {
+                    let element = document.createElement('a');
+                    let datatype = "text/plain;charset=utf-8,";
+                    if (r[0] === '[' || r[0] === '{') {
+                        datatype = "text/json;charset=utf-8,";
+                    } else {
+                        console.log("Is not an object! ", r);
+                        if (r.startsWith("%PDF")) {
+                            //var blob=new Blob([data]);
+                            datatype = "application/pdf;charset=utf-8,";
+                        }
+                    }
+                    element.setAttribute('href', 'data:' + datatype + encodeURIComponent(r));
+                    element.setAttribute('download', displayFilename(url));
+                  
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
+                  
+                    element.click();
+                  
+                    document.body.removeChild(element);
+                });
+        }
     }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
@@ -160,6 +219,23 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
+            <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
+                <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
+                {loadingEndpoints ? 
+                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                    (dataSource ?
+                        <Fragment>
+                            <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
+                            <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
+                                <div dangerouslySetInnerHTML={{__html: renderDescription(dataSource.description)}}/>
+                            </Box>
+                        </Fragment>
+                    :
+                        null
+                    )
+                }
+            </Box>
+
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
                 <Box>
                     <TypographyLabel>Data query explanation:</TypographyLabel>
@@ -217,7 +293,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
              :  <List>
                 {TLOI.outputFiles.map((url:string) => 
                 <ListItem disablePadding key={url}>
-                    <ListItemButton>
+                    <ListItemButton onClick={() => downloadFile(url)}>
                         <ListItemIcon>
                             <InsertDriveFileIcon />
                         </ListItemIcon>

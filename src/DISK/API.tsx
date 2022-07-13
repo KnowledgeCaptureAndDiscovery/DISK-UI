@@ -32,7 +32,7 @@ export class DISKAPI {
         return response.json();
     }
 
-    private static async post (url:string, obj:any) : Promise<any> {
+    private static async post (url:string, obj:any, asText:boolean=false) : Promise<any> {
         const response = await fetch(url, {
             method: 'POST',
             headers: DISKAPI.headers,
@@ -40,7 +40,7 @@ export class DISKAPI {
         });
         if (!response.ok) 
             throw new Error(response.statusText);
-        return response.json();
+        return asText ? response.text() : response.json();
     }
 
     private static async put (url:string, obj:any) : Promise<any> {
@@ -170,5 +170,9 @@ export class DISKAPI {
 
     public static async getVocabulary () : Promise<Vocabularies> {
         return await DISKAPI.get(DISKAPI.url + "vocabulary") as Vocabularies;
+    }
+
+    public static async getData (dataSource:string, dataId:string) : Promise<string> {
+        return await DISKAPI.post(DISKAPI.url + "getData", {'source': dataSource, 'dataId': dataId.replace(/.*#/,"")}, true) as string;
     }
 }
