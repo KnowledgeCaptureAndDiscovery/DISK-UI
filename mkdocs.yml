@@ -35,7 +35,6 @@ nav:
     - developer-guide/data-adapter.md
     - developer-guide/method-adapter.md
   - Adoptions: adoptions.md
-  - Ontologies: ontologies.md
 theme:
   name: material
   logo: figures/logo.png
