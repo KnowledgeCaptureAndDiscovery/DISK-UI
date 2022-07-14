@@ -23,7 +23,7 @@ import { QuestionPreview } from "components/QuestionPreview";
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { DISKAPI } from "DISK/API";
 import { loadDataEndpoints } from "redux/loader";
-import { renderDescription } from "DISK/util";
+import { downloadFile, renderDescription } from "DISK/util";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -119,36 +119,14 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         return;
     }
 
-    const downloadFile = (url:string) => {
+    const onDownloadFile = (url:string) => {
         if (url && TLOI) {
             let methodSource : string = "";
-            [ ...(TLOI.workflows||[]), ...(TLOI.metaworkflows||[]) ].forEach((w:Workflow) => {
+            [ ...(TLOI.workflows||[]), ...(TLOI.metaWorkflows||[]) ].forEach((w:Workflow) => {
                 methodSource = w.source;
             })
             console.log("Downloading " + url);
-            DISKAPI.getData(methodSource, url)
-                .then((r:string) => {
-                    let element = document.createElement('a');
-                    let datatype = "text/plain;charset=utf-8,";
-                    if (r[0] === '[' || r[0] === '{') {
-                        datatype = "text/json;charset=utf-8,";
-                    } else {
-                        console.log("Is not an object! ", r);
-                        if (r.startsWith("%PDF")) {
-                            //var blob=new Blob([data]);
-                            datatype = "application/pdf;charset=utf-8,";
-                        }
-                    }
-                    element.setAttribute('href', 'data:' + datatype + encodeURIComponent(r));
-                    element.setAttribute('download', displayFilename(url));
-                  
-                    element.style.display = 'none';
-                    document.body.appendChild(element);
-                  
-                    element.click();
-                  
-                    document.body.removeChild(element);
-                });
+            downloadFile(methodSource, url, displayFilename(url));
         }
     }
 
@@ -267,12 +245,14 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                 {loading ? 
                     <Skeleton/> :
                     <Box>
-                        {!!TLOI && TLOI.tableVariables && TLOI.dataQuery ? <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={TLOI.dataSource}/> : null}
                         {!!TLOI && TLOI.tableDescription ? 
                         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                             <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
                             <TypographyInline> {TLOI.tableDescription} </TypographyInline>
                         </Box> : null}
+                        {!!TLOI && TLOI.tableVariables && TLOI.dataQuery ? 
+                            <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={TLOI.dataSource}/> 
+                            : null}
                     </Box>
                 }
             </Box>
@@ -280,9 +260,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         <Divider/>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
-            {!!TLOI && TLOI.workflows && TLOI.workflows.length > 0 ?
-                <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaworkflows ? TLOI.metaworkflows : []} options={[]}/>
-                : null }
+            {!!TLOI && <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaWorkflows} options={[]}/>}
         </Box>
 
         <Divider/>
@@ -293,7 +271,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
              :  <List>
                 {TLOI.outputFiles.map((url:string) => 
                 <ListItem disablePadding key={url}>
-                    <ListItemButton onClick={() => downloadFile(url)}>
+                    <ListItemButton onClick={() => onDownloadFile(url)}>
                         <ListItemIcon>
                             <InsertDriveFileIcon />
                         </ListItemIcon>

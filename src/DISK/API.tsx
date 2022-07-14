@@ -1,6 +1,7 @@
 import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
 import { DISK_API } from "../constants/config";
+import { cleanLOI } from "./util";
 
 export class DISKAPI {
     private static url : string = DISK_API;
@@ -109,16 +110,16 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "lois") as LineOfInquiry[];
     }
 
-    public static async createLOI (loi:LineOfInquiry|LineOfInquiryRequest) : Promise<LineOfInquiry> {
-        return await DISKAPI.post(DISKAPI.url + "lois", loi) as LineOfInquiry;
+    public static async createLOI (loi:LineOfInquiry) : Promise<LineOfInquiry> {
+        return await DISKAPI.post(DISKAPI.url + "lois", cleanLOI(loi)) as LineOfInquiry;
     }
 
     public static async getLOI (id:string, username?:string) : Promise<LineOfInquiry> {
         return await DISKAPI.get(DISKAPI.url + "lois/" + id) as LineOfInquiry;
     }
 
-    public static async updateLOI (loi:LineOfInquiry|LineOfInquiryRequest) : Promise<LineOfInquiry> {
-        return await DISKAPI.put(DISKAPI.url + "lois/" + loi.id, loi) as LineOfInquiry;
+    public static async updateLOI (loi:LineOfInquiry) : Promise<LineOfInquiry> {
+        return await DISKAPI.put(DISKAPI.url + "lois/" + loi.id, cleanLOI(loi)) as LineOfInquiry;
     }
 
     public static async deleteLOI (id:string) : Promise<boolean> {
@@ -129,7 +130,7 @@ export class DISKAPI {
     //=======================
 
     public static async getTLOIs (username?:string) : Promise<TriggeredLineOfInquiry[]> {
-        return await DISKAPI.get(DISKAPI.url + "tlois") as TriggeredLineOfInquiry[];
+        return await DISKAPI.get(DISKAPI.url + "tlois") as TriggeredLineOfInquiry[]
     }
 
     public static async getTLOI (id:string, username?:string) : Promise<TriggeredLineOfInquiry> {

@@ -52,6 +52,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     }
 
     const onWorkflowSave = (wf:Workflow) => {
+        console.log("asd> ", editingMeta, wf);
         if (notifyChange) {
             let curWfs : Workflow[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
             if (selectedWorkflow) curWfs[editingIndex] = wf; //Editing
@@ -87,23 +88,24 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     return <Box>
         <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mb:"5px"}}>
             <FormHelperText sx={{fontSize: ".9rem"}}>
-                The data analysis methods are represented in the following workflows:
+                {addingWorkflow ? 
+                "Creating " + (editingMeta ? "meta-" : "") + "workflow:"
+                :
+                "The data analysis methods are represented in the following workflows:"}
             </FormHelperText>
             {editable ? 
                 (addingWorkflow ? 
                     <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={() => toggleEdition()} color="error">
-                        <CancelIcon sx={{marginRight: "4px"}}/> Cancel workflow {selectedWorkflow ? "edition" : "creation"}
+                        <CancelIcon sx={{marginRight: "4px"}}/> Cancel {editingMeta? "meta-":""}workflow {selectedWorkflow ? "edition" : "creation"}
                     </Button>
                 :
                     <Box>
                         <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={() => toggleEdition()} color="primary">
                             <AddIcon sx={{marginRight: "4px"}}/> Add Workflow
                         </Button>
-                        {workflows.length > 0 ?
                         <Button sx={{padding: "3px 6px", marginLeft: "6px"}} variant="outlined" onClick={() => toggleEdition(true)} color="primary">
                             <AddIcon sx={{marginRight: "4px"}}/> Add Meta-workflow
                         </Button>
-                        : null}
                     </Box>
                 )
             :
@@ -124,25 +126,36 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
                         </Tooltip>
                     : undefined}/>
                 )}
-                {metaWorkflows.length > 0 ? <Box>
-                    <FormHelperText sx={{fontSize: ".9rem"}}>
-                        The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
-                    </FormHelperText>
-                    {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
-                        <WorkflowPreview key={`mwf_${wf.workflow}${i}`} workflow={wf} button={editable && !addingWorkflow ? 
-                            <Button variant="text" sx={{padding: 0, margin: "0 4px"}} onClick={() => {onEditButtonClicked(wf,i,true)}}>
-                                <EditIcon sx={{marginRight: "4px"}}></EditIcon> EDIT
-                            </Button>
-                        : undefined}/>
-                    )}
-                </Box> : ""}
             </Box>
-        :   (addingWorkflow ? 
-                "" 
-            :
+        :   (!addingWorkflow &&
                 <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
                     <Typography>
                         No workflows to run
+                    </Typography>
+                </Card>
+            )
+        }
+        {!addingWorkflow &&
+        <FormHelperText sx={{fontSize: ".9rem"}}>
+            The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
+        </FormHelperText> }
+
+        {metaWorkflows.length > 0 ? <Box>
+            {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
+                <WorkflowPreview key={`mwf_${wf.workflow}${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? (wf) => onRemoveWorkflow(wf,true) : undefined}
+                    button={editable && !addingWorkflow ? 
+                    <Tooltip arrow title="Edit">
+                        <IconButton sx={{padding: '0 3px'}} onClick={() => {onEditButtonClicked(wf,i,true)}}>
+                            <EditIcon />
+                        </IconButton>
+                    </Tooltip>
+                : undefined}/>
+            )}
+        </Box> 
+        :   (!addingWorkflow &&
+                <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
+                    <Typography>
+                        No meta-workflows to run
                     </Typography>
                 </Card>
             )

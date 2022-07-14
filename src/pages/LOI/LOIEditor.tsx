@@ -184,14 +184,7 @@ export const LOIEditor = () => {
             dataQuery: dataQuery,
             hypothesisQuery: hypothesisQuery,
             dataSource: selectedDataSource,
-            workflows: workflows.map(w => {return {
-                ...w,
-                bindings: w.bindings.map(b => {return {
-                    ...b,
-                    collection: undefined,
-                    bindingAsArray: undefined,
-                }}),
-            }}),
+            workflows: workflows,
             metaWorkflows: metaWorkflows,
             tableDescription: tableExplanation,
             tableVariables: tableVariables,
@@ -200,7 +193,7 @@ export const LOIEditor = () => {
 
         setWaiting(true);
         console.log("SEND:", newLOI);
-        (editing?DISKAPI.updateLOI:DISKAPI.createLOI)(newLOI)
+        (editing?DISKAPI.updateLOI:DISKAPI.createLOI)(newLOI as LineOfInquiry)
             .then((savedLOI) => {
                 setSaveNotification(true);
                 setWaiting(false);
@@ -221,16 +214,7 @@ export const LOIEditor = () => {
         let newLOI : LineOfInquiry = { 
             ...LOI,
             id: '',
-            name: LOI.name + " (copy)",
-            //Remove stuff added in the response
-            workflows: workflows.map(w => {return {
-                ...w,
-                bindings: w.bindings.map(b => {return {
-                    ...b,
-                    collection: undefined,
-                    bindingAsArray: undefined,
-                }}),
-            }}),
+            name: LOI.name + " (copy)"
         };
 
         setWaiting(true);

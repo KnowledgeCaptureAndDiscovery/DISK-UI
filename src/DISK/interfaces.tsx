@@ -52,9 +52,9 @@ export interface QuestionVariable {
 export interface WorkflowRun {
     id: string,
     link: string,
-    status: any,
-    outputs: string[],
-    files: string[],
+    status: string,
+    outputs: {[name:string] :string},
+    files: {[name:string] :string},
     startDate: string,
     endDate: string
 }
@@ -68,8 +68,6 @@ export interface Workflow {
     workflow: string, //Same as method id
     workflowLink: string,
     bindings: VariableBinding[],
-    parameters: VariableBinding[],
-    optionalParameters: VariableBinding[],
     run?: WorkflowRun,
     meta?: {
         hypothesis: MetaInfo,
@@ -105,10 +103,7 @@ export interface TriggeredLineOfInquiry {
     parentHypothesisId: string,
     resultingHypothesisIds: string[],
     workflows: Workflow[],
-    metaworkflows: Workflow[],
-    confidenceValue: number,
-    inputFiles: string[],
-    outputFiles: string[],
+    metaWorkflows: Workflow[],
     dataQuery: string,
     notes: string,
     author: string,
@@ -118,6 +113,11 @@ export interface TriggeredLineOfInquiry {
     tableDescription: string,
     dataQueryExplanation: string,
     dataSource: string,
+    // All of these are workflow-run related.
+    confidenceValue: number,
+    inputFiles: string[],
+    outputFiles: string[],
+    // Computed on retrieval
 }
 
 export type MethodInputType = 'input' | 'parameter' | 'none' ;

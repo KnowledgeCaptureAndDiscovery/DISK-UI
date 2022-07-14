@@ -14,6 +14,7 @@ import { PATH_HYPOTHESES, PATH_TLOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionPreview } from "components/QuestionPreview";
+import { FileList } from "components/FileList";
 import { loadTLOIs, loadHypothesis } from "redux/loader";
 import { DISKAPI } from "DISK/API";
 import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
@@ -319,22 +320,14 @@ export const HypothesisView = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        {tloi.inputFiles.length === 0 ? 0 : 
-                                        <Box sx={{display:'flex', alignItems: 'center', justifyContent:'flex-end'}}>
-                                            <span>
-                                                {tloi.inputFiles.length}
-                                            </span>
-                                            <FileCopyIcon sx={{}}/>
-                                        </Box>
-                                        }
+                                        <FileList type="input" tloi={tloi} title="Input files"/>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         {tloi.status === 'SUCCESSFUL' ? 
-                                            <Box sx={{display:'flex', alignItems: 'center', justifyContent:'flex-end'}}>
-                                                {tloi.outputFiles.length}
-                                                {tloi.outputFiles.length > 0 ? <FileCopyIcon/> : null }
-                                            </Box>
-                                            : null}
+                                            <FileList type="output" tloi={tloi} title="Output files"/>
+                                        :
+                                            null
+                                        }
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue.toFixed(5)}

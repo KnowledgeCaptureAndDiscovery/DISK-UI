@@ -106,7 +106,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
             let m = methods.filter(m => m.name === wf.workflow)![0];
             if (m) onWorkflowChange(m);
         }
-        let allBindings = [ ...wf.bindings, ...wf.parameters, ...wf.optionalParameters];
+        let allBindings = [ ...wf.bindings ];
         if (allBindings.length > 0) {
             setSelectedVariableValues((values) => {
                 let newValues = { ...values };
@@ -153,8 +153,6 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                             collection: selectedCollectionValues[i.name],
                         } as VariableBinding;
                     }),
-                parameters: [],
-                optionalParameters: [],
             };
 
             loadForm(newWorkflow);

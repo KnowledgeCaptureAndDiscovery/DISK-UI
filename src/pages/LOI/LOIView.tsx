@@ -21,6 +21,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
+import { WorkflowList } from "components/WorkflowList";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -211,45 +212,11 @@ export const LOIView = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
-            <Box>
-                {loading ? <Skeleton/> : (LOI && LOI.workflows && LOI.workflows.length > 0 ? 
-                    <Box>
-                        <FormHelperText sx={{fontSize: ".9rem"}}>
-                            The data analysis methods are represented in the following workflows:
-                        </FormHelperText>
-                        { LOI.workflows.map((wf:Workflow, i) => <Card key={`wf_${wf.workflow}-${i}`} variant="outlined" sx={{mb:"5px"}}>
-                            <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                                <a target="_blank" rel="noreferrer" href={wf.workflowLink} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
-                                    <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />
-                                    <Typography sx={{padding:"0 10px", fontWeight: 500}}>{wf.workflow}</Typography>
-                                    <OpenInNewIcon sx={{fontSize: "1rem"}}/>
-                                </a>
-                            </Box>
-                            <Divider/>
-                            <Box sx={{fontSize:".85rem"}}>
-                                { wf.bindings.map((binding:VariableBinding) =>
-                                    <Grid key={`var_${binding.variable}`} container spacing={1}>
-                                        <Grid item xs={3} md={2} sx={{textAlign: "right"}}>
-                                            <b>{binding.variable}: </b>
-                                        </Grid>
-                                        <Grid item xs={9} md={10}>
-                                            {binding.binding}
-                                        </Grid>
-                                    </Grid>
-                                )}
-                            </Box>
-                        </Card>)}
-                    </Box>
-                : 
-                    <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
-                        <Typography>
-                            No workflows to run
-                        </Typography>
-                    </Card>
-                )}
-
-            </Box>
+            {loading?
+                <Skeleton/> 
+            : 
+                !!LOI && <WorkflowList editable={false} workflows={LOI.workflows} metaworkflows={LOI.metaWorkflows} options={[]}/>
+            }
         </Box>
-        
     </Card>
 }
