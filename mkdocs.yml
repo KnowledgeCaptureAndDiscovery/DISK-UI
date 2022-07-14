@@ -18,22 +18,22 @@ nav:
     - advanced-user-guide/index.md
     - advanced-user-guide/steps/add-basic-info.md
     - advanced-user-guide/steps/write-query.md
+    - Add questions:
+      - advanced-user-guide/questions/overview.md 
+      - advanced-user-guide/questions/disk-ontologies.md
+      - advanced-user-guide/questions/question-ontology.md
+      - advanced-user-guide/questions/extending-ontology.md
+    - Add workflows:
+      - advanced-user-guide/running-workflows.md
   - Administrator Guide:
     - admin-guide/index.md
-    - Add questions:
-      - admin-guide/questions/overview.md 
-      - admin-guide/questions/disk-ontologies.md
-      - admin-guide/questions/question-ontology.md
-      - admin-guide/questions/extending-ontology.md
-    - Add workflows:
-      - admin-guide/running-workflows.md
+    - admin-guide/installation.md 
+    - admin-guide/configuration.md
   - Developer Guide: 
     - developer-guide/index.md
     - developer-guide/architecture.md
     - developer-guide/data-adapter.md
     - developer-guide/method-adapter.md
-    - developer-guide/installation.md 
-    - developer-guide/configuration.md
   - Adoptions: adoptions.md
   - Ontologies: ontologies.md
 theme:

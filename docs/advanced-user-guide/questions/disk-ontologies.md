@@ -11,7 +11,7 @@ The DISK system uses several ontologies to store and produce data.
 
 The following diagram shows the ontologies used on the DISK system.
 
-![Disk Ontologies](../figures/DISK-ontologies.png "DISK Ontologies")
+![Disk Ontologies](../../figures/DISK-ontologies.png "DISK Ontologies")
 
  - **On blue:** Commonly used ontologies. These ontologies contribute the vocabulary used to store metadata on the DISK system.
 
@@ -32,5 +32,3 @@ The following diagram shows the ontologies used on the DISK system.
     - Ontologies to interact with workflows systems. Defined as part of [Method Adapters](/method-adapter)
 
     - Ontologies imported to help on the creation of *hypotheses* and *data queries*. Domain specific.
-
-## Next steps
