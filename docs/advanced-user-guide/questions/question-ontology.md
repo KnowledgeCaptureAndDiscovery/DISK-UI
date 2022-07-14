@@ -1,6 +1,6 @@
-# The Question Template Ontology
+#  Scientific Questions Ontology
 
-The question ontology aims to help users on the creation of semantic representations for scientific questions (hypothesis).
+The Scientific Questions Ontology aims to help users on the creation of semantic representations for scientific questions (hypothesis).
 
 The ontology defines the `Question` resource with the following properties:
 

@@ -52,7 +52,14 @@ For more information about the DISK architecture, please check the [architecture
 - Support for multiple workflow engines using Adapter
 - SSO for user authentication
 
+## Users types
 
+DISK is designed to be used by different users types depending on their needs.
+
+- Users: Scientists who want to use DISK to create and test hypothesis using existing questions.
+- Expert users: Users who defines which question can trigger it, which data and from whom data source get and which method will create new workflows executions on the workflow system. Also, they can define new questions to be used on the creation of new hypothesis.
+- Administrator: Users who install DISK and defines which data sources and which workflow engines are available
+- Developers: Users who want to build third-party integrations.
 
 ## Development Status
 
