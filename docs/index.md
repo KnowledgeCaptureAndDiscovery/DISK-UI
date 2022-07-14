@@ -63,7 +63,6 @@ Our releases can be found [releases](https://github.com/KnowledgeCaptureAndDisco
 
 
 
-
 ## Adoptions
 
 Organizations who have officially adopted DISK can be found [here](adoptions).
