@@ -4,6 +4,8 @@
 
 DISK is a framework that uses AI to automate scientific data analysis to accelerate discoveries. 
 
+This video shows a brief overview how a new hypothesis can be specified by a user and the automation that follows.
+
 ![DISK](figures/user-guide/web.gif "DISK")
 
 
