@@ -1,7 +1,7 @@
 # Overview
 
-This guide is for Advanced users wanting to create a Line of Inquiry
+This documentation is for Advanced Users who want to create new Lines of Inquiry and new kinds of hypotheses and questions in DISK.
 
 !!! Note
-    Please make sure you've completed the user guide before you start this guide.
+    This documentation assumes that you are familiar with the basic DISK concepts and User Guide.
 
