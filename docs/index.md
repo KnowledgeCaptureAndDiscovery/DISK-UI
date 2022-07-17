@@ -13,29 +13,23 @@ This video shows a brief overview how a new hypothesis can be specified by a use
 
 ## Getting Started
 
+You can start to use DISK [here](https://disk.isi.edu), note that you will need to request an account.
 
-### Documentation for Users, Advanced Users, and Developers
+### Target Users and Documentation
 
-You can start to use DISK [here](https://disk.isi.edu), although you need to request an account.
-[User documentation](user-guide/) describe how to create and test hypotheses using DISK.
-Advanced users [documentation](advanced-user/) can extend DISK to incorporate new datasets and new kinds of analyses. Developers [documentation](developer-guide/) 
-can integrate DISK with different data sources and data analysis engines.
+- Users: Scientists who use DISK to specify and test hypotheses or ask questions.  Read this [documentation](user-guide/)
+- Advanced Users: Scientists who understand the design of DISK and can extend it to support new types of hypotheses and questions by defining data queries and workflows.  Here is the detailed [documentation](advanced-user/). 
+- Developers: Programmers who can extend DISK by integrating it with new data sources and new workflow systems.  There is [documentation](developer-guide/) and a GitHub repository with the code.
 
 
-## How it works
+## How DISK Works
 
-The DISK system automatically tests hypotheses provided by a scientist.
+DISK automatically tests hypotheses provided by a scientist.
 To do this, DISK retrieves data from existing data repositories and analyzes the data using intelligent workflows.
 User-defined hypotheses are re-run when new data or methods become available. 
 DISK stores all the provenance and metadata for new results, so they can be inspected and reproduced.
 
-## Overview of DISK Architecture
-
-![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
-
-For more information about the DISK architecture, please check the [architecture](developer-guide/architecture/) page.
-
-## Key Features
+### Key Features
 
 - User interface to specify scientific hypotheses and track results
 - Automated retrieval of data relevant to a given hypothesis or question
@@ -45,11 +39,11 @@ For more information about the DISK architecture, please check the [architecture
 - Support for new workflow engines using Adapters
 - SSO for user authentication
 
-## Target Users
+### Overview of DISK Architecture
 
-- Users: Scientists who use DISK to specify and test hypotheses or ask questions.
-- Advanced Users: Scientists who understand the design of DISK and can extend it to support new types of hypotheses and questions by defining data queries and workflows.
-- Developers: Programmers who can extend DISK by integrating it with new data sources and new workflow systems.
+![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
+
+For more information about the DISK architecture, please check the [architecture](developer-guide/architecture/) page.
 
 ## Development Status
 
