@@ -1,36 +1,40 @@
-# Write the query
+# Writing a Data Query for an LOI
 
-A **data query** is used to obtain the data required by the workflow.
+A **data query** is used to obtain the data required to answer the question template of the LOI.
 
 
 !!! note
-    A *data query* can be executed on multiples data repositories, as long a [data adapter](/data-adapter) is written to support it.
-    The current implementation queries for data using `SPARQL` as query language.
+    The *data query* will be executed on an external data repository that has a [data adapter](/data-adapter) that integrates it with DISK.
+    The current implementation of DISK supports queries for data using `SPARQL` as the query language.  
+    Developers can extend DISK to integrate new data sources and create new data adapters.
 
-## Creating a query using SPARQL
+## Writing a Data Query in SPARQL
 
-The starting point of the query is the **Question Variable** and the goal is to obtain the **data** required by the workflow.
+The starting point of the query are the **Question Variables** specified in the Question Template.  
 
-You can write the query click in the **Query** text area.
+You can write the query by clicking on the **Query** text area.
 
 ![Query](../../figures/user-guide/data-query-field.png "Query")
 
+The next example shows a data query for neuroscience data.  The query follows several steps to obtain the data:
 
-### Example
+1. Using the Question Variable `?Genotype` to find the `?Cohort`
+2. Using `?Cohort` to find the `?dataset`
+3. Using `?dataset` to find the `?schema`
+4. Using `?schema` to find `?url`
 
-The next example has been taken from the Neuro Disk Implementation, we can see a **data query** in the following image.
-
-The steps to obtain the data are:
-
-1. Using the Question Variable `?Genotype` found the `?Cohort`
-2. Using `?Cohort` found `?dataset`
-3. Using `?dataset` found `?schema`
-4. Using `?schema` found `?url`
-
-And the ending point is the **Workflow Variable: Url**.
+The query also includes at the end the **Workflow Variable: Url**.
 
 ![Data Query](../../figures/user-guide/mapping-with-number.png "Data Query")
 
-## Final steps
+
+## Specifying Workflows and Meta-Workflows
+
+
+
+## Saving
 
 Remember to save the Line of Inquiry.
+
+## Next steps
+
