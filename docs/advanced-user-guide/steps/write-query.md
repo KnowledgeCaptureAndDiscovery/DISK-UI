@@ -23,7 +23,7 @@ The next example shows a data query for neuroscience data.  The query follows se
 3. Using `?dataset` to find the `?schema`
 4. Using `?schema` to find `?url`
 
-The query also includes at the end the **Workflow Variable: Url**.
+The query also includes at the end the **Workflow Variable: Url** that is passed as an input to the workflow of the LOI, as we describe next.
 
 ![Data Query](../../figures/user-guide/mapping-with-number.png "Data Query")
 
