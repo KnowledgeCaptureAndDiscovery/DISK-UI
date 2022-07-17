@@ -1,64 +1,44 @@
-# Create hypothesis and questions
+# Specifying New Hypotheses or Questions
 
-
-The aim of an investigation is to answer a **question**, which is
-most useful if it is well scoped to be tractable given the time
-and resources available. 
-
-Questions can be posed as testing a hypothesis, which would
-be a statement that can be supported or dismissed based on
-data analysis.
-
-DISK starts with a hypothesis, and then a question.
-
-## Hypothesis
-
-### Create a Hypothesis
-
-You can create a hypothesis by clicking on the **Create Hypothesis** button.
+A user can start to add a new hypothesis by selecting **Create Hypothesis**.
 
 ![New Hypothesis](../figures/user-guide/button.png "New Hypothesis")
 
-Then, you must fill the form with the following information:
+We are going to create a new question to see what weather variables affect the number bikes rented.
 
-- **Hypothesis name**: The name of the hypothesis.
-- **Hypothesis description**: A description of the hypothesis.
-- **Hypothesis Notes**: Any notes you want to add to the hypothesis.
+## Selecting a Hypothesis or Question Template
 
-For example, here we have created a new hypothesis called **"The effect of the weather in the number bikes rented"**.
-
-![New Hypothesis](../figures/user-guide/new-hypothesis.png "New Hypothesis")
-
-
-## Question 
-
-Questions can be posed as testing a hypothesis.
-
-### Create a Question
+DISK will show a menu of all the hypothesis and question templates that are defined in the system.  This means that there are Lines of Inquiry that DISK can use to answer the types of questions that fit those templates.
 
 You can display the questions available by clicking on the **Select Hypothesis Question** drop down list.
 Then, select a question from the list.
 
 !!! Info
-    The questions are created by the Advanced User.
+    The question templates and Lines of Inquiry are created by Advanced Users.
 
-## Question Variables
+## Creating a Specific Hypothesis
 
-Some questions have to do with associations between observed variables. 
+To create a specific hypothesis or question, you need to fill the question template by selecting from the menus shown.
 
-!!! Example 
-    In neuroscience we can ask if a **brain characteristic**, such as *hippocampus size*,
-    is associated with a **disorder** such as *ADHD (Attention-deficit/hyperactivity disorder)*.
-
-### Select a Question Variable
-
-To select the question variables, you need to click in TextField of each **Variables** button.
-In our bike example, we can ask if the number of bikes rented is associated with the weather.
+In our bike example, we can create questions about whether the number of bikes rented is associated with the weather variables that we are investigating.
 
 ![Select Question](../figures/user-guide/select-variable.png "Select Question")
+
+
+## Documenting a New Hypothesis
+
+You can fill the form to provide the following documentation:
+
+- **Hypothesis name**: The name that you want to give the hypothesis.
+- **Hypothesis description**: A brief description of the hypothesis.
+- **Hypothesis Notes**: Any notes you want to add that will be attached to the hypothesis.
+
+![New Hypothesis](../figures/user-guide/new-hypothesis.png "New Hypothesis")
+
+## Saving Your New Hypothesis
 
 Finally, you can click in the **Save ** button to save the hypothesis and question.
 
 ## Next step
 
-In the step, we show how to test a hypothesis using Line of Inquiry.
+In the next step, we will show you how to find a Line of Inquiry to test your new hypothesis.
