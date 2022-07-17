@@ -54,6 +54,6 @@ DISK releases can be found [releases](https://github.com/KnowledgeCaptureAndDisc
 
 
 
-## Adoptions
+## Applications of DISK
 
-Organizations who have officially adopted DISK can be found [here](adoptions).
+We are using DISK in several applications, more details can be found [here](adoptions).
