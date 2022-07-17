@@ -1,29 +1,32 @@
 
-# Create Line of Inquiry
+# Creating a New Line of Inquiry
 
-## Add basic information
+You can create a new Line of Inquiry (LOI) by selecting the **Create Line of Inquiry** button.
 
-You can create a Line of Inquiry by clicking on the **Create Line of Inquiry** button.
+We show first how to create an additional LOI for a question template that already exists.  There can be several LOIs to address the same question template, for example each LOI can specify an analysis for a different type of data that can answer the same question.
 
-Then, you must fill the form with the following information:
+We will show later how to create new question templates.
 
-- **Line of Inquiry name**: The name of the Line of Inquiry.
-- **Line of Inquiry description**: A description of the Line of Inquiry.
+## Adding Basic Documentation
 
-## Select the Question  
+You can fill the form to provide basic documentation about the LOI:
 
-A Line of Inquiry must be associated with a Question and the Question Variables
+- **Line of Inquiry name**: A meaningful name for the Line of Inquiry.
+- **Line of Inquiry description**: A brief overview of what the Line of Inquiry is for and how it works.
 
-You can display the questions available by clicking on the **Select Question** drop down list.
+## Selecting the Question  
+
+A Line of Inquiry is created to answer a type of question and therefore it must specify a Question Template.
+
+You can display the question templates available by selecting the **Select Question** drop down list.
 Then, select a question from the list.
 
 ![Select Question](../../figures/user-guide/loi-create.png "Select Question")
 
 ### Question Variables
 
-Each question variable is going be associated with a variable in the **data source**. In other words,
-the question variable is used to find the data required by the analysis.
+Note that each question template has one or more **question variables**. These question variables will be used in the **data query** that you will create for the LOI as we will explain next. 
 
-## Next steps
+## Next step
 
-In the next steps, you will write a Data Query to obtain the data required to run the analysis.
+In the next step, you will write a data query to obtain the data needed to answer the type of question that this LOI is designed to answer.
