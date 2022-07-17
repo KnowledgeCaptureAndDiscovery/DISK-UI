@@ -1,45 +1,52 @@
-# Test hypothesis
+# Testing a New Hypothesis
 
-Questions can be posed as testing a hypothesis, which would be a statement that can be supported or dismissed based on data analysis.
+DISK can test your new hypothesis by triggering a Line of Inquiry (LOI) that matches it.  This will happen automatically, and DISK will show you the results.  But in case you are curious, we show you next how you can browse the Lines of Inquiry defined in DISK.
 
-This document shows how DISK runs the data analysis.
+## Browsing LOIs
 
-## Line of inquiry (LOI)
-
-A line of inquiry (LOI) is the mechanism that DISK use to trigger
-workflows to answer questions and test the hypothesis.
+To view LOIs associated with a hypothesis template, go to the **Hypothesis** tab. The LOIs are listed under the Hypothesis template that they match.  
 
 !!! Info
-    A line of inquiry is created by the Operator user.
+    Lines of inquiry are created by Advanced Users who are familiar with advanced features of DISK.
 
-## View LOIs
-
-To view LOIs associated with a hypothesis, go to the **Hypothesis** page. LOIs are displayed below the **Hypothesis** title.
-
-In the following image, you can see the LOIs associated with the two hypothesis
+This example shows the LOIs associated with two hypotheses:
 
 ![LOI](../figures/user-guide/loi.png "LOI")
 
-## Check results
+## Executing LOIs
 
-The LOIs that match are then triggered, which results in their query being executed, then the workflows, and then the meta-workflow. 
+You don't have to ask DISK to execute LOIs.  LOIs are executed automatically when you add a new hypothesis or question.
 
-To display the workflow executions, click on the LOI name. Then, you can see the results.
+The LOIs that match your new hypothesis will be triggered.  When an LOI is triggered, the following occurs:
 
-In the following image, you can see two executions associated with the LOI. The first one is using 10 files, generating 2 outputs and the p-value result is 0.838 and the second one is using 56 files, generating 2 outputs and the p-value is 0.776.
+ - A data query will be executed to retrieve relevant data
+ - One or more workflows will be executed to analyze the data
+ - A meta-workflow will be executed to assemble the results of all the workflows 
+
+## Checking Results
+
+When you select an LOI name, you can see all the workflow executions, including their individual results.
+
+In the following image, you can see two workflow executions associated with the LOI. The first one is using 10 input datasets, generating 2 outputs and showing a resulting p-value of 0.838.  The second one is using 56 input datasets, generating 2 outputs and showing a resulting p-value of 0.776.
 
 ![LOI](../figures/user-guide/lois.png "LOI")
 
-## Get the Execution narrative
+## Getting the Execution Provenance
 
-Each workflow execution has a narrative. It shows the steps, and files that were used in the execution and their results.
+All the LOI and workflow executions are recorded in detail.  DISK generates a narrative from those provenance records that explains how the results were obtained.
 
-To display the narrative,  you can click on the **Narrative** button to see the narrative.
+To display the narrative, you can select the **Narrative** button.
 
-The following image shows the execution narrative for the first LOI. The workflow triggered is the **"Bike Rental"** workflow, which was done on the **Wings** Workflow Engine using multiple csv files.
+The following image shows the execution narrative for the first LOI, along with a table that summarizes key metadata of the input datasets used.
 
 ![Narrative](../figures/user-guide/narrative.png "Narrative")
 
+## Updating the Results
+
+The LOI will be triggered again when new datasets become available in the data source.  DISK will do this automatically.  
+
+You can view the new executions and the updated results.
+
 ## Next steps
 
-You can learn about the Advanced User actions.
+You can learn more about what Advanced Users can do in DISK.
