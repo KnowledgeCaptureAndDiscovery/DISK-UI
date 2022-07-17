@@ -1,4 +1,4 @@
-# Specifying New Hypotheses or Questions
+# Specifying A New Hypothesis
 
 A user can start to add a new hypothesis by selecting **Create Hypothesis**.
 
