@@ -2,7 +2,7 @@
 
 ## What is DISK?
 
-The DISK is a system that automates the execution of scientific workflows triggered on data changes. 
+DISK is a framework that uses AI to automate scientific data analysis to accelerate discoveries. 
 
 ![DISK](figures/user-guide/web.gif "DISK")
 
@@ -12,59 +12,52 @@ The DISK is a system that automates the execution of scientific workflows trigge
 Existing large repositories of
 data could be continuously and systematically analyzed by
 machines, updating findings and potentially making new
-discoveries as new data becomes available
+discoveries as new data becomes available.
 
 ## Getting Started
 
 
-### Quick Start
+### Documentation for Users, Advanced Users, and Developers
 
-You can using DISK [here](https://disk.isi.edu).
-[User documentation](user-guide/) describe how to create and test hypothesis.
-Further advanced user oriented [documentation](advanced-user/) describe how to find 
-data and run analysis. Additionally, Developer oriented [documentation](developer-guide/) 
-is available for people interested in building third-party integrations.
+You can start to use DISK [here](https://disk.isi.edu), although you need to request an account.
+[User documentation](user-guide/) describe how to create and test hypotheses using DISK.
+Advanced users [documentation](advanced-user/) can extend DISK to incorporate new datasets and new kinds of analyses. Developers [documentation](developer-guide/) 
+can integrate DISK with different data sources and data analysis engines.
 
 
 ## How it works
 
-The DISK system automates the execution of scientific workflows triggered on data changes.
-To do this DISK collects data from different data repositories and defines methods on different workflows systems.
-User defined goals are periodically check for new data/methods available. When a method detects new data, a new workflow execution will be send.
-Each experiment execution is stored with its metadata and outputs for posterior analysis.
+The DISK system automatically tests hypotheses provided by a scientist.
+To do this, DISK retrieves data from existing data repositories and analyzes the data using intelligent workflows.
+User-defined hypotheses are re-run when new data or methods become available. 
+DISK stores all the provenance and metadata for new results, so they can be inspected and reproduced.
 
-## Architecture
+## Overview of DISK Architecture
 
 ![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
 
-DISK is implemented as a service which continuously monitors new data/methods available with existing user goals.
-Furthermore, DISK System can obtain data from different data repositories and send runs to different workflow systems.
 For more information about the DISK architecture, please check the [architecture](developer-guide/architecture/) page.
 
-## Features
+## Key Features
 
-- Automated execution of scientific workflows triggered on data changes
-- Automatic discovery of new data and methods
-- Automatic execution of new workflows
-- Automatic storage of experiment executions
-- Automatic analysis of experiment executions
-- Support for multiple data source integration using Adapter
-- Support for multiple workflow engines using Adapter
+- User interface to specify scientific hypotheses and track results
+- Automated retrieval of data relevant to a given hypothesis or question
+- Automated selection and execution of workflows to analyze data
+- Automated recording of provenance for new results
+- Support for new data source integration using Adapters
+- Support for new workflow engines using Adapters
 - SSO for user authentication
 
-## Users types
+## Target Users
 
-DISK is designed to be used by different users types depending on their needs.
-
-- Users: Scientists who want to use DISK to create and test hypothesis using existing questions.
-- Expert users: Users who defines which question can trigger it, which data and from whom data source get and which method will create new workflows executions on the workflow system. Also, they can define new questions to be used on the creation of new hypothesis.
-- Administrator: Users who install DISK and defines which data sources and which workflow engines are available
-- Developers: Users who want to build third-party integrations.
+- Users: Scientists who use DISK to specify and test hypotheses or ask questions.
+- Advanced Users: Scientists who understand the design of DISK and can extend it to support new types of hypotheses and questions by defining data queries and workflows.
+- Developers: Programmers who can extend DISK by integrating it with new data sources and new workflow systems.
 
 ## Development Status
 
-DISK is being actively developed by the [Knowledge Capture and Discovery Team](https://knowledgecaptureanddiscovery.github.io/).
-Our releases can be found [releases](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/releases).
+DISK is being actively developed by the USC/ISI [Knowledge Capture and Discovery Team](https://knowledgecaptureanddiscovery.github.io/).
+DISK releases can be found [releases](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/releases).
 
 ---
 
