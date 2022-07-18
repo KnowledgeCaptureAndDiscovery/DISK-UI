@@ -1,37 +1,37 @@
-**The Scientific Questions Ontology** defines semantic templates for scientific questions, variables, options, and constraints.
+# Extending the Questions Ontology
 
-In the next step, you will create a new ontology that describes the questions, variables, options, and constraints for the Bike-sharing domain
+**The Scientific Questions Ontology** defines core concepts to express scientific question templates, question variables, options, and constraints.
 
-## Step 1: Installing protege
+We show here with simple examples how to use an ontology editor to add new types of questions to DISK.  
 
-To work with ontology, we recommend using [protégé](https://protege.stanford.edu). 
+## Step 1: Setting Up an Ontology Editor
 
-Check the official instruction to learn [how to install it](http://protegeproject.github.io/protege/installation/)
+We recommend using the [Protégé](https://protege.stanford.edu) ontology editor.  Extensive documentation about how to install Protégé [is available here](http://protegeproject.github.io/protege/installation/).
 
-## Step 2: Creating the Bike-sharing question ontology
+Load into Protégé the DISK Scientific Questions Ontology:
 
-Create a new ontology extending SQO:
-
-1. Open Protege
-2. Click the button + near the Direct Imports section. 
+1. Open Protégé
+2. Click the "+" button next to the "Direct Imports" section. 
 3. A new window will be opened
-4. Paste the SQO link in the URI text field [`https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml`](https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml)
+4. Paste the DISK Scientific Qquestions Ontology URL in the text field [`https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml`](https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml)
 
 ![Untitled](../../figures/admin-guide/Untitled%201.png)
 
-Great. You had created a new ontology for the Bike-rental Domain.
+Great. You are all set to extend the ontology with new types of questions.
 
-In the next step, you will create the questions.
 
-## Thinking and creating the question
+## Designing New Types of Question
 
 In this step, we will learn how to transfer your question into the ontology
 
 ![2.Searching.png](../../figures/admin-guide/2Searching.png)
 
-Let’s suppose that we want to know `Can we predict the number of rented bikes using 3 climate variables?`
+Suppose that our users want to predict the number of bike rentals in a bike sharing service from the weather forecast in an area.  One user may live in Los Angeles and may ask whether bike rentals can be predicted from temperature only.  Another user may live in Seattle and wonder whether temperature and precipitation will be the most important factors.  Another user living in Chicago may believe that temperature, wind, and precipitation will be needed to make a prediction.
 
-This question can be broken into three pieces:
+
+
+
+There are three aspects to this kind of question:
 
 1. **Question**: It represents our Scientific question using human language
 2. **Question Variable:** It represents the *variables* used on *a question*.
