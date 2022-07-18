@@ -1,10 +1,10 @@
 #  Scientific Questions Ontology
 
-The Scientific Questions Ontology aims to help users on the creation of semantic representations for scientific questions (hypothesis).
+The DISK Scientific Questions Ontology provides the vocabulary to create semantic representations for scientific hypothesis or questions.
 
-The ontology defines the `Question` resource with the following properties:
+The ontology defines the `Question` class, with the following properties:
 
- - `hasQuestionTemplate`: Text representation of the question. Includes `SPARQL` variable names that will be replaced for appropriate options.
+ - `hasQuestionTemplate`: A brief text statement of the question. Includes Question Variables that will be replaced with domain concepts to create specific questions.
  
  - `hasQuestionPattern`: `SPARQL` like pattern that defines the semantic representation of this *Question*.
  
