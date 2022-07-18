@@ -1,34 +1,23 @@
-# What is a ontology?
+## Ontologies used in DISK
 
-Ontology is a term borrowed from philosophy that refers to the science of describing 
-the kinds of entities in the world and how they are related. 
-An OWL ontology may include descriptions of classes, properties and their instances.
-
-
-## Disk Ontologies
-
-The DISK system uses several ontologies to store and produce data.
-
-The following diagram shows the ontologies used on the DISK system.
+DISK uses several ontologies to represent core concepts about hypothesis-driven discoveries, shown in the following diagram:
 
 ![Disk Ontologies](../../figures/DISK-ontologies.png "DISK Ontologies")
 
- - **On blue:** Commonly used ontologies. These ontologies contribute the vocabulary used to store metadata on the DISK system.
+ - **Community ontologies (shown in blue):** Widely-used community standards to represent basic entities such as people, provenance, and files. These ontologies are the core vocabulary used to store general metadata on DISK.
 
- - **On green:** Internal ontologies created for DISK:
+ - **Core DISK ontologies (shown in green):** Internal ontologies that represent core knowledge structures in DISK, such as:
 
-    - **DISK Core:** Basic DISK definitions, such as *Hypothesis*, *Line of inquiry* and so on.
-    Please check the [Disk vocabulary](http://disk-project.org/ontology/disk#) for more information.
+    - **DISK Ontology:** Basic DISK definitions such as *Hypothesis* and *Line of inquiry*. [More information here](http://disk-project.org/ontology/disk#).
 
-    - **DISK Hypothesis:** Basic properties to define general hypothesis. Contains terms as `associatedWith` and so on.
-    Please check the [hypothesis vocabulary](http://disk-project.org/ontology/hypothesis#) for more information.
+    - **DISK Hypothesis Ontology:** Basic properties to define general hypothesis. [More information here](http://disk-project.org/ontology/hypothesis#).
  
-    - **Question Template:** Ontology to help on the creation of hypothesis, defines *Hypothesis Questions* and how to customize them. [More info here](./question-ontology.md).
+    - **Question Template Ontology:** Ontology to represent questions. [More information here](./question-ontology.md).
 
- - **On yellow:** Imported ontologies. Categorized on three types:
+ - **Imported Ontologies:** Imported ontologies. Categorized on three types:
 
-    - Ontologies to interact with data repositories. Defined as part of [Data Adapters](/data-adapter)
+    - Data Ontologies: Each data repository used in DISK has to provide an ontology of its metadata concepts. This ontology is specified as part of [Data Adapters](/data-adapter).
 
-    - Ontologies to interact with workflows systems. Defined as part of [Method Adapters](/method-adapter)
+    - Workflow System Ontologies: Each workflow system used in DISK has to provide an ontology of its workflow concepts.  This ontology is a key aspect of [Method Adapters](/method-adapter).
 
-    - Ontologies imported to help on the creation of *hypotheses* and *data queries*. Domain specific.
+    - Domain Ontologies: These are ontologies that are used to state hypotheses and questions.  They are domain specific.
