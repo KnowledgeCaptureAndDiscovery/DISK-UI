@@ -14,7 +14,7 @@ DISK uses several ontologies to represent core concepts about hypothesis-driven 
  
     - **Question Template Ontology:** Ontology to represent questions. [More information here](./question-ontology.md).
 
- - **Imported Ontologies:** Imported ontologies. Categorized on three types:
+ - **Imported Ontologies (shown in yellow):** Imported ontologies. Categorized on three types:
 
     - Data Ontologies: Each data repository used in DISK has to provide an ontology of its metadata concepts. This ontology is specified as part of [Data Adapters](/data-adapter).
 
