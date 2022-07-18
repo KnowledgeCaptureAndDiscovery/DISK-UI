@@ -259,7 +259,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
-                    {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
+                    {questionParts.length > 0 ? questionParts.map((part:string, i:number, parts: string[]) => 
                         part.charAt(0) !== '?' ? 
                             <TextPart key={`qPart${i}`}> {part} </TextPart>
                         :
