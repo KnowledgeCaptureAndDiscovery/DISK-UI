@@ -1,4 +1,4 @@
-## Ontologies used in DISK
+# Ontologies used in DISK
 
 DISK uses several ontologies to represent core concepts about hypothesis-driven discoveries, shown in the following diagram:
 
@@ -21,4 +21,3 @@ DISK uses several ontologies to represent core concepts about hypothesis-driven 
     - Workflow System Ontologies: Each workflow system used in DISK has to provide an ontology of its workflow concepts.  This ontology is a key aspect of [Method Adapters](/method-adapter).
 
     - Domain Ontologies: These are ontologies that are used to state hypotheses and questions.  They are domain specific.
-
