@@ -1,21 +1,21 @@
 #  Scientific Questions Ontology
 
-The DISK Scientific Questions Ontology provides the vocabulary to create semantic representations for scientific hypothesis or questions.
+The DISK Scientific Questions Ontology provides a vocabulary to create semantic representations for scientific hypothesis or questions.
 
 The ontology defines the `Question` class, with the following properties:
 
  - `hasQuestionTemplate`: A brief text statement of the question. Includes Question Variables that will be replaced with domain concepts to create specific questions.
  
- - `hasQuestionPattern`: `SPARQL` like pattern that defines the semantic representation of this *Question*.
+ - `hasQuestionPattern`: `SPARQL` like semantic representation of this *Question*, placing Question Variables within the Question Template.
  
- - `hasQuestionVariable`: list of `QuestionVariable` for this *Question*. These appear as `SPARQL` variables on the template and pattern.
+ - `hasQuestionVariable`: list of `QuestionVariable` for this *Question template*. These appear as `SPARQL` variables on the Question Pattern.
  
-and the `QuestionVariable` resource:
+The `QuestionVariable` class has the following properties:
  
- - `hasVariableName`: `SPARQL` name of this variable. Is used on the question pattern and template.
+ - `hasVariableName`: `SPARQL` name of this variable. It is used on the Question Pattern.
  
- - `hasConstraints`: `SPARQL` query that will determine the options for this variable.
+ - `hasConstraints`: `SPARQL` query that will determine any restrictions for this variable.
  
- - `hasFixedOptions`: list of fixed options for this variable, use this or `hasConstraints`.
+ - `hasFixedOptions`: list of possible values for this variable.  This is an alternative to specifying `hasConstraints`.
 
-As each question defines a "part" of a `SPARQL` query, we can compose multiple simple questions to create complex ones.
+Since each question corresponds to a portion of a `SPARQL` query, multiple questions can be composed to create more complex ones.
