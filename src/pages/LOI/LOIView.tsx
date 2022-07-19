@@ -1,11 +1,9 @@
-import { Box, Card, Divider, FormHelperText, Grid, IconButton, MenuItem, Select, Skeleton, Tooltip, Typography } from "@mui/material";
+import { Box, Card, Divider, FormHelperText, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
-import { LineOfInquiry, idPattern, VariableBinding, Workflow, DataEndpoint } from "DISK/interfaces";
+import { LineOfInquiry, idPattern, DataEndpoint } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -15,7 +13,6 @@ import { QuestionLinker } from "components/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
-import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server";
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -147,7 +144,7 @@ export const LOIView = () => {
                         <Fragment>
                             <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
                             <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                <div dangerouslySetInnerHTML={{__html: renderDescription(dataSource.description)}}/>
+                                {renderDescription(dataSource.description)}
                             </Box>
                         </Fragment>
                     :

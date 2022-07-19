@@ -12,7 +12,6 @@ import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setErrorSelected, setLoadingSelected, setSelectedLOI, add as addLOI } from "redux/lois";
-import { setEndpoint, setErrorEndpoint, setLoadingEndpoints } from "redux/server";
 import { QuestionLinker } from "components/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
@@ -336,7 +335,7 @@ export const LOIEditor = () => {
                             }
                         </Select>
                         <Box sx={{display: 'inline', ml:"5px", fontSize:".85em"}}>
-                            <div dangerouslySetInnerHTML={{__html: renderDescription(dataSourceDescription)}}/>
+                            {renderDescription(dataSourceDescription)}
                         </Box>
                     </Fragment>
                 }

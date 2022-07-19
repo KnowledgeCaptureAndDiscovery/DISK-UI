@@ -1,11 +1,11 @@
-import { Box, breadcrumbsClasses, Button, Card, Divider, FormHelperText, Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { DataEndpoint, idPattern, VariableBinding, Workflow } from "DISK/interfaces";
+import { Box, Button, Card, Divider, FormHelperText, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
+import { DataEndpoint, idPattern, Workflow } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { styled } from '@mui/material/styles';
-import { PATH_LOIS, PATH_TLOIS } from "constants/routes";
+import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
@@ -21,7 +21,6 @@ import { WorkflowList } from "components/WorkflowList";
 import { loadHypothesis } from "redux/loader";
 import { QuestionPreview } from "components/QuestionPreview";
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import { DISKAPI } from "DISK/API";
 import { loadDataEndpoints } from "redux/loader";
 import { downloadFile, renderDescription } from "DISK/util";
 
@@ -205,7 +204,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                         <Fragment>
                             <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
                             <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                <div dangerouslySetInnerHTML={{__html: renderDescription(dataSource.description)}}/>
+                                {renderDescription(dataSource.description)}
                             </Box>
                         </Fragment>
                     :

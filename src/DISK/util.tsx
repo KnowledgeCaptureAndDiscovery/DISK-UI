@@ -6,7 +6,8 @@ import { LineOfInquiryRequest } from "./requests";
 const RE_LINKS = /\[(.*?)\]\((.*?)\)/g;
 
 export const renderDescription = (text:string) => {
-    return text.replaceAll(RE_LINKS, '<a target="_blank" href="$2">$1</a>');
+    let htmlText : string = text.replaceAll(RE_LINKS, '<a target="_blank" href="$2">$1</a>');
+    return <div dangerouslySetInnerHTML={{__html: htmlText}}/>
 }
 
 export const downloadFile = (source:string, fileId:string, name:string) => {

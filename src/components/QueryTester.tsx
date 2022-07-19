@@ -8,6 +8,7 @@ import { DISKAPI } from "DISK/API";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { DataEndpoint } from "DISK/interfaces";
+import { ResultTable } from "./ResultTable";
 
 interface QueryTesterProps {
     name?: string,
@@ -17,11 +18,9 @@ interface QueryTesterProps {
 
 export const QueryTester = ({name="Open query tester", initQuery, initSource} : QueryTesterProps) => {
     const [open, setOpen] = useState(false);
-    const [waiting, setWaiting] = useState(false);
-    const [dataSource, setDataSource] = useState("");
+    const [dataSource, setDataSource] = useState<DataEndpoint|null>(null);
     const [query, setQuery] = useState("SELECT * WHERE {\n ?a ?b ?c \n} LIMIT 10");
-    const [results, setResults] = useState<{[varName:string] : string[]}>({});
-    const [total, setTotal] = useState<number>(0);
+    const [queryToSend, setQueryToSend] = useState("");
 
     const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
 
@@ -30,28 +29,23 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
     }, [initQuery]);
 
     useEffect(() => {
-        if (initSource) setDataSource(initSource);
+        if (initSource && endpoints) {
+            setDataSourceByUrl(initSource);
+        }
     }, [initSource, endpoints]);
 
-    const sendQuery = () => {
-        if (dataSource && query) {
-            setWaiting(true);
-            DISKAPI.testQuery(dataSource, query, [])
-                    .then((r) => {
-                        setWaiting(false);
-                        setResults(r)}
-                    );
+    const setDataSourceByUrl = (url:string) => {
+        if (endpoints && endpoints.length > 0) {
+            endpoints.forEach((e:DataEndpoint) => {
+                if (e.url === url)
+                    setDataSource(e);
+            })
         }
     }
 
-    useEffect(() => {
-        console.log(results);
-        for (let key of Object.keys(results)){
-            setTotal(results[key].length);
-            console.log(results[key].length);
-            break;
-        }
-    }, [results])
+    const sendQuery = () => {
+        setQueryToSend(query);
+    }
 
     return (
         <Fragment>
@@ -70,7 +64,7 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
                     <Box sx={{display: "inline-flex", alignItems: "center"}}>
                         <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
                         <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
-                                value={dataSource} onChange={(e) => setDataSource(e.target.value)} error={dataSource.length===0} >
+                                value={dataSource?.url} onChange={(e) => setDataSourceByUrl(e.target.value)} error={dataSource === null} >
                             <MenuItem value="" disabled> None </MenuItem>
                             {endpoints.map((endpoint:DataEndpoint) =>
                                 <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
@@ -87,23 +81,7 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
                         }}
                         onBlur={console.log}
                     />
-                    {waiting ? <Skeleton/> : (Object.keys(results).length > 0 ? <Box>
-                    <TableContainer sx={{display: "flex", justifyContent: "center"}}>
-                        <Table sx={{width:"unset"}}>
-                            <TableHead>
-                                <TableRow>
-                                    {Object.keys(results).map((varname:string) => <TableCell key={`header_${varname}`} sx={{padding: "0 10px"}}> {varname}</TableCell>)}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {Array(total < 20 ? total : 20).fill(0).map((_,i) => 
-                                <TableRow key={`row_${i}`}>
-                                    {Object.values(results).map((values:string[], i) => <TableCell key={`c_${i}`} sx={{padding: "0 10px"}}> {values[i].replace(/.*\//g,'').replace(/.*#/g,'')}</TableCell>)}
-                                </TableRow>)}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    </Box> : null)}
+                    {queryToSend && dataSource && <ResultTable query={queryToSend} dataSource={dataSource} variables={'*'}/> }
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={sendQuery}>

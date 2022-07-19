@@ -85,7 +85,7 @@ export const ResultTable = ({query, variables, dataSource, indexes=true} : Resul
                                             <Box sx={{fontWeight:"bold", color:"darkgray", padding: "0 10px"}}>
                                                 Showing {(curPage)*MAX_PER_PAGE} - {(curPage+1) * MAX_PER_PAGE < total ? (curPage+1) * MAX_PER_PAGE : total} of {total} results
                                             </Box>
-                                            <Button sx={{padding:"0"}} disabled={(1+curPage)*MAX_PER_PAGE > total} onClick={() => setCurPage(curPage+1)}>Next</Button>
+                                            <Button sx={{padding:"0"}} disabled={(1+curPage)*MAX_PER_PAGE >= total} onClick={() => setCurPage(curPage+1)}>Next</Button>
                                         </Box>
                                     </TableCell>
                                 </TableRow>
