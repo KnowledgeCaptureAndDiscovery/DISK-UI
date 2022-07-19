@@ -103,7 +103,7 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
             }}/>)
         else
             return <Box sx={{p:"5px"}}>
-                You don not have any hypothesis, you can create a new one based on one of the following questions:
+                You do not have any hypothesis. You can create a new one based on one of the following questions:
             </Box>
     }
 
