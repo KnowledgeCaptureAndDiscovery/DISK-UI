@@ -4,7 +4,7 @@
 
 We show here with simple examples how to use an ontology editor to add new types of questions to DISK.  
 
-## Step 1: Setting Up an Ontology Editor
+## Setting Up an Ontology Editor
 
 We recommend using the [Protégé](https://protege.stanford.edu) ontology editor.  Extensive documentation about how to install Protégé [is available here](http://protegeproject.github.io/protege/installation/).
 
@@ -24,22 +24,21 @@ Great. You are all set to extend the ontology with new types of questions.
 
 In this step, we will learn how to transfer your question into the ontology
 
-![2.Searching.png](../../figures/admin-guide/2Searching.png)
+Suppose that our users want to predict the number of bike rentals in a bike sharing service from the weather forecast in an area.  A user may hypothesize that in New York bike rentals can be predicted from temperature, humidity, and precipitation.  But in Seattle the temperature, BP, and precipitation may be the most important factors, while in Chicago it may be temperature, wind, and precipitation.  So we wan to add a new type of question:
 
-Suppose that our users want to predict the number of bike rentals in a bike sharing service from the weather forecast in an area.  One user may live in Los Angeles and may ask whether bike rentals can be predicted from temperature only.  Another user may live in Seattle and wonder whether temperature and precipitation will be the most important factors.  Another user living in Chicago may believe that temperature, wind, and precipitation will be needed to make a prediction.
+Is the number of rented bikes associated with ?weatherSensor1, ?weatherSensor2, and ?weatherSensor3 in ?region ?
 
+We refer to this statement as the **Question Statement**.  Question statements contain **Question Variables**.  In this example, the question variables are ?weatherSensor1, ?weatherSensor2, ?weatherSensor3, and ?region.
 
+To create this new type of question, we have to define 3 new items in the ontology:
 
+1. **Question Statement**: It is the statement of the question template in English as in the example above.
+2. **Question Variables:** It represents the variables used on a Question Statement.
+3. **Question Template**: It is the concept that represents both the Question Statement and the Question Variables.
 
-There are three aspects to this kind of question:
+### Creating the Question Statement in the Ontology
 
-1. **Question**: It represents our Scientific question using human language
-2. **Question Variable:** It represents the *variables* used on *a question*.
-3. **Question Template**: it links the Question to the previous variables
-
-### Create the question in the ontology
-
-In this example, we will create our **question**: 
+In this example, we will create our question: 
 
 `Can we predict the number of rented bikes using 3 climate variables?`
 
