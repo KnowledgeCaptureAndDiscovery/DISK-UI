@@ -103,7 +103,7 @@ export const LOIEditor = () => {
     }, [selectedDataSource, endpoints])
     
     const loadEndpoints = () => {
-        if (!initEndpoints) {
+        if (!initEndpoints && !loadingEndpoints) {
             loadDataEndpoints(dispatch);
         }
     };
