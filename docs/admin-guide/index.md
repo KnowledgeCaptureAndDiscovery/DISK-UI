@@ -1,7 +1,7 @@
 # Overview
 
-This guide is for Administration users wanting to install a own DISK instance.
+This guide is for Administrators who need to set up a new DISK installation.
 
 !!! Note
-    Please make sure you've completed the user guide before you start this guide.
+    Please make sure you have completed the User guide and the Advanced User guide before you start.
 
