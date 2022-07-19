@@ -14,7 +14,11 @@ import { loadLOIs } from "redux/loader";
 
 type OrderType = 'date'|'author';
 
-export const LinesOfInquiry = () => {
+interface ViewProps {
+    myPage?:boolean
+}
+
+export const LinesOfInquiry = ({myPage=false} : ViewProps) => {
     const dispatch = useAppDispatch();
     const [order, setOrder] = React.useState<OrderType>('date');
     const [searchTerm, setSearchTerm] = React.useState<string>("");
@@ -32,6 +36,7 @@ export const LinesOfInquiry = () => {
     const [confirmDialogOpen, setConfirmDialogOpen] = React.useState<boolean>(false);
     const [LOIToDelete, setLOIToDelete] = React.useState<LineOfInquiry|null>(null);
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const username = useAppSelector((state:RootState) => state.keycloak.username);
 
     useEffect(() => {
         if (!initializedLOIs)
@@ -78,7 +83,11 @@ export const LinesOfInquiry = () => {
         setLastDeletedNamed("");
     };
 
-    const textFilter = (loi:LineOfInquiry) => {
+    const applyFilter = (loi:LineOfInquiry) => {
+        //User filter
+        if (myPage)
+            return username && loi.author === username;
+        //TextFilter
         let t : string = loi.name + loi.description + loi.author;
         if (loi.notes) t += loi.notes;
         if (loi.dateCreated) t += loi.dateCreated;
@@ -147,7 +156,7 @@ export const LinesOfInquiry = () => {
                     (error ? 
                         <Box> Error loading Lines of Inquiry </Box>
                     :
-                        LOIs.filter(textFilter).map((loi:LineOfInquiry) => <LOIPreview key={loi.id} LOI={loi} onDelete={() => {
+                        LOIs.filter(applyFilter).map((loi:LineOfInquiry) => <LOIPreview key={loi.id} LOI={loi} onDelete={() => {
                             setConfirmDialogOpen(true);
                             setLOIToDelete(loi);
                         }}/>)

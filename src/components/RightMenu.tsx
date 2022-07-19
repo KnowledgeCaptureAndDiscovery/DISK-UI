@@ -23,10 +23,11 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
 import { Link as MuiLink, Menu, MenuItem } from '@mui/material';
 import { useLocation } from 'react-router-dom'
-import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
+import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_MY_HYPOTHESES, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
+import NewTabIcon from '@mui/icons-material/OpenInNew';
 
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
@@ -152,10 +153,14 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
       return <Box>DISK Home</Box>;
     case PATH_HYPOTHESES:
       return <Box>Hypotheses</Box>;
+    case PATH_MY_HYPOTHESES:
+      return <Box>My Hypotheses</Box>;
     case PATH_HYPOTHESIS_NEW:
       return <Box>Creating new hypothesis</Box>;
     case PATH_LOIS:
       return <Box>Lines of Inquiry</Box>
+    case PATH_MY_LOIS:
+      return <Box>My Lines of Inquiry</Box>
     case PATH_TERMINOLOGY:
       return <Box>Terminology</Box>
     case PATH_DATA:
@@ -236,6 +241,32 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </DrawerHeader>
+
+        {keycloak && keycloak.authenticated && (<React.Fragment>
+          <Divider />
+          <List>
+            <ListItemButton  key={PATH_MY_HYPOTHESES} component={Link} to={PATH_MY_HYPOTHESES}
+                sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_MY_HYPOTHESES) ? "darkorange" : "orange" }} >
+                <ScienceIcon />
+              </ListItemIcon>
+              <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
+                <Typography sx={{fontWeight: inLocation(PATH_MY_HYPOTHESES) ? 700 : 400}}>My Hypotheses</Typography>
+              }/>
+            </ListItemButton>
+
+            <ListItemButton key={PATH_MY_LOIS} component={Link} to={PATH_MY_LOIS}
+                sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_MY_LOIS) ? "darkgreen" : "green" }} >
+                <SettingIcon />
+              </ListItemIcon>
+              <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
+                <Typography sx={{fontWeight: inLocation(PATH_MY_LOIS) ? 700 : 400}}>My Lines of Inquiry</Typography>
+              }/>
+            </ListItemButton>
+          </List>
+        </React.Fragment>)}
+
         <Divider />
         <List>
           <ListItemButton  key={PATH_HYPOTHESES} component={Link} to={PATH_HYPOTHESES}
@@ -305,9 +336,15 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             </Menu>
           </Box>
           <Divider />
+            <Typography variant="body2" color="textSecondary" align="center">
+              <MuiLink  underline="none" href={"https://disk.readthedocs.io/en/stable/"}>
+                Documentation <NewTabIcon sx={{p:0, height: '14px'}}/>
+              </MuiLink>
+            </Typography>
+          <Divider />
           <Box>
             <Typography variant="body2" color="textSecondary" align="center">
-              <MuiLink  underline="none" href={`https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/releases`}>   v{VERSION} </MuiLink>
+              <MuiLink  underline="none" href={`https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/releases`}> v{VERSION} </MuiLink>
             </Typography>
           </Box>
         </Box>

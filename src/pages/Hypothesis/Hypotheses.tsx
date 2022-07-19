@@ -14,7 +14,11 @@ import { loadHypotheses } from "redux/loader";
 
 type OrderType = 'date'|'author';
 
-export const Hypotheses = () => {
+interface ViewProps {
+    myPage?:boolean
+}
+
+export const Hypotheses = ({myPage=false} : ViewProps) => {
     const dispatch = useAppDispatch();
     const [order, setOrder] = React.useState<OrderType>('date');
     const [searchTerm, setSearchTerm] = React.useState<string>("");
@@ -31,6 +35,7 @@ export const Hypotheses = () => {
     const [confirmDialogOpen, setConfirmDialogOpen] = React.useState<boolean>(false);
     const [hypothesisToDelete, setHypothesisToDelete] = React.useState<Hypothesis|null>(null);
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const username = useAppSelector((state:RootState) => state.keycloak.username);
 
     useEffect(() => {
         if (!initializedHypotheses) loadHypotheses(dispatch);
@@ -77,12 +82,29 @@ export const Hypotheses = () => {
         setLastDeletedNamed("");
     };
 
-    const textFilter = (hypothesis:Hypothesis) => {
+    const applyFilters = (hypothesis:Hypothesis) => {
+        //User filter
+        if (myPage)
+            return username && hypothesis.author === username;
+        //Text Filter:
         let t : string = hypothesis.name + hypothesis.description + hypothesis.author;
         if (hypothesis.notes) t += hypothesis.notes;
         if (hypothesis.dateCreated) t += hypothesis.dateCreated;
         if (hypothesis.dateModified) t += hypothesis.dateModified;
         return t.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+
+    const renderHypotheses = () => {
+        let curH = hypotheses.filter(applyFilters);
+        if (curH.length > 0)
+            return curH.map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => {
+                setHypothesisToDelete(h);
+                setConfirmDialogOpen(true);
+            }}/>)
+        else
+            return <Box sx={{p:"5px"}}>
+                You don not have any hypothesis, you can create a new one based on one of the following questions:
+            </Box>
     }
 
     return (
@@ -146,10 +168,7 @@ export const Hypotheses = () => {
                     (error ? 
                         <Box> Error loading Hypotheses </Box>
                     :
-                        hypotheses.filter(textFilter).map((h:Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h} onDelete={(h:Hypothesis) => {
-                            setHypothesisToDelete(h);
-                            setConfirmDialogOpen(true);
-                        }}/>)
+                        renderHypotheses()
                     )
                 }
             </Card>

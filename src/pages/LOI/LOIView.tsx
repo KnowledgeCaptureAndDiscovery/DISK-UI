@@ -141,7 +141,6 @@ export const LOIView = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data:</TypographySubtitle>
-
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
                 <Box>
                     <TypographyLabel>Data query explanation:</TypographyLabel>
