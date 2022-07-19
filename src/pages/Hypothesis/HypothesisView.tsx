@@ -1,6 +1,6 @@
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import { idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
@@ -18,7 +18,8 @@ import { FileList } from "components/FileList";
 import { loadTLOIs, loadHypothesis } from "redux/loader";
 import { DISKAPI } from "DISK/API";
 import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
-import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { TLOIEdit } from "components/TLOIEdit";
+import CachedIcon from '@mui/icons-material/Cached';
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -264,10 +265,10 @@ export const HypothesisView = () => {
         <Box sx={{padding:"10px"}}>
             <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', mb: "10px"}}>
                 <TypographySubtitle>
-                    Analyses executed to test the hypothesis or answer the question:
+                    Lines of inquiry triggered to test this hypothesis and answer the question:
                 </TypographySubtitle>
                 <Button variant="outlined" onClick={onTestHypothesisClicked}>
-                    <PlayIcon/> Run analysis 
+                    <CachedIcon/> Update
                 </Button>
             </Box>
             {TLOIloading ? 
@@ -280,23 +281,24 @@ export const HypothesisView = () => {
                     <Box sx={{display: 'flex', alignItems: 'center', justifyContent:"space-between"}}>
                         <Box sx={{display: 'flex', alignItems: 'center'}}>
                             <SettingsIcon sx={{color: "green", mr: "5px"}}/>
-                            <span style={{marginRight: ".5em"}}> Execution of: </span> 
+                            <span style={{marginRight: ".5em"}}> Triggered line of inquiry: </span> 
                             <b> {myTLOIs[loiId].name}</b>
                         </Box>
                         <Box>{myTLOIs[loiId].value.length} runs</Box>
                     </Box>
                     <Divider/>
+                    <TypographyLabel>Overview of results:</TypographyLabel>
                     <TableContainer sx={{display: "flex", justifyContent: "center"}}>
                         <Table sx={{width:"unset"}}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{padding: "0 10px"}}> # </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Date</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>Run Status</TableCell>
+                                    <TableCell sx={{padding: "0 10px", minWidth:"100px"}}>Run Status</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Input Files</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Output Files</TableCell>
                                     <TableCell sx={{padding: "0 10px", minWidth: "120px"}}>P-value</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}></TableCell>
+                                    <TableCell sx={{padding: "0 10px", minWidth: "70px"}}></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -320,11 +322,11 @@ export const HypothesisView = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        <FileList type="input" tloi={tloi} title="Input files"/>
+                                        <FileList type="input" tloi={tloi} label="Input files"/>
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         {tloi.status === 'SUCCESSFUL' ? 
-                                            <FileList type="output" tloi={tloi} title="Output files"/>
+                                            <FileList type="output" tloi={tloi} label="Output files"/>
                                         :
                                             null
                                         }
@@ -333,13 +335,9 @@ export const HypothesisView = () => {
                                         {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue.toFixed(5)}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        <Box sx={{display:'flex', alignItems:'center'}}>
+                                        <Box sx={{display:'flex', alignItems:'center', justifyContent:"end"}}>
                                             {tloi.status === 'SUCCESSFUL' ? 
-                                                <Tooltip arrow placement="top" title="Create new run editing this one">
-                                                    <IconButton sx={{padding:"0"}}>
-                                                        <EditIcon/>
-                                                    </IconButton>
-                                                </Tooltip>
+                                                <TLOIEdit tloi={tloi} label={"Editing " + tloi.name}/>
                                                 : null
                                             }
                                             <Tooltip arrow placement="top" title="Delete">

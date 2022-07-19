@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link as MuiLink, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
+import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, Link as MuiLink, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import CodeMirror from '@uiw/react-codemirror';
@@ -8,11 +8,10 @@ import { DISKAPI } from "DISK/API";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { DataEndpoint, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
-import FileCopyIcon from '@mui/icons-material/FileCopy';
+import EditIcon from '@mui/icons-material/Edit';
 import { downloadFile } from "DISK/util";
 
 interface FileListProps {
-    type: 'input' | 'output',
     tloi: TriggeredLineOfInquiry | null,
     label: string,
 }
@@ -21,30 +20,50 @@ interface RunStatus extends WorkflowRun {
     source: string,
 }
 
-export const FileList = ({type:displayType, tloi, label: title} : FileListProps) => {
+export const TLOIEdit = ({tloi, label: title} : FileListProps) => {
     const [open, setOpen] = useState(false);
     const [total, setTotal] = useState(0);
     const [runs, setRuns] = useState<RunStatus[]>([]);
+    const [selectedFiles, setSelectedFiles] = useState<{[id:string]: boolean}>({});
 
-    const getFileMap : (run:RunStatus|WorkflowRun) => {[name:string]: string} = (run) => {
-        return (displayType === 'input') ? run.files : run.outputs
+    const runAnalysis = () => {
+        if (tloi) {
+            let wfs : Workflow[] = [];
+            let mtWfs : Workflow[] = []
+
+            let newTLOI : TriggeredLineOfInquiry = { 
+                ...tloi,
+                id: "",
+                confidenceValue: 0,
+                dateCreated: "",
+                inputFiles: [],
+                outputFiles: [],
+            };
+
+            console.log("run ", newTLOI);
+        }
     }
 
     useEffect(() => {
         if (tloi) {
-            let allWfs = [ ...(tloi.workflows ? tloi.workflows : []) , ...(tloi.metaWorkflows ? tloi.metaWorkflows : []) ];
+            let allWfs = tloi.workflows && tloi.workflows.length > 0 ? tloi.workflows : tloi.metaWorkflows;
             let allRuns : RunStatus[] = [];
             let i = 0;
             allWfs.forEach((wf:Workflow) => {
                 if (wf && wf.run && wf.run.id) {
-                    let list = getFileMap(wf.run);
-                    let length = Object.keys(list).length;
+                    let ids : string[] = Object.keys(wf.run.files);
+                    let length = ids.length;
                     if (length > 0) {
                         allRuns.push({
                             ...wf.run,
                             source: wf.source
                         });
                         i += length;
+
+                        setSelectedFiles((curFiles:{[id:string]: boolean}) => {
+                            ids.forEach((id:string) => curFiles[wf.source+"+"+id] = true)
+                            return { ...curFiles};
+                        });
                     }
                 }
             });
@@ -54,12 +73,8 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
     }, [tloi])
 
     const renderFile = (run:RunStatus, id:string) => {
-        let fileMap = getFileMap(run);
-        let url : string = fileMap[id];
-        let filename : string = url.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}/,'');;
-        return <MuiLink color="inherit" onClick={() => downloadFile(run.source, url, filename)}>
-            {filename}
-        </MuiLink>
+        let url : string = run.files[id];
+        return url.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}/,'');
     }
 
     const renderRunTitle = (id:string) => {
@@ -68,10 +83,11 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
 
     return (
         <Fragment>
-            <Button onClick={() => setOpen(true)} sx={{p:0}} disabled={total === 0}>
-                {total}
-                <FileCopyIcon sx={{color: "gray", ml: "4px"}}/>
-            </Button>
+            <Tooltip arrow placement="top" title="Create new run editing this one">
+                <IconButton onClick={() => setOpen(true)} sx={{p:0}} disabled={total === 0}>
+                    <EditIcon sx={{color: "gray"}}/>
+                </IconButton>
+            </Tooltip>
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ m: 0, p: '8px 16px'}}>
                     {title}
@@ -93,13 +109,20 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {Object.keys(getFileMap(run)).map((id:string, i:number) => 
+                                    {Object.keys(run.files).map((id:string, i:number) => 
                                         <TableRow key={i}>
                                             <TableCell key={`x_${i}`} sx={{padding: "0 10px", textAlign:"end"}}>
                                                 {i+1}
                                             </TableCell>
                                             <TableCell key={`y_${i}`} sx={{padding: "0 10px"}}>
-                                                {renderFile(run, id)}
+                                                <FormControlLabel label={renderFile(run, id)} control={
+                                                    <Checkbox size="small" sx={{p:0, pr: '5px'}} checked={selectedFiles[run.source + "+" + id]} onChange={(ev) =>  
+                                                        setSelectedFiles((curFiles:{[id:string]: boolean}) => {
+                                                            curFiles[run.source + "+" + id] = ev.target.checked;
+                                                            return { ...curFiles };
+                                                        })
+                                                    }/>
+                                                }/>
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -110,8 +133,11 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={() => setOpen(false)}>
-                        Close
+                    <Button autoFocus onClick={() => setOpen(false)} color="error">
+                        Cancel
+                    </Button>
+                    <Button onClick={runAnalysis} color="success">
+                        Run analysis
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -40,6 +40,11 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
     fontSize: "1.2em"
 }));
 
+const TypographySection = styled(Typography)(({ theme }) => ({
+    fontWeight: "bold",
+    fontSize: "1.05em"
+}));
+
 export const LOIView = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
@@ -135,23 +140,8 @@ export const LOIView = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
-            <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
-                <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
-                {loadingEndpoints ? 
-                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    (dataSource ?
-                        <Fragment>
-                            <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                            <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                {renderDescription(dataSource.description)}
-                            </Box>
-                        </Fragment>
-                    :
-                        null
-                    )
-                }
-            </Box>
+            <TypographySubtitle>Data:</TypographySubtitle>
+
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
                 <Box>
                     <TypographyLabel>Data query explanation:</TypographyLabel>
@@ -164,22 +154,41 @@ export const LOIView = () => {
                     }
                 </Box>
                 <Tooltip arrow title={(formalView? "Hide" : "Show") + " data query"}>
-                    <IconButton onClick={() => setFormalView(!formalView)}>
+                    <IconButton sx={{p:0}} onClick={() => setFormalView(!formalView)}>
                         {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}
                     </IconButton>
                 </Tooltip>
             </Box>
             {formalView ?
-            <Box sx={{fontSize: "0.94rem"}} >
-                <CodeMirror value={!!LOI? LOI.dataQuery : ""}
-                    extensions={[StreamLanguage.define(sparql)]}
-                    onChange={(value, viewUpdate) => {
-                    console.log('value:', value);
-                    }}
-                />
-            </Box> : null }
+            <Fragment>
+                <TypographySection>Data query:</TypographySection>
+                <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
+                    <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
+                    {loadingEndpoints ? 
+                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                        (dataSource ?
+                            <Fragment>
+                                <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
+                                <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
+                                    {renderDescription(dataSource.description)}
+                                </Box>
+                            </Fragment>
+                        :
+                            null
+                        )
+                    }
+                </Box>
+                <Box sx={{fontSize: "0.94rem"}} >
+                    <CodeMirror value={!!LOI? LOI.dataQuery : ""}
+                        extensions={[StreamLanguage.define(sparql)]}
+                        onChange={(value, viewUpdate) => {
+                        console.log('value:', value);
+                        }}
+                    />
+                </Box> 
+            </Fragment> : null }
             <Box>
-                <Divider/>
+                <TypographySection>Results:</TypographySection>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>

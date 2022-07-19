@@ -49,6 +49,11 @@ interface TLOIViewProps {
     edit?: boolean
 }
 
+const TypographySection = styled(Typography)(({ theme }) => ({
+    fontWeight: "bold",
+    fontSize: "1.05em"
+}));
+
 export const TLOIView = ({edit} : TLOIViewProps) => {
     const location = useLocation();
     const dispatch = useAppDispatch();
@@ -156,7 +161,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             //</Box>
             }
             {!loadingHyp && !!selectedHypothesis ? 
-                <QuestionPreview selected={selectedHypothesis.question as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis tested"/>
+                <QuestionPreview selected={selectedHypothesis.question as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis or question tested"/>
                 : <Skeleton/>}
             <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 0px;", position:"relative", overflow:"visible", mb: "5px"}}>
                 <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Line of inquiry: </FormHelperText>
@@ -195,24 +200,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
-            <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
-                <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
-                {loadingEndpoints ? 
-                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    (dataSource ?
-                        <Fragment>
-                            <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                            <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                {renderDescription(dataSource.description)}
-                            </Box>
-                        </Fragment>
-                    :
-                        null
-                    )
-                }
-            </Box>
-
+            <TypographySubtitle>Data:</TypographySubtitle>
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
                 <Box>
                     <TypographyLabel>Data query explanation:</TypographyLabel>
@@ -230,28 +218,49 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                     </IconButton>
                 </Tooltip>
             </Box>
-            {formalView ? 
-            <Box sx={{fontSize: "0.94rem"}} >
-                <CodeMirror value={!!TLOI? TLOI.dataQuery : ""}
-                    extensions={[StreamLanguage.define(sparql)]}
-                    onChange={(value, viewUpdate) => {
-                        console.log('value:', value);
-                    }}
-                />
-            </Box> : null}
+
+            {formalView && <Fragment>
+                <TypographySection>Data query:</TypographySection>
+                <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
+                    <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
+                    {loadingEndpoints ? 
+                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                        (dataSource ?
+                            <Fragment>
+                                <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
+                                <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
+                                    {renderDescription(dataSource.description)}
+                                </Box>
+                            </Fragment>
+                        :
+                            null
+                        )
+                    }
+                </Box>
+                <Box sx={{fontSize: "0.94rem"}} >
+                    <CodeMirror value={!!TLOI? TLOI.dataQuery : ""}
+                        extensions={[StreamLanguage.define(sparql)]}
+                        onChange={(value, viewUpdate) => {
+                            console.log('value:', value);
+                        }}
+                    />
+                </Box>
+            </Fragment>}
+
             <Box> 
                 <Divider/>
                 {loading ? 
                     <Skeleton/> :
                     <Box>
-                        {!!TLOI && TLOI.tableDescription ? 
+                        {!!TLOI && (TLOI.tableDescription || TLOI.dataQuery && TLOI.tableVariables && dataSource) &&
+                            <TypographySection>Results:</TypographySection>}
+                        {!!TLOI && TLOI.tableDescription && 
                         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                             <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
                             <TypographyInline> {TLOI.tableDescription} </TypographyInline>
-                        </Box> : null}
-                        {!!TLOI && dataSource && TLOI.tableVariables && TLOI.dataQuery ? 
-                            <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={dataSource}/> 
-                            : null}
+                        </Box>}
+                        {!!TLOI && dataSource && TLOI.tableVariables && TLOI.dataQuery &&
+                            <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={dataSource}/> }
                     </Box>
                 }
             </Box>

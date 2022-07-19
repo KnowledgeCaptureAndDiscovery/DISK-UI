@@ -33,6 +33,11 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
     padding: "5px 5px 0px 5px",
 }));
 
+const TypographySection = styled(Typography)(({ theme }) => ({
+    fontWeight: "bold",
+    fontSize: "1.05em"
+}));
+
 export const LOIEditor = () => {
     const location = useLocation();
     let navigate = useNavigate();
@@ -315,8 +320,11 @@ export const LOIEditor = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
+            <TypographySubtitle>Data:</TypographySubtitle>
+            <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
+
             <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-                <TypographySubtitle>Data needed to execute this line of inquiry:</TypographySubtitle>
+                <TypographySection>Data query:</TypographySection>
                 <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
             <Box sx={{display: "flex", alignItems: "end"}}>
@@ -340,7 +348,6 @@ export const LOIEditor = () => {
                     </Fragment>
                 }
             </Box>
-            <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
             <Box sx={{fontSize: "0.94rem"}} >
                 <Card variant="outlined" sx={{
                         ...{mt: "8px", p: "0px", position: "relative", overflow:"visible", pt:"10px"},
@@ -361,6 +368,7 @@ export const LOIEditor = () => {
                 </Card>
             </Box>
             <Box>
+                <TypographySection>Results:</TypographySection>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>

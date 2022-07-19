@@ -159,7 +159,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     return <Box>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
-                {label? label : "The hypothesis to be tested:"}
+                {label ? label : "The hypothesis or question to be tested:"}
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: "6px"}}>
