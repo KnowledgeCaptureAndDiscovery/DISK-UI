@@ -8,9 +8,9 @@ To configure DISK, you need to edit the [server.properties file](https://github.
 The configuration contains four major sections:
 
 - Data Adapters: This section contains the list of data adapters that are used to retrieve data from the data sources.
-- Method Adapters: This section contains the list of method adapters that are used to retrieve data from the data sources.
-- Question Templates: This section contains the list of question templates that are used to generate questions.
-- Vocabularies: This section contains the list of vocabularies that are used to describe the domain.
+- Method Adapters: This section contains the list of method adapters that are used to run workflows for data analysis.
+- Question Templates: This section contains the list of question templates that are used to create new questions.
+- Vocabularies: This section contains the list of ontologies that are used to describe the domain.
 
 ### Data Adapters
 
@@ -79,7 +79,7 @@ question-templates =
 If you want to use a new vocabulary, you should edit the section `vocabularies`.
 To learn more about how to create or edit vocabularies, please visit [insert link].
 
-The following example shows how to add the Neuro vocabulary on DISK.
+The following example shows how to add the Neuro-DISK vocabulary on DISK.
 
 ```bash
 vocabularies =
@@ -93,7 +93,7 @@ vocabularies =
 }
 ```
 
-## Refreshing the DISK
+## Restarting DISK
 
 DISK needs to be restart after you have edited the configuration files.
 
