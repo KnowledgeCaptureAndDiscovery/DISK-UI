@@ -135,26 +135,24 @@ export interface Method {
     inputs?: MethodInput[]
 }
 
-export interface VocabularyType {
+export interface VocabularyEntity {
     id: string,
     name: string,
     label: string,
+    description: string,
+}
+
+export interface VocabularyType extends VocabularyEntity {
     parent: string | null,
     children: string[]
 }
 
-export interface VocabularyProperty {
-    id: string,
-    name: string,
-    label: string,
+export interface VocabularyProperty  extends VocabularyEntity{
     domain: string | null,
     range: string | null,
 }
 
-export interface VocabularyIndividual {
-    id: string,
-    name: string,
-    label: string,
+export interface VocabularyIndividual  extends VocabularyEntity{
     type: string,
 }
 
