@@ -1,15 +1,9 @@
 # Overview
 
-This guide is for Advanced users wanting to create a Line of Inquiry
+This documentation is for Advanced Users who want to create new Lines of Inquiry and new kinds of hypotheses and questions in DISK.
+
+Advanced users should have basic familiarity with ontologies, OWL, SPARQL, and RDF.  
 
 !!! Note
-    Please make sure you've completed the user guide before you start this guide.
+    This documentation assumes that you are familiar with the basic DISK concepts and User Guide.
 
-
-## Create a Line of Inquiry
-
-Three steps are required to create a Line of Inquiry:
-
-1. Describe the Line of Inquiry info and select the question to be asked.
-2. Select the Data Source and write the query to obtain the data required by the workflow.
-3. Select the workflow. Map the data to the workflow inputs.

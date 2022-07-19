@@ -1,3 +1,3 @@
 # Overview
 
-This guide is for researchers who wants to create, manage and test hypothesis.
+This documentation is for users who want to create hypotheses that can be tested automatically by DISK.

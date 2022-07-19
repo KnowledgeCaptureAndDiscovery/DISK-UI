@@ -1,16 +1,16 @@
-# DISK Resources
+# Core Concepts in DISK
 
-The DISK system defines several resources necessary for its operation. Some of them are:
+ - **Hypothesis:** A hypothesis statement is a set of assertions about entities that can be tested. A hypothesis can be tested by analyzing relevant data.
+ - **Question:** A statement that represents the goal of a scientific investigation.
+ - **Hypothesis or Question Template:**  A general pattern that can be instantiated to create a particular hypothesis or question.  
+ - **Workflow:**  Workflows specify multi-step computations to carry out a type of data analysis.
+ - **Method:** A general approach that is followed to test a hypothesis.  
+ - **Line of Inquiry (LOI):** DISK represents in an LOI *how* a hypothesis will be tested through a computational experiment. An LOI specifies: 1) A hypothesis template, 2) A query to retrieve relevant data from accessible data sources in DISK, 3) One or more workflows to analyze the data retrieved from the query, and 4) A meta-workflow to combine the results of all the workflows and synthesize findings.  
+ - **Triggered Line of Inquiry:** When the user specifies a hypothesis, it is matched against the hypothesis templates of all LOIs.  The matched LOI is then triggered for execition.  
+ - **Provenance:** DISK records the provenance of all results so that they can be inspected and reproduced. 
+ - **Metadata:** DISK accesses data sources that contain datasets that are well described with appropriate metadata that can be used in specifying queries.
 
- - **Hypotheses:** A hypothesis statement, which is a set of assertions about entities in the domain. This statement can be supported or dismissed based on data analysis.
- - **Question:** A represents a type of scientific question to be solved.
- - **Question Variable:**  Identifies a variable within hypothesis question. The value of the variable may be defined by the user or line of inquiry.
- - **Workflow:**  Workflows define the set of computational tasks and dependencies needed to carry out in silico experiments
- - **Method:** Representation of a workflow. 
- - **Line of Inquiry:** (LOI) represents *how* an experiment will be run. Defines which hypothesis can trigger it, which data and from whom data source get and which method will create new workflows executions on the workflow system.
- - **Triggered Line of Inquiry:** (TLOI) represents the execution of an experiment defined on a LOI. Stores all used inputs and generated outputs, along with provenance metadata.
-
-Users can add **Hypotheses** that will be tested over a list of **Lines of Inquiries** generating a set of new **Triggered Line of Inquiries**. This interaction is summarized on the following diagram:
+The diagram below gives an overview of the differtent components of DISK and how different types of users interact with DISK.
 
 
 ![Disk overview](figures/DISK-overview.png "DISK Overview")

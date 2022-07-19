@@ -18,16 +18,22 @@ nav:
     - advanced-user-guide/index.md
     - advanced-user-guide/steps/add-basic-info.md
     - advanced-user-guide/steps/write-query.md
+    - Add questions:
+      - advanced-user-guide/questions/overview.md 
+      - advanced-user-guide/questions/disk-ontologies.md
+      - advanced-user-guide/questions/question-ontology.md
+      - advanced-user-guide/questions/extending-ontology.md
+    - Add workflows:
+      - advanced-user-guide/running-workflows.md
   - Administrator Guide:
     - admin-guide/index.md
-    - admin-guide/ontology.md
-    - admin-guide/extending-ontology.md
+    - admin-guide/installation.md 
+    - admin-guide/configuration.md
   - Developer Guide: 
     - developer-guide/index.md
     - developer-guide/architecture.md
     - developer-guide/data-adapter.md
     - developer-guide/method-adapter.md
-    - developer-guide/installation.md 
   - Adoptions: adoptions.md
 theme:
   name: material
@@ -41,4 +47,5 @@ markdown_extensions:
 - codehilite
 - admonition
 - toc:
+    toc_depth : "1-1"
     permalink: true
