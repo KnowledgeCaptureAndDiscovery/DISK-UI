@@ -163,11 +163,18 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: "6px"}}>
-                {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
+                {questionParts.length > 0 ? questionParts.map((part:string, i:number, parts: string[]) => 
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
-                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>{nameToValue[part] ? displayValue(nameToValue[part]) : "any" }</TextPart>
+                        (
+                            <>
+                                <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>{nameToValue[part] ? displayValue(nameToValue[part]) : "any" }</TextPart>
+                                {i === (parts.length - 1) && (
+                                    <TextPart key={`qPartFinal`}> ? </TextPart>
+                                )}
+                            </>
+                        )
                     )
                 : ""}
                 </Box>
