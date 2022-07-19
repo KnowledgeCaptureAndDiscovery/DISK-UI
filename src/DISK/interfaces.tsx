@@ -173,6 +173,7 @@ export interface DataEndpoint {
     name:   string,
     prefix: string,
     namespace: string,
+    prefixResolution: string,
     description: string;
 }
 

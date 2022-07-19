@@ -250,8 +250,8 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                             <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
                             <TypographyInline> {TLOI.tableDescription} </TypographyInline>
                         </Box> : null}
-                        {!!TLOI && TLOI.tableVariables && TLOI.dataQuery ? 
-                            <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={TLOI.dataSource}/> 
+                        {!!TLOI && dataSource && TLOI.tableVariables && TLOI.dataQuery ? 
+                            <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={dataSource}/> 
                             : null}
                     </Box>
                 }

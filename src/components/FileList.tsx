@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link as MuiLink, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link as MuiLink, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import CodeMirror from '@uiw/react-codemirror';
@@ -89,14 +89,14 @@ export const FileList = ({type:displayType, tloi, title} : FileListProps) => {
                             <Table sx={{width:"unset", border: "1px solid rgb(223 223 223)", borderRadius: "5px", mt:"4px"}}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{padding: "0 10px"}}>#</TableCell>
+                                        <TableCell sx={{padding: "0 10px", textAlign: "end"}}>#</TableCell>
                                         <TableCell sx={{padding: "0 10px"}}>File</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {Object.keys(getFileMap(run)).map((id:string, i:number) => 
                                         <TableRow key={i}>
-                                            <TableCell key={`x_${i}`} sx={{padding: "0 10px"}}>
+                                            <TableCell key={`x_${i}`} sx={{padding: "0 10px", textAlign:"end"}}>
                                                 {i+1}
                                             </TableCell>
                                             <TableCell key={`y_${i}`} sx={{padding: "0 10px"}}>
