@@ -127,19 +127,14 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>This line of inquiry can be used to investigate the following hypothesis or question:</FormHelperText>
             <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: (disabled ? "6px": 0)}}>
-                {questionParts.length > 0 ? questionParts.map((part:string, i:number, parts: string[]) => 
+                {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
-                        <>
-                            <Select key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "150px"}} 
-                                variant="standard" value={part} id={`var-${i}`} label={part} disabled>
-                                <MenuItem value={part}>{part}</MenuItem>
-                            </Select>
-                            {i === parts.length - 1 && (
-                                <TextPart key={`qPartFinal`}> ? </TextPart>
-                                )}
-                        </>
+                        <Select key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "150px"}} 
+                            variant="standard" value={part} id={`var-${i}`} label={part} disabled>
+                            <MenuItem value={part}>{part}</MenuItem>
+                        </Select>
                     )
                 : ""}
             </Box>

@@ -94,12 +94,10 @@ export class DISKAPI {
 
     // QUESTIONS
     //=======================
-
     public static async getQuestions (username?:string) : Promise<Question[]> {
         const question =  await DISKAPI.get(DISKAPI.url + "questions") as Question[];
         return question.map(q => { 
             q.name = q.name.endsWith('?') ? q.name : `${q.name}?`;
-            //q.pattern = q.pattern.endsWith('?') ? q.pattern : `${q.pattern}?`;
             return q; 
         });
     }
