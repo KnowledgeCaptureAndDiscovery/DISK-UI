@@ -171,6 +171,20 @@ export const HypothesisView = () => {
                 });
     }
 
+    const onSendEditedRun = (tloi:TriggeredLineOfInquiry) => {
+        setWaiting(true);
+        setQueryNotification(true);
+        DISKAPI.createTLOI(tloi)
+                .then((tloi:TriggeredLineOfInquiry) => {
+                    setNewTLOIs([tloi]);
+                    dispatch(addTLOI(tloi));
+                    setQueryNotification(true);
+                })
+                .finally(() => {
+                    setWaiting(false);
+                });
+    }
+
     const handleQueryNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
             return;
@@ -268,7 +282,7 @@ export const HypothesisView = () => {
                     Lines of inquiry triggered to test this hypothesis and answer the question:
                 </TypographySubtitle>
                 <Button variant="outlined" onClick={onTestHypothesisClicked}>
-                    <CachedIcon/> Update
+                    <CachedIcon sx={{mr:"5px"}}/> Update
                 </Button>
             </Box>
             {TLOIloading ? 
@@ -337,7 +351,7 @@ export const HypothesisView = () => {
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center', justifyContent:"end"}}>
                                             {tloi.status === 'SUCCESSFUL' ? 
-                                                <TLOIEdit tloi={tloi} label={"Editing " + tloi.name}/>
+                                                <TLOIEdit tloi={tloi} label={"Editing " + tloi.name} onSave={onSendEditedRun}/>
                                                 : null
                                             }
                                             <Tooltip arrow placement="top" title="Delete">

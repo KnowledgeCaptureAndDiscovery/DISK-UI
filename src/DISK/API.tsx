@@ -1,7 +1,7 @@
 import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
 import { DISK_API } from "../constants/config";
-import { cleanLOI } from "./util";
+import { cleanLOI, cleanTLOI } from "./util";
 
 export class DISKAPI {
     private static url : string = DISK_API;
@@ -99,7 +99,7 @@ export class DISKAPI {
         const question =  await DISKAPI.get(DISKAPI.url + "questions") as Question[];
         return question.map(q => { 
             q.name = q.name.endsWith('?') ? q.name : `${q.name}?`;
-            q.pattern = q.pattern.endsWith('?') ? q.pattern : `${q.pattern}?`;
+            //q.pattern = q.pattern.endsWith('?') ? q.pattern : `${q.pattern}?`;
             return q; 
         });
     }
@@ -144,6 +144,14 @@ export class DISKAPI {
 
     public static async deleteTLOI (id:string) : Promise<boolean> {
         return await DISKAPI.delete(DISKAPI.url + "tlois/" + id) as boolean;
+    }
+
+    public static async createTLOI (tloi:TriggeredLineOfInquiry) : Promise<TriggeredLineOfInquiry> {
+        return await DISKAPI.post(DISKAPI.url + "tlois", cleanTLOI(tloi)) as TriggeredLineOfInquiry;
+    }
+
+    public static async updateTLOI (tloi:TriggeredLineOfInquiry) : Promise<TriggeredLineOfInquiry> {
+        return await DISKAPI.put(DISKAPI.url + "tlois/" + tloi.id, cleanTLOI(tloi)) as TriggeredLineOfInquiry;
     }
 
     // OTHER STUFF

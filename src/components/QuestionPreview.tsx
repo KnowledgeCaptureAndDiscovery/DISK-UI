@@ -167,14 +167,10 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
-                        (
-                            <>
-                                <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>{nameToValue[part] ? displayValue(nameToValue[part]) : "any" }</TextPart>
-                                {i === (parts.length - 1) && (
-                                    <TextPart key={`qPartFinal`}> ? </TextPart>
-                                )}
-                            </>
-                        )
+                        <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>
+                            {nameToValue[part] ? displayValue(nameToValue[part]) : "any" }
+                            {i === (parts.length - 1) && "?"}
+                        </TextPart>
                     )
                 : ""}
                 </Box>

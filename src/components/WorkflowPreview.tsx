@@ -4,6 +4,7 @@ import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect, useState } from "react";
+import { getBindingAsArray } from "DISK/util";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -37,7 +38,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
 
     const renderBinding = (binding:VariableBinding, index:number) => {
         let value : string = binding.collection ?
-            binding.binding.replace(/[\[\]]/g, '').split(", ")[index]
+            getBindingAsArray(binding.binding)[index]
             : binding.binding;
 
         let text = value.replace(/SHA[\d\w]{6}_/,'');

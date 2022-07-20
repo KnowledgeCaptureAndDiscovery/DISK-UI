@@ -46,6 +46,14 @@ export const cleanLOI : (loi:LineOfInquiry) => LineOfInquiry = (loi:LineOfInquir
     };
 }
 
+export const cleanTLOI : (tloi:TriggeredLineOfInquiry) => TriggeredLineOfInquiry = (tloi) => {
+    return { 
+        ...tloi,
+        workflows: tloi.workflows.map(cleanWorkflow),
+        metaWorkflows: tloi.metaWorkflows.map(cleanWorkflow)
+    };
+}
+
 export const cleanWorkflow : (wf:Workflow) => Workflow = (wf) => {
     return {
         ...wf,
@@ -55,4 +63,8 @@ export const cleanWorkflow : (wf:Workflow) => Workflow = (wf) => {
             bindingAsArray: undefined,
         }}),
     }
+}
+
+export const getBindingAsArray : (binding:string) => string[] = (binding) => {
+    return binding.replaceAll(/[\[\]]/g, '').split(', ');
 }
