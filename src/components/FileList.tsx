@@ -1,13 +1,7 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link as MuiLink, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link as MuiLink, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
-import CodeMirror from '@uiw/react-codemirror';
-import { sparql } from "@codemirror/legacy-modes/mode/sparql";
-import { StreamLanguage } from '@codemirror/language';
-import { DISKAPI } from "DISK/API";
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
-import { DataEndpoint, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
+import { TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { downloadFile } from "DISK/util";
 
@@ -27,7 +21,7 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
     const [runs, setRuns] = useState<RunStatus[]>([]);
 
     const getFileMap : (run:RunStatus|WorkflowRun) => {[name:string]: string} = (run) => {
-        return (displayType === 'input') ? run.files : run.outputs
+        return (displayType === 'input') ? (run.files ? run.files : {}) : (run.outputs ? run.outputs : {})
     }
 
     useEffect(() => {
