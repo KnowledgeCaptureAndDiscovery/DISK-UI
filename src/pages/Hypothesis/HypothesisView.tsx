@@ -87,13 +87,13 @@ export const HypothesisView = () => {
     useEffect(() => {
         let map : TLOIMap = {};
         TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
-            if (!map[tloi.loiId]) {
-                map[tloi.loiId] = {
+            if (!map[tloi.parentLoiId]) {
+                map[tloi.parentLoiId] = {
                     value: [],
                     name: tloi.name.replace("Triggered: ",""),
                 }
             }
-            let cur = map[tloi.loiId].value;
+            let cur = map[tloi.parentLoiId].value;
             cur.push(tloi);
         });
         setMyTLOIs(map);
@@ -160,7 +160,7 @@ export const HypothesisView = () => {
         setQueryNotification(true);
         DISKAPI.queryHypothesis(selectedId)
                 .then((tlois:TriggeredLineOfInquiry[]) => {
-                    setNewTLOIs(tlois);
+                    setNewTLOIs(tlois.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL'));
                     tlois.forEach((tloi:TriggeredLineOfInquiry) => {
                         dispatch(addTLOI(tloi));
                     });
@@ -253,9 +253,8 @@ export const HypothesisView = () => {
         <Box sx={{padding:"10px"}}>
             <Box>
                 <TypographyLabel>Description: </TypographyLabel>
-                <TypographyInline>
-                    {!loading && !!hypothesis ? hypothesis.description : <Skeleton sx={{display:"inline-block", width: "200px"}}/>}
-                </TypographyInline>
+                    {loading ? (<Skeleton sx={{display:"inline-block", width: "200px"}}/>)
+                    : (<TypographyInline>{!!hypothesis && hypothesis.description}</TypographyInline>)}
             </Box>
             <Box>
                 <TypographyLabel>Additional notes: </TypographyLabel>

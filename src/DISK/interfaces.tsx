@@ -99,9 +99,8 @@ export interface TriggeredLineOfInquiry {
     name: string,
     description: string,
     status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL',
-    loiId: string,
+    parentLoiId: string,
     parentHypothesisId: string,
-    resultingHypothesisIds: string[],
     workflows: Workflow[],
     metaWorkflows: Workflow[],
     dataQuery: string,
@@ -115,9 +114,6 @@ export interface TriggeredLineOfInquiry {
     dataSource: string,
     // All of these are workflow-run related.
     confidenceValue: number,
-    inputFiles: string[],
-    outputFiles: string[],
-    // Computed on retrieval
 }
 
 export type MethodInputType = 'input' | 'parameter' | 'none' ;

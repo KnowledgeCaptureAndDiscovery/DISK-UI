@@ -1,4 +1,4 @@
-import { Box, Button, Card, Divider, FormHelperText, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint, idPattern, Workflow } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
@@ -20,7 +20,6 @@ import { ResultTable } from "components/ResultTable";
 import { WorkflowList } from "components/WorkflowList";
 import { loadHypothesis } from "redux/loader";
 import { QuestionPreview } from "components/QuestionPreview";
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { loadDataEndpoints } from "redux/loader";
 import { downloadFile, renderDescription } from "DISK/util";
 
@@ -115,23 +114,12 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     }
 
     const updateNotes = () => {
-        //Fix server 
+        //TODO: Fix server 
         if (TLOI) {
             TLOI.notes = notes;
             setEditMode(false);
         }
         return;
-    }
-
-    const onDownloadFile = (url:string) => {
-        if (url && TLOI) {
-            let methodSource : string = "";
-            [ ...(TLOI.workflows||[]), ...(TLOI.metaWorkflows||[]) ].forEach((w:Workflow) => {
-                methodSource = w.source;
-            })
-            console.log("Downloading " + url);
-            downloadFile(methodSource, url, displayFilename(url));
-        }
     }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
@@ -165,7 +153,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                 : <Skeleton/>}
             <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 0px;", position:"relative", overflow:"visible", mb: "5px"}}>
                 <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Line of inquiry: </FormHelperText>
-                <Box component={Link} to={PATH_LOIS + "/" + (!!TLOI ? TLOI.loiId : "")} sx={{textDecoration: "none", display:"inline-flex", alignItems:"center", padding: "0 5px", ml: "10px", mt: "12px"}}>
+                <Box component={Link} to={PATH_LOIS + "/" + (!!TLOI ? TLOI.parentLoiId : "")} sx={{textDecoration: "none", display:"inline-flex", alignItems:"center", padding: "0 5px", ml: "10px", mt: "12px"}}>
                     <SettingsIcon sx={{color: "green", mr:"5px"}}/>
                     <span style={{color:"black"}}>
                         {!!TLOI ? TLOI.name.replace("Triggered: ", "") : null}
@@ -269,25 +257,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
             {!!TLOI && <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaWorkflows} options={[]}/>}
-        </Box>
-
-        <Divider/>
-        <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle sx={{display: "inline-block"}}>Generated outputs:</TypographySubtitle>
-            {TLOI == null || TLOI.outputFiles.length == 0 ? 
-                <TypographyInline> No outputs were generated </TypographyInline>
-             :  <List>
-                {TLOI.outputFiles.map((url:string) => 
-                <ListItem disablePadding key={url}>
-                    <ListItemButton onClick={() => onDownloadFile(url)}>
-                        <ListItemIcon>
-                            <InsertDriveFileIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={displayFilename(url)} />
-                    </ListItemButton>
-                </ListItem>
-                )}
-             </List> }
         </Box>
     </Card>
 }

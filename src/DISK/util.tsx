@@ -68,3 +68,7 @@ export const cleanWorkflow : (wf:Workflow) => Workflow = (wf) => {
 export const getBindingAsArray : (binding:string) => string[] = (binding) => {
     return binding.replaceAll(/[\[\]]/g, '').split(', ');
 }
+
+export const getFileName = (text:string) => {
+    return text.replace('FILE-','').replaceAll(/[-_]/g, ' ');
+}

@@ -32,8 +32,6 @@ export const TLOIEdit = ({tloi, label: title, onSave} : FileListProps) => {
                 id: "",
                 confidenceValue: 0,
                 dateCreated: "",
-                inputFiles: [],
-                outputFiles: [],
                 workflows: meta ? cleanWorkflows(tloi.workflows) : getEditedWorkflows(),
                 metaWorkflows: meta ? getEditedWorkflows() : cleanWorkflows(tloi.metaWorkflows),
             };

@@ -1,10 +1,11 @@
-import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip, TableHead, Button, Table, TableBody, TableCell, TableContainer, TableRow, styled } from "@mui/material"
-import { Workflow, VariableBinding } from "DISK/interfaces"
+import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip, TableHead, Button, Table, TableBody, TableCell, TableContainer, TableRow,
+    styled, Link as MuiLink } from "@mui/material"
+import { Workflow, VariableBinding, WorkflowRun } from "DISK/interfaces"
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useEffect, useState } from "react";
-import { getBindingAsArray } from "DISK/util";
+import { Fragment, useEffect, useState } from "react";
+import { downloadFile, getBindingAsArray, getFileName } from "DISK/util";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -19,9 +20,11 @@ interface WorkflowPreviewProps {
     onDelete?: (wf:Workflow) => void,
 }
 
+const MAX_PER_PAGE = 10;
+
 export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} : WorkflowPreviewProps) => {
-    const [maxLength, setMaxLength] = useState(0);
-    const [showAll, setShowAll] = useState(false);
+    const [total, setTotal] = useState(0);
+    const [curPage, setCurPage] = useState(0);
 
     useEffect(() => {
         if (!!wf) {
@@ -32,7 +35,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                     if (l > max) max = l;
                 }
             })
-            setMaxLength(max);
+            setTotal(max);
         }
     }, [wf]);
 
@@ -41,8 +44,25 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
             getBindingAsArray(binding.binding)[index]
             : binding.binding;
 
-        let text = value.replace(/SHA[\d\w]{6}_/,'');
-        return text;
+        if (value.startsWith('SHA') && wf.run && wf.run.files) {
+            let url : string = '';
+            Object.keys(wf.run.files).forEach((name:string) => {
+                if (name === value) {
+                    url = (wf.run as WorkflowRun).files[name];
+                }
+            })
+            return renderDownloadLink(url);
+        }
+
+        return (<span>{value}</span>);
+    }
+
+    const renderDownloadLink = (url:string) => {
+        let filename : string = url.replaceAll(/.*#/g,'').replace(/SHA[\d\w]{6}_/,'');
+
+        return (<MuiLink onClick={() => downloadFile(wf.source, url, filename)} sx={{cursor:"pointer"}}>
+            {filename}
+        </MuiLink>)
     }
 
     return (
@@ -62,53 +82,8 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 </Box>
             </Box>
             <Divider/>
-            {maxLength > 1 ? 
-                <Box>
-                    <TypographyLabel sx={{ml:"5px"}}>Workflow bindings: </TypographyLabel>
-                    <TableContainer sx={{mb:"10px"}}>
-                        <Table sx={{width:"unset", ml: "20px"}}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{padding: "0 10px"}}> # </TableCell>
-                                    {wf.bindings.map((binding:VariableBinding, i:number, x) =>
-                                        <TableCell key={`u_${binding.variable}`} sx={{padding: "0 10px"}}>
-                                            {binding.variable}
-                                            {i+1 === wf.bindings.length ? 
-                                                <Button sx={{padding: "0", float:"right"}} onClick={() => setShowAll(!showAll)}>
-                                                    {showAll ? "Less" : "More"}
-                                                </Button> : null}
-                                        </TableCell>
-                                    )}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                            {Array(showAll? maxLength : 4).fill(0).map((_,i) => 
-                                <TableRow key={`row_${i}`}>
-                                    <TableCell sx={{padding: "0 10px"}}>
-                                        {i+1}
-                                    </TableCell>
-                                    {wf.bindings.map((binding:VariableBinding) =>
-                                        <TableCell key={`c_${binding.variable}_${i}`} sx={{padding: "0 10px"}}>
-                                            {renderBinding(binding, i)}
-                                        </TableCell>
-                                    )}
-                                </TableRow>
-                            )}
-                            {showAll?null:
-                                <TableRow>
-                                    <TableCell sx={{padding: "0 10px"}}>
-                                        5
-                                    </TableCell>
-                                    <TableCell sx={{padding: "0 10px"}} colSpan={wf.bindings.length}>
-                                        <Box sx={{display:"flex", justifyContent:"center"}}> . . . </Box>
-                                    </TableCell>
-                                </TableRow>
-                            }
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
-            :
+
+            {!wf.run || !wf.run.id ?  //If theres no run, we are looking at a workflow config
                 <Box sx={{fontSize:".85rem"}}>
                     { wf.bindings.map((binding:VariableBinding) =>
                         <Grid key={`var_${binding.variable}`} container spacing={1}>
@@ -119,6 +94,95 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                                 {binding.binding}
                             </Grid>
                         </Grid>
+                    )}
+                </Box>
+            :
+                <Box>
+                    <TypographyLabel sx={{ml:"5px"}}>Workflow bindings: </TypographyLabel>
+                    <TableContainer sx={{mb:"10px"}}>
+                        <Table sx={{width:"unset", ml: "20px"}}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{padding: "0 10px", textAlign: 'end'}}> # </TableCell>
+                                    {wf.bindings.map((binding:VariableBinding, i:number, x) =>
+                                        <TableCell key={`u_${binding.variable}`} sx={{padding: "0 10px"}}>
+                                            {binding.variable}
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+
+                            {Array(MAX_PER_PAGE).fill(0)
+                                .map((_, i) => curPage * MAX_PER_PAGE + i)
+                                .map((i) => (
+                                <TableRow key={`row_${i}`}>
+                                    {i < total && (
+                                    <Fragment>
+                                        <TableCell sx={{padding: "0 10px", textAlign: 'end'}}>
+                                            {i+1}
+                                        </TableCell>
+                                        {wf.bindings.map((binding:VariableBinding) =>
+                                            <TableCell key={`c_${binding.variable}_${i}`} sx={{padding: "0 10px"}}>
+                                                {renderBinding(binding, i)}
+                                            </TableCell>
+                                        )}
+                                    </Fragment>)}
+                                </TableRow>
+                            ))}
+                                <TableRow>
+                                    <TableCell sx={{ padding: "0 10px" }} colSpan={wf.bindings.length + 1}>
+                                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
+                                        <Button sx={{ padding: "0" }} disabled={curPage === 0} onClick={() => setCurPage(curPage - 1)}>
+                                            Previous
+                                        </Button>
+                                        <Box sx={{ fontWeight: "bold", color: "darkgray", padding: "0 10px" }}>
+                                            Showing {curPage * MAX_PER_PAGE} -{" "}
+                                            {(curPage + 1) * MAX_PER_PAGE < total
+                                            ? (curPage + 1) * MAX_PER_PAGE
+                                            : total}{" "}
+                                            of {total} bindings
+                                        </Box>
+                                        <Button sx={{ padding: "0" }} disabled={(1 + curPage) * MAX_PER_PAGE >= total} onClick={() => setCurPage(curPage + 1)}>
+                                            Next
+                                        </Button>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+                    {wf.run.outputs && Object.keys(wf.run.outputs).length > 0 && (
+                    <Fragment>
+                        <TypographyLabel sx={{ml:"5px"}}>Workflow outputs: </TypographyLabel>
+                        <TableContainer sx={{mb:"10px"}}>
+                            <Table sx={{width:"unset", ml: "20px"}}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{padding: "0 10px", textAlign: 'end'}}>#</TableCell>
+                                        <TableCell sx={{padding: "0 10px"}}>Name</TableCell>
+                                        <TableCell sx={{padding: "0 10px"}}>File</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                {Object.keys(wf.run.outputs).map((name:string, i:number) => (
+                                    <TableRow key={`out_r_${i}`}>
+                                        <TableCell sx={{padding: "0 10px", textAlign: 'end'}}>
+                                            {i+1}
+                                        </TableCell>
+                                        <TableCell sx={{padding: "0 10px", whiteSpace: 'nowrap'}}>
+                                            {getFileName(name)}
+                                        </TableCell>
+                                        <TableCell sx={{padding: "0 10px"}}>
+                                            {renderDownloadLink((wf.run as WorkflowRun).outputs[name])}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Fragment>
                     )}
                 </Box>
             }
