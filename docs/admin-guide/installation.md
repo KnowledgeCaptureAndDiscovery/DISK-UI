@@ -51,6 +51,6 @@ You can access the DISK user interface at [http://localhost:8000](http://localho
 
 ### Check the server
 
-Sometimes the server is not responding. You can check the state of the server by running the following command:
+Sometimes the server is not responding. You can check the state of the server opening http://localhost:8080/disk-server/vocabulary. It might take a little while to open it for the first time as it downloads vocabularies from the internet.
 
-Open http://localhost:8080/disk-server/vocabulary to check that the local repository server is working fine. It might take a little while to open it for the first time as it downloads vocabularies from the internet.
+You should see a list of vocabularies.
