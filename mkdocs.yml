@@ -34,7 +34,6 @@ nav:
     - developer-guide/architecture.md
     - developer-guide/data-adapter.md
     - developer-guide/method-adapter.md
-  - Adoptions: adoptions.md
 theme:
   name: material
   logo: figures/logo.png
