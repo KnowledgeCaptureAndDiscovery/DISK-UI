@@ -98,7 +98,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 </Box>
             :
                 <Box>
-                    <TypographyLabel sx={{ml:"5px"}}>Workflow bindings: </TypographyLabel>
+                    <TypographyLabel sx={{ml:"5px"}}>Inputs: </TypographyLabel>
                     <TableContainer sx={{mb:"10px"}}>
                         <Table sx={{width:"unset", ml: "20px"}}>
                             <TableHead>
@@ -153,9 +153,9 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                         </Table>
                     </TableContainer>
 
-                    {wf.run.outputs && Object.keys(wf.run.outputs).length > 0 && (
+                    {wf.run.status === 'SUCCESSFUL' && wf.run.outputs && Object.keys(wf.run.outputs).length > 0 && (
                     <Fragment>
-                        <TypographyLabel sx={{ml:"5px"}}>Workflow outputs: </TypographyLabel>
+                        <TypographyLabel sx={{ml:"5px"}}>Outputs: </TypographyLabel>
                         <TableContainer sx={{mb:"10px"}}>
                             <Table sx={{width:"unset", ml: "20px"}}>
                                 <TableHead>

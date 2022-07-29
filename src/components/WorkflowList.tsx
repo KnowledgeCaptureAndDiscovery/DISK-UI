@@ -52,7 +52,6 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     }
 
     const onWorkflowSave = (wf:Workflow) => {
-        console.log("asd> ", editingMeta, wf);
         if (notifyChange) {
             let curWfs : Workflow[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
             if (selectedWorkflow) curWfs[editingIndex] = wf; //Editing
@@ -86,13 +85,16 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     };
 
     return <Box>
-        <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mb:"5px"}}>
-            <FormHelperText sx={{fontSize: ".9rem"}}>
-                {addingWorkflow ? 
-                "Creating " + (editingMeta ? "meta-" : "") + "workflow:"
-                :
-                "The data analysis methods are represented in the following workflows:"}
-            </FormHelperText>
+        <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"start", mb:"5px"}}>
+            <Box>
+                <Typography sx={{fontWeight: "500"}}>Workflows:</Typography>
+                <FormHelperText sx={{fontSize: ".9rem"}}>
+                    {addingWorkflow ? 
+                    "Creating " + (editingMeta ? "meta-" : "") + "workflow:"
+                    :
+                    "The data analysis methods are represented in the following workflows:"}
+                </FormHelperText>
+            </Box>
             {editable ? 
                 (addingWorkflow ? 
                     <Button sx={{padding: "3px 6px"}} variant="outlined" onClick={() => toggleEdition()} color="error">
@@ -136,9 +138,12 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
             )
         }
         {!addingWorkflow &&
-        <FormHelperText sx={{fontSize: ".9rem"}}>
-            The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
-        </FormHelperText> }
+        <Box>
+            <Typography sx={{fontWeight: "500"}}>Meta workflows:</Typography>
+            <FormHelperText sx={{fontSize: ".9rem"}}>
+                The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
+            </FormHelperText> 
+        </Box> }
 
         {metaWorkflows.length > 0 ? <Box>
             {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 

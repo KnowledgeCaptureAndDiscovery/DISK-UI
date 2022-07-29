@@ -368,7 +368,7 @@ export const LOIEditor = () => {
                 </Card>
             </Box>
             <Box>
-                <TypographySection>Results:</TypographySection>
+                <TypographySection>Input data retrieved:</TypographySection>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>

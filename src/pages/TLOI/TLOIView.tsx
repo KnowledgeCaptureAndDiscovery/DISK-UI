@@ -241,7 +241,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                     <Skeleton/> :
                     <Box>
                         {!!TLOI && (TLOI.tableDescription || TLOI.dataQuery && TLOI.tableVariables && dataSource) &&
-                            <TypographySection>Results:</TypographySection>}
+                            <TypographySection>Input data retrieved:</TypographySection>}
                         {!!TLOI && TLOI.tableDescription && 
                         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                             <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
@@ -255,7 +255,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         </Box>
         <Divider/>
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle sx={{display: "inline-block"}}>Method configuration:</TypographySubtitle>
+            <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
             {!!TLOI && <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaWorkflows} options={[]}/>}
         </Box>
     </Card>
