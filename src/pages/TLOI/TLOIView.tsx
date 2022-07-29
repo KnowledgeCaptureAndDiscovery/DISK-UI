@@ -1,5 +1,5 @@
-import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { DataEndpoint, idPattern, Workflow } from "DISK/interfaces";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { DataEndpoint, idPattern, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
@@ -22,6 +22,8 @@ import { loadHypothesis } from "redux/loader";
 import { QuestionPreview } from "components/QuestionPreview";
 import { loadDataEndpoints } from "redux/loader";
 import { downloadFile, renderDescription } from "DISK/util";
+import { DISKAPI } from "DISK/API";
+import { setErrorSelected, setLoadingSelected, setSelectedTLOI } from "redux/tlois";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -75,6 +77,10 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
     const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
 
+    const [waiting, setWaiting] = React.useState<boolean>(false);;
+    const [doneNotification, setDoneNotification] = React.useState<boolean>(false);
+    const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
+
     useEffect(() => {
         if (!initializedEndpoint) {
             loadDataEndpoints(dispatch);
@@ -114,15 +120,55 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     }
 
     const updateNotes = () => {
-        //TODO: Fix server 
         if (TLOI) {
-            TLOI.notes = notes;
-            setEditMode(false);
+            let editedTLOI : TriggeredLineOfInquiry = { ...TLOI, notes: notes };
+            setSelectedTLOI(null);
+            setLoadingSelected(editedTLOI.id);
+            setWaiting(true);
+            DISKAPI.updateTLOI(editedTLOI)
+                    .then((tloi:TriggeredLineOfInquiry) => {
+                        //FIXME: UI does not update.
+                        console.log("SUCCESS:", tloi.notes);
+                        setNotes(tloi.notes);
+                        setSelectedTLOI(tloi);
+                        setDoneNotification(true);
+                    })
+                    .catch((e) =>{
+                        setErrorNotification(true);
+                        setErrorSelected();
+                        console.warn(e);
+                    })
+                    .finally(() => {
+                        setWaiting(false);
+                        setEditMode(false);
+                    })
         }
         return;
     }
 
+    const handleNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setDoneNotification(false);
+        setErrorNotification(false);
+    };
+
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
+        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
+            <CircularProgress color="inherit" />
+        </Backdrop>
+        <Snackbar open={doneNotification} autoHideDuration={3000} onClose={handleNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+            <Alert severity="info" sx={{ width: '100%' }} onClose={handleNotificationClose}>
+                Notes were updated successfully
+            </Alert>
+        </Snackbar>
+        <Snackbar open={errorNotification} autoHideDuration={3000} onClose={handleNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
+            <Alert severity="error" sx={{ width: '100%' }} onClose={handleNotificationClose}>
+                Error trying to update notes. TLOI was not edited
+            </Alert>
+        </Snackbar>
+
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :

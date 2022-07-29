@@ -18,6 +18,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
     const dispatch = useAppDispatch();
     const [selected, setSelected] = React.useState<Method|null>(null);
     const [selectedLabel, setSelectedLabel] = React.useState("");
+    const [description, setDescription] = React.useState("");
 
     const methods = useAppSelector((state:RootState) => state.workflows.workflows);
     const loading = useAppSelector((state:RootState) => state.workflows.loadingAll);
@@ -123,6 +124,9 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                 return newValues;
             });
         }
+        if (wf.description) {
+            setDescription(wf.description);
+        }
     };
 
     useEffect(() => {
@@ -141,6 +145,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         if (selected) {
             let newWorkflow : Workflow = {
                 source: selected.source,
+                description: description,
                 workflow: selected.name,
                 workflowLink: selected.link,
                 bindings: 
@@ -233,6 +238,9 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                 </Grid>)
             : <Skeleton height={"60px"}/>)
         : <Box/>}
+        <TextField label="Workflow description" placeholder="You can add a description of what this workflow does here" 
+                sx={{width:"100%", mb:"5px"}} size='small'
+                value={description} onChange={(e) => setDescription(e.target.value)} />
         <Box sx={{display:"flex", justifyContent:"end", alignItems: "center"}}>
             <Button variant="contained" color="success" onClick={onWorkflowSave} disabled={!selected}>
                 <AddIcon sx={{mr: "5px"}}/> Save workflow

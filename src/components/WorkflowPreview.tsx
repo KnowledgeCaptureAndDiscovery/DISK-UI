@@ -82,6 +82,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 </Box>
             </Box>
             <Divider/>
+            {wf.description && (<Typography sx={{p:"0 10px", fontSize:"0.95em", color:"#333"}}>{wf.description}</Typography>)}
 
             {!wf.run || !wf.run.id ?  //If theres no run, we are looking at a workflow config
                 <Box sx={{fontSize:".85rem"}}>
