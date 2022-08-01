@@ -8,7 +8,7 @@ discoveries as new data becomes available.
 
 This video shows a brief overview how a new hypothesis can be specified by a user and the automation that follows.
 
-![DISK](figures/user-guide/web.gif "DISK")
+![DISK](figures/user-guide/welcome.gif "DISK")
 
 
 ## Getting Started

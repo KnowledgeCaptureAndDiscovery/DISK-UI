@@ -18,6 +18,7 @@ nav:
     - advanced-user-guide/index.md
     - advanced-user-guide/steps/add-basic-info.md
     - advanced-user-guide/steps/write-query.md
+    - advanced-user-guide/steps/specify-workflow.md
     - Add questions:
       - advanced-user-guide/questions/overview.md 
       - advanced-user-guide/questions/disk-ontologies.md

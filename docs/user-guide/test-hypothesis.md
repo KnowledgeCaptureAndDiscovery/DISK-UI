@@ -33,11 +33,10 @@ In the following image, you can see two workflow executions associated with the 
 
 ## Getting the Execution Provenance
 
-All the LOI and workflow executions are recorded in detail.  DISK generates a narrative from those provenance records that explains how the results were obtained.
+All the LOI and workflow executions are recorded in detail. 
+To display the execution provenance, you can click the **Date** of the execution.
 
-To display the narrative, you can select the **Narrative** button.
-
-The following image shows the execution narrative for the first LOI, along with a table that summarizes key metadata of the input datasets used.
+The following image shows the execution provenance for the hypothesis, along with a table that summarizes key metadata of the input datasets used.
 
 ![Narrative](../figures/user-guide/narrative.png "Narrative")
 

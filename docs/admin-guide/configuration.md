@@ -74,12 +74,12 @@ question-templates =
 }
 ```
 
-### Vocabularies
+### Domain vocabularies
 
-If you want to use a new vocabulary, you should edit the section `vocabularies`.
+If you want to use a new domain vocabulary, you should edit the section `vocabularies`.
 To learn more about how to create or edit vocabularies, please visit [insert link].
 
-The following example shows how to add the Neuro-DISK vocabulary on DISK.
+The following example shows how to add the Neuro-DISK domain vocabulary on DISK.
 
 ```bash
 vocabularies =
