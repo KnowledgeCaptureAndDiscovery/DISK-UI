@@ -28,7 +28,7 @@ export const AppRouter = () => {
     <BrowserRouter>
       <RightMenu>
         <Routes>
-          <Route path={PATH_HOME} element={<Home/>}></Route>
+          <Route path={PATH_HOME} element={<Hypotheses/>}></Route>
           <Route path={PATH_HYPOTHESES} element={<Hypotheses/>}></Route>
           <Route path={PATH_LOIS} element={<LinesOfInquiry/>}></Route>
 
