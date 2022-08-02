@@ -1,5 +1,5 @@
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
-import { DataEndpoint, idPattern, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
+import { DataEndpoint, idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
@@ -21,7 +21,7 @@ import { WorkflowList } from "components/WorkflowList";
 import { loadHypothesis } from "redux/loader";
 import { QuestionPreview } from "components/QuestionPreview";
 import { loadDataEndpoints } from "redux/loader";
-import { downloadFile, renderDescription } from "DISK/util";
+import { renderDescription } from "DISK/util";
 import { DISKAPI } from "DISK/API";
 import { setErrorSelected, setLoadingSelected, setSelectedTLOI } from "redux/tlois";
 
@@ -88,7 +88,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     }, []);
 
     useEffect(() => {
-        if (!!TLOI && TLOI.parentHypothesisId && TLOI.parentHypothesisId != selectedHypId && !loadingHyp && !errorHyp) {
+        if (!!TLOI && TLOI.parentHypothesisId && TLOI.parentHypothesisId !== selectedHypId && !loadingHyp && !errorHyp) {
             loadHypothesis(dispatch, TLOI.parentHypothesisId);
         }
         if (!!TLOI && TLOI.notes) {
@@ -114,10 +114,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             loadTLOI(dispatch, id);
         }
     }, [location, dispatch, error, loading, selectedId]);
-
-    const displayFilename = (text:string) => {
-        return text.replace(/.*#/,'').replace(/-\w{24,25}/,'');
-    }
 
     const updateNotes = () => {
         if (TLOI) {
@@ -286,7 +282,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                 {loading ? 
                     <Skeleton/> :
                     <Box>
-                        {!!TLOI && (TLOI.tableDescription || TLOI.dataQuery && TLOI.tableVariables && dataSource) &&
+                        {!!TLOI && (TLOI.tableDescription || (TLOI.dataQuery && TLOI.tableVariables && dataSource)) &&
                             <TypographySection>Input data retrieved:</TypographySection>}
                         {!!TLOI && TLOI.tableDescription && 
                         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>

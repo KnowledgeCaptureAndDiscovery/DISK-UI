@@ -1,5 +1,5 @@
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
-import { idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
+import { idPattern, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +20,7 @@ import { DISKAPI } from "DISK/API";
 import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
 import { TLOIEdit } from "components/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
+import { ShinyModal } from "components/ShinyModal";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -192,6 +193,27 @@ export const HypothesisView = () => {
         setQueryNotification(false);
     };
 
+    const renderOptionalButtons = (cur:TriggeredLineOfInquiry) => {
+        const PVNAME = "shiny_visualization";
+        let url : string = "";
+        let source : string = "";
+        [ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:Workflow) => {
+            if (wf.run && wf.run.outputs) {
+                Object.keys(wf.run.outputs).forEach(((name:string) => {
+                    if (name === PVNAME) {
+                        url = wf.run ? wf.run.outputs[name] : "";
+                        source = wf.source;
+                    }
+                }));
+            }
+        });
+        if (url) {
+            console.log("shiny detected!")
+            return <ShinyModal shinyUrl={url} source={source}/>
+        }
+        return null;
+    }
+
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
         <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
             <CircularProgress color="inherit" />
@@ -345,14 +367,22 @@ export const HypothesisView = () => {
                                         }
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
-                                        {tloi.status !== 'SUCCESSFUL' ? "" : tloi.confidenceValue.toFixed(5)}
+                                        {tloi.status === 'SUCCESSFUL' && (
+                                            tloi.confidenceValue > 0 ?
+                                                (tloi.confidenceValue < 0.0001 ?
+                                                    tloi.confidenceValue.toExponential(3)
+                                                :
+                                                    tloi.confidenceValue.toFixed(4)) 
+                                            : 
+                                                0
+                                        )}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center', justifyContent:"end"}}>
-                                            {tloi.status === 'SUCCESSFUL' ? 
+                                            {tloi.status === 'SUCCESSFUL' && (
                                                 <TLOIEdit tloi={tloi} label={"Editing " + tloi.name} onSave={onSendEditedRun}/>
-                                                : null
-                                            }
+                                            )}
+                                            {renderOptionalButtons(tloi) }
                                             <Tooltip arrow placement="top" title="Delete">
                                                 <IconButton sx={{padding:"0"}} onClick={() => {
                                                     setConfirmDialogOpen(true);
