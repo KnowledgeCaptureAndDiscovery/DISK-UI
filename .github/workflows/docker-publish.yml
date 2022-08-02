@@ -226,7 +226,7 @@ jobs:
         with:
           push: true
           context: .
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NEURO_NAME }}:${{ env.DOCKER_TAG }},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_DEV_NAME }}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_DEV_NAME }}:${{ env.DOCKER_TAG }},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_DEV_NAME }}:latest
           file: ${{ env.DOCKER_FILE}}
     outputs:
       docker_tag: ${{ steps.exposeValue.outputs.docker_tag }}

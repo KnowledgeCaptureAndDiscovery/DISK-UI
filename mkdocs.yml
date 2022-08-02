@@ -26,6 +26,7 @@ nav:
       - advanced-user-guide/questions/extending-ontology.md
     - Add workflows:
       - advanced-user-guide/running-workflows.md
+      - Example: advanced-user-guide/workflows/bike-example.md
   - Administrator Guide:
     - admin-guide/index.md
     - admin-guide/installation.md 
