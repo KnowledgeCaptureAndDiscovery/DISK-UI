@@ -35,6 +35,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                     if (l > max) max = l;
                 }
             })
+            setTotal(max);
         }
     }, [wf]);
 

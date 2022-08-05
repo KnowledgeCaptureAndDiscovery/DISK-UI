@@ -67,6 +67,7 @@ export const QuestionList = ({expanded=false}) => {
          if (myHyp.length === 0 && myLOI.length === 0)
             return null
          return (<Fragment>
+            <Divider sx={{mb: '5px'}}/>
             {myHyp.map((h:Hypothesis) => <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', mb:'5px', ':hover': {backgroundColor:'#ddd'}}}
                 component={Link} to={PATH_HYPOTHESES + '/' + h.id} key={h.id}>
                 <ScienceIcon sx={{color:'darkorange'}}/> {h.name}

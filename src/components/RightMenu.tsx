@@ -298,7 +298,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               <Typography sx={{fontWeight: location.pathname === PATH_HYPOTHESES ? 700 : 400}}>Hypotheses</Typography>
             }/>
           </ListItemButton>
-          {selectedHypothesis &&
+          {selectedHypothesis && (inLocation(PATH_TLOIS) || inLocation(PATH_HYPOTHESES)) &&
             <ListItemButton  key={PATH_HYPOTHESES + selectedHypothesis.id} component={Link} to={PATH_HYPOTHESES + "/" + selectedHypothesis.id}
                 sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px'}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
@@ -311,7 +311,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               }/>
             </ListItemButton>
           }
-          {selectedTLOI && (
+          {selectedTLOI && (inLocation(PATH_TLOIS) || inLocation(PATH_HYPOTHESES)) && (
             <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + selectedTLOI.id}
                 sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px'}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
@@ -332,9 +332,9 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               <Typography sx={{fontWeight: inLocation(PATH_LOIS) ? 700 : 400}}>Lines of Inquiry</Typography>
             }/>
           </ListItemButton>
-          {selectedLOI &&
+          {selectedLOI && inLocation(PATH_LOIS) &&
             <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + selectedLOI.id}
-                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center' }}>
+                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "50px"}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
                 <SubdirectoryArrowRightIcon/>
               </ListItemIcon>
