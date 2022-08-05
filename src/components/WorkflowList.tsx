@@ -132,7 +132,8 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         :   (!addingWorkflow &&
                 <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
                     <Typography>
-                        No workflows to run
+                        No workflows specified.
+                        {metaWorkflows.length > 0 && ("The data retrieved will be used directly in the meta-workflows")}
                     </Typography>
                 </Card>
             )
@@ -160,7 +161,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         :   (!addingWorkflow &&
                 <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
                     <Typography>
-                        No meta-workflows to run
+                        No meta-workflows specified
                     </Typography>
                 </Card>
             )

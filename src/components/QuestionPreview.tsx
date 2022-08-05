@@ -33,6 +33,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
     const [triplePattern, setTriplePattern] = React.useState<string[][]>([]);
 
+    //FIXME: use question loader.
     React.useEffect(() => {
         if (questions.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());

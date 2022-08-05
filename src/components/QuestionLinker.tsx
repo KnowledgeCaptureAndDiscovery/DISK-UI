@@ -31,6 +31,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
+    //FIXME: use question loader.
     React.useEffect(() => {
         if (options.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());

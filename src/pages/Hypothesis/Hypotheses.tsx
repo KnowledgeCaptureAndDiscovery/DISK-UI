@@ -1,4 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField, Tooltip } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { Hypothesis } from "DISK/interfaces";
 import React, { useEffect } from "react";
@@ -11,6 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
 import { loadHypotheses } from "redux/loader";
+import { QuestionList } from "components/QuestionList";
 
 type OrderType = 'date'|'author';
 
@@ -103,7 +104,10 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
             }}/>)
         else
             return <Box sx={{p:"5px"}}>
-                You do not have any hypotheses. You can create a new one based on one of the following questions:
+                <Typography variant="h6">
+                    You do not have any hypotheses. You can create a new one based on one of the following questions:
+                </Typography>
+                <QuestionList/>
             </Box>
     }
 

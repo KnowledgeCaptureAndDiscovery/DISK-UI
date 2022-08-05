@@ -35,7 +35,6 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                     if (l > max) max = l;
                 }
             })
-            setTotal(max);
         }
     }, [wf]);
 
@@ -154,7 +153,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                         </Table>
                     </TableContainer>
 
-                    {wf.run.status === 'SUCCESSFUL' && wf.run.outputs && Object.keys(wf.run.outputs).length > 0 && (
+                    {wf.run.status === 'SUCCESS' && wf.run.outputs && Object.keys(wf.run.outputs).length > 0 && (
                     <Fragment>
                         <TypographyLabel sx={{ml:"5px"}}>Outputs: </TypographyLabel>
                         <TableContainer sx={{mb:"10px"}}>

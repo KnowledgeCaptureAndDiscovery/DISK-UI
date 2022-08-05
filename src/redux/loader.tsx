@@ -1,5 +1,5 @@
 import { DISKAPI } from 'DISK/API';
-import { DataEndpoint, Hypothesis, LineOfInquiry, TriggeredLineOfInquiry, Vocabularies } from 'DISK/interfaces';
+import { DataEndpoint, Hypothesis, LineOfInquiry, Question, TriggeredLineOfInquiry, Vocabularies } from 'DISK/interfaces';
 import { setLoadingSelected as setLoadingHypothesis, setSelectedHypothesis, setErrorSelected as setErrorHypothesis, setLoadingAll as setLoadingHypotheses,
         setHypotheses, setErrorAll as setErrorHypotheses} from './hypothesis';
 import type { AppDispatch } from './store';
@@ -7,6 +7,7 @@ import {setLoadingAll as setLoadingTLOIs, setErrorAll as setErrorTLOIs, setTLOIs
         setSelectedTLOI, setErrorSelected as setErrorTLOI } from './tlois';
 import {setLoadingAll as setLoadingLOIs, setErrorAll as setErrorLOIs, setLOIs, setLoadingSelected as setLoadingLOI, setSelectedLOI, setErrorSelected as setErrorLOI } from './lois';
 import { setEndpoint, setErrorEndpoint, setErrorVocabularies, setLoadingEndpoints, setLoadingVocabularies, setVocabularies } from './server';
+import { setLoadingAll as setLoadingQuestions, setErrorAll as setErrorQuestion, setQuestions } from './questions';
 
 // Hypothesis
 export const loadHypotheses = (dispatch:AppDispatch) => {
@@ -56,6 +57,14 @@ export const loadTLOI = (dispatch:AppDispatch, id:string) => {
         .then((TLOI:TriggeredLineOfInquiry) => dispatch(setSelectedTLOI(TLOI)))
         .catch(() => dispatch(setErrorTLOI()));
 };
+
+// Questions
+export const loadQuestions = (dispatch:AppDispatch) => {
+    dispatch(setLoadingQuestions());
+    return DISKAPI.getQuestions()
+        .then((questions:Question[]) => dispatch(setQuestions(questions)))
+        .catch(() => dispatch(setErrorQuestion()));
+}
 
 // Vocabularies
 export const loadVocabularies = (dispatch:AppDispatch) => {

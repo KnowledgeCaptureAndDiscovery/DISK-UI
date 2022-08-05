@@ -18,7 +18,8 @@ interface QuestionState {
   questions: Question[],
   loadingAll: boolean,
   errorAll: boolean,
-  options: OptionMap
+  options: OptionMap,
+  initialized: boolean
 }
 
 interface PartialQuestionState {
@@ -26,11 +27,13 @@ interface PartialQuestionState {
   loadingAll?: boolean,
   errorAll?: boolean,
   options?: OptionMap
+  initialized?: boolean
 }
 
 export const questionSlice = createSlice({
     name: 'question',
     initialState: {
+        initialized: false,
         questions: [],
         loadingAll: false,
         errorAll: false,
@@ -41,7 +44,8 @@ export const questionSlice = createSlice({
             let newState : PartialQuestionState = {
                 questions: action.payload,
                 loadingAll: false,
-                errorAll: false
+                errorAll: false,
+                initialized: true
             }
             return  { ...state , ...newState };
         },

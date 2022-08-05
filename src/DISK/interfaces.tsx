@@ -52,7 +52,7 @@ export interface QuestionVariable {
 export interface WorkflowRun {
     id: string,
     link: string,
-    status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL',
+    status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESS',
     outputs: {[name:string] :string},
     files: {[name:string] :string},
     startDate: string,

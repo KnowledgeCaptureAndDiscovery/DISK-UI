@@ -40,6 +40,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
   
+    //FIXME: use question loader.
     React.useEffect(() => {
         if (options.length === 0 && !loading && !error) {
             dispatch(setLoadingAll());

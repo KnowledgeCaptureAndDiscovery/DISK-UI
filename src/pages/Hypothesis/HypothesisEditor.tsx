@@ -2,7 +2,7 @@ import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, IconButt
 import { DISKAPI } from "DISK/API";
 import { Hypothesis, idPattern, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
@@ -28,7 +28,9 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 
 export const HypothesisEditor = () => {
     const location = useLocation();
+    const [searchParams, setSearchParams]= useSearchParams();
     let navigate = useNavigate();
+    let initQuestion = searchParams.get("q");
 
     // Redux data
     const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
@@ -59,6 +61,11 @@ export const HypothesisEditor = () => {
     const onDescChange = (desc:string) => { setDescription(desc); setErrorDesc(desc.length === 0); }
 
     useEffect(() => {
+        if (initQuestion)
+            setQuestionId(initQuestion);
+    }, [initQuestion])
+
+    useEffect(() => {
         let match = PATH_HYPOTHESIS_ID_EDIT_RE.exec(location.pathname);
         if (match != null && match.length === 2) {
             let id : string = match[1];
@@ -78,6 +85,7 @@ export const HypothesisEditor = () => {
         } else if (location.pathname === PATH_HYPOTHESIS_NEW) {
             dispatch(setSelectedHypothesis(null));
             clearForm();
+            if (initQuestion) setQuestionId(initQuestion);
         }
     }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
