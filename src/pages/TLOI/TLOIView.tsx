@@ -231,6 +231,22 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data:</TypographySubtitle>
+            <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
+                <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
+                {loadingEndpoints ? 
+                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                    (dataSource ?
+                        <Fragment>
+                            <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
+                            <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
+                                {renderDescription(dataSource.description)}
+                            </Box>
+                        </Fragment>
+                    :
+                        null
+                    )
+                }
+            </Box>
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
                 <Box>
                     <TypographyLabel>Data query explanation:</TypographyLabel>
@@ -251,22 +267,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
 
             {formalView && <Fragment>
                 <TypographySection>Data query:</TypographySection>
-                <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
-                    <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
-                    {loadingEndpoints ? 
-                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (dataSource ?
-                            <Fragment>
-                                <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                                <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                    {renderDescription(dataSource.description)}
-                                </Box>
-                            </Fragment>
-                        :
-                            null
-                        )
-                    }
-                </Box>
                 <Box sx={{fontSize: "0.94rem"}} >
                     <CodeMirror value={!!TLOI? TLOI.dataQuery : ""}
                         extensions={[StreamLanguage.define(sparql)]}
