@@ -58,6 +58,7 @@ const TypographySection = styled(Typography)(({ theme }) => ({
 export const TLOIView = ({edit} : TLOIViewProps) => {
     const location = useLocation();
     const dispatch = useAppDispatch();
+    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
     const [formalView, setFormalView] = React.useState<boolean>(false);
     const [editMode, setEditMode] = React.useState<boolean>(false);
     const [notes, setNotes] = React.useState<string>("");
@@ -172,12 +173,13 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                 <Typography variant="h5">
                     {error ? "Error loading TLOI" : TLOI?.name}
                 </Typography>
-
+                { authenticated ? 
                 <Tooltip arrow title={editMode ? "Cancel" : "Edit"}>
                     <IconButton onClick={() => setEditMode(!editMode)}>
                         {editMode ? <CancelIcon /> : <EditIcon /> }
                     </IconButton>
                 </Tooltip>
+                : null }
             </Box>
         }
         <Divider/>
@@ -221,7 +223,12 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                     {TLOI && TLOI.notes ?
                         <TypographyInline>{TLOI.notes}</TypographyInline>
                     :
-                        <InfoInline>None specified. Click the edit button to add notes.</InfoInline>
+                        <InfoInline>None specified. 
+                            { authenticated ? 
+                                <> Click the edit button to add notes. </> :
+                                <> Please login to add notes </>
+                            }
+                        </InfoInline>
                     }
                 </Box>
             }
