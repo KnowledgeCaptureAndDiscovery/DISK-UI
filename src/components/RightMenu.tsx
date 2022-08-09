@@ -200,9 +200,9 @@ export default function MiniDrawer(props: { children: string | number | boolean 
       return;
     
     keycloak.onTokenExpired = () => {
-      keycloak.updateToken(60);
+      keycloak.updateToken(300);
     }
-   }, [keycloak.authenticated]);
+   }, [keycloak.authenticated, initialized, keycloak]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

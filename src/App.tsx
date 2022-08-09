@@ -32,13 +32,10 @@ function App() {
       <Provider store={store}>
         <ReactKeycloakProvider
           authClient={keycloak}
-          onTokens={({ token }) => {
+          onTokens={() => {
             dispatch(
               setToken(
-                keycloak &&
-                  keycloak.authenticated &&
-                  keycloak.token &&
-                  keycloak.tokenParsed
+                keycloak && keycloak.authenticated && keycloak.token && keycloak.tokenParsed
                   ? {
                       token: keycloak.token,
                       parsedToken: keycloak.tokenParsed,
