@@ -184,6 +184,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const dispatch = useAppDispatch();
 
   const { keycloak, initialized } = useKeycloak();
+  
   const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
   const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
   const selectedTLOI = useAppSelector((state:RootState) => state.tlois.selectedTLOI);
@@ -192,24 +193,23 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const logoutDialogOpen = Boolean(anchorEl);
 
+  React.useEffect(() => {
+    if (!initialized)
+      return;
+    if (!keycloak.authenticated) 
+      return;
+    
+    keycloak.onTokenExpired = () => {
+      keycloak.updateToken(60);
+    }
+   }, [keycloak.authenticated]);
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  React.useEffect(() => {
-  dispatch(setToken(
-    (initialized && keycloak && keycloak.authenticated && keycloak.token && keycloak.tokenParsed) ?
-      {
-        token: keycloak.token,
-        parsedToken: keycloak.tokenParsed,
-      } : {
-        token: "",
-      }
-  ));
-  }, [keycloak, initialized]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [open, setOpen] = React.useState(true);
 

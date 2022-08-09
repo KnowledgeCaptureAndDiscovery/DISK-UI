@@ -1,8 +1,10 @@
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import { ReactKeycloakProvider } from '@react-keycloak/web';
-import { AppRouter } from 'AppRouter';
-import { Provider } from 'react-redux';
-import { store } from 'redux/store';
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { ReactKeycloakProvider } from "@react-keycloak/web";
+import { AppRouter } from "AppRouter";
+import { Provider } from "react-redux";
+import { useAppDispatch } from "redux/hooks";
+import { setToken } from "redux/keycloak";
+import { store } from "redux/store";
 import keycloak from "./keycloak";
 
 // Theme
@@ -19,15 +21,36 @@ const theme = createTheme({
       dark: "#b28900",
     },
   },*/
-}); 
+});
 
 function App() {
+  const dispatch = useAppDispatch();
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Provider store={store}>
-        <ReactKeycloakProvider authClient={keycloak}>
-          <AppRouter/>
+        <ReactKeycloakProvider
+          authClient={keycloak}
+          onTokens={({ token }) => {
+            dispatch(
+              setToken(
+                keycloak &&
+                  keycloak.authenticated &&
+                  keycloak.token &&
+                  keycloak.tokenParsed
+                  ? {
+                      token: keycloak.token,
+                      parsedToken: keycloak.tokenParsed,
+                    }
+                  : {
+                      token: "",
+                    }
+              )
+            );
+          }}
+        >
+          <AppRouter />
         </ReactKeycloakProvider>
       </Provider>
     </ThemeProvider>

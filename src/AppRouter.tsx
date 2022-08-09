@@ -15,6 +15,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionsPage } from "pages/Questions";
+import { useKeycloak } from "@react-keycloak/web";
 
 const notAuthMsg = () => {
   return (<Box sx={{display: 'flex', width: "100%", alignItems: 'center', justifyContent: 'center', height: "75vh", fontSize: "1.2em", color: "#777"}}>
@@ -23,8 +24,9 @@ const notAuthMsg = () => {
 }
 
 export const AppRouter = () => {
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-
+  const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+  const {initialized} = useKeycloak();
+  if (!initialized) return <div>Loading...</div>;
   return (
     <BrowserRouter>
       <RightMenu>
