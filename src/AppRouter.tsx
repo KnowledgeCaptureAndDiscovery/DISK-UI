@@ -14,7 +14,6 @@ import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { QuestionsPage } from "pages/Questions";
 import { useKeycloak } from "@react-keycloak/web";
 import { HypothesisQuestion } from "pages/Questions/HypothesisQuestions";
 import { LOIQuestion } from "pages/Questions/LOIQuestion";
