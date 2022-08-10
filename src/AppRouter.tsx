@@ -14,6 +14,7 @@ import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
+import { useKeycloak } from "@react-keycloak/web";
 import { HypothesisQuestion } from "pages/Questions/HypothesisQuestions";
 import { LOIQuestion } from "pages/Questions/LOIQuestion";
 
@@ -24,8 +25,9 @@ const notAuthMsg = () => {
 }
 
 export const AppRouter = () => {
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-
+  const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+  //const {initialized} = useKeycloak();
+  //if (!initialized) return <div>Loading...</div>;
   return (
     <BrowserRouter>
       <RightMenu>
