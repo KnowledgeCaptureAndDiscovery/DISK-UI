@@ -26,8 +26,8 @@ const notAuthMsg = () => {
 
 export const AppRouter = () => {
   const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-  const {initialized} = useKeycloak();
-  if (!initialized) return <div>Loading...</div>;
+  //const {initialized} = useKeycloak();
+  //if (!initialized) return <div>Loading...</div>;
   return (
     <BrowserRouter>
       <RightMenu>
