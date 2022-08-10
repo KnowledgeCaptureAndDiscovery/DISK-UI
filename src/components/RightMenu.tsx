@@ -22,9 +22,9 @@ import SettingIcon from '@mui/icons-material/Settings';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
-import { Link as MuiLink, Menu, MenuItem } from '@mui/material';
+import { Link as MuiLink, ListItem, Menu, MenuItem } from '@mui/material';
 import { useLocation } from 'react-router-dom'
-import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_LOI_NEW, PATH_MY_HYPOTHESES, PATH_MY_LOIS, PATH_QUESTIONS, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
+import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_HYP_QUESTIONS, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_LOI_NEW, PATH_LOI_QUESTIONS, PATH_MY_HYPOTHESES, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
 import { AccountCircle } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -38,7 +38,6 @@ import { Button } from '@mui/material';
 import { setToken } from 'redux/keycloak';
 import { VERSION } from 'constants/config';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
-import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck';
 
 const drawerWidth = 240;
 
@@ -170,8 +169,10 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
       return <Box>Terminology</Box>
     case PATH_DATA:
       return <Box>Data</Box>
-    case PATH_QUESTIONS:
+    case PATH_HYP_QUESTIONS:
       return <Box>Hypotheses templates</Box>
+    case PATH_LOI_QUESTIONS:
+      return <Box>Line of Inquiry templates</Box>
     default: {
       return <Box>{url}</Box>;
     }
@@ -191,13 +192,6 @@ export default function MiniDrawer(props: { children: string | number | boolean 
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const logoutDialogOpen = Boolean(anchorEl);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   React.useEffect(() => {
   dispatch(setToken(
@@ -253,67 +247,97 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         {keycloak && keycloak.authenticated && (<React.Fragment>
           <Divider />
           <List>
+            {open && <ListItem sx={{p: '0 10px', fontSize: "0.9em", fontWeight: "500", color: "#444"}}>My work:</ListItem>}
             <ListItemButton  key={PATH_MY_HYPOTHESES} component={Link} to={PATH_MY_HYPOTHESES}
                 sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_MY_HYPOTHESES) ? "darkorange" : "orange" }} >
+              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center',
+                  color: inLocation(PATH_MY_HYPOTHESES) || ((location.pathname !== PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && selectedHypothesis && selectedHypothesis.author === username) ? "darkorange" : "orange" }} >
                 <ScienceIcon />
               </ListItemIcon>
               <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                <Typography sx={{fontWeight: inLocation(PATH_MY_HYPOTHESES) ? 700 : 400}}>My Hypotheses</Typography>
+                <Typography sx={{fontWeight: inLocation(PATH_MY_HYPOTHESES)|| ((location.pathname !== PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && selectedHypothesis && selectedHypothesis.author === username) ? 700 : 400}}>My Hypotheses</Typography>
               }/>
             </ListItemButton>
 
-          {
-            //</List><ListItemButton key={PATH_MY_LOIS} component={Link} to={PATH_MY_LOIS}
-            //</List>    sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-            //</List>  <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_MY_LOIS) ? "darkgreen" : "green" }} >
-            //</List>    <SettingIcon />
-            //</List>  </ListItemIcon>
-            //</List>  <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
-            //</List>    <Typography sx={{fontWeight: inLocation(PATH_MY_LOIS) ? 700 : 400}}>My Lines of Inquiry</Typography>
-            //</List>  }/>
-            //</List></ListItemButton>
-          }
+            {selectedHypothesis && selectedHypothesis.author === username && (inLocation(PATH_TLOIS) || (location.pathname != PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES))) &&
+              <ListItemButton  key={PATH_HYPOTHESES + selectedHypothesis.id} component={Link} to={PATH_HYPOTHESES + "/" + selectedHypothesis.id}
+                  sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px', py: 0}}>
+                <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
+                  <SubdirectoryArrowRightIcon/>
+                </ListItemIcon>
+                <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
+                  <Typography sx={{fontWeight: location.pathname != PATH_HYPOTHESES  && inLocation(PATH_HYPOTHESES) ? 700 : 400, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>
+                    {selectedHypothesis.name}
+                  </Typography>
+                }/>
+              </ListItemButton>
+            }
+            {selectedTLOI && selectedHypothesis && selectedHypothesis.author === username && inLocation(PATH_TLOIS) && (
+              <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + selectedTLOI.id}
+                  sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px', py: 0}}>
+                <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
+                  <SubdirectoryArrowRightIcon/>
+                </ListItemIcon>
+                <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
+                  <Typography sx={{fontWeight: inLocation(PATH_TLOIS) ? 700 : 400, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedTLOI.name}</Typography>
+                }/>
+              </ListItemButton>
+            )}
+
+            <ListItemButton key={PATH_MY_LOIS} component={Link} to={PATH_MY_LOIS}
+                sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', 
+                  color: inLocation(PATH_MY_LOIS) || (inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && selectedLOI && selectedLOI.author === username) ? "darkgreen" : "green" }} >
+                <SettingIcon />
+              </ListItemIcon>
+              <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
+                <Typography sx={{fontWeight: inLocation(PATH_MY_LOIS)  || (location.pathname !== PATH_LOIS && inLocation(PATH_LOIS) && selectedLOI && selectedLOI.author === username) ? 700 : 400}}>My Lines of Inquiry</Typography>
+              }/>
+            </ListItemButton>
+
+            {selectedLOI && selectedLOI.author === username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS &&
+              <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + selectedLOI.id}
+                  sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "25px", py: 0}}>
+                <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
+                  <SubdirectoryArrowRightIcon/>
+                </ListItemIcon>
+                <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
+                  <Typography sx={{fontWeight: 700, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedLOI.name}</Typography>
+                }/>
+              </ListItemButton>
+            }
           </List>
         </React.Fragment>)}
 
         <Divider />
         <List>
-          <ListItemButton  key={PATH_QUESTIONS} component={Link} to={PATH_QUESTIONS}
-              sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_QUESTIONS) ? "darkgoldenrod" : "burlywood" }} >
-              <QuestionIcon />
-            </ListItemIcon>
-            <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-              <Typography sx={{fontWeight: inLocation(PATH_QUESTIONS) ? 700 : 400}}>Hypotheses Templates</Typography>
-            }/>
-          </ListItemButton>
-
+          {open && <ListItem sx={{p: '0 10px', fontSize: "0.9em", fontWeight: "500", color: "#444"}}>Community work:</ListItem>}
           <ListItemButton  key={PATH_HYPOTHESES} component={Link} to={PATH_HYPOTHESES}
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_HYPOTHESES) ? "darkorange" : "orange" }} >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && (!selectedHypothesis || selectedHypothesis.author !== username) ? "darkorange" : "orange" }} >
               <ScienceIcon />
             </ListItemIcon>
             <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-              <Typography sx={{fontWeight: location.pathname === PATH_HYPOTHESES ? 700 : 400}}>Hypotheses</Typography>
+              <Typography sx={{fontWeight: location.pathname === PATH_HYPOTHESES || ((!selectedHypothesis || selectedHypothesis.author !== username) && (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS))) ? 700 : 400}}>All Hypotheses</Typography>
             }/>
           </ListItemButton>
-          {selectedHypothesis && (inLocation(PATH_TLOIS) || inLocation(PATH_HYPOTHESES)) &&
+
+          {selectedHypothesis && selectedHypothesis.author !== username && (inLocation(PATH_TLOIS) || (inLocation(PATH_HYPOTHESES) && location.pathname !== PATH_HYPOTHESES)) &&
             <ListItemButton  key={PATH_HYPOTHESES + selectedHypothesis.id} component={Link} to={PATH_HYPOTHESES + "/" + selectedHypothesis.id}
-                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px'}}>
+                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px', py: 0}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                 <SubdirectoryArrowRightIcon/>
               </ListItemIcon>
               <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                <Typography sx={{fontWeight: location.pathname != PATH_HYPOTHESES  && inLocation(PATH_HYPOTHESES) ? 700 : 400, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>
+                <Typography sx={{fontWeight: 700, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>
                   {selectedHypothesis.name}
                 </Typography>
               }/>
             </ListItemButton>
           }
-          {selectedTLOI && (inLocation(PATH_TLOIS) || inLocation(PATH_HYPOTHESES)) && (
+          {selectedTLOI && selectedHypothesis && selectedHypothesis.author !== username && inLocation(PATH_TLOIS) && (
             <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + selectedTLOI.id}
-                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px'}}>
+                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px', py: 0}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                 <SubdirectoryArrowRightIcon/>
               </ListItemIcon>
@@ -325,24 +349,49 @@ export default function MiniDrawer(props: { children: string | number | boolean 
 
           <ListItemButton key={PATH_LOIS} component={Link} to={PATH_LOIS}
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_LOIS) ? "darkgreen" : "green" }} >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && (!selectedLOI || selectedLOI.author !== username)) ? "darkgreen" : "green" }} >
               <SettingIcon />
             </ListItemIcon>
             <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
-              <Typography sx={{fontWeight: inLocation(PATH_LOIS) ? 700 : 400}}>Lines of Inquiry</Typography>
+              <Typography sx={{fontWeight: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && (!selectedLOI || selectedLOI.author !== username)) ? 700 : 400}}>All Lines of Inquiry</Typography>
             }/>
           </ListItemButton>
-          {selectedLOI && inLocation(PATH_LOIS) &&
+
+          {selectedLOI && selectedLOI.author !== username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS &&
             <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + selectedLOI.id}
-                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "50px"}}>
+                sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "50px", py: 0}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
                 <SubdirectoryArrowRightIcon/>
               </ListItemIcon>
               <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                <Typography sx={{fontWeight: 700, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>&bull; {selectedLOI.name}</Typography>
+                <Typography sx={{fontWeight: 700, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedLOI.name}</Typography>
               }/>
             </ListItemButton>
           }
+
+        </List>
+
+        <Divider />
+        <List>
+          {open && <ListItem sx={{p: '0 10px', fontSize: "0.9em", fontWeight: "500", color: "#444"}}>DISK core</ListItem>}
+          <ListItemButton  key={PATH_HYP_QUESTIONS} component={Link} to={PATH_HYP_QUESTIONS}
+              sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_HYP_QUESTIONS) ? "darkorange" : "orange" }} >
+              <QuestionIcon />
+            </ListItemIcon>
+            <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
+              <Typography sx={{fontWeight: inLocation(PATH_HYP_QUESTIONS) ? 700 : 400}}>Hypotheses Templates</Typography>
+            }/>
+          </ListItemButton>
+          <ListItemButton  key={PATH_LOI_QUESTIONS} component={Link} to={PATH_LOI_QUESTIONS}
+              sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: inLocation(PATH_LOI_QUESTIONS) ? "darkgreen" : "green" }} >
+              <QuestionIcon />
+            </ListItemIcon>
+            <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
+              <Typography sx={{fontWeight: inLocation(PATH_LOI_QUESTIONS) ? 700 : 400}}>LOI Templates</Typography>
+            }/>
+          </ListItemButton>
 
           <ListItemButton key={PATH_TERMINOLOGY} component={Link} to={PATH_TERMINOLOGY}
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>

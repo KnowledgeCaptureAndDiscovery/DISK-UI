@@ -3,7 +3,7 @@ import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelp
 import { DISKAPI } from "DISK/API";
 import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
@@ -42,6 +42,8 @@ export const LOIEditor = () => {
     const location = useLocation();
     let navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const [searchParams, setSearchParams]= useSearchParams();
+    let initQuestion = searchParams.get("q");
 
     const LOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
     const selectedId = useAppSelector((state:RootState) => state.lois.selectedId);
@@ -315,7 +317,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} onQuestionChange={onQuestionChange} error={errorQuestion}/>
+            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.question : "")} onQuestionChange={onQuestionChange} error={errorQuestion}/>
         </Box>
         <Divider/>
 

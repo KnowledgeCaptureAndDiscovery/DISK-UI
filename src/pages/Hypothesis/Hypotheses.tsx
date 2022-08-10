@@ -107,7 +107,7 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
                 <Typography variant="h6">
                     You do not have any hypotheses. You can create a new one based on one of the following questions:
                 </Typography>
-                <QuestionList/>
+                <QuestionList kind="hypothesis"/>
             </Box>
     }
 
