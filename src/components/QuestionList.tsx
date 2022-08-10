@@ -1,4 +1,4 @@
-import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, ListItem, Tooltip, Typography } from "@mui/material";
 import { Hypothesis, LineOfInquiry, Question } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -7,16 +7,17 @@ import { RootState } from "redux/store";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from "react-router-dom";
-import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS } from "constants/routes";
+import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "constants/routes";
 
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 interface QuestionListProps {
-    expanded?: boolean
+    expanded?: boolean,
+    kind: 'hypothesis' | 'loi',
 }
 
-export const QuestionList = ({expanded=false}) => {
+export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     const dispatch = useAppDispatch();
     const error : boolean = useAppSelector((state:RootState) => state.question.errorAll);
     const loading : boolean = useAppSelector((state:RootState) => state.question.loadingAll);
@@ -29,16 +30,50 @@ export const QuestionList = ({expanded=false}) => {
     const hypotheses : Hypothesis[] = useAppSelector((state:RootState) => state.hypotheses.hypotheses);
     const lois : LineOfInquiry[] = useAppSelector((state:RootState) => state.lois.LOIs);
 
+    const [count, setCount] = useState<{[id:string] : number}>({});
+    const [sortedQuestions, setSortedQuestions] = useState<Question[]>([]);
+
     useEffect(() => {
         if (!error && !loading && !initialized) {
             loadQuestions(dispatch);
         }
     }, [])
 
+    const countQuestions = (items: Hypothesis[] | LineOfInquiry[]) => {
+        let newCount : {[id:string] : number} = {};
+        items.forEach((item:Hypothesis|LineOfInquiry) => {
+            if (item.question) {
+                if (!newCount[item.question])
+                    newCount[item.question] = 0;
+                newCount[item.question] += 1;
+            }
+        });
+        setCount(newCount);
+    }
+
+    useEffect(() => {
+        countQuestions(hypotheses);
+    }, [hypotheses])
+
+    useEffect(() => {
+        countQuestions(lois);
+    }, [lois])
+
+    useEffect(() => {
+        let q : Question[] = [ ...questions ];
+        setSortedQuestions(q.sort(sortQuestions));
+    }, [questions, count])
+
+    const sortQuestions = (q1:Question, q2:Question) => {
+        let a : number = count[q1.id] ? count[q1.id] : 0;
+        let b : number = count[q2.id] ? count[q2.id] : 0;
+        return a < b ? 1 : -1;
+    }
+
     useEffect(() => {
         if (expanded) {
-            if (!initHyp) loadHypotheses(dispatch);
-            if (!initLOI) loadLOIs(dispatch);
+            if (kind === 'hypothesis' && !initHyp) loadHypotheses(dispatch);
+            if (kind === 'loi' && !initLOI) loadLOIs(dispatch);
         }
     }, [expanded])
 
@@ -61,22 +96,42 @@ export const QuestionList = ({expanded=false}) => {
         </Fragment>)
     }
 
-    const renderQuestionDetails = (q:Question) => {
+    const renderQuestionHypotheses = (q:Question) => {
          let myHyp : Hypothesis[] = hypotheses.filter((h:Hypothesis) => h.question === q.id);
-         let myLOI : LineOfInquiry[] = lois.filter((l:LineOfInquiry) => l.question === q.id);
-         if (myHyp.length === 0 && myLOI.length === 0)
+         if (myHyp.length === 0)
             return null
-         return (<Fragment>
-            <Divider sx={{mb: '5px'}}/>
-            {myHyp.map((h:Hypothesis) => <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', mb:'5px', ':hover': {backgroundColor:'#ddd'}}}
-                component={Link} to={PATH_HYPOTHESES + '/' + h.id} key={h.id}>
-                <ScienceIcon sx={{color:'darkorange'}}/> {h.name}
-            </Card>)}
-            {myLOI.map((l:LineOfInquiry) => <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', mb:'5px', ':hover': {backgroundColor:'#ddd'}}}
-                component={Link} to={PATH_LOIS + '/' + l.id} key={l.id}>
-                <SettingsIcon sx={{color:'darkgreen'}}/> {l.name}
-            </Card>)}
-         </Fragment>)
+         return myHyp.map((h:Hypothesis) => <Box key={h.id}>
+            <Divider/>
+            <Typography>Hypotheses based on this question:</Typography>
+            <List sx={{p:0}}>
+                <ListItem sx={{p:"4px 16px"}}>
+                    <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
+                        component={Link} to={PATH_HYPOTHESES + '/' + h.id} key={h.id}>
+                        <ScienceIcon sx={{mx: "5px", color:'darkorange'}}/> {h.name}
+                    </Card>
+                </ListItem>
+            </List>
+         </Box>
+        )
+    }
+
+    const renderQuestionLOIs = (q:Question) => {
+         let myLOI : LineOfInquiry[] = lois.filter((l:LineOfInquiry) => l.question === q.id);
+         if (myLOI.length === 0)
+            return null
+         return myLOI.map((l:LineOfInquiry) => <Box key={l.id}>
+            <Divider/>
+            <Typography>Lines of Inquiry based on this question:</Typography>
+            <List sx={{p:0}}>
+                <ListItem sx={{p:"4px 16px"}}>
+                    <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
+                        component={Link} to={PATH_LOIS + '/' + l.id} key={l.id}>
+                        <SettingsIcon sx={{mx: "5px", color:'darkgreen'}}/> {l.name}
+                    </Card>
+                </ListItem>
+            </List>
+         </Box>
+        )
     }
 
     return (<Box sx={{display: "flex", justifyContent: "center"}}>
@@ -93,7 +148,8 @@ export const QuestionList = ({expanded=false}) => {
                 </Box>
             :
                 <Box>
-                    {questions.map((q:Question) => <Card variant="outlined" sx={{mb: "5px", p: '5px 10px'}} key={q.id}>
+                    {sortedQuestions
+                            .map((q:Question) => <Card variant="outlined" sx={{mb: "5px", p: '5px 10px'}} key={q.id}>
                         <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                             <Box sx={{display: 'flex', alignItems: 'center'}}>
                                 <QuestionMarkIcon sx={{color:'burlywood'}}/>
@@ -103,14 +159,14 @@ export const QuestionList = ({expanded=false}) => {
                             </Box>
                             <Box>
                                 <Tooltip arrow title="Create a new Hypothesis based on this template" placement="top">
-                                    <Button component={Link} to={PATH_HYPOTHESIS_NEW+"?q="+q.id} disabled={!authenticated}>
+                                    <Button component={Link} to={(kind === 'hypothesis' ? PATH_HYPOTHESIS_NEW : PATH_LOI_NEW)+"?q="+q.id} disabled={!authenticated}>
                                         <AddIcon sx={{mr:'5px'}}/> New
                                     </Button>
                                 </Tooltip>
                             </Box>
 
                         </Box>
-                        {expanded && renderQuestionDetails(q)}
+                        {expanded && (kind === 'hypothesis' ? renderQuestionHypotheses(q) : renderQuestionLOIs(q))}
                     </Card>)}
                 </Box>
             )
