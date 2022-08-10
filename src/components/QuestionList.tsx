@@ -100,38 +100,38 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
          let myHyp : Hypothesis[] = hypotheses.filter((h:Hypothesis) => h.question === q.id);
          if (myHyp.length === 0)
             return null
-         return myHyp.map((h:Hypothesis) => <Box key={h.id}>
+         return <Fragment>
             <Divider/>
             <Typography>Hypotheses based on this question:</Typography>
             <List sx={{p:0}}>
-                <ListItem sx={{p:"4px 16px"}}>
+            {myHyp.map((h:Hypothesis) => 
+                <ListItem sx={{p:"4px 16px"}} key={h.id}>
                     <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
                         component={Link} to={PATH_HYPOTHESES + '/' + h.id} key={h.id}>
                         <ScienceIcon sx={{mx: "5px", color:'darkorange'}}/> {h.name}
                     </Card>
-                </ListItem>
+                </ListItem>)}
             </List>
-         </Box>
-        )
+         </Fragment>
     }
 
     const renderQuestionLOIs = (q:Question) => {
          let myLOI : LineOfInquiry[] = lois.filter((l:LineOfInquiry) => l.question === q.id);
          if (myLOI.length === 0)
             return null
-         return myLOI.map((l:LineOfInquiry) => <Box key={l.id}>
+         return <Fragment>
             <Divider/>
             <Typography>Lines of Inquiry based on this question:</Typography>
             <List sx={{p:0}}>
-                <ListItem sx={{p:"4px 16px"}}>
+            {myLOI.map((l:LineOfInquiry) =>
+                <ListItem sx={{p:"4px 16px"}} key={l.id}>
                     <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
                         component={Link} to={PATH_LOIS + '/' + l.id} key={l.id}>
                         <SettingsIcon sx={{mx: "5px", color:'darkgreen'}}/> {l.name}
                     </Card>
-                </ListItem>
+                </ListItem>)}
             </List>
-         </Box>
-        )
+         </Fragment>
     }
 
     return (<Box sx={{display: "flex", justifyContent: "center"}}>
