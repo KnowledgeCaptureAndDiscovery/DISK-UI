@@ -1,4 +1,7 @@
+
 # Specifying Workflows and Meta-Workflows
+
+When an LOI is edited then a list of possible workflows will be shown and you can choose one
 
 To specify the workflow of the LOI, you need to select the button **Add Workflow** and select the workflow from the list of workflows.
 
@@ -18,17 +21,17 @@ For example, the following workflow requires the inputs to run:
 ![Workflow](../../figures/bikes/loi/method-workflow-empty.png "Select workflow")
 
 
-Next, you need to specify the values for the Workflow Inputs. To do that, click on one of the Workflow Inputs and select the LOI variable from the list of LOI variables displayed.
+Next, you need to specify the values for the Workflow Inputs. To do that, click on one of the Workflow Inputs and select the Data Query or Hypothesis variable from the list displayed.
 
 !!! info
-        The LOI variables are obtained from the data query response and the question template.
+        The Data Query variables are obtained from the data query response and the question template.
 
 For example, we select the following options:
 
-- LOI variable `?WeatherSensor1` to pass as the value for the `?WeatherSensor1` Workflow Input.
-- LOI variable `?WeatherSensor2` to pass as the value for the `?WeatherSensor2` Workflow Input.
-- LOI variable `?WeatherSensor3` to pass as the value for the `?WeatherSensor3` Workflow Input.
-- LOI variable `?WeatherRecordCsvFile` to pass as the value for the `?WeatherCsvFile` Workflow Input. Also, we select the option called **Multiple** because the LOI variable `?url` can be a CSV file or multiple CSV files.
+- Hypothesis variable`?WeatherSensor1` to pass as the value for the `?WeatherSensor1` Workflow Input.
+- Hypothesis variable `?WeatherSensor2` to pass as the value for the `?WeatherSensor2` Workflow Input.
+- Hypothesis variable `?WeatherSensor3` to pass as the value for the `?WeatherSensor3` Workflow Input.
+- Data Query variable `?WeatherRecordCsvFile` to pass as the value for the `?WeatherCsvFile` Workflow Input. Also, we select the option called **Multiple** because the Data Query or Hypothesis variable `?url` can be a CSV file or multiple CSV files.
 
 ![Workflow](../../figures/bikes/loi/method-workflow-selected.png"Workflow Variables")
 
