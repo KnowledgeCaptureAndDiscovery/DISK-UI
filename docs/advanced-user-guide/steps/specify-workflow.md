@@ -43,4 +43,4 @@ Remember to save the Line of Inquiry.
 
 ## Next steps
 
-You can test the LOI by creating a new Hypothesis and selecting the LOI. [See the previous section details](../user-guide/write-hypothesis).
+You can test the LOI by creating a new Hypothesis and selecting the LOI. [See the previous section details](/advanced-user-guide/steps/write-query).
