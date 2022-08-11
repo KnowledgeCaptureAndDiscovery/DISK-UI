@@ -35,7 +35,7 @@ For example, we select the following options:
 
 ![Workflow](../../figures/bikes/loi/method-workflow-selected.png"Workflow Variables")
 
-You can also add a **Meta-Workflow** to the workflow.  A **Meta-Workflow** is a workflow that is executed before the main workflow. 
+You can also add a **Meta-Workflow** to the workflow.  A **Meta-Workflow** is a workflow that is executed after the main workflow. 
 
 ### Saving
 
