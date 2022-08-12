@@ -332,7 +332,7 @@ export const HypothesisView = () => {
                                     <TableCell sx={{padding: "0 10px", minWidth:"100px"}}>Run Status</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Input Files</TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>Output Files</TableCell>
-                                    <TableCell sx={{padding: "0 10px", minWidth: "120px"}}>P-value</TableCell>
+                                    <TableCell sx={{padding: "0 10px", minWidth: "120px"}}>Confidence Value</TableCell>
                                     <TableCell sx={{padding: "0 10px", minWidth: "70px"}}></TableCell>
                                 </TableRow>
                             </TableHead>
@@ -375,7 +375,10 @@ export const HypothesisView = () => {
                                                     tloi.confidenceValue.toFixed(4)) 
                                             : 
                                                 0
-                                        )}
+                                        )
+                                        }
+                                        {/** TODO: Remove p-value as default confidence type */}
+                                        {tloi.confidenceType ?  ` (${tloi.confidenceType})` : " (P-value)"}
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center', justifyContent:"end"}}>

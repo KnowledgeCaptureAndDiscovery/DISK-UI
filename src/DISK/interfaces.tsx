@@ -115,6 +115,7 @@ export interface TriggeredLineOfInquiry {
     dataSource: string,
     // All of these are workflow-run related.
     confidenceValue: number,
+    confidenceType: string,
 }
 
 export type MethodInputType = 'input' | 'parameter' | 'none' ;
