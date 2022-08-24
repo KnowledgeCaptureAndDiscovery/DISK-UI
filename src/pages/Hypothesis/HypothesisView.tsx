@@ -3,7 +3,7 @@ import { idPattern, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import PlayIcon from '@mui/icons-material/PlayArrow';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import ErrorIcon from '@mui/icons-material/ErrorOutline';
 import WaitIcon from '@mui/icons-material/HourglassBottom';
 import CheckIcon from '@mui/icons-material/Check';
@@ -21,6 +21,7 @@ import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
 import { TLOIEdit } from "components/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
 import { ShinyModal } from "components/ShinyModal";
+import { NarrativeModal } from "components/NarrativeModal";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -382,6 +383,9 @@ export const HypothesisView = () => {
                                     </TableCell>
                                     <TableCell sx={{padding: "0 10px"}}>
                                         <Box sx={{display:'flex', alignItems:'center', justifyContent:"end"}}>
+                                            {hypothesis != null && (
+                                                <NarrativeModal hypothesis={hypothesis} tloi={tloi}/>
+                                            )}
                                             {tloi.status === 'SUCCESSFUL' && (
                                                 <TLOIEdit tloi={tloi} label={"Editing " + tloi.name} onSave={onSendEditedRun}/>
                                             )}

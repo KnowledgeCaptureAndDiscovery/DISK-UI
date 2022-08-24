@@ -50,7 +50,7 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
     const renderFile = (run:RunStatus, id:string) => {
         let fileMap = getFileMap(run);
         let url : string = fileMap[id];
-        let filename : string = url.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}/,'');;
+        let filename : string = url.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}$/,'');
         return <MuiLink color="inherit" onClick={() => downloadFile(run.source, url, filename)}>
             {filename}
         </MuiLink>

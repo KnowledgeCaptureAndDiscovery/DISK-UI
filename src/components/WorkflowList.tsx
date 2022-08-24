@@ -9,6 +9,7 @@ import { WorkflowPreview } from "./WorkflowPreview";
 
 interface WorkflowListProps {
     editable: boolean,
+    minimal?: boolean,
     workflows: Workflow[],
     metaworkflows: Workflow[],
     options: string[],
@@ -16,7 +17,7 @@ interface WorkflowListProps {
     onChange?: (workflows:Workflow[], metaWorkflows:Workflow[]) => void;
 }
 
-export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options, onEditStateChange:sendEditChange, onChange:notifyChange} : WorkflowListProps) => {
+export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options, onEditStateChange:sendEditChange, onChange:notifyChange, minimal=false} : WorkflowListProps) => {
     const [addingWorkflow, setAddingWorkflow] = React.useState(false);
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
@@ -85,6 +86,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     };
 
     return <Box>
+        {!minimal && (
         <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"start", mb:"5px"}}>
             <Box>
                 <Typography sx={{fontWeight: "500"}}>Workflows:</Typography>
@@ -114,6 +116,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
                 null
             }
         </Box> 
+        )}
 
         {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow} options={options} onSave={onWorkflowSave}></WorkflowEditor> : ""}
         {workflows.length > 0 ? 
@@ -129,22 +132,23 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
                     : undefined}/>
                 )}
             </Box>
-        :   (!addingWorkflow &&
+        :   (!addingWorkflow && !minimal && (
                 <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
                     <Typography>
                         No workflows specified.
                         {metaWorkflows.length > 0 && ("The data retrieved will be used directly in the meta-workflows")}
                     </Typography>
                 </Card>
-            )
+            ))
         }
-        {!addingWorkflow &&
-        <Box>
-            <Typography sx={{fontWeight: "500"}}>Meta workflows:</Typography>
-            <FormHelperText sx={{fontSize: ".9rem"}}>
-                The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
-            </FormHelperText> 
-        </Box> }
+        {!addingWorkflow && !minimal && (
+            <Box>
+                <Typography sx={{fontWeight: "500"}}>Meta workflows:</Typography>
+                <FormHelperText sx={{fontSize: ".9rem"}}>
+                    The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
+                </FormHelperText> 
+            </Box>
+        )}
 
         {metaWorkflows.length > 0 ? <Box>
             {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
@@ -158,13 +162,13 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
                 : undefined}/>
             )}
         </Box> 
-        :   (!addingWorkflow &&
+        :   (!addingWorkflow && !minimal && (
                 <Card variant="outlined" sx={{display: "flex", alignItems: "center", justifyContent: "center", padding: "10px"}}>
                     <Typography>
                         No meta-workflows specified
                     </Typography>
                 </Card>
-            )
+            ))
         }
     </Box>
 }
