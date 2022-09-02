@@ -21,10 +21,6 @@ export const NarrativeModal = ({hypothesis, tloi} : NarrativeModalProps) => {
         setOpen(false);
     }
 
-    useEffect(() => {
-        console.log(tloi);
-    }, [tloi])
-
     const getColor = (status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL') => {
         if (status === 'SUCCESSFUL') return "green";
         if (status === 'FAILED') return "red";

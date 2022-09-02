@@ -175,6 +175,11 @@ export interface DataEndpoint {
     description: string;
 }
 
+export interface QuestionOptionsRequest {
+    id:         string,
+    bindings:   {[name:string] : string};
+}
+
 const _names = {}
 
 

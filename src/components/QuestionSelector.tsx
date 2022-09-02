@@ -4,9 +4,10 @@ import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
+import { setErrorOptions, setLoadingOptions, setOptions, Option } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { loadQuestions } from "redux/loader";
 
 interface QuestionProps {
     questionId: string,
@@ -26,6 +27,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
+    const initialized = useAppSelector((state:RootState) => state.question.initialized);
     const options = useAppSelector((state:RootState) => state.question.questions);
     const varOptions = useAppSelector((state:RootState) => state.question.options);
     const [formalView, setFormalView] = React.useState<boolean>(false);
@@ -37,29 +39,15 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
     const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
+    const [setByUser, setSetByUser] = React.useState<{[id:string] : boolean}>({});
 
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
   
-    //FIXME: use question loader.
     React.useEffect(() => {
-        if (options.length === 0 && !loading && !error) {
-            dispatch(setLoadingAll());
-            DISKAPI.getQuestions()
-                .then((questions:Question[]) => {
-                    dispatch(setQuestions(questions))
-                    if (selectedQuestionId) {
-                        let selectedQuestion : Question = questions.filter((q) => q.id === selectedQuestionId)?.[0];
-                        if (selectedQuestion)
-                            onQuestionChange(selectedQuestion);
-                        else
-                            console.warn("Selected question not found on question catalog")
-                    }
-                })
-                .catch(() => {
-                    dispatch(setErrorAll())
-                })
+        if (!error && !loading && !initialized) {
+            loadQuestions(dispatch);
         }
-    })
+    }, [])
 
     React.useEffect(() => {
         if (selectedQuestionId && options.length > 0) {
@@ -89,7 +77,8 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const onQuestionChange = (value: Question | null) => {
         if (value) {
             setSelectedQuestion(value);
-            loadQuestionOptions(value);
+            //loadQuestionOptions(value);
+            loadQuestionDynamicOptions(value);
             updateQuestionFiller(value);
         }
     }
@@ -153,6 +142,45 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                         dispatch(setErrorOptions(qv.id))
                     })
             );
+        }
+    }
+
+    const loadQuestionDynamicOptions = (question:Question) => {
+        if (question.variables && question.variables.length > 0) {
+            let bindings : {[name:string] :string} = {};
+            question.variables.forEach((qv:QuestionVariable) => {
+                dispatch(setLoadingOptions(qv.id))
+                let val = selectedOptionValues[qv.id];
+                if (val) {
+                    console.log("SELECTED:", val);
+                    bindings[qv.varName] = val.id;
+                }
+            });
+
+            DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
+                    .then((options:{[name:string] : string[][]}) => {
+                        question.variables.forEach((qv:QuestionVariable) => {
+                            let curOpts = options[qv.varName];
+                            if (curOpts) {
+                                dispatch(setOptions({id:qv.id, options:curOpts}));
+                                if (questionBindings) {
+                                    let curVarBind : VariableBinding = questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
+                                    let curOpt : Option = curOpts
+                                            .filter((opt) => curVarBind && opt[0] === curVarBind.binding)
+                                            .map((opt) => { 
+                                                return {id: opt[0], name: opt[1]} as Option 
+                                            })?.[0];
+                                    if (curOpt) {
+                                        setSelectedOptionValues((values) => {
+                                            let newValues = { ...values };
+                                            newValues[qv.id] = curOpt;
+                                            return newValues;
+                                        })
+                                    }
+                                }
+                            }
+                        });
+                    });
         }
     }
 
@@ -227,6 +255,25 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         return obj.type === 'URI' ? displayURI(obj.value) : obj.value;
     }
 
+    const onOptionChange = (value: Option | null, varName:string) => {
+        setSelectedOptionValues((values) => {
+            let newValues = { ...values };
+            newValues[nameToId[varName]] = value;
+            return newValues;
+        })
+        setSetByUser((v) => {
+            let n = { ...v };
+            n[varName] = !!value;
+            return n;
+        });
+    }
+
+    React.useEffect(() => {
+        if (selectedQuestion) {
+            loadQuestionDynamicOptions(selectedQuestion);
+        }
+    }, [selectedOptionValues]);
+
     return <Box>
         <Box>
             <FormHelperText sx={{margin: "2px"}}>Select a template that can express your hypothesis or question:</FormHelperText>
@@ -267,11 +314,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                             <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
                                 options={varOptions[nameToId[part]].values}
                                 value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                                onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
-                                    let newValues = { ...values };
-                                    newValues[nameToId[part]] = value;
-                                    return newValues;
-                                })}
+                                onChange={(_, value: Option | null) => onOptionChange(value, part)}
                                 inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
                                 onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
                                     let newMap = { ...map };
