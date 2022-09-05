@@ -1,0 +1,1 @@
+window.REACT_APP_DISK_API="http://localhost:3000/api/v1";
