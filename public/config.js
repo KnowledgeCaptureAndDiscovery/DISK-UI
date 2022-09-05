@@ -1,1 +1,1 @@
-window.REACT_APP_DISK_API="https://disk.isi.edu/disk-server/";
+window.REACT_APP_DISK_API="https://bikes.disk.isi.edu/disk-server/";
