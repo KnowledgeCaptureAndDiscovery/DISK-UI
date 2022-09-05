@@ -1,10 +1,10 @@
 import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
-import { DISK_API } from "../constants/config";
+import { REACT_APP_DISK_API }  from "../config";
 import { cleanLOI, cleanTLOI } from "./util";
 
 export class DISKAPI {
-    private static url : string = DISK_API;
+    private static url : string = REACT_APP_DISK_API;
     private static headers : RequestInit["headers"] = {
         "Content-Type": "application/json;charset=UTF-8",
     };
