@@ -1,6 +1,6 @@
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import { idPattern, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
@@ -22,6 +22,8 @@ import { TLOIEdit } from "components/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
 import { ShinyModal } from "components/ShinyModal";
 import { NarrativeModal } from "components/NarrativeModal";
+import { BrainModal } from "components/BrainModal";
+import { BrainVisualization } from "components/BrainVisualization";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -195,24 +197,30 @@ export const HypothesisView = () => {
     };
 
     const renderOptionalButtons = (cur:TriggeredLineOfInquiry) => {
-        const PVNAME = "shiny_visualization";
-        let url : string = "";
-        let source : string = "";
+        const SHINY_FILENAME = "shiny_visualization";
+        const BRAIN_FILENAME = "brain_visualization";
+        let shinyUrl : string = "";
+        let shinySource : string = "";
+        let brainUrl : string = "";
+        let brainSource : string = "";
         [ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:Workflow) => {
             if (wf.run && wf.run.outputs) {
                 Object.keys(wf.run.outputs).forEach(((name:string) => {
-                    if (name === PVNAME) {
-                        url = wf.run ? wf.run.outputs[name] : "";
-                        source = wf.source;
+                    if (name === SHINY_FILENAME) {
+                        shinyUrl = wf.run ? wf.run.outputs[name] : "";
+                        shinySource = wf.source;
+                    } else if (name === BRAIN_FILENAME) {
+                        brainUrl = wf.run ? wf.run.outputs[name] : "";
+                        brainSource = wf.source;
                     }
                 }));
             }
         });
-        if (url) {
-            console.log("shiny detected!")
-            return <ShinyModal shinyUrl={url} source={source}/>
-        }
-        return null;
+
+        return (<Fragment>
+            {!!shinyUrl && (<ShinyModal shinyUrl={shinyUrl} source={shinySource}/>)}
+            {!!brainUrl && (<BrainModal brainUrl={brainUrl} source={brainSource}/>)}
+        </Fragment>);
     }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
@@ -386,18 +394,20 @@ export const HypothesisView = () => {
                                             {hypothesis != null && (
                                                 <NarrativeModal hypothesis={hypothesis} tloi={tloi}/>
                                             )}
-                                            {tloi.status === 'SUCCESSFUL' && (
+                                            {authenticated && tloi.status === 'SUCCESSFUL' && (
                                                 <TLOIEdit tloi={tloi} label={"Editing " + tloi.name} onSave={onSendEditedRun}/>
                                             )}
-                                            {renderOptionalButtons(tloi) }
-                                            <Tooltip arrow placement="top" title="Delete">
-                                                <IconButton sx={{padding:"0"}} onClick={() => {
-                                                    setConfirmDialogOpen(true);
-                                                    setTLOIToDelete(tloi);
-                                                }}>
-                                                    <DeleteIcon/>
-                                                </IconButton>
+                                            {authenticated && renderOptionalButtons(tloi) }
+                                            {authenticated && (
+                                                <Tooltip arrow placement="top" title="Delete">
+                                                    <IconButton sx={{padding:"0"}} onClick={() => {
+                                                        setConfirmDialogOpen(true);
+                                                        setTLOIToDelete(tloi);
+                                                    }}>
+                                                        <DeleteIcon/>
+                                                    </IconButton>
                                             </Tooltip>
+                                            )}
                                         </Box>
                                     </TableCell>
                                 </TableRow>)}
