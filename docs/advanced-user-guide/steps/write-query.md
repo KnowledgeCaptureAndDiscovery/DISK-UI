@@ -4,9 +4,9 @@ A **data query** is used to obtain the data required to answer the question temp
 
 
 !!! note
-    The *data query* will be executed on an external data repository that has a [data adapter](/data-adapter) that integrates it with DISK.
-    The current implementation of DISK supports queries for data using `SPARQL` as the query language.  
-    Developers can extend DISK to integrate new data sources and create new data adapters.
+    The *data query* will be executed on an external data repository that has a [data adapter](/data-adapter) that integrates it with [DISK](https://disk.isi.edu).
+    The current implementation of [DISK](https://disk.isi.edu) supports queries for data using `SPARQL` as the query language.  
+    Developers can extend [DISK](https://disk.isi.edu) to integrate new data sources and create new data adapters.
 
 ## Writing a Data Query in SPARQL
 

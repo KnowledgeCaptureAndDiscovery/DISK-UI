@@ -2,18 +2,18 @@
 
 **The Scientific Questions Ontology** defines core concepts to express scientific question templates, question variables, options, and constraints.
 
-We show here with simple examples how to use an ontology editor to add new types of questions to DISK.  
+We show here with simple examples how to use an ontology editor to add new types of questions to [DISK](https://disk.isi.edu).  
 
 ## Setting Up an Ontology Editor
 
 We recommend using the [Protégé](https://protege.stanford.edu) ontology editor.  Extensive documentation about how to install Protégé [is available here](http://protegeproject.github.io/protege/installation/).
 
-Load into Protégé the DISK Scientific Questions Ontology:
+Load into Protégé the [DISK](https://disk.isi.edu) Scientific Questions Ontology:
 
 1. Open Protégé
 2. Click the "+" button next to the "Direct Imports" section. 
 3. A new window will be opened
-4. Paste the DISK Scientific Qquestions Ontology URL in the text field [`https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml`](https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml)
+4. Paste the [DISK](https://disk.isi.edu) Scientific Qquestions Ontology URL in the text field [`https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml`](https://knowledgecaptureanddiscovery.github.io/QuestionOntology/release/v1.0.0/ontology.xml)
 
 ![Untitled](../../figures/admin-guide/Untitled%201.png)
 
@@ -138,4 +138,4 @@ Save the ontology using the `OWL/XML syntax`
 
 ![Untitled](../../figures/admin-guide/Untitled%206.png)
 
-You did it. You can use your ontology on Disk! Please go to Using DISK documentation to learn how to use it
+You did it. You can use your ontology on [DISK](https://disk.isi.edu)! Please go to Using [DISK](https://disk.isi.edu) documentation to learn how to use it

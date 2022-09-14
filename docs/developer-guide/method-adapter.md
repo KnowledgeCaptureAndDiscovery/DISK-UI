@@ -1,7 +1,7 @@
 # Method Adapter
 
-A DISK Method adapter is the implementation of the `MethodAdapter` abstract class (at the end).
-This adapters are used to gain control of the workflow system from DISK.
+A [DISK](https://disk.isi.edu) Method adapter is the implementation of the `MethodAdapter` abstract class (at the end).
+This adapters are used to gain control of the workflow system from [DISK](https://disk.isi.edu).
 
 The method adapter must be able to perform at least the following operations:
 

@@ -1,13 +1,13 @@
 # DISK REST API
 
-The main resources of DISK are exposed through the REST API.
+The main resources of [DISK](https://disk.isi.edu) are exposed through the REST API.
 Common REST operations are available, but some may be restricted to authenticated users.
 
 Each resource can be listed (`GET`), but creating (`POST`) or editing (`PUT`) needs authentication.
 
 ## Authentication
 
-To edit the data on the DISK REST API you need an account on our [login system](https://auth.mint.isi.edu/auth/).
+To edit the data on the [DISK](https://disk.isi.edu) REST API you need an account on our [login system](https://auth.mint.isi.edu/auth/).
 You could get an access token with:
 
 ```

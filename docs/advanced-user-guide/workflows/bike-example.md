@@ -61,7 +61,7 @@ You can browse and run workflows that are pre-defined in the system. You do this
 
 ![](../../figures/wings/workflows/edit.png)
 
-In this tab, you can see the list of workflows that are available in the system and DISK or you can run them.
+In this tab, you can see the list of workflows that are available in the system and [DISK](https://disk.isi.edu) or you can run them.
 
 
 You will be see the example workflow created by us called: "linearRegressionBikesRental". This workflow run the component described previously.
