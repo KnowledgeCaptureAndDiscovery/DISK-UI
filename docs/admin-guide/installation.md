@@ -1,9 +1,9 @@
-You can install DISK using a Docker container or [building from source code](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/building.md).
-We recommend to use a Docker container to install DISK. 
+You can install [DISK](https://disk.isi.edu) using a Docker container or [building from source code](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/building.md).
+We recommend to use a Docker container to install [DISK](https://disk.isi.edu). 
 
 ## Requirements
 
-To install DISK from a Docker container you need to meet the following requirements:
+To install [DISK](https://disk.isi.edu) from a Docker container you need to meet the following requirements:
 
 - Docker
 - Docker Compose
@@ -20,13 +20,13 @@ Clone the repository using git:
 $ git clone https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB.git
 ```
 
-Install the DISK container using `docker-compose` tool:
+Install the [DISK](https://disk.isi.edu) container using `docker-compose` tool:
 
 ```bash
 $ docker-compose up -d
 ```
 
-Now you can verify if DISK is running:
+Now you can verify if [DISK](https://disk.isi.edu) is running:
 
 ```bash
 $ docker-compose ps
@@ -43,9 +43,9 @@ core_frontend_1   nginx -g daemon off;             Up      0.0.0.0:8000->80/tcp,
 core_wings_1      catalina.sh run                  Up      0.0.0.0:7080->8080/tcp,:::7080->8080/tcp
 ```
 
-If the state is `Up` in all the lines, all the DISK services are running.
+If the state is `Up` in all the lines, all the [DISK](https://disk.isi.edu) services are running.
 
-You can access the DISK user interface at [http://localhost:8000](http://localhost:8000).
+You can access the [DISK](https://disk.isi.edu) user interface at [http://localhost:8000](http://localhost:8000).
 
 ## Troubleshooting
 

@@ -8,7 +8,7 @@ We are going to create a new question to see what weather variables affect the n
 
 ## Selecting a Hypothesis or Question Template
 
-DISK will show a menu of all the hypothesis and question templates that are defined in the system.  This means that there are Lines of Inquiry that DISK can use to answer the types of questions that fit those templates.
+[DISK](https://disk.isi.edu) will show a menu of all the hypothesis and question templates that are defined in the system.  This means that there are Lines of Inquiry that [DISK](https://disk.isi.edu) can use to answer the types of questions that fit those templates.
 
 You can display the questions available by clicking on the **Select Hypothesis Question** drop down list.
 Then, select a question from the list.
