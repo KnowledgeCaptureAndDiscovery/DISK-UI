@@ -1,4 +1,4 @@
-# Core Concepts in [DISK](https://disk.isi.edu)
+# Core Concepts in DISK
 
  - **Hypothesis:** A hypothesis statement is a set of assertions about entities that can be tested. A hypothesis can be tested by analyzing relevant data.
  - **Question:** A statement that represents the goal of a scientific investigation.
