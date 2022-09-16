@@ -39,7 +39,8 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
     const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
-    const [setByUser, setSetByUser] = React.useState<{[id:string] : boolean}>({});
+    const [lastQuery, setLastQuery] = React.useState<string>("-1");
+    const [pristine, setPristine] = React.useState<boolean>(true);
 
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
   
@@ -60,19 +61,22 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }, [selectedQuestionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     React.useEffect(() => {
-        if (questionBindings.length > 0) {
-            questionBindings.forEach((qb) => {
-                let curOpt: Option = options.filter((opt) => opt.id === qb.binding)?.[0];
-                if (curOpt) {
-                    setSelectedOptionValues((values) => {
-                        let newValues = { ...values };
-                        newValues[qb.variable] = curOpt;
-                        return newValues;
-                    })
-                }
+        if (pristine && questionBindings.length > 0) {
+            let newValues : {[id:string] : Option|null} = {};
+            questionBindings.forEach((qb:VariableBinding) => {
+                let curOpt: Option = varOptions[qb.variable]?.values.filter((opt) => opt.id === qb.binding)?.[0];
+                if (curOpt)
+                    newValues[qb.variable] = curOpt;
             });
+
+            if (Object.keys(newValues).length === questionBindings.length) {
+                setPristine(false);
+                setSelectedOptionValues((values) => {
+                    return { ...values, ...newValues }
+                })
+            }
         }
-    }, [questionBindings]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [questionBindings, varOptions, pristine]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const onQuestionChange = (value: Question | null) => {
         if (value) {
@@ -149,12 +153,20 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         if (question.variables && question.variables.length > 0) {
             let bindings : {[name:string] :string} = {};
             question.variables.forEach((qv:QuestionVariable) => {
-                dispatch(setLoadingOptions(qv.id))
                 let val = selectedOptionValues[qv.id];
                 if (val) {
-                    console.log("SELECTED:", val);
                     bindings[qv.varName] = val.id;
                 }
+            });
+            let queryId : string = Object.keys(bindings).map((key) => key + ":" + bindings[key] + "|").join("");
+            //console.log(queryId);
+            if (queryId === lastQuery) {
+                return;
+            }
+            setLastQuery(queryId);
+
+            question.variables.forEach((qv:QuestionVariable) => {
+                dispatch(setLoadingOptions(qv.id))
             });
 
             DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
@@ -163,7 +175,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                             let curOpts = options[qv.varName];
                             if (curOpts) {
                                 dispatch(setOptions({id:qv.id, options:curOpts}));
-                                if (questionBindings) {
+                                /*if (questionBindings) {
                                     let curVarBind : VariableBinding = questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
                                     let curOpt : Option = curOpts
                                             .filter((opt) => curVarBind && opt[0] === curVarBind.binding)
@@ -171,13 +183,14 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                                                 return {id: opt[0], name: opt[1]} as Option 
                                             })?.[0];
                                     if (curOpt) {
+                                        console.log("Setting options")
                                         setSelectedOptionValues((values) => {
                                             let newValues = { ...values };
                                             newValues[qv.id] = curOpt;
                                             return newValues;
                                         })
                                     }
-                                }
+                                }*/
                             }
                         });
                     });
@@ -261,11 +274,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             newValues[nameToId[varName]] = value;
             return newValues;
         })
-        setSetByUser((v) => {
-            let n = { ...v };
-            n[varName] = !!value;
-            return n;
-        });
     }
 
     React.useEffect(() => {
