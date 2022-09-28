@@ -1,20 +1,13 @@
 import { Canvas, ThreeElements } from "@react-three/fiber";
-import { RootState } from "@react-three/fiber/dist/declarations/src/core/store";
 import { DISKAPI } from "DISK/API";
 import { useEffect, useRef, useState } from "react";
-import { BufferGeometry, DirectionalLight, Float32BufferAttribute, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { BufferGeometry, DirectionalLight, Mesh, MeshLambertMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { VTKParser } from "VTKParser";
-//import { OrbitControls } from 'three-stdlib';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { Box, CircularProgress } from "@mui/material";
-import { visitLexicalEnvironment } from "typescript";
-
-
-interface BrainFiles {
-    colors: {[id:string] : [number, number, number]},
-    filename: {[id:string] : string},
-    name: {[id:string] : string},
-}
+import { Box } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { addMesh, BrainFiles, setFilelist } from "redux/brain";
+import { RootState } from "redux/store";
 
 export interface BrainCfgItem {
     name: string,
@@ -26,6 +19,7 @@ interface BrainVisualizationProps {
 }
 
 export const BrainVisualization = ({configuration}: BrainVisualizationProps) => {
+    const dispatch = useAppDispatch();
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -35,11 +29,13 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     const [camera, setCamera]= useState<null|PerspectiveCamera>(null);
     const [controls, setControls]= useState<null|OrbitControls>(null);
     const [renderer, setRenderer]= useState<null|WebGLRenderer>(null);
+
+    const init : boolean = useAppSelector((state:RootState) => state.brain.initialized);
+    const filelist : BrainFiles | null = useAppSelector((state:RootState) => state.brain.filelist);
+    const meshesStr : {[id:string]: string} = useAppSelector((state:RootState) => state.brain.meshes);
     
     useEffect(() => {
         if (canvas && canvas.current) {
-            console.log("canvas set:", canvas.current);
-
             canvas.current.width = 800;
             canvas.current.height = 600;
 
@@ -92,7 +88,6 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
             configuration.forEach((item:BrainCfgItem) => {
                 map[item.name] = item.pval;
             });
-            console.log(map);
             meshes.forEach((mesh:Mesh<BufferGeometry,MeshLambertMaterial>) => {
                 if (map[mesh.name]) {
                     let value : number = map[mesh.name];
@@ -102,7 +97,6 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
                     //mesh.material.color.setRGB(1,.875 + (.125 * value),.875 + (.125 * value));
                     mesh.material.color.setRGB(1,(.86*value),(.86*value));
                     //mesh.material.color.setHex(0xff0000);
-                    console.log(value);
                 } else {
                     mesh.material.opacity = 0.05;
                     mesh.material.color.setHex(0xdddddd);
@@ -112,49 +106,70 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     }, [meshes, loading, configuration]);
 
     useEffect(() => {
-        setLoading(true);
-        DISKAPI.getPublic("files.json")
-            .then((text:string) => {
-                let ok : boolean = text.startsWith('{');
-                setError(!ok)
-                if (ok) {
-                    // Now load all the brain meshes 
-                    let files : BrainFiles = JSON.parse(text);
-                    let allRequests = Object.keys(files.filename).map((id:string) => {
-                        DISKAPI.getPublic("models/" + files.filename[id])
-                            .then((vtkMesh:string) => {
-                                let name = files.name[id];
-                                let bufferGeo : BufferGeometry = VTKParser.parse(vtkMesh);
-                                bufferGeo.computeVertexNormals();
-                                let material = new MeshLambertMaterial({color: 0xdddddd});
-
-                                let mesh = new Mesh(bufferGeo, material);
-                                mesh.material.transparent = true;
-                                mesh.material.opacity = 0.1;
-                                mesh.rotation.y = (Math.PI * 1.01);
-                                mesh.rotation.x = (Math.PI * 0.5);
-                                mesh.rotation.z = (Math.PI * 1.5 * (name.indexOf("rh_") == -1 ? 1 : -1));
-                                mesh.name = name;
-
-                                setMeshes((cur) => {
-                                    let next = [ ...cur ];
-                                    next.push(mesh);
-                                    return next;
-                                })
-                            });
-                    });
-                    Promise.all(allRequests)
-                        .finally(() => {
-                            console.log("All models downloaded");
-                            setLoading(false);
-                        })
-                }
-            })
-            .catch(() => {
-                setError(true);
-                setLoading(false);
-            })
+        if (!init) {
+            setLoading(true);
+            DISKAPI.getPublic("files.json")
+                .then((text:string) => {
+                    let ok : boolean = text.startsWith('{');
+                    setError(!ok)
+                    if (ok) {
+                        dispatch(setFilelist(JSON.parse(text)));
+                        console.log("asd", Object.keys(JSON.parse(text)["filename"]).length );
+                    }
+                })
+                .catch(() => {
+                    setError(true);
+                    setLoading(false);
+                })
+        }
     }, [])
+
+    useEffect(() => {
+        if (filelist) {
+            let allRequests = Object.keys(filelist.filename)
+                    .filter((id:string) => !meshesStr[id] )
+                    .map((id:string) => {
+                DISKAPI.getPublic("models/" + filelist.filename[id])
+                    .then((vtkMesh: string) => {
+                        dispatch(addMesh([id, vtkMesh]));
+                    });
+            });
+            Promise.all(allRequests)
+                .finally(() => {
+                    console.log("All models downloaded");
+                })
+        }
+    }, [filelist]);
+
+    useEffect(() => {
+        if (filelist && Object.keys(filelist.filename).length === Object.keys(meshesStr).length) { 
+            let newMeshes : Mesh<BufferGeometry,MeshLambertMaterial>[] = Object.keys(meshesStr).map((id:string) => {
+                let name = filelist.name[id];
+                let bufferGeo: BufferGeometry = VTKParser.parse(meshesStr[id]);
+                bufferGeo.computeVertexNormals();
+                let material = new MeshLambertMaterial({ color: 0xdddddd });
+
+                let mesh = new Mesh(bufferGeo, material);
+                mesh.material.transparent = true;
+                mesh.material.opacity = 0.1;
+                mesh.rotation.y = (Math.PI * 1.01);
+                mesh.rotation.x = (Math.PI * 0.5);
+                mesh.rotation.z = (Math.PI * 1.5 * (name.indexOf("rh_") == -1 ? 1 : -1));
+                mesh.name = name;
+                return mesh
+                //newMeshes.push(mesh);
+
+                /*setMeshes((cur) => {
+                    let next = [...cur];
+                    next.push(mesh);
+                    return next;
+                })*/
+            });
+
+            setMeshes(newMeshes);
+            setLoading(false);
+        }
+    }, [meshesStr]);
 
     return (
         <Box sx={{display: 'flex', justifyContent:'center', alignItems: 'center'}}>

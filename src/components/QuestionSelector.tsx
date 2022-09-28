@@ -79,7 +79,12 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }, [questionBindings, varOptions, pristine]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const onQuestionChange = (value: Question | null) => {
-        if (value) {
+        if (value && (!selectedQuestion || value.id != selectedQuestion.id)) {
+            /*let newOptionValues = { ...selectedOptionValues };
+            value.variables.forEach((qv:QuestionVariable) => {
+                newOptionValues[qv.id] = null;
+            });
+            setSelectedOptionValues(newOptionValues);*/
             setSelectedQuestion(value);
             //loadQuestionOptions(value);
             loadQuestionDynamicOptions(value);
@@ -163,7 +168,8 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             if (queryId === lastQuery) {
                 return;
             }
-            setLastQuery(queryId);
+            if (queryId)
+                setLastQuery(queryId);
 
             question.variables.forEach((qv:QuestionVariable) => {
                 dispatch(setLoadingOptions(qv.id))
@@ -320,7 +326,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                             <TextPart key={`qPart${i}`}> {part} </TextPart>
                         :
                             <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                                options={varOptions[nameToId[part]].values}
+                                options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
                                 value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
                                 onChange={(_, value: Option | null) => onOptionChange(value, part)}
                                 inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
@@ -331,13 +337,13 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                                 })}
                                 isOptionEqualToValue={(option, value) => option.id === value.id}
                                 getOptionLabel={(option) => option.name}
-                                loading={varOptions[nameToId[part]].loading}
+                                loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
                                 renderInput={(params) => (
                                     <TextField {...params} label={part} variant="standard" InputProps={{
                                         ...params.InputProps,
                                         endAdornment: (
                                             <React.Fragment>
-                                                {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
                                                 {params.InputProps.endAdornment}
                                             </React.Fragment>
                                         ),

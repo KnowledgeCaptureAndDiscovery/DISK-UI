@@ -1,49 +1,48 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DISKAPI } from "DISK/API";
 
-interface KeycloakState {
-    token?: string
-    parsedToken?: Keycloak.KeycloakTokenParsed,
-    username?: string,
-    authenticated: boolean,
+export interface BrainFiles {
+  colors: {[id:string] : [number, number, number]},
+  filename: {[id:string] : string},
+  name: {[id:string] : string},
 }
 
-export interface KeycloakUserToken {
-    token: string
-    parsedToken?: Keycloak.KeycloakTokenParsed,
+interface BrainState {
+  initialized: boolean,
+  filelist: BrainFiles | null,
+  meshes: {[id:string]: string}
 }
 
-export const keycloakSlice = createSlice({
-  name: 'keycloak',
+export const brainSlice = createSlice({
+  name: 'brain',
   initialState: {
-    token: undefined,
-    parsedToken: undefined,
-    username: undefined,
-    authenticated: false
-  } as KeycloakState,
+    initialized: false,
+    filelist: null,
+    meshes: {},
+  } as BrainState,
   reducers: {
-    setToken: (state:KeycloakState, action: PayloadAction<KeycloakUserToken>) => {
-        let cur : KeycloakUserToken = action.payload;
-        if (cur && cur.token && cur.parsedToken) {
-            DISKAPI.setToken(cur.token);
-            let username : string = (cur.parsedToken as any)["preferred_username"];
-            if (!username) username = (cur.parsedToken as any)["email"];
-            if (!username) username = (cur.parsedToken as any)["azp"];
-            return {
-                token: cur.token,
-                parsedToken: cur.parsedToken,
-                username: username,
-                authenticated: true,
-            } as KeycloakState;
-        }
+    setFilelist: (state:BrainState, action: PayloadAction<BrainFiles>) => {
+      let cfg : BrainFiles = action.payload;
+      let newState = { ...state };
+      newState.filelist = cfg;
+      newState.initialized = true;
+      console.log("new state");
+      return newState;
+    },
+    addMesh: (state:BrainState, action: PayloadAction<string[]>) => {
+      if (action.payload && action.payload.length === 2) {
+        let id = action.payload[0];
+        let mesh = action.payload[1];
+        let prev = { ...state.meshes };
+        if (id && mesh)
+          prev[id] = mesh;
         return {
-            token:undefined,
-            parsedToken:undefined,
-            username:undefined,
-            authenticated:false,
-        } as KeycloakState;
+          ...state,
+          meshes: prev,
+        }
+      }
+      return state;
     },
   },
 });
 
-export const { setToken } = keycloakSlice.actions;
+export const { setFilelist, addMesh } = brainSlice.actions;

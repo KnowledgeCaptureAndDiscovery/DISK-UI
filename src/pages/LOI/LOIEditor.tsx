@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Backdrop, Box, Button, Card, Checkbox, CircularProgress, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
@@ -224,7 +224,6 @@ export const LOIEditor = () => {
         };
 
         setWaiting(true);
-        console.log("SEND:", newLOI);
         DISKAPI.createLOI(newLOI)
             .then((savedLOI) => {
                 setSaveNotification(true);
@@ -303,6 +302,16 @@ export const LOIEditor = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
+            <FormGroup row={true}>
+                <TypographySubtitle sx={{mr:'5px'}}>Update on </TypographySubtitle>
+                <Tooltip arrow title="This line of inquiry will be trigger when changes on the data source are detected">
+                    <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="data changes"/>
+                </Tooltip>
+                <Tooltip arrow title="This line of inquiry will be trigger when changes on the workflow are detected">
+                    <FormControlLabel control={<Checkbox size="small"/>} label="workflow changes"/>
+                </Tooltip>
+            </FormGroup>
+
             <TypographySubtitle>Description:</TypographySubtitle>
             {!loading ?
                 <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="Brief description"

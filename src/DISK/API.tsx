@@ -194,6 +194,6 @@ export class DISKAPI {
     }
 
     public static async getPublic (path:string) : Promise<string> {
-        return await DISKAPI.get(DISKAPI.url + "public/" + path, true) as string;
+        return await DISKAPI.get("https://s3.mint.isi.edu/neurodisk/" + path, true) as string;
     }
 }

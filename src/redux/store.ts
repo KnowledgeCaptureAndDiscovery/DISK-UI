@@ -6,10 +6,12 @@ import { questionSlice } from './questions';
 import { serverSlice } from './server';
 import { tloisSlice } from './tlois';
 import { workflowSlice } from './workflows';
+import { brainSlice } from './brain';
 
 
 export const store = configureStore({
   reducer: {
+    brain: brainSlice.reducer,
     server: serverSlice.reducer,
     hypotheses: hypothesisSlice.reducer,
     question: questionSlice.reducer,
