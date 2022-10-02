@@ -1,4 +1,4 @@
-import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, Select, Typography, Skeleton, Grid, Checkbox, FormControlLabel, FormGroup, MenuItem, Button } from "@mui/material"
+import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, Select, Typography, Skeleton, Grid, MenuItem, Button } from "@mui/material"
 import { DISKAPI } from "DISK/API";
 import { Method, MethodInput, VariableBinding, Workflow } from "DISK/interfaces";
 import React, { useEffect } from "react"
@@ -12,7 +12,6 @@ interface WorkflowEditorProps {
     workflow?:  Workflow,
     onSave?:    (workflow:Workflow) => void,
 }
-
 
 export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : WorkflowEditorProps) => {
     const dispatch = useAppDispatch();
@@ -30,7 +29,8 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
 
     //form
     const [selectedVariableValues, setSelectedVariableValues] = React.useState<{[id:string]: string}>({});
-    const [selectedCollectionValues, setSelectedCollectionValues] = React.useState<{[id:string]: boolean}>({});
+    //const [selectedCollectionValues, setSelectedCollectionValues] = React.useState<{[id:string]: boolean}>({});
+    const [selectedTypeValues, setSelectedTypeValues] = React.useState<{[id:string]: string}>({});
 
     const loadWorkflows = () => {
         if (methods.length === 0 && !loading && !error) {
@@ -79,11 +79,11 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
             newInputs.forEach(i => newValues[i] = newValues[i] ? newValues[i] : "");
             return newValues;
         });
-        setSelectedCollectionValues((values) => {
+        /*setSelectedCollectionValues((values) => {
             let newValues = { ...values };
             newInputs.forEach(i => newValues[i] = newValues[i] ? newValues[i] : false);
             return newValues;
-        });
+        });*/
     }
     
     const onValueChange = (inputId:string, value:string) => {
@@ -94,8 +94,16 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         });
     };
 
-    const onCollectionChange = (inputId:string, value:any) => {
+    /*const onCollectionChange = (inputId:string, value:any) => {
         setSelectedCollectionValues((values) => {
+            let newValues = { ...values };
+            newValues[inputId] = value;
+            return newValues;
+        });
+    };*/
+
+    const onTypeChange = (inputId:string, value:string) => {
+        setSelectedTypeValues((values) => {
             let newValues = { ...values };
             newValues[inputId] = value;
             return newValues;
@@ -115,14 +123,25 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                     newValues[vb.variable] = vb.collection ? vb.binding.substring(1).slice(0, -1) : vb.binding;
                 });
                 return newValues;
-            })
-            setSelectedCollectionValues((values) => {
+            });
+            /*setSelectedCollectionValues((values) => {
                 let newValues = { ...values };
                 allBindings.forEach(vb => {
                     newValues[vb.variable] = vb.collection ? true:false;
                 });
                 return newValues;
-            });
+            });*/
+            setSelectedTypeValues((values) => {
+                let newValues = { ...values };
+                allBindings.forEach(vb => {
+                    let methods = inputMap[wf.workflow];
+                    if (methods) methods.forEach((m:MethodInput) => {
+                        if (m.name === vb.variable)
+                            newValues[vb.variable] = m.type[0]; // TODO: search a way to store the option
+                    })
+                });
+                return newValues;
+            })
         }
         if (wf.description) {
             setDescription(wf.description);
@@ -150,12 +169,12 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                 workflowLink: selected.link,
                 bindings: 
                     inputMap[selected.name]
-                            .filter((i) => i.type === 'input' && selectedVariableValues[i.name])
+                            .filter((i) => i.input && selectedVariableValues[i.name])
                             .map((i:MethodInput) => {
                         return {
                             variable: i.name,
-                            binding: selectedCollectionValues[i.name] ? "[" + selectedVariableValues[i.name] + "]" : selectedVariableValues[i.name],
-                            collection: selectedCollectionValues[i.name],
+                            binding: i.dimensionality > 0 ? "[" + selectedVariableValues[i.name] + "]" : selectedVariableValues[i.name],
+                            collection: i.dimensionality > 0
                         } as VariableBinding;
                     }),
             };
@@ -200,23 +219,23 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
         </Grid>
         { selected ? 
             (!varLoadingMap[selected.name] && inputMap[selected.name] ?
-                (inputMap[selected.name].filter((i) =>i.type === 'input').length > 0 ? 
+                (inputMap[selected.name].filter((i) =>i.input).length > 0 ? 
                 <Box>
                     <Grid container spacing={1}  sx={{alignItems: "center"}}>
                         <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
                             Workflow input
                         </Grid>
-                        <Grid item xs={8} md={7} sm={6} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        <Grid item xs={6} md={5} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
                             Dataset information
                         </Grid>
                         <Grid item xs={2} md={2} sm={2} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
-                            Single or multiple
+                            Type
                         </Grid>
                     </Grid>
-                    { inputMap[selected.name].filter((i) => i.type === 'input').map((inp:MethodInput) =>
+                    { inputMap[selected.name].filter((i) => i.input).map((inp:MethodInput) =>
                         <Grid container spacing={1}  sx={{alignItems: "center"}} key={`inp_${inp.name}`}>
                             <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", color: "#444", fontSize: "0.85rem"}}>{inp.name}:</Grid>
-                            <Grid item xs={8} md={7} sm={6}>
+                            <Grid item xs={6} md={5} sm={4}>
                                 <Select size="small" sx={{display: 'inline-block', minWidth: "200px"}} variant="standard"  label="Set binding"
                                         value={selectedVariableValues[inp.name]} onChange={(e) => onValueChange(inp.name, e.target.value)}>
                                     <MenuItem value=""> None </MenuItem>
@@ -224,11 +243,18 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                                 </Select>
                             </Grid>
                             <Grid item xs={2} md={2} sm={2}>
-                                <FormGroup>
-                                    <FormControlLabel sx={{fontSize: "0.85rem"}} label="Multiple" control={
-                                        <Checkbox checked={selectedCollectionValues[inp.name]} onChange={(e) => onCollectionChange(inp.name, e.target.checked)}/>
-                                    }/>
-                                </FormGroup>
+                                {inp.type.length <= 1 ?
+                                    <Typography>{inp.type[0].replaceAll(/.*#/g,'') }</Typography>
+                                :
+                                    <Select size="small" sx={{display: 'inline-block', minWidth: "120px"}} variant="standard"  label="Set type"
+                                            value={selectedTypeValues[inp.name] || inp.type[0] } onChange={(e) => onTypeChange(inp.name, e.target.value)}>
+                                        <MenuItem value=""> None </MenuItem>
+                                        { inp.type.map((url:string) => <MenuItem key={url} value={url}>{url.replaceAll(/.*#/g,'')}</MenuItem>) }
+                                    </Select>
+                                }
+                            </Grid>
+                            <Grid item xs={2} md={2} sm={2}>
+                                {inp.dimensionality > 0 && (<Typography>Multiple</Typography>)}
                             </Grid>
                         </Grid>)}
                 </Box>

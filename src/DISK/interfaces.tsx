@@ -118,11 +118,13 @@ export interface TriggeredLineOfInquiry {
     confidenceType: string,
 }
 
-export type MethodInputType = 'input' | 'parameter' | 'none' ;
 
 export interface MethodInput {
     name: string,
-    type: MethodInputType
+    type: string[],
+    dimensionality: number,
+    param: boolean,
+    input: boolean
 }
 
 export interface Method {

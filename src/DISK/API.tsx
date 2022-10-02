@@ -169,12 +169,7 @@ export class DISKAPI {
     }
 
     public static async getWorkflowVariables (source:string, id:string) : Promise<MethodInput[]>{
-        let inputsRaw = await DISKAPI.get(DISKAPI.url + "workflows/" + source + "/" + id);
-        let inputs : MethodInput[] = inputsRaw.map((i:any) => {return {
-            name: i.name,
-            type: i["input"] ? "input" : (i["param"] ? "parameter" : "none"),
-        }})
-        return inputs;
+        return await DISKAPI.get(DISKAPI.url + "workflows/" + source + "/" + id) as MethodInput[];
     }
 
     public static async testQuery (dataSource:string, query:string, variables:string[]) : Promise<{[varName:string] : string[]}> {

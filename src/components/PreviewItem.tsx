@@ -36,7 +36,7 @@ const TwoLines = styled(Typography)(({ theme }) => ({
 export const PreviewItem = ({item, icon, onDelete} : PreviewItemProps) => {
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
-    return <Card variant="outlined" sx={{margin: "10px", height: "96px"}}>
+    return <Card variant="outlined" sx={{margin: "10px", minHeight: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
             <Box component={Link} to={item.path + "/" + item.id}
                  sx={{display:"inline-flex", alignItems:"center", textDecoration: "none"}}>
