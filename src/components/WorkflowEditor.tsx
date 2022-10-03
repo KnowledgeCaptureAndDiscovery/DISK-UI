@@ -244,7 +244,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                             </Grid>
                             <Grid item xs={2} md={2} sm={2}>
                                 {inp.type.length <= 1 ?
-                                    <Typography>{inp.type[0].replaceAll(/.*#/g,'') }</Typography>
+                                    <Typography>{inp === null || inp.type.length === 0 ? "" : inp.type[0].replaceAll(/.*#/g,'') }</Typography>
                                 :
                                     <Select size="small" sx={{display: 'inline-block', minWidth: "120px"}} variant="standard"  label="Set type"
                                             value={selectedTypeValues[inp.name] || inp.type[0] } onChange={(e) => onTypeChange(inp.name, e.target.value)}>
