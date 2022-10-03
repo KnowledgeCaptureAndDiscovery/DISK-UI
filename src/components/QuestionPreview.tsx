@@ -155,8 +155,10 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
 
     const displayValue = (text:string) => {
         text = text.replaceAll(".Location","");
+        text = text.replaceAll('-28','(').replaceAll('-29',')').replaceAll('-3A',': ');
         text = text.replaceAll("PAGES2kv2#","").replaceAll(/[\.\-_]/g,' ');
-        return text.replaceAll('-28','(').replaceAll('-29',')').replaceAll('-3A',': ');
+        text = text.replaceAll(" (E)","").replaceAll("Property: ","");
+        return text;
     }
 
     return <Box>
