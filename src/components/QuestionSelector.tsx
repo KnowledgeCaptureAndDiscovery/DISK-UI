@@ -4,9 +4,10 @@ import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setErrorOptions, setLoadingAll, setLoadingOptions, setOptions, setQuestions, Option } from "redux/questions";
+import { setErrorOptions, setLoadingOptions, setOptions, Option } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { loadQuestions } from "redux/loader";
 
 interface QuestionProps {
     questionId: string,
@@ -26,6 +27,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const dispatch = useAppDispatch();
     const error = useAppSelector((state:RootState) => state.question.errorAll);
     const loading = useAppSelector((state:RootState) => state.question.loadingAll);
+    const initialized = useAppSelector((state:RootState) => state.question.initialized);
     const options = useAppSelector((state:RootState) => state.question.questions);
     const varOptions = useAppSelector((state:RootState) => state.question.options);
     const [formalView, setFormalView] = React.useState<boolean>(false);
@@ -37,29 +39,16 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
     const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
+    const [lastQuery, setLastQuery] = React.useState<string>("-1");
+    const [pristine, setPristine] = React.useState<boolean>(true);
 
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
   
-    //FIXME: use question loader.
     React.useEffect(() => {
-        if (options.length === 0 && !loading && !error) {
-            dispatch(setLoadingAll());
-            DISKAPI.getQuestions()
-                .then((questions:Question[]) => {
-                    dispatch(setQuestions(questions))
-                    if (selectedQuestionId) {
-                        let selectedQuestion : Question = questions.filter((q) => q.id === selectedQuestionId)?.[0];
-                        if (selectedQuestion)
-                            onQuestionChange(selectedQuestion);
-                        else
-                            console.warn("Selected question not found on question catalog")
-                    }
-                })
-                .catch(() => {
-                    dispatch(setErrorAll())
-                })
+        if (!error && !loading && !initialized) {
+            loadQuestions(dispatch);
         }
-    })
+    }, [])
 
     React.useEffect(() => {
         if (selectedQuestionId && options.length > 0) {
@@ -72,24 +61,33 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }, [selectedQuestionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     React.useEffect(() => {
-        if (questionBindings.length > 0) {
-            questionBindings.forEach((qb) => {
-                let curOpt: Option = options.filter((opt) => opt.id === qb.binding)?.[0];
-                if (curOpt) {
-                    setSelectedOptionValues((values) => {
-                        let newValues = { ...values };
-                        newValues[qb.variable] = curOpt;
-                        return newValues;
-                    })
-                }
+        if (pristine && questionBindings.length > 0) {
+            let newValues : {[id:string] : Option|null} = {};
+            questionBindings.forEach((qb:VariableBinding) => {
+                let curOpt: Option = varOptions[qb.variable]?.values.filter((opt) => opt.id === qb.binding)?.[0];
+                if (curOpt)
+                    newValues[qb.variable] = curOpt;
             });
+
+            if (Object.keys(newValues).length === questionBindings.length) {
+                setPristine(false);
+                setSelectedOptionValues((values) => {
+                    return { ...values, ...newValues }
+                })
+            }
         }
-    }, [questionBindings]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [questionBindings, varOptions, pristine]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const onQuestionChange = (value: Question | null) => {
-        if (value) {
+        if (value && (!selectedQuestion || value.id != selectedQuestion.id)) {
+            /*let newOptionValues = { ...selectedOptionValues };
+            value.variables.forEach((qv:QuestionVariable) => {
+                newOptionValues[qv.id] = null;
+            });
+            setSelectedOptionValues(newOptionValues);*/
             setSelectedQuestion(value);
-            loadQuestionOptions(value);
+            //loadQuestionOptions(value);
+            loadQuestionDynamicOptions(value);
             updateQuestionFiller(value);
         }
     }
@@ -153,6 +151,55 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                         dispatch(setErrorOptions(qv.id))
                     })
             );
+        }
+    }
+
+    const loadQuestionDynamicOptions = (question:Question) => {
+        if (question.variables && question.variables.length > 0) {
+            let bindings : {[name:string] :string} = {};
+            question.variables.forEach((qv:QuestionVariable) => {
+                let val = selectedOptionValues[qv.id];
+                if (val) {
+                    bindings[qv.varName] = val.id;
+                }
+            });
+            let queryId : string = Object.keys(bindings).map((key) => key + ":" + bindings[key] + "|").join("");
+            //console.log(queryId);
+            if (queryId === lastQuery) {
+                return;
+            }
+            if (queryId)
+                setLastQuery(queryId);
+
+            question.variables.forEach((qv:QuestionVariable) => {
+                dispatch(setLoadingOptions(qv.id))
+            });
+
+            DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
+                    .then((options:{[name:string] : string[][]}) => {
+                        question.variables.forEach((qv:QuestionVariable) => {
+                            let curOpts = options[qv.varName];
+                            if (curOpts) {
+                                dispatch(setOptions({id:qv.id, options:curOpts}));
+                                /*if (questionBindings) {
+                                    let curVarBind : VariableBinding = questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
+                                    let curOpt : Option = curOpts
+                                            .filter((opt) => curVarBind && opt[0] === curVarBind.binding)
+                                            .map((opt) => { 
+                                                return {id: opt[0], name: opt[1]} as Option 
+                                            })?.[0];
+                                    if (curOpt) {
+                                        console.log("Setting options")
+                                        setSelectedOptionValues((values) => {
+                                            let newValues = { ...values };
+                                            newValues[qv.id] = curOpt;
+                                            return newValues;
+                                        })
+                                    }
+                                }*/
+                            }
+                        });
+                    });
         }
     }
 
@@ -227,6 +274,20 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         return obj.type === 'URI' ? displayURI(obj.value) : obj.value;
     }
 
+    const onOptionChange = (value: Option | null, varName:string) => {
+        setSelectedOptionValues((values) => {
+            let newValues = { ...values };
+            newValues[nameToId[varName]] = value;
+            return newValues;
+        })
+    }
+
+    React.useEffect(() => {
+        if (selectedQuestion) {
+            loadQuestionDynamicOptions(selectedQuestion);
+        }
+    }, [selectedOptionValues]);
+
     return <Box>
         <Box>
             <FormHelperText sx={{margin: "2px"}}>Select a template that can express your hypothesis or question:</FormHelperText>
@@ -265,13 +326,9 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                             <TextPart key={`qPart${i}`}> {part} </TextPart>
                         :
                             <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                                options={varOptions[nameToId[part]].values}
+                                options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
                                 value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                                onChange={(_, value: Option | null) => setSelectedOptionValues((values) => {
-                                    let newValues = { ...values };
-                                    newValues[nameToId[part]] = value;
-                                    return newValues;
-                                })}
+                                onChange={(_, value: Option | null) => onOptionChange(value, part)}
                                 inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
                                 onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
                                     let newMap = { ...map };
@@ -280,13 +337,13 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                                 })}
                                 isOptionEqualToValue={(option, value) => option.id === value.id}
                                 getOptionLabel={(option) => option.name}
-                                loading={varOptions[nameToId[part]].loading}
+                                loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
                                 renderInput={(params) => (
                                     <TextField {...params} label={part} variant="standard" InputProps={{
                                         ...params.InputProps,
                                         endAdornment: (
                                             <React.Fragment>
-                                                {varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
                                                 {params.InputProps.endAdornment}
                                             </React.Fragment>
                                         ),

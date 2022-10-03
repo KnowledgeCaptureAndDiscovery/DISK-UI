@@ -11,7 +11,7 @@ To specify the workflow of the LOI, you need to select the button **Add Workflow
 
 ## Passing Data to the Workflow
  
-When you select a workflow, DISK displays the Workflow Inputs required to run.
+When you select a workflow, [DISK](https://disk.isi.edu) displays the Workflow Inputs required to run.
 
 For example, the following workflow requires the inputs to run:
 

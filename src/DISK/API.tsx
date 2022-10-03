@@ -1,10 +1,10 @@
-import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
+import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, QuestionOptionsRequest, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
-import { DISK_API } from "../constants/config";
+import { REACT_APP_DISK_API }  from "../config";
 import { cleanLOI, cleanTLOI } from "./util";
 
 export class DISKAPI {
-    private static url : string = DISK_API;
+    private static url : string = REACT_APP_DISK_API;
     private static headers : RequestInit["headers"] = {
         "Content-Type": "application/json;charset=UTF-8",
     };
@@ -22,7 +22,7 @@ export class DISKAPI {
         }
     }
 
-    private static async get (url:string) : Promise<any> {
+    private static async get (url:string, asText:boolean=false) : Promise<any> {
         const response = await fetch(url, {
             method: "GET",
             headers: DISKAPI.headers,
@@ -30,7 +30,7 @@ export class DISKAPI {
 
         if (!response.ok) 
             throw new Error(response.statusText);
-        return response.json();
+        return asText ? response.text() : response.json();
     }
 
     private static async post (url:string, obj:any, asText:boolean=false) : Promise<any> {
@@ -106,6 +106,11 @@ export class DISKAPI {
         return await DISKAPI.get(DISKAPI.url + "question/" + id + "/options") as string[][];
     }
 
+    public static async getDynamicOptions (cfg:QuestionOptionsRequest) : Promise<{[name:string]:string[][]}> {
+        return await DISKAPI.post(DISKAPI.url + "question/options", cfg) as {[name:string]:string[][]};
+    }
+
+
     // LINES OF INQUIRY
     //=======================
 
@@ -164,12 +169,7 @@ export class DISKAPI {
     }
 
     public static async getWorkflowVariables (source:string, id:string) : Promise<MethodInput[]>{
-        let inputsRaw = await DISKAPI.get(DISKAPI.url + "workflows/" + source + "/" + id);
-        let inputs : MethodInput[] = inputsRaw.map((i:any) => {return {
-            name: i.name,
-            type: i["input"] ? "input" : (i["param"] ? "parameter" : "none"),
-        }})
-        return inputs;
+        return await DISKAPI.get(DISKAPI.url + "workflows/" + source + "/" + id) as MethodInput[];
     }
 
     public static async testQuery (dataSource:string, query:string, variables:string[]) : Promise<{[varName:string] : string[]}> {
@@ -186,5 +186,9 @@ export class DISKAPI {
 
     public static async getData (dataSource:string, dataId:string) : Promise<string> {
         return await DISKAPI.post(DISKAPI.url + "getData", {'source': dataSource, 'dataId': dataId.replace(/.*#/,"")}, true) as string;
+    }
+
+    public static async getPublic (path:string) : Promise<string> {
+        return await DISKAPI.get("https://s3.mint.isi.edu/neurodisk/" + path, true) as string;
     }
 }

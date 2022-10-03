@@ -1,6 +1,6 @@
 # Configuration
 
-To configure DISK, you need to edit the [server.properties file](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/blob/main/server.properties).
+To configure [DISK](https://disk.isi.edu), you need to edit the [server.properties file](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/blob/main/server.properties).
 
 
 ## Editing server.properties configuration file
@@ -95,9 +95,9 @@ vocabularies =
 
 ## Restarting DISK
 
-DISK needs to be restart after you have edited the configuration files.
+[DISK](https://disk.isi.edu) needs to be restart after you have edited the configuration files.
 
-To restart the DISK, you should run the following command:
+To restart the [DISK](https://disk.isi.edu), you should run the following command:
 
 ```bash
 docker-compose restart

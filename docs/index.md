@@ -1,9 +1,9 @@
 # Overview
 
-## What is DISK?
+## What is DISK
 
-DISK is a framework that uses AI to automate scientific data analysis to accelerate discoveries. There are many large repositories of
-scientific data could be continuously and systematically analyzed by DISK, updating findings and potentially making new
+[DISK](https://disk.isi.edu) is a framework that uses AI to automate scientific data analysis to accelerate discoveries. There are many large repositories of
+scientific data could be continuously and systematically analyzed by [DISK](https://disk.isi.edu), updating findings and potentially making new
 discoveries as new data becomes available.
 
 This video shows a brief overview how a new hypothesis can be specified by a user and the automation that follows.
@@ -17,17 +17,17 @@ You can start to use DISK [here](https://disk.isi.edu), note that you will need 
 
 ### Target Users and Documentation
 
-- Users: Scientists who use DISK to specify and test hypotheses or ask questions.  Read this [documentation](user-guide/)
-- Advanced Users: Scientists who understand the design of DISK and can extend it to support new types of hypotheses and questions by defining data queries and workflows.  Here is the detailed [documentation](advanced-user/). 
-- Developers: Programmers who can extend DISK by integrating it with new data sources and new workflow systems.  There is [documentation](developer-guide/) and a GitHub repository with the code.
+- Users: Scientists who use [DISK](https://disk.isi.edu) to specify and test hypotheses or ask questions.  Read this [documentation](user-guide/)
+- Advanced Users: Scientists who understand the design of [DISK](https://disk.isi.edu) and can extend it to support new types of hypotheses and questions by defining data queries and workflows.  Here is the detailed [documentation](advanced-user/). 
+- Developers: Programmers who can extend [DISK](https://disk.isi.edu) by integrating it with new data sources and new workflow systems.  There is [documentation](developer-guide/) and a GitHub repository with the code.
 
 
 ## How DISK Works
 
-DISK automatically tests hypotheses provided by a scientist.
-To do this, DISK retrieves data from existing data repositories and analyzes the data using intelligent workflows.
+[DISK](https://disk.isi.edu) automatically tests hypotheses provided by a scientist.
+To do this, [DISK](https://disk.isi.edu) retrieves data from existing data repositories and analyzes the data using intelligent workflows.
 User-defined hypotheses are re-run when new data or methods become available. 
-DISK stores all the provenance and metadata for new results, so they can be inspected and reproduced.
+[DISK](https://disk.isi.edu) stores all the provenance and metadata for new results, so they can be inspected and reproduced.
 
 ### Key Features
 
@@ -43,12 +43,12 @@ DISK stores all the provenance and metadata for new results, so they can be insp
 
 ![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
 
-For more information about the DISK architecture, please check the [architecture](developer-guide/architecture/) page.
+For more information about the [DISK](https://disk.isi.edu) architecture, please check the [architecture](developer-guide/architecture/) page.
 
 ## Development Status
 
-DISK is being actively developed by the USC/ISI [Knowledge Capture and Discovery Team](https://knowledgecaptureanddiscovery.github.io/).
-DISK releases can be found [releases](https://github.com/KnowledgeCaptureAndDiscovery/DISK-WEB/releases).
+[DISK](https://disk.isi.edu) is being actively developed by the USC/ISI [Knowledge Capture and Discovery Team](https://knowledgecaptureanddiscovery.github.io/).
+[DISK](https://disk.isi.edu) releases can be found [releases](https://github.com/KnowledgeCaptureAndDiscovery/[DISK](https://disk.isi.edu)-WEB/releases).
 
 ---
 
@@ -56,4 +56,4 @@ DISK releases can be found [releases](https://github.com/KnowledgeCaptureAndDisc
 
 ## Applications of DISK
 
-We are using DISK in several applications, more details can be found [here](adoptions).
+We are using [DISK](https://disk.isi.edu) in several applications, more details can be found [here](adoptions).
