@@ -374,7 +374,6 @@ export const LOIEditor = () => {
                             setErrorQuery(value.length === 0);
                             console.log('value:', value);
                         }}
-                        onBlur={console.log}
                     />
                 </Card>
             </Box>

@@ -87,7 +87,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             for (let i:number=0; i<pattern.length; i++){
                 let part : string = pattern[i];
                 if (map2[part]) {
-                    newBindings.push({variable: map[part], binding:map2[part], collection: false});
+                    newBindings.push({variable: map[part], binding:map2[part], collection: false, type: null});
                     part = map2[part];
                 }
 
@@ -154,10 +154,10 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     }
 
     const displayValue = (text:string) => {
-        text = text.replaceAll(".Location","");
-        text = text.replaceAll('-28','(').replaceAll('-29',')').replaceAll('-3A',': ');
-        text = text.replaceAll("PAGES2kv2#","").replaceAll(/[\.\-_]/g,' ');
-        text = text.replaceAll(" (E)","").replaceAll("Property: ","");
+        text = text.replaceAll("Pages2k2_1_2#","").replaceAll(".Location","");
+        text = text.replaceAll('-28','(').replaceAll('-29',')').replaceAll('-3A',':');
+        text = text.replaceAll("_(E)","").replaceAll("Property:","");
+        text = text.replaceAll(/[\.\-_]/g,' ');
         return text;
     }
 
