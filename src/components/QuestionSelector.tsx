@@ -164,7 +164,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 }
             });
             let queryId : string = Object.keys(bindings).map((key) => key + ":" + bindings[key] + "|").join("");
-            //console.log(queryId);
             if (queryId === lastQuery) {
                 return;
             }
@@ -229,7 +228,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 // The map should exist already, but if not, we can generate it here.
                 if (nameToId && nameToId[part] && selectedOptionValues[nameToId[part]] != null) {
                     value = selectedOptionValues[nameToId[part]]!.id;
-                    newBindings.push({variable: nameToId[part], binding:value});
+                    newBindings.push({variable: nameToId[part], binding:value, type:null});
                 } else 
                     value = part;
 

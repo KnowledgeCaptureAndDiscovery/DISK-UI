@@ -136,8 +136,14 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                 allBindings.forEach(vb => {
                     let methods = inputMap[wf.workflow];
                     if (methods) methods.forEach((m:MethodInput) => {
-                        if (m.name === vb.variable)
-                            newValues[vb.variable] = m.type[0]; // TODO: search a way to store the option
+                        if (m.name === vb.variable) {
+                            let t = m.type[0];
+                            if (vb.type && m.type.includes(vb.type)) {
+                                t = vb.type;
+                            }
+                            newValues[vb.variable] = t;
+
+                        }
                     })
                 });
                 return newValues;
@@ -174,7 +180,8 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                         return {
                             variable: i.name,
                             binding: i.dimensionality > 0 ? "[" + selectedVariableValues[i.name] + "]" : selectedVariableValues[i.name],
-                            collection: i.dimensionality > 0
+                            collection: i.dimensionality > 0,
+                            type: selectedTypeValues[i.name] ? selectedTypeValues[i.name] : null,
                         } as VariableBinding;
                     }),
             };

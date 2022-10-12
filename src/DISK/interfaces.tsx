@@ -20,6 +20,7 @@ export interface Hypothesis {
 export interface VariableBinding {
     variable:   string,
     binding:    string,
+    type:       string|null,
     collection?: boolean,
 }
 
