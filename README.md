@@ -31,3 +31,7 @@ $ vim public/config.js
 ## Documentation
 
 Full documentation is available at [https://disk.readthedocs.io](https://disk.readthedocs.io)
+
+## Related repositories
+
+- [DISK API](https://github.com/KnowledgeCaptureAndDiscovery/DISK-API)
