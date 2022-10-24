@@ -27,16 +27,18 @@ nav:
     - Add workflows:
       - advanced-user-guide/running-workflows.md
       - Example: advanced-user-guide/workflows/bike-example.md
-  - Administrator Guide:
-    - admin-guide/index.md
-    - admin-guide/installation.md 
-    - admin-guide/configuration.md
   - Developer Guide: 
     - developer-guide/index.md
     - developer-guide/architecture.md
     - developer-guide/data-adapter.md
     - developer-guide/method-adapter.md
     - developer-guide/contributing.md
+  - Software:
+    - admin-guide/index.md
+    - admin-guide/installation.md 
+    - admin-guide/configuration.md
+    - developer-guide/contributing.md
+
 theme:
   name: material
   logo: figures/logo.png
