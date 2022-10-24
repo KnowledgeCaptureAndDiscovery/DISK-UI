@@ -1,5 +1,5 @@
 
-# DISK UI
+# DISK User Interface (UI)
 
 The [DISK](https://disk.isi.edu) system automates the execution of scientific workflows triggered 
 on data changes. To do this [DISK](https://disk.isi.edu) collects data from different data repositories
