@@ -1,21 +1,4 @@
-setTimeout(function() {
-  const callbackName = 'callback_' + new Date().getTime();
-  window[callbackName] = function (response) {
-  var caret = document.createElement('div');
-  caret.innerHTML = "<i class='fa fa-caret-down dropdown-caret'></i>"
-  caret.classList.add('dropdown-caret')
-  }
 
-  var CSSLink = document.createElement('link');
-  CSSLink.rel='stylesheet';
-  CSSLink.href = '/assets/versions.css';
-  document.getElementsByTagName('head')[0].appendChild(CSSLink);
-
-  var script = document.createElement('script');
-  script.src = 'https://disk.readthedocs.io/_/api/v2/footer_html/?'+
-      'callback=' + callbackName + '&project=disk&page=&theme=mkdocs&format=jsonp&docroot=docs&source_suffix=.md&version=' + (window['READTHEDOCS_DATA'] || { version: 'latest' }).version;
-  document.getElementsByTagName('head')[0].appendChild(script);
-}, 0);
 
 // VERSION WARNINGS
 window.addEventListener("DOMContentLoaded", function() {

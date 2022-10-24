@@ -146,7 +146,7 @@ most styles have to be overriden here */
 .rst-versions.rst-badge.shift-up .rst-current-version{
   text-align: left !important;
 }
-.rst-versions.rst-badge.shift-up .rst-current-version .fa-book{
+.rst-versions.rst-badge.shift-up . .fa-book{
   display: none !important;
 }
 .rst-versions.rst-badge.shift-up .rst-current-version .icon-book{
