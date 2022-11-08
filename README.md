@@ -18,7 +18,7 @@ $ yarn start
 
 ## How to configure?
 
-To configure the [DISK](https://disk.isi.edu) UI, you need to create a `config.json` file in the public folder.
+To configure the [DISK](https://disk.isi.edu) UI, you need to create a `config.js` file in the public folder.
 
 ```bash
 $ vim public/config.js
