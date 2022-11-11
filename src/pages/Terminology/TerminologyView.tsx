@@ -1,17 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { loadVocabularies } from "redux/loader";
-import { Box, Card, Divider, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Vocabulary, VocabularyIndividual, VocabularyProperty, VocabularyType } from "DISK/interfaces";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { renderDescription } from "DISK/util";
 
 export const TerminologyView = () => {
     const dispatch = useAppDispatch();
     const vocabularies = useAppSelector((state:RootState) => state.server.vocabularies);
     const loading = useAppSelector((state:RootState) => state.server.loadingVocabularies);
     const error = useAppSelector((state:RootState) => state.server.errorVocabularies);
+
+    const [showMore, setShowMore] = useState<{[id:string]:boolean}>({});
 
     useEffect(() => {
         if (!vocabularies && !loading)
@@ -21,8 +24,11 @@ export const TerminologyView = () => {
     return <Box>
         <Typography variant="h5">Terminology:</Typography>
         <Typography>
-            The DISK System follows the descriptions ahead. On green <span style={{color: 'green'}}>types</span>, 
-            on orange <span style={{color: 'orange'}}>properties</span> and on blue <span style={{color: 'blue'}}>individuals</span>.
+            DISK uses the terms below.
+            The terms are defined in several ontologies, some general and some more specific to neuroscience.
+            <span style={{marginLeft: '4px', color: 'green'}}>Types are shown in green</span>,
+            <span style={{marginLeft: '4px', color: 'orange'}}>properties in orange</span>, and 
+            <span style={{marginLeft: '4px', color: 'blue'}}>individuals in blue</span>.
         </Typography>
         {loading ? <Skeleton/> : (vocabularies ? 
             Object.values(vocabularies)
@@ -41,18 +47,25 @@ export const TerminologyView = () => {
                         </IconButton>
                     </Box>
                     <Divider/>
-                    <Typography>
-                        {v.description}
-                    </Typography>
+                    {v.description && (<Typography>
+                        {renderDescription(v.description)}
+                    </Typography>)}
 
                     <Typography sx={{fontFamily: "monospace"}}>
                         PREFIX {v.prefix}: &lt;{v.namespace}&gt;
                     </Typography>
                     <Box>
-                        <Typography>
-                            Example terms:
-                        </Typography>
-                        <Box>
+                        <Box style={{display:"flex", justifyContent:"space-between", alignItems: "center", borderBottom: '1px solid #ddd'}}>
+                            <Typography>
+                                This ontology includes the following definitions:
+                            </Typography>
+                            <Button onClick={() => setShowMore((cur) => {
+                                let next = { ...cur};
+                                next[v.namespace] = !next[v.namespace];
+                                return next;
+                            })}>See {showMore[v.namespace]? 'less' : 'more'}</Button>
+                        </Box>
+                        <Box style={{maxHeight: showMore[v.namespace] ? 'unset' : '52px', overflow:'hidden'}}>
                             {Object.values(v.types).filter(v => !!v.description).map((t:VocabularyType) => 
                             <Box key={`t_${t.id}`} sx={{display: "flex", alignItems:"baseline", mb: "2px"}}>
                                 <Tooltip arrow title={t.id}>
@@ -84,9 +97,6 @@ export const TerminologyView = () => {
                                         {t.label ? t.label : t.id.replaceAll(/.*#/g,'')}
                                     </Card>
                                 </Tooltip>:
-                                <Box sx={{ml:"3px"}}>
-                                    {t.description}
-                                </Box>
                             </Box>
                             )}
                         </Box>

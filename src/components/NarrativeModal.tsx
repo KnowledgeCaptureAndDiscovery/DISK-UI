@@ -30,24 +30,24 @@ export const NarrativeModal = ({hypothesis, tloi} : NarrativeModalProps) => {
 
     return (
         <Fragment>
-            <Tooltip arrow placement="top" title="Narrative">
+            <Tooltip arrow placement="top" title="Provenance">
                 <IconButton onClick={onOpenDialog} sx={{p:0}}>
                     <TextSnippetIcon sx={{color: "gray", ml: "4px"}}/>
                 </IconButton>
             </Tooltip>
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ m: 0, p: '8px 16px'}}>
-                    Execution Narrative
+                    Provenance and Explanation
                     <IconButton aria-label="close" onClick={onCloseDialog}
                             sx={{ position: 'absolute', right: 5, top: 5, color: 'grey'}} >
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                    The Hypothesis with title: <span style={{fontWeight:"bold"}}>{hypothesis.name}</span> had
-                    a <span style={{color: getColor(tloi.status) }}>{tloi.status}</span> run for the
-                    Line of Inquiry: <span style={{fontWeight:"bold"}}>{tloi.name.replace("Triggered: ", "")}</span>.
-                    The LOI triggered <Link>{[...tloi.workflows, ...tloi.metaWorkflows].map(w => w.workflow).join(", ")}</Link> on WINGS, where it was tested with the following datasets:
+                    The Hypothesis "<span style={{fontWeight:"bold"}}>{hypothesis.name}</span>" was tested with the line of inquiry
+                    "<span style={{fontWeight:"bold"}}>{tloi.name.replace("Triggered: ", "")}</span>".
+
+                    The analysis was <span style={{color: getColor(tloi.status) }}>{tloi.status}</span>run on {tloi.dateCreated} with the following datasets:
                     <WorkflowList editable={false} workflows={tloi.workflows} metaworkflows={tloi.metaWorkflows} options={[]} minimal/>
                     {tloi.status === 'SUCCESSFUL' && tloi.confidenceValue > 0 && (
                         <span>

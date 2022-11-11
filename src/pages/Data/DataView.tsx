@@ -22,7 +22,7 @@ export const DataView = () => {
     return <Box>
         <Typography variant="h5">Data sources:</Typography>
         <Typography>
-            The DISK System can read information stored on the following systems:
+            This DISK portal can access the data and information described in the following systems:
         </Typography>
         {loadingEndpoints ? 
             <Skeleton/>

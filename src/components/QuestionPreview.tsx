@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { normalizeTextValue, normalizeURI } from "./QuestionList";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -69,7 +70,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             //Create map id -> name
             let map : {[id:string] : string} = {};
             selectedQuestion.variables.forEach((qv:QuestionVariable) => {
-                map[qv.id] = qv.varName;
+                map[qv.id] = qv.variableName;
             });
             //Create map name -> value
             let map2 : {[id:string] : string} = {};
@@ -141,26 +142,6 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
         setQuestionParts(ordered);
     }
 
-    const displayURI = (uri:string) => {
-        if (uri.startsWith("http") || uri.startsWith("www")) 
-            uri = uri.replace(idPattern, "");
-        
-        //WIKI Specific 
-        if (uri.startsWith("Property-3A"))
-            uri = uri.replace("Property-3A","").replace("-28E-29","");
-
-        uri = uri.replaceAll("_","");
-        return uri;
-    }
-
-    const displayValue = (text:string) => {
-        text = text.replaceAll("Pages2k2_1_2#","").replaceAll(".Location","");
-        text = text.replaceAll('-28','(').replaceAll('-29',')').replaceAll('-3A',':');
-        text = text.replaceAll("_(E)","").replaceAll("Property:","");
-        text = text.replaceAll(/[\.\-_]/g,' ');
-        return text;
-    }
-
     return <Box>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
@@ -173,7 +154,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
                         <TextPart key={`qPart${i}`} sx={{fontWeight: "500", color: 'darkgreen'}}>
-                            {nameToValue[part] ? displayValue(nameToValue[part]) : "any" }
+                            {nameToValue[part] ? normalizeTextValue(nameToValue[part]) : "any" }
                             {i === (questionParts.length - 1) && "?"}
                         </TextPart>
                     )
@@ -193,7 +174,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                 <Table sx={{width:"unset"}}>
                     <TableBody>
                         {triplePattern.map((triple:string[], index:number) => <TableRow key={`row_${index}`}>
-                            {triple.map((res:string) => <TableCell key={`cell${index}${res}`} sx={{padding: "2px 10px"}}> {displayURI(res)} </TableCell>)}
+                            {triple.map((res:string) => <TableCell key={`cell${index}${res}`} sx={{padding: "2px 10px"}}> {normalizeURI(res)} </TableCell>)}
                         </TableRow>)}
                     </TableBody>
                 </Table>

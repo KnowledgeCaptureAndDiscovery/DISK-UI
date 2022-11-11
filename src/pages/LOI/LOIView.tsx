@@ -1,4 +1,4 @@
-import { Box, Card, Divider, FormHelperText, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { DISKAPI } from "DISK/API";
 import { LineOfInquiry, idPattern, DataEndpoint } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
@@ -153,31 +153,27 @@ export const LOIView = () => {
                     }
                 </Box>
                 <Tooltip arrow title={(formalView? "Hide" : "Show") + " data query"}>
-                    <IconButton sx={{p:0}} onClick={() => setFormalView(!formalView)}>
-                        {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}
-                    </IconButton>
+                    <Button sx={{p:0}} onClick={() => setFormalView(!formalView)}>
+                        {formalView? <VisibilityIcon sx={{mr:'10px'}}/> : <VisibilityOffIcon sx={{mr:'10px'}}/>}
+                        Data query
+                    </Button>
                 </Tooltip>
             </Box>
-            {formalView ?
-            <Fragment>
+            {formalView && (<Fragment>
                 <TypographySection>Data query:</TypographySection>
                 <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
                     <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
                     {loadingEndpoints ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (dataSource ?
-                            <Fragment>
-                                <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                                <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                    {renderDescription(dataSource.description)}
-                                </Box>
-                            </Fragment>
-                        :
-                            null
-                        )
+                        (dataSource && <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap', fontWeight: '500'}}> {dataSource.name.replaceAll('_',' ')} </TypographyInline>)
                     }
                 </Box>
-                <Box sx={{fontSize: "0.94rem"}} >
+                {!loadingEndpoints && dataSource && (
+                    <Box sx={{ display: "inline-block", ml: "5px", fontSize: ".85em" }}>
+                        {renderDescription(dataSource.description)}
+                    </Box>
+                )}
+                <Box sx={{fontSize: "0.94rem", mb:"10px"}} >
                     <CodeMirror value={!!LOI? LOI.dataQuery : ""}
                         extensions={[StreamLanguage.define(sparql)]}
                         onChange={(value, viewUpdate) => {
@@ -185,9 +181,10 @@ export const LOIView = () => {
                         }}
                     />
                 </Box> 
-            </Fragment> : null }
-            <Box>
-                <TypographySection>Input data retrieved:</TypographySection>
+            </Fragment>)}
+            <Card variant="outlined" sx={{p:'5px'}}>
+                <TypographySection>Data retrieved:</TypographySection>
+                <Divider/>
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>
@@ -211,7 +208,7 @@ export const LOIView = () => {
                         )
                     }
                 </Box>
-            </Box>
+            </Card>
         </Box>
         <Divider/>
 

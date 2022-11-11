@@ -1,5 +1,5 @@
 import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, ListItem, Tooltip, Typography } from "@mui/material";
-import { Hypothesis, LineOfInquiry, Question } from "DISK/interfaces";
+import { Hypothesis, idPattern, LineOfInquiry, Question, QuestionVariable, VariableBinding } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { loadHypotheses, loadLOIs, loadQuestions } from "redux/loader";
@@ -16,6 +16,30 @@ interface QuestionListProps {
     expanded?: boolean,
     kind: 'hypothesis' | 'loi',
 }
+
+export const normalizeURI = (uri:string) => {
+    if (uri.startsWith("http") || uri.startsWith("www"))
+        uri = uri.replace(idPattern, "");
+
+    //WIKI Specific 
+    if (uri.startsWith("Property-3A"))
+        uri = uri.replace("Property-3A", "").replace("-28E-29", "");
+
+    uri = uri.replaceAll("_", "");
+    return uri;
+}
+
+export const normalizeTextValue = (text:string) => {
+    //If is an url use the last part of the path
+    if (text.startsWith("http") || text.startsWith("www"))
+        text = text.replace(idPattern, "");
+    text = text.replaceAll("Pages2k2_1_2#", "").replaceAll(".Location", "");
+    text = text.replaceAll('-28', '(').replaceAll('-29', ')').replaceAll('-3A', ':');
+    text = text.replaceAll("_(E)", "").replaceAll("Property:", "");
+    text = text.replaceAll(/[\.\-_]/g, ' ');
+    return text;
+}
+
 
 export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     const dispatch = useAppDispatch();
@@ -79,20 +103,19 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
 
     const renderQuestion = (q:Question) => {
         let variableStep : number = q.name.charAt(0) === '?' ? 1 : 0;
-        let parts : string[] = q.name.split(/<(.*?)>/); // parse <var>
+        let name = q.name.endsWith('?') ? q.name.substring(0, q.name.length-1) : q.name;
+        let parts : string[] = name.split(/<(.*?)>/); // parse <var> FIXME: this is old.
         if (parts.length === 1) {
-            parts = q.name.split(/(\?.* )/); // parse ?var
+            parts = name.split(/(\?[A-Za-z0-9_]*)/); // parse ?var
         }
         return (<Fragment>
             {parts.map((txt:string, i:number) => i%2===variableStep ?
                 <span key={i}>{txt}</span>
                 :
                 <Tooltip key={i} arrow title={"You can set this variable on the hypothesis."}>
-                    <span style={{textDecoration: "underline", textDecorationStyle: "dotted"}}>?{txt}</span>
+                    <span style={{textDecoration: "underline", textDecorationStyle: "dotted"}}>{txt}</span>
                 </Tooltip>
-                
-
-            )}
+            )}?
         </Fragment>)
     }
 
@@ -108,11 +131,37 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                 <ListItem sx={{p:"4px 16px"}} key={h.id}>
                     <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
                         component={Link} to={PATH_HYPOTHESES + '/' + h.id} key={h.id}>
-                        <ScienceIcon sx={{mx: "5px", color:'darkorange'}}/> {h.name}
+                        {renderHypothesisQuestionText(q, h)}
                     </Card>
                 </ListItem>)}
             </List>
          </Fragment>
+    }
+
+    const renderHypothesisQuestionText = (q:Question, h:Hypothesis) => {
+        let parts = q.template.split(/(\?[A-Za-z0-9_]*)/);
+        let values : {[name:string]:string} = {};
+        let tmp : {[url:string]:string} = {};
+        q.variables.forEach((variable:QuestionVariable) => {
+            tmp[variable.id] = variable.variableName;
+        })
+        h.questionBindings.forEach((binding:VariableBinding) => {
+            if (tmp[binding.variable]) {
+                values[tmp[binding.variable]] = binding.binding;
+            }
+        })
+        return <Fragment>
+            <ScienceIcon sx={{mx: "5px", color:'darkorange'}}/>
+            {parts.map((part:string,i:number) => part.startsWith('?') ? 
+                <b key={`pv_${i}`} style={{color:'green', margin: '4px'}}>
+                    {normalizeTextValue(values[part])}
+                </b>
+            :
+                <span key={`p_${i}`}>
+                    {part}
+                </span>
+            )}
+        </Fragment>
     }
 
     const renderQuestionLOIs = (q:Question) => {

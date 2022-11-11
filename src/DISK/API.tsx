@@ -1,4 +1,4 @@
-import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, QuestionOptionsRequest, TriggeredLineOfInquiry, Vocabularies } from "./interfaces";
+import { DataEndpoint, Hypothesis, LineOfInquiry, Method, MethodInput, Question, QuestionOptionsRequest, TriggeredLineOfInquiry, VariableOption, Vocabularies } from "./interfaces";
 import { HypothesisRequest, LineOfInquiryRequest } from "./requests";
 import { REACT_APP_DISK_API }  from "../config";
 import { cleanLOI, cleanTLOI } from "./util";
@@ -102,14 +102,13 @@ export class DISKAPI {
         });
     }
 
-    public static async getVariableOptions (id:string, username?:string) : Promise<string[][]> {
-        return await DISKAPI.get(DISKAPI.url + "question/" + id + "/options") as string[][];
+    public static async getVariableOptions (id:string, username?:string) : Promise<VariableOption[]> {
+        return await DISKAPI.get(DISKAPI.url + "question/" + id + "/options") as VariableOption[];
     }
 
-    public static async getDynamicOptions (cfg:QuestionOptionsRequest) : Promise<{[name:string]:string[][]}> {
-        return await DISKAPI.post(DISKAPI.url + "question/options", cfg) as {[name:string]:string[][]};
+    public static async getDynamicOptions (cfg:QuestionOptionsRequest) : Promise<{[name:string]:VariableOption[]}> {
+        return await DISKAPI.post(DISKAPI.url + "question/options", cfg) as {[name:string]:VariableOption[]};
     }
-
 
     // LINES OF INQUIRY
     //=======================

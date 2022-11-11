@@ -40,14 +40,39 @@ export interface Question {
     name:       string,
     template:   string,
     pattern:    string,
+    category:   QuestionCategory | null,
     variables:  QuestionVariable[],
 }
 
+export interface QuestionCategory {
+    id:     string,
+    name:   string,
+}
+
 export interface QuestionVariable {
-    id:             string,
-    constraints:    string,
-    varName:        string,
-    fixedOptions:   string,
+    id:                 string,
+    variableName:       string,
+    optionsQuery:       string,
+    options:            VariableOption[],
+    minCardinality:     number,
+    maxCardinality:     number,
+    representation:     string | null,
+    explanation:        string | null,
+    explanationQuery:   string | null,
+    subType:            string | null,
+    // Possible subtypes are BoundingBox, TimeInterval and UserInput
+    // For UserInputs:
+    inputDatatype:      string | null,
+    // For BoundingBox:
+    minLat:             QuestionVariable,
+    minLng:             QuestionVariable,
+    maxLat:             QuestionVariable,
+    maxLng:             QuestionVariable;
+}
+
+export interface VariableOption {
+    value:  string,
+    label:  string,
 }
 
 export interface WorkflowRun {

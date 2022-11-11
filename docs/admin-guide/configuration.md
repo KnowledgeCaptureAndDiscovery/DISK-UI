@@ -88,7 +88,7 @@ vocabularies =
         url = https://knowledgecaptureanddiscovery.github.io/DISK-Ontologies/enigma_hypothesis/release/2.0.1/ontology.ttl;
         prefix = neuro;
         namespace = https://w3id.org/disk/ontology/enigma_hypothesis#;
-        description = "The NEURO-DISK Hypothesis Ontology. Defines properties to be used on Hypothesis for the ENIGMA project.";
+        description = "The NEURO-DISK Hypothesis Ontology: Defines terms to express neuroimaging hypotheses.";
     }
 }
 ```

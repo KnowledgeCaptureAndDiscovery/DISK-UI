@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Question } from "DISK/interfaces";
+import { Question, VariableOption } from "DISK/interfaces";
 
 export interface Option {
     id:string,
@@ -65,10 +65,10 @@ export const questionSlice = createSlice({
             }
             return  { ...state , ...newState };
         },
-        setOptions: (state:QuestionState, action:PayloadAction<{id:string, options:string[][]}>) => {
+        setOptions: (state:QuestionState, action:PayloadAction<{id:string, options:VariableOption[]}>) => {
             let newOpts : Option[] = []
-            action.payload.options.forEach((opt:string[]) => 
-                newOpts.push({id: opt[0], name:opt[1]})
+            action.payload.options.forEach((opt:VariableOption) => 
+                newOpts.push({id: opt.value, name:opt.label})
             );
             let newOptionMap : OptionMap = { ...state.options };
             newOptionMap[action.payload.id] = {

@@ -152,7 +152,7 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
 
   switch (url) {
     case PATH_HOME:
-      return <Box>DISK Home</Box>;
+      return <Box>Home</Box>;
     case PATH_HYPOTHESES:
       return <Box>Hypotheses</Box>;
     case PATH_MY_HYPOTHESES:
@@ -172,7 +172,7 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
     case PATH_HYP_QUESTIONS:
       return <Box>Hypotheses templates</Box>
     case PATH_LOI_QUESTIONS:
-      return <Box>Line of Inquiry templates</Box>
+      return <Box>Lines of Inquiry per question templates</Box>
     default: {
       return <Box>{url}</Box>;
     }
@@ -224,7 +224,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   };
 
   const inLocation = (loc:string) => {
-      return location.pathname.includes(loc);
+      //return location.pathname.includes(loc);
+      return location.pathname === loc;
   }
 
   return (
@@ -388,7 +389,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               <QuestionIcon />
             </ListItemIcon>
             <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-              <Typography sx={{fontWeight: inLocation(PATH_HYP_QUESTIONS) ? 700 : 400}}>Hypotheses Templates</Typography>
+              <Typography sx={{fontWeight: inLocation(PATH_HYP_QUESTIONS) ? 700 : 400}}>Hypothesis Templates</Typography>
             }/>
           </ListItemButton>
           <ListItemButton  key={PATH_LOI_QUESTIONS} component={Link} to={PATH_LOI_QUESTIONS}
@@ -397,7 +398,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               <QuestionIcon />
             </ListItemIcon>
             <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-              <Typography sx={{fontWeight: inLocation(PATH_LOI_QUESTIONS) ? 700 : 400}}>LOI Templates</Typography>
+              <Typography sx={{fontWeight: inLocation(PATH_LOI_QUESTIONS) ? 700 : 400}}>LOIs per Template</Typography>
             }/>
           </ListItemButton>
 

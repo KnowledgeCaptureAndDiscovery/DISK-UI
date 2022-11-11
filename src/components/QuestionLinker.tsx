@@ -68,7 +68,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
             updateQuestionFiller(value);
         }
         if (notifyChange)
-            if (value) notifyChange(value, value.variables.map((v:QuestionVariable) => v.varName));
+            if (value) notifyChange(value, value.variables.map((v:QuestionVariable) => v.variableName));
             else notifyChange(null, []);
     }
 
