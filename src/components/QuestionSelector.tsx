@@ -9,6 +9,10 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { loadQuestions } from "redux/loader";
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
+import { TimeIntervalVariable } from "./TimeIntervalVariable";
+
+const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
+const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
 
 interface QuestionProps {
     questionId: string,
@@ -44,7 +48,8 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const [pristine, setPristine] = React.useState<boolean>(true);
 
     const [boundingBoxVariable, setBoundingBoxVariable] = React.useState<{[id:string] : QuestionVariable}>({});
-    const [timeIntervalVariable, setTimeIntervalVariable] = React.useState<{[id:string] : boolean}>({});
+    const [timeIntervalVariable, setTimeIntervalVariable] = React.useState<{[id:string] : QuestionVariable}>({});
+    const [initialBoundingBox, setInitialBoundingBox] = React.useState<{minLat:number,minLng:number,maxLat:number,maxLng:number}|null>(null);
 
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
   
@@ -67,14 +72,27 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     React.useEffect(() => {
         if (pristine && questionBindings.length > 0) {
             let newValues : {[id:string] : Option|null} = {};
+            let initBB : {minLat:number,minLng:number,maxLat:number,maxLng:number} = {minLat:0,minLng:0,maxLat:0,maxLng:0};
+
             questionBindings.forEach((qb:VariableBinding) => {
                 let curOpt: Option = varOptions[qb.variable]?.values.filter((opt) => opt.id === qb.binding)?.[0];
                 if (curOpt)
                     newValues[qb.variable] = curOpt;
+                else
+                    newValues[qb.variable] = {id:qb.binding, name:qb.binding} as Option;
+
+                // TODO: this is for bbvars
+                if (qb.variable.startsWith("?minLat")) initBB.minLat = parseFloat(qb.binding);
+                if (qb.variable.startsWith("?minLng")) initBB.minLng = parseFloat(qb.binding);
+                if (qb.variable.startsWith("?maxLat")) initBB.maxLat = parseFloat(qb.binding);
+                if (qb.variable.startsWith("?maxLng")) initBB.maxLng = parseFloat(qb.binding);
             });
 
             if (Object.keys(newValues).length === questionBindings.length) {
                 setPristine(false);
+                //Set bounding box:
+                if (initBB.minLat != 0 && initBB.minLng != 0 && initBB.maxLat != 0 && initBB.maxLng != 0)
+                    setInitialBoundingBox(initBB);
                 setSelectedOptionValues((values) => {
                     return { ...values, ...newValues }
                 })
@@ -84,25 +102,15 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
   
     const onQuestionChange = (value: Question | null) => {
         if (value && (!selectedQuestion || value.id != selectedQuestion.id)) {
-            /*let newOptionValues = { ...selectedOptionValues };
-            value.variables.forEach((qv:QuestionVariable) => {
-                newOptionValues[qv.id] = null;
-            });
-            setSelectedOptionValues(newOptionValues);*/
             // Check question variable types and add it.
             let bbVars : {[id:string] : QuestionVariable} = {};
-            let tiVars : {[id:string] : boolean} = {};
-            value.variables.filter(v => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable")).forEach((v:QuestionVariable) => {
-                bbVars[v.variableName] = v;
-            });
-            value.variables.filter(v => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable")).forEach((v:QuestionVariable) => {
-                tiVars[v.variableName] = true;
-            });
+            let tiVars : {[id:string] : QuestionVariable} = {};
+            value.variables.filter(isBoundingBoxVariable).forEach((v:QuestionVariable) => { bbVars[v.variableName] = v; });
+            value.variables.filter(isTimeIntervalVariable).forEach((v:QuestionVariable) => { tiVars[v.variableName] = v; });
             setBoundingBoxVariable(bbVars);
             setTimeIntervalVariable(tiVars);
 
             setSelectedQuestion(value);
-            //loadQuestionOptions(value);
             loadQuestionDynamicOptions(value);
             updateQuestionFiller(value);
         }
@@ -139,37 +147,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         setQuestionParts(ordered);
     }
 
-    const loadQuestionOptions = (question:Question) => {
-        if (question.variables && question.variables.length > 0) {
-            question.variables.forEach((qv:QuestionVariable) => dispatch(setLoadingOptions(qv.id)));
-            question.variables.forEach((qv:QuestionVariable) => 
-                DISKAPI.getVariableOptions(qv.id.replace(idPattern,""))
-                    .then((varOptions:VariableOption[]) => {
-                        dispatch(setOptions({id:qv.id, options:varOptions}))
-                        if (questionBindings) {
-                            let curVarBind : VariableBinding = questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
-                            let curOpt : Option = varOptions
-                                    .filter((opt) => curVarBind && opt.value === curVarBind.binding)
-                                    .map((opt) => { 
-                                        return {id: opt.value, name: opt.label} as Option 
-                                    })?.[0];
-                            if (curOpt) {
-                                setSelectedOptionValues((values) => {
-                                    let newValues = { ...values };
-                                    newValues[qv.id] = curOpt;
-                                    return newValues;
-                                })
-                            }
-                        }
-                    })
-                    .catch((e) => {
-                        console.warn("ERR:", e);
-                        dispatch(setErrorOptions(qv.id))
-                    })
-            );
-        }
-    }
-
     const loadQuestionDynamicOptions = (question:Question) => {
         if (question.variables && question.variables.length > 0) {
             let bindings : {[name:string] :string} = {};
@@ -188,9 +165,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 }
             });
             let queryId : string = Object.keys(bindings).map((key) => key + ":" + bindings[key] + "|").join("");
-            console.log(
-                ">>", bindings
-            )
             if (queryId === lastQuery) {
                 return;
             }
@@ -207,22 +181,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                             let curOpts = options[qv.variableName];
                             if (curOpts) {
                                 dispatch(setOptions({id:qv.id, options:curOpts}));
-                                /*if (questionBindings) {
-                                    let curVarBind : VariableBinding = questionBindings.filter((qb) => qb.variable === qv.id)?.[0];
-                                    let curOpt : Option = curOpts
-                                            .filter((opt) => curVarBind && opt[0] === curVarBind.binding)
-                                            .map((opt) => { 
-                                                return {id: opt[0], name: opt[1]} as Option 
-                                            })?.[0];
-                                    if (curOpt) {
-                                        console.log("Setting options")
-                                        setSelectedOptionValues((values) => {
-                                            let newValues = { ...values };
-                                            newValues[qv.id] = curOpt;
-                                            return newValues;
-                                        })
-                                    }
-                                }*/
                             }
                         });
                     });
@@ -230,13 +188,40 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }
 
     useEffect(() => {
-        // Update pattern
+        // Update pattern and send bindings
         if (selectedQuestion) {
             let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
-            //let pattern:string[] = selectedQuestion.pattern.split(/\s/);
             let pattern:string[] = noOptionalsPattern.split(/\s/);
-            let newBindings: VariableBinding[] = [];
             let updatedGraph: Triple[] = [];
+
+            let newBindings: VariableBinding[] = [];
+            let values : {[varName:string]:string} = {};
+            selectedQuestion.variables.forEach((qv:QuestionVariable) => {
+                if (boundingBoxVariable[qv.variableName]) {
+                    [qv.minLat, qv.minLng, qv.maxLat, qv.maxLng].forEach((bbVar) => {
+                        let val = selectedOptionValues[bbVar.id];
+                        if (val) {
+                            values[bbVar.variableName] = val.id;
+                            newBindings.push({
+                                variable: bbVar.variableName,
+                                binding: val.id,
+                                type: null
+                            });
+                        }
+                    });
+                    values[qv.variableName] = qv.variableName.replace('?', ':');
+                } else {
+                    let val = selectedOptionValues[qv.id];
+                    if (val) {
+                        values[qv.variableName] = val.id;
+                        newBindings.push({
+                            variable: qv.variableName,
+                            binding: val.id,
+                            type: null
+                        })
+                    }
+                }
+            })
 
             let emptyTriple: Triple = {
                 subject: "",
@@ -251,14 +236,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
             for (let i:number=0; i<pattern.length; i++){
                 let part : string = pattern[i];
-                let value : string = "";
-                // The map should exist already, but if not, we can generate it here.
-                if (nameToId && nameToId[part] && selectedOptionValues[nameToId[part]] != null) {
-                    value = selectedOptionValues[nameToId[part]]!.id;
-                    newBindings.push({variable: nameToId[part], binding:value, type:null});
-                } else 
-                    value = part;
-
+                let value : string = values[part] ? values[part] : part;
                 let c : number = i%3;
                 switch (c) {
                     case 0:
@@ -361,33 +339,38 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                         part.charAt(0) !== '?' ? 
                             <TextPart key={`qPart${i}`}> {part} </TextPart>
                         : (boundingBoxVariable[part] ? 
-                            <BoundingBoxMap key={`qVars${i}`} onChange={onBoundingBoxOptionChange} variable={boundingBoxVariable[part]}/>
-                            :
-                            <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                                options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
-                                value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                                onChange={(_, value: Option | null) => onOptionChange(value, part)}
-                                inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
-                                onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
-                                    let newMap = { ...map };
-                                    newMap[nameToId[part]] = newIn;
-                                    return newMap;
-                                })}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
-                                getOptionLabel={(option) => option.name}
-                                loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
-                                renderInput={(params) => (
-                                    <TextField {...params} label={part} variant="standard" InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <React.Fragment>
-                                                {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                {params.InputProps.endAdornment}
-                                            </React.Fragment>
-                                        ),
-                                    }}/>
-                                )}
-                            />)
+                            <BoundingBoxMap key={`qVars${i}`} 
+                                    onChange={onBoundingBoxOptionChange}
+                                    variable={boundingBoxVariable[part]}
+                                    bindings={initialBoundingBox}/>
+                            : (timeIntervalVariable[part] ? 
+                                <TimeIntervalVariable key={`qVars${i}`} variable={timeIntervalVariable[part]}/>
+                                : <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
+                                    options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
+                                    value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
+                                    onChange={(_, value: Option | null) => onOptionChange(value, part)}
+                                    inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
+                                    onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
+                                        let newMap = { ...map };
+                                        newMap[nameToId[part]] = newIn;
+                                        return newMap;
+                                    })}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    getOptionLabel={(option) => option.name}
+                                    loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label={part} variant="standard" InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}/>
+                                    )}
+                                />)
+                            )
                         )
                     : ""}
                 </Box>

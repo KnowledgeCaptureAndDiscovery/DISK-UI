@@ -18,10 +18,16 @@ export interface OptionBinding {
 
 interface BoundingBoxMapProps {
     variable: QuestionVariable,
+    bindings: {
+        minLat: number,
+        minLng: number,
+        maxLat: number,
+        maxLng: number
+    } | null,
     onChange: (bindings:OptionBinding[]) => void
 }
 
-export const BoundingBoxMap = ({variable, onChange}: BoundingBoxMapProps) => {
+export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: BoundingBoxMapProps) => {
     const [open, setOpen] = useState(false);
     const [map, setMap] = useState<any>();
     const [maps, setMaps] = useState<any>();
@@ -31,6 +37,20 @@ export const BoundingBoxMap = ({variable, onChange}: BoundingBoxMapProps) => {
     const [boundingBox, setBoundingBox] = useState<any>();
     const [marker, setMarker] = useState<any>();
     const [simpleBox, setSimpleBox] = useState<{minLat:number,minLng:number,maxLat?:number,maxLng?:number}|null>(null);
+
+    const [pristine, setPristine] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (initialBindings) {
+            setSimpleBox(initialBindings);
+            onChange([
+                {variable:variable.minLat, value:{id: initialBindings.minLat.toFixed(6), name: initialBindings.minLat.toFixed(2)}},
+                {variable:variable.minLng, value:{id: initialBindings.minLng.toFixed(6), name: initialBindings.minLng.toFixed(2)}},
+                {variable:variable.maxLat, value:{id: initialBindings.maxLat.toFixed(6), name: initialBindings.maxLat.toFixed(2)}},
+                {variable:variable.maxLng, value:{id: initialBindings.maxLng.toFixed(6), name: initialBindings.maxLng.toFixed(2)}},
+            ]);
+        }
+    }, [initialBindings]);
 
     const defaultProps = {
         center: {
@@ -49,12 +69,12 @@ export const BoundingBoxMap = ({variable, onChange}: BoundingBoxMapProps) => {
     }
 
     const onSelect = () => {
-        if (simpleBox && simpleBox.minLat && simpleBox.maxLat) {
+        if (simpleBox && simpleBox.maxLat && simpleBox.maxLng) {
             let bindings : OptionBinding[] = [
                 {variable:variable.minLat, value:{id: simpleBox.minLat.toFixed(6), name: simpleBox.minLat.toFixed(2)}},
-                {variable:variable.maxLat, value:{id: simpleBox.maxLat.toFixed(6), name: simpleBox.maxLat.toFixed(2)}},
                 {variable:variable.minLng, value:{id: simpleBox.minLng.toFixed(6), name: simpleBox.minLng.toFixed(2)}},
-                {variable:variable.maxLng, value:{id: simpleBox.minLng.toFixed(6), name: simpleBox.minLng.toFixed(2)}},
+                {variable:variable.maxLat, value:{id: simpleBox.maxLat.toFixed(6), name: simpleBox.maxLat.toFixed(2)}},
+                {variable:variable.maxLng, value:{id: simpleBox.maxLng.toFixed(6), name: simpleBox.maxLng.toFixed(2)}},
             ];
             onChange(bindings);
             onCloseDialog();
