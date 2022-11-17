@@ -11,6 +11,7 @@ import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "c
 
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { isBoundingBoxVariable } from "./QuestionSelector";
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -36,7 +37,7 @@ export const normalizeTextValue = (text:string) => {
     text = text.replaceAll("Pages2k2_1_2#", "").replaceAll(".Location", "");
     text = text.replaceAll('-28', '(').replaceAll('-29', ')').replaceAll('-3A', ':');
     text = text.replaceAll("_(E)", "").replaceAll("Property:", "");
-    text = text.replaceAll(/[\.\-_]/g, ' ');
+    text = text.replaceAll('_', ' ');
     return text;
 }
 
@@ -148,6 +149,16 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         h.questionBindings.forEach((binding:VariableBinding) => {
             if (tmp[binding.variable]) {
                 values[tmp[binding.variable]] = binding.binding;
+            }
+        })
+        q.variables.forEach((variable:QuestionVariable) => {
+            if (isBoundingBoxVariable(variable)) {
+                if (variable.representation != null) {
+                    let explanationParts: string[] = variable.representation.split(/(\?[a-zA-Z0-9]*)/g);
+                    console.log(values, explanationParts);
+                    let val: string = explanationParts.map((p: string) => p.startsWith('?') && values[p] ? Number(values[p]).toFixed(2) : p).join('');
+                    values[variable.variableName] = val;
+                }
             }
         })
         return <Fragment>

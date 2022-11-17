@@ -224,8 +224,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   };
 
   const inLocation = (loc:string) => {
-      //return location.pathname.includes(loc);
-      return location.pathname === loc;
+      return location.pathname.includes(loc);
+      //return location.pathname === loc;
   }
 
   return (
@@ -323,11 +323,11 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           {open && <ListItem sx={{p: '0 10px', fontSize: "0.9em", fontWeight: "500", color: "#444"}}>Community work:</ListItem>}
           <ListItemButton  key={PATH_HYPOTHESES} component={Link} to={PATH_HYPOTHESES}
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && (!selectedHypothesis || selectedHypothesis.author !== username) ? "darkorange" : "orange" }} >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && (!inLocation(PATH_HYP_QUESTIONS)) && (!selectedHypothesis || selectedHypothesis.author !== username) ? "darkorange" : "orange" }} >
               <ScienceIcon />
             </ListItemIcon>
             <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-              <Typography sx={{fontWeight: location.pathname === PATH_HYPOTHESES || ((!selectedHypothesis || selectedHypothesis.author !== username) && (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS))) ? 700 : 400}}>All Hypotheses</Typography>
+              <Typography sx={{fontWeight: location.pathname === PATH_HYPOTHESES || ((!selectedHypothesis || selectedHypothesis.author !== username) && !inLocation(PATH_HYP_QUESTIONS) && (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS))) ? 700 : 400}}>All Hypotheses</Typography>
             }/>
           </ListItemButton>
 
@@ -358,11 +358,11 @@ export default function MiniDrawer(props: { children: string | number | boolean 
 
           <ListItemButton key={PATH_LOIS} component={Link} to={PATH_LOIS}
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
-            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && (!selectedLOI || selectedLOI.author !== username)) ? "darkgreen" : "green" }} >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && !inLocation(PATH_LOI_QUESTIONS) && (!selectedLOI || selectedLOI.author !== username)) ? "darkgreen" : "green" }} >
               <SettingIcon />
             </ListItemIcon>
             <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
-              <Typography sx={{fontWeight: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && (!selectedLOI || selectedLOI.author !== username)) ? 700 : 400}}>All Lines of Inquiry</Typography>
+              <Typography sx={{fontWeight: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && !inLocation(PATH_LOI_QUESTIONS) && (!selectedLOI || selectedLOI.author !== username)) ? 700 : 400}}>All Lines of Inquiry</Typography>
             }/>
           </ListItemButton>
 

@@ -8,6 +8,7 @@ import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { normalizeTextValue, normalizeURI } from "./QuestionList";
+import { isBoundingBoxVariable } from "./QuestionSelector";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -71,13 +72,29 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             let map : {[id:string] : string} = {};
             selectedQuestion.variables.forEach((qv:QuestionVariable) => {
                 map[qv.id] = qv.variableName;
+                if (isBoundingBoxVariable(qv)) {
+                    [qv.minLat, qv.minLng, qv.maxLat, qv.maxLng].forEach((bbqv:QuestionVariable)=>{
+                        map[bbqv.id] = bbqv.variableName;
+                    });
+                }
             });
             //Create map name -> value
             let map2 : {[id:string] : string} = {};
             bindings.forEach((vb:VariableBinding) => {
                 map2[map[vb.variable]] = vb.binding.replace(idPattern, "");
             })
+            selectedQuestion.variables.forEach((qv:QuestionVariable) => {
+                // Add sub variables
+                if (isBoundingBoxVariable(qv)) {
+                    if (qv.representation != null) {
+                        let explanationParts : string[] = qv.representation.split(/(\?[a-zA-Z0-9]*)/g);
+                        let values : string = explanationParts.map((p:string) => p.startsWith('?') && map2[p] ? Number(map2[p]).toFixed(2) : p).join('');
+                        map2[qv.variableName] = values;
+                    }
+                }
+            });
             setNameToValue(map2);
+            console.log(map, map2)
 
             let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
 
@@ -149,7 +166,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end", mt: "6px"}}>
-                {questionParts.length > 0 ? questionParts.map((part:string, i:number) => 
+                {questionParts.length > 0 && (questionParts.map((part:string, i:number) => 
                     part.charAt(0) !== '?' ? 
                         <TextPart key={`qPart${i}`}> {part} </TextPart>
                     :
@@ -158,7 +175,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                             {i === (questionParts.length - 1) && "?"}
                         </TextPart>
                     )
-                : ""}
+                )}
                 </Box>
                 <Tooltip arrow title={(formalView? "Hide" : "Show") + " formal expression"}>
                     <IconButton onClick={() => setFormalView(!formalView)}>

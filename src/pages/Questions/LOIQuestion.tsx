@@ -5,7 +5,7 @@ export const LOIQuestion = () => {
     return (
         <div>
             <Typography variant="h6">
-                You can create hypotheses using any of the following templates:
+                You can create lines of inquiry using any of the following templates:
             </Typography>
             <QuestionList expanded kind="loi"/>
         </div>
