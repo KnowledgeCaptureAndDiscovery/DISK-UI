@@ -11,8 +11,8 @@ import { loadQuestions } from "redux/loader";
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
 import { TimeIntervalVariable } from "./TimeIntervalVariable";
 
-const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
-const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
+export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
+export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
 
 interface QuestionProps {
     questionId: string,
@@ -82,17 +82,19 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                     newValues[qb.variable] = {id:qb.binding, name:qb.binding} as Option;
 
                 // TODO: this is for bbvars
-                if (qb.variable.startsWith("?minLat")) initBB.minLat = parseFloat(qb.binding);
-                if (qb.variable.startsWith("?minLng")) initBB.minLng = parseFloat(qb.binding);
-                if (qb.variable.startsWith("?maxLat")) initBB.maxLat = parseFloat(qb.binding);
-                if (qb.variable.startsWith("?maxLng")) initBB.maxLng = parseFloat(qb.binding);
+                if (qb.variable.endsWith("MinLatVariable")) initBB.minLat = parseFloat(qb.binding);
+                if (qb.variable.endsWith("MinLngVariable")) initBB.minLng = parseFloat(qb.binding);
+                if (qb.variable.endsWith("MaxLatVariable")) initBB.maxLat = parseFloat(qb.binding);
+                if (qb.variable.endsWith("MaxLngVariable")) initBB.maxLng = parseFloat(qb.binding);
             });
 
             if (Object.keys(newValues).length === questionBindings.length) {
                 setPristine(false);
                 //Set bounding box:
-                if (initBB.minLat != 0 && initBB.minLng != 0 && initBB.maxLat != 0 && initBB.maxLng != 0)
+                console.log(initBB, questionBindings);
+                if (initBB.minLat != 0 && initBB.minLng != 0 && initBB.maxLat != 0 && initBB.maxLng != 0){
                     setInitialBoundingBox(initBB);
+                }
                 setSelectedOptionValues((values) => {
                     return { ...values, ...newValues }
                 })
@@ -203,7 +205,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                         if (val) {
                             values[bbVar.variableName] = val.id;
                             newBindings.push({
-                                variable: bbVar.variableName,
+                                variable: bbVar.id,
                                 binding: val.id,
                                 type: null
                             });
@@ -215,7 +217,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                     if (val) {
                         values[qv.variableName] = val.id;
                         newBindings.push({
-                            variable: qv.variableName,
+                            variable: qv.id,
                             binding: val.id,
                             type: null
                         })

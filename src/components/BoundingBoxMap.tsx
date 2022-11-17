@@ -43,6 +43,8 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
     useEffect(() => {
         if (initialBindings) {
             setSimpleBox(initialBindings);
+            setPointA({lat:initialBindings.minLat, lng:initialBindings.minLng});
+            setPointB({lat:initialBindings.maxLat, lng:initialBindings.maxLng});
             onChange([
                 {variable:variable.minLat, value:{id: initialBindings.minLat.toFixed(6), name: initialBindings.minLat.toFixed(2)}},
                 {variable:variable.minLng, value:{id: initialBindings.minLng.toFixed(6), name: initialBindings.minLng.toFixed(2)}},
@@ -179,7 +181,7 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
                         <Button style={{position: 'absolute', zIndex: 1000, margin: '10px', background: 'white'}} onClick={clearMap}>Clear</Button>
                         <GoogleMapReact
                             bootstrapURLKeys={{ key: "" }}
-                            defaultCenter={defaultProps.center}
+                            defaultCenter={pointA ? (pointB ? {lat: (pointA.lat + pointB.lat)/2, lng: (pointA.lng + pointB.lng)/2} : pointA) : defaultProps.center}
                             defaultZoom={defaultProps.zoom}
                             yesIWantToUseGoogleMapApiInternals
                             onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
