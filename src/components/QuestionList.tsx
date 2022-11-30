@@ -12,6 +12,7 @@ import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "c
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { isBoundingBoxVariable } from "./QuestionSelector";
+import { useGetHypothesesQuery } from "DISK/queries";
 
 interface QuestionListProps {
     expanded?: boolean,

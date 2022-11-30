@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DISKAPI } from "DISK/API";
+import { DISK } from "DISK/queries";
 import Keycloak from "keycloak-js";
 
 interface KeycloakState {
@@ -27,6 +28,7 @@ export const keycloakSlice = createSlice({
         let cur : KeycloakUserToken = action.payload;
         if (cur && cur.token && cur.parsedToken) {
             DISKAPI.setToken(cur.token);
+            DISK.setToken(cur.token);
             let username : string = (cur.parsedToken as any)["preferred_username"];
             if (!username) username = (cur.parsedToken as any)["email"];
             if (!username) username = (cur.parsedToken as any)["azp"];

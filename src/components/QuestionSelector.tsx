@@ -4,12 +4,12 @@ import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
 import { RootState } from "redux/store";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorOptions, setLoadingOptions, setOptions, Option } from "redux/questions";
+import { setLoadingOptions, setOptions, Option } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { loadQuestions } from "redux/loader";
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
-import { TimeIntervalVariable } from "./TimeIntervalVariable";
+import { StartTimeURI, StopTimeURI, TimeIntervalVariable, TimeTypeURI } from "./TimeIntervalVariable";
 
 export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
 export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
@@ -81,7 +81,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 else
                     newValues[qb.variable] = {id:qb.binding, name:qb.binding} as Option;
 
-                // TODO: this is for bbvars
+                // TODO: this is for bounding box variables
                 if (qb.variable.endsWith("MinLatVariable")) initBB.minLat = parseFloat(qb.binding);
                 if (qb.variable.endsWith("MinLngVariable")) initBB.minLng = parseFloat(qb.binding);
                 if (qb.variable.endsWith("MaxLatVariable")) initBB.maxLat = parseFloat(qb.binding);
@@ -91,8 +91,8 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             if (Object.keys(newValues).length === questionBindings.length) {
                 setPristine(false);
                 //Set bounding box:
-                console.log(initBB, questionBindings);
-                if (initBB.minLat != 0 && initBB.minLng != 0 && initBB.maxLat != 0 && initBB.maxLng != 0){
+                //console.log(initBB, questionBindings);
+                if (initBB.minLat !== 0 && initBB.minLng !== 0 && initBB.maxLat !== 0 && initBB.maxLng !== 0){
                     setInitialBoundingBox(initBB);
                 }
                 setSelectedOptionValues((values) => {
@@ -103,12 +103,13 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }, [questionBindings, varOptions, pristine]); // eslint-disable-line react-hooks/exhaustive-deps
   
     const onQuestionChange = (value: Question | null) => {
-        if (value && (!selectedQuestion || value.id != selectedQuestion.id)) {
+        if (value && (!selectedQuestion || value.id !== selectedQuestion.id)) {
             // Check question variable types and add it.
             let bbVars : {[id:string] : QuestionVariable} = {};
             let tiVars : {[id:string] : QuestionVariable} = {};
             value.variables.filter(isBoundingBoxVariable).forEach((v:QuestionVariable) => { bbVars[v.variableName] = v; });
             value.variables.filter(isTimeIntervalVariable).forEach((v:QuestionVariable) => { tiVars[v.variableName] = v; });
+
             setBoundingBoxVariable(bbVars);
             setTimeIntervalVariable(tiVars);
 
@@ -212,6 +213,20 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                         }
                     });
                     values[qv.variableName] = qv.variableName.replace('?', ':');
+                } else if (timeIntervalVariable[qv.variableName]) {
+                    [[StartTimeURI,'?MinTime'], [StopTimeURI, '?MaxTime'], [TimeTypeURI, '?TimeType']].forEach(([id,name]) => {
+                        let val = selectedOptionValues[id];
+                    console.log(id, val);
+                        if (val) {
+                            values[name] = val.id;
+                            newBindings.push({
+                                variable: id,
+                                binding: val.id,
+                                type: null
+                            });
+                        }
+                    })
+                    values[qv.variableName] = qv.variableName.replace('?', ':');
                 } else {
                     let val = selectedOptionValues[qv.id];
                     if (val) {
@@ -287,7 +302,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             return newValues;
         })
     }
-
+    
     const onBoundingBoxOptionChange = (bindings:OptionBinding[]) => {
         setSelectedOptionValues((values) => {
             let newValues = { ...values };
@@ -346,7 +361,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                                     variable={boundingBoxVariable[part]}
                                     bindings={initialBoundingBox}/>
                             : (timeIntervalVariable[part] ? 
-                                <TimeIntervalVariable key={`qVars${i}`} variable={timeIntervalVariable[part]}/>
+                                <TimeIntervalVariable key={`qVars${i}`} variable={timeIntervalVariable[part]} onChange={onBoundingBoxOptionChange}/>
                                 : <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
                                     options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
                                     value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
