@@ -19,7 +19,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { ResultTable } from "components/ResultTable";
 import { WorkflowList } from "components/WorkflowList";
 import { loadHypothesis } from "redux/loader";
-import { QuestionPreview } from "components/QuestionPreview";
+import { QuestionPreview } from "components/questions/QuestionPreview";
 import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
 import { DISKAPI } from "DISK/API";

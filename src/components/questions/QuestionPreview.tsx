@@ -9,6 +9,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { normalizeTextValue, normalizeURI } from "./QuestionList";
 import { isBoundingBoxVariable } from "./QuestionSelector";
+import { useGetQuestionsQuery } from "DISK/queries";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -25,32 +26,13 @@ const TextPart = styled(Box)(({ theme }) => ({
 
 export const QuestionPreview = ({selected:selectedId, bindings, label} : QuestionPreviewProps) => {
     const dispatch = useAppDispatch();
-    const error = useAppSelector((state:RootState) => state.question.errorAll);
-    const loading = useAppSelector((state:RootState) => state.question.loadingAll);
-    const questions = useAppSelector((state:RootState) => state.question.questions);
+    const { data: questions, isLoading, isError } = useGetQuestionsQuery();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [formalView, setFormalView] = React.useState<boolean>(false);
 
     const [nameToValue, setNameToValue] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
     const [triplePattern, setTriplePattern] = React.useState<string[][]>([]);
-
-    //FIXME: use question loader.
-    React.useEffect(() => {
-        if (questions.length === 0 && !loading && !error) {
-            dispatch(setLoadingAll());
-            DISKAPI.getQuestions()
-                .then((questions:Question[]) => {
-                    dispatch(setQuestions(questions))
-                    setFromQuestionList(questions, selectedId)
-                })
-                .catch(() => {
-                    dispatch(setErrorAll())
-                })
-        } else {
-            setFromQuestionList(questions, selectedId);
-        }
-    })
 
     const setFromQuestionList = (list:Question[], id:string) => {
         if (list.length > 0 && !!id) {
@@ -63,8 +45,10 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     }
 
     React.useEffect(() => {
-        setFromQuestionList(questions, selectedId);
-    }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+        if (questions && questions.length > 0 && selectedId) {
+            setFromQuestionList(questions, selectedId);
+        }
+    }, [selectedId, questions]);
 
     React.useEffect(() => {
         if (selectedQuestion && bindings.length > 0) {
@@ -94,7 +78,6 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                 }
             });
             setNameToValue(map2);
-            console.log(map, map2)
 
             let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
 

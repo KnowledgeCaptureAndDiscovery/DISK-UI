@@ -12,7 +12,7 @@ import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setErrorSelected, setLoadingSelected, setSelectedLOI, add as addLOI } from "redux/lois";
-import { QuestionLinker } from "components/QuestionLinker";
+import { QuestionLinker } from "components/questions/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';

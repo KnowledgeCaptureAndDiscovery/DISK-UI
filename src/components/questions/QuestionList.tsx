@@ -12,7 +12,7 @@ import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "c
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { isBoundingBoxVariable } from "./QuestionSelector";
-import { useGetHypothesesQuery } from "DISK/queries";
+import { useGetHypothesesQuery, useGetQuestionsQuery } from "DISK/queries";
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -32,6 +32,7 @@ export const normalizeURI = (uri:string) => {
 }
 
 export const normalizeTextValue = (text:string) => {
+    if (!text) return "";
     //If is an url use the last part of the path
     if (text.startsWith("http") || text.startsWith("www"))
         text = text.replace(idPattern, "");
@@ -45,10 +46,7 @@ export const normalizeTextValue = (text:string) => {
 
 export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     const dispatch = useAppDispatch();
-    const error : boolean = useAppSelector((state:RootState) => state.question.errorAll);
-    const loading : boolean = useAppSelector((state:RootState) => state.question.loadingAll);
-    const initialized : boolean = useAppSelector((state:RootState) => state.question.initialized);
-    const questions : Question[] = useAppSelector((state:RootState) => state.question.questions);
+    const { data: questions, isLoading, isError } = useGetQuestionsQuery();
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
     const initHyp : boolean = useAppSelector((state:RootState) => state.hypotheses.initialized);
@@ -58,12 +56,6 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
 
     const [count, setCount] = useState<{[id:string] : number}>({});
     const [sortedQuestions, setSortedQuestions] = useState<Question[]>([]);
-
-    useEffect(() => {
-        if (!error && !loading && !initialized) {
-            loadQuestions(dispatch);
-        }
-    }, [])
 
     const countQuestions = (items: Hypothesis[] | LineOfInquiry[]) => {
         let newCount : {[id:string] : number} = {};
@@ -86,7 +78,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }, [lois])
 
     useEffect(() => {
-        let q : Question[] = [ ...questions ];
+        let q : Question[] = questions ? [ ...questions ] : [];
         setSortedQuestions(q.sort(sortQuestions));
     }, [questions, count])
 
@@ -196,9 +188,9 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     return (<Box sx={{display: "flex", justifyContent: "center"}}>
-        {loading ? 
+        {isLoading ? 
             <CircularProgress/>
-        :  (error ? 
+        :  (isError ? 
                 <Box>
                     <span style={{marginRight:'5px'}}>
                         An error has ocurred while loading.

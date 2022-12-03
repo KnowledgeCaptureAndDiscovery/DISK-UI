@@ -1,10 +1,7 @@
 import { Autocomplete, Box, Card, CircularProgress, FormHelperText, MenuItem, Select, styled, TextField } from "@mui/material"
 import { Question, QuestionVariable, varPattern } from "DISK/interfaces"
-import { DISKAPI } from "DISK/API";
-import React from "react";
-import { RootState } from "redux/store";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
+import React, { useEffect } from "react";
+import { useGetQuestionsQuery } from "DISK/queries";
 
 interface QuestionLinkerProps {
     selected: string,
@@ -21,46 +18,21 @@ const TextPart = styled(Box)(({ theme }) => ({
 }));
 
 export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:notifyChange, error:exError=false} : QuestionLinkerProps) => {
-    const dispatch = useAppDispatch();
-    const error = useAppSelector((state:RootState) => state.question.errorAll);
-    const loading = useAppSelector((state:RootState) => state.question.loadingAll);
-    const options = useAppSelector((state:RootState) => state.question.questions);
-
+    const { data: questions, isLoading, isError } = useGetQuestionsQuery();
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
-    //FIXME: use question loader.
-    React.useEffect(() => {
-        if (options.length === 0 && !loading && !error) {
-            dispatch(setLoadingAll());
-            DISKAPI.getQuestions()
-                .then((questions:Question[]) => {
-                    dispatch(setQuestions(questions))
-                    if (selectedId) {
-                        let selectedQuestion : Question = questions.filter((q) => q.id === selectedId)?.[0];
-                        if (selectedQuestion)
-                            onQuestionChange(selectedQuestion);
-                        else
-                            console.warn("Selected question not found on question catalog")
-                    }
-                })
-                .catch(() => {
-                    dispatch(setErrorAll())
-                })
-        }
-    })
-
-    React.useEffect(() => {
-        if (selectedId && options.length > 0) {
-            let selectedQuestion : Question = options.filter((q) => q.id === selectedId)?.[0];
+    useEffect(() => {
+        if (questions && questions.length > 0 && selectedId) {
+            let selectedQuestion : Question = questions.filter((q) => q.id === selectedId)?.[0];
             if (selectedQuestion)
                 onQuestionChange(selectedQuestion);
             else
-                console.warn("Selected question not found on question catalog")
+                console.warn("Selected question '" + selectedId + "'not found on question catalog");
         }
-    }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
-  
+    }, [questions, selectedId]);
+
     const onQuestionChange = (value: Question | null) => {
         if (value) {
             setSelectedQuestion(value);
@@ -107,15 +79,15 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
                 onInputChange={(_,newIn) => setSelectedQuestionLabel(newIn)}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 getOptionLabel={(option) => option.name}
-                options={options}
-                loading={loading}
+                options={questions ? questions : []}
+                loading={isLoading}
                 renderInput={(params) => (
                     <TextField {...params} error={exError} label="Templates"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (
                                 <React.Fragment>
-                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {isLoading && (<CircularProgress color="inherit" size={20} />)}
                                     {params.InputProps.endAdornment}
                                 </React.Fragment>
                             ),

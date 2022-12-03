@@ -68,7 +68,6 @@ export const questionsAPI = createApi({
   reducerPath: 'question',
   baseQuery: fetchBaseQuery({
     baseUrl: REACT_APP_DISK_API,
-    headers: DISK.headers,
   }),
   endpoints: (builder) => ({
     getQuestions: builder.query<Question[], void>({
@@ -81,6 +80,7 @@ export const questionsAPI = createApi({
       query: ({cfg}) => ({
         url: `question/options/`,
         method: 'POST',
+        headers: DISK.headers,
         body: cfg,
       }),
     }),

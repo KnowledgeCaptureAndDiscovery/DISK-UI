@@ -13,7 +13,7 @@ import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES, PATH_TLOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { QuestionPreview } from "components/QuestionPreview";
+import { QuestionPreview } from "components/questions/QuestionPreview";
 import { FileList } from "components/FileList";
 import { loadTLOIs, loadHypothesis } from "redux/loader";
 import { DISKAPI } from "DISK/API";

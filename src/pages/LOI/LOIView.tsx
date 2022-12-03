@@ -9,7 +9,7 @@ import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setSelectedLOI, setLoadingSelected, setErrorSelected } from 'redux/lois';
-import { QuestionLinker } from "components/QuestionLinker";
+import { QuestionLinker } from "components/questions/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';

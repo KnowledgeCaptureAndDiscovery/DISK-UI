@@ -7,9 +7,10 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setLoadingOptions, setOptions, Option } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { loadQuestions } from "redux/loader";
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
 import { StartTimeURI, StopTimeURI, TimeIntervalVariable, TimeTypeURI } from "./TimeIntervalVariable";
+import { useGetQuestionsQuery, useGetDynamicOptionsQuery } from "DISK/queries";
+import { QuestionVariableSelector } from "./QuestionVariableSelector";
 
 export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
 export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
@@ -30,13 +31,11 @@ const TextPart = styled(Box)(({ theme }) => ({
 
 export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questionBindings, onQuestionChange:sendQuestionChange, error:exError=false} : QuestionProps) => {
     const dispatch = useAppDispatch();
-    const error = useAppSelector((state:RootState) => state.question.errorAll);
-    const loading = useAppSelector((state:RootState) => state.question.loadingAll);
-    const initialized = useAppSelector((state:RootState) => state.question.initialized);
-    const options = useAppSelector((state:RootState) => state.question.questions);
-    const varOptions = useAppSelector((state:RootState) => state.question.options);
-    const [formalView, setFormalView] = React.useState<boolean>(false);
+    //const varOptions = useAppSelector((state:RootState) => state.question.options);
 
+    const { data: questions, isLoading, isError } = useGetQuestionsQuery();
+
+    const [formalView, setFormalView] = React.useState<boolean>(false);
     const [nameToId, setNameToId] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
@@ -46,30 +45,26 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
     const [lastQuery, setLastQuery] = React.useState<string>("-1");
     const [pristine, setPristine] = React.useState<boolean>(true);
-
-    const [boundingBoxVariable, setBoundingBoxVariable] = React.useState<{[id:string] : QuestionVariable}>({});
-    const [timeIntervalVariable, setTimeIntervalVariable] = React.useState<{[id:string] : QuestionVariable}>({});
     const [initialBoundingBox, setInitialBoundingBox] = React.useState<{minLat:number,minLng:number,maxLat:number,maxLng:number}|null>(null);
 
+    //MAPS varname -> variable
+    const [boundingBoxVariable, setBoundingBoxVariable] = React.useState<{[name:string] : QuestionVariable}>({});
+    const [timeIntervalVariable, setTimeIntervalVariable] = React.useState<{[name:string] : QuestionVariable}>({});
+    const [questionVariable, setQuestionVariable] = React.useState<{[name:string] : QuestionVariable}>({});
+
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
-  
-    React.useEffect(() => {
-        if (!error && !loading && !initialized) {
-            loadQuestions(dispatch);
-        }
-    }, [])
 
     React.useEffect(() => {
-        if (selectedQuestionId && options.length > 0) {
-            let selectedQuestion : Question = options.filter((q) => q.id === selectedQuestionId)?.[0];
+        if (selectedQuestionId && questions && questions.length > 0) {
+            let selectedQuestion : Question = questions.filter((q) => q.id === selectedQuestionId)?.[0];
             if (selectedQuestion)
                 onQuestionChange(selectedQuestion);
             else
                 console.warn("Selected question not found on question catalog")
         }
-    }, [selectedQuestionId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [selectedQuestionId, questions]);
 
-    React.useEffect(() => {
+    /*React.useEffect(() => {
         if (pristine && questionBindings.length > 0) {
             let newValues : {[id:string] : Option|null} = {};
             let initBB : {minLat:number,minLng:number,maxLat:number,maxLng:number} = {minLat:0,minLng:0,maxLat:0,maxLng:0};
@@ -101,17 +96,27 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             }
         }
     }, [questionBindings, varOptions, pristine]); // eslint-disable-line react-hooks/exhaustive-deps
+    */
   
     const onQuestionChange = (value: Question | null) => {
         if (value && (!selectedQuestion || value.id !== selectedQuestion.id)) {
             // Check question variable types and add it.
-            let bbVars : {[id:string] : QuestionVariable} = {};
-            let tiVars : {[id:string] : QuestionVariable} = {};
-            value.variables.filter(isBoundingBoxVariable).forEach((v:QuestionVariable) => { bbVars[v.variableName] = v; });
-            value.variables.filter(isTimeIntervalVariable).forEach((v:QuestionVariable) => { tiVars[v.variableName] = v; });
+            let simpleVars : {[name:string] : QuestionVariable} = {};
+            let bbVars : {[name:string] : QuestionVariable} = {};
+            let tiVars : {[name:string] : QuestionVariable} = {};
 
+            value.variables.forEach((v:QuestionVariable) => {
+                if (isBoundingBoxVariable(v)) {
+                    bbVars[v.variableName] = v;
+                } else if (isTimeIntervalVariable(v)) {
+                    tiVars[v.variableName] = v;
+                } else {
+                    simpleVars[v.variableName] = v;
+                }
+            });
             setBoundingBoxVariable(bbVars);
             setTimeIntervalVariable(tiVars);
+            setQuestionVariable(simpleVars);
 
             setSelectedQuestion(value);
             loadQuestionDynamicOptions(value);
@@ -178,6 +183,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 dispatch(setLoadingOptions(qv.id))
             });
 
+            //useGetDynamicOptionsQuery({cfg: {id:question.id, bindings:bindings}});
             DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
                     .then((options:{[name:string] : VariableOption[]}) => {
                         question.variables.forEach((qv:QuestionVariable) => {
@@ -329,15 +335,15 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 onInputChange={(_,newIn) => setSelectedQuestionLabel(newIn)}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 getOptionLabel={(option) => option.name}
-                options={options}
-                loading={loading}
+                options={questions ? questions : []}
+                loading={isLoading}
                 renderInput={(params) => (
                     <TextField {...params} error={exError} label="Templates"
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (
                                 <React.Fragment>
-                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {isLoading && (<CircularProgress color="inherit" size={20} />)}
                                     {params.InputProps.endAdornment}
                                 </React.Fragment>
                             ),
@@ -362,33 +368,10 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                                     bindings={initialBoundingBox}/>
                             : (timeIntervalVariable[part] ? 
                                 <TimeIntervalVariable key={`qVars${i}`} variable={timeIntervalVariable[part]} onChange={onBoundingBoxOptionChange}/>
-                                : <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                                    options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
-                                    value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                                    onChange={(_, value: Option | null) => onOptionChange(value, part)}
-                                    inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
-                                    onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
-                                        let newMap = { ...map };
-                                        newMap[nameToId[part]] = newIn;
-                                        return newMap;
-                                    })}
-                                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                                    getOptionLabel={(option) => option.name}
-                                    loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
-                                    renderInput={(params) => (
-                                        <TextField {...params} label={part} variant="standard" InputProps={{
-                                            ...params.InputProps,
-                                            endAdornment: (
-                                                <React.Fragment>
-                                                    {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                    {params.InputProps.endAdornment}
-                                                </React.Fragment>
-                                            ),
-                                        }}/>
-                                    )}
-                                />)
+                                : (selectedQuestion &&
+                                    <QuestionVariableSelector key={`qVars${i}`} question={selectedQuestion} variable={questionVariable[part]} onChange={onBoundingBoxOptionChange}/>)
                             )
-                        )
+                        ))
                     : ""}
                 </Box>
                 <Tooltip arrow title={(formalView? "Hide" : "Show") + " formal expression"}>
@@ -416,3 +399,32 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         : null}
     </Box>;
 }
+
+
+
+                                /*
+                                : <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
+                                    options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
+                                    value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
+                                    onChange={(_, value: Option | null) => onOptionChange(value, part)}
+                                    inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
+                                    onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
+                                        let newMap = { ...map };
+                                        newMap[nameToId[part]] = newIn;
+                                        return newMap;
+                                    })}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    getOptionLabel={(option) => option.name}
+                                    loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label={part} variant="standard" InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}/>
+                                    )}
+                                />)*/

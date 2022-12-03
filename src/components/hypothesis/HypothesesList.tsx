@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { HypothesisPreview } from "components/HypothesisPreview";
-import { QuestionList } from "components/QuestionList";
+import { QuestionList } from "components/questions/QuestionList";
 import { Hypothesis } from "DISK/interfaces"
 
 interface HypothesisListProps {

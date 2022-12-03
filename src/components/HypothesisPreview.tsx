@@ -74,7 +74,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
                 <ScienceIcon sx={{color: "orange"}}/>
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{hypothesis.name}</Typography>
             </Box>
-            <Box>
+            <Box sx={{display:'flex'}}>
                 {displayEditButton && (
                 <Tooltip arrow title={authenticated? "Edit" : "You need to log in to edit"}>
                     <Box sx={{display:"inline-block"}}>
