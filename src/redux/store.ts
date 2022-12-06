@@ -12,6 +12,7 @@ import { hypothesisAPI, questionsAPI } from '../DISK/queries';
 import { setupListeners } from '@reduxjs/toolkit/dist/query';
 import { notificationSlice } from './stores/notifications';
 import { backdropSlice } from './stores/backdrop';
+import { formsSlice } from './stores/forms';
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ export const store = configureStore({
     keycloak: keycloakSlice.reducer,
 
     [notificationSlice.name]: notificationSlice.reducer,
+    [formsSlice.name]: formsSlice.reducer,
     [backdropSlice.name]: backdropSlice.reducer,
     [questionsAPI.reducerPath]: questionsAPI.reducer,
     [hypothesisAPI.reducerPath]: hypothesisAPI.reducer,
