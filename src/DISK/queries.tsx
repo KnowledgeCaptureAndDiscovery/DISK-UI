@@ -23,40 +23,78 @@ export class DISK {
 }
 
 export const hypothesisAPI = createApi({
-  reducerPath: 'hypotheses2',
+  reducerPath: 'hypotheses',
   baseQuery: fetchBaseQuery({
     baseUrl: REACT_APP_DISK_API,
-    headers: DISK.headers,
   }),
+  tagTypes: ['Hypotheses'],
   endpoints: (builder) => ({
     getHypotheses: builder.query<Hypothesis[], void>({
       query: () => 'hypotheses',
+      providesTags: ['Hypotheses']
     }),
     getHypothesisById: builder.query<Hypothesis, string>({
       query: (id: string) => `hypotheses/${id}`,
     }),
-    putHypothesis: builder.mutation<Hypothesis, { id: string; data: Partial<Hypothesis> }>({
-      query: ({ id, data }) => ({
-        url: `hypothesis/${id}`,
+    putHypothesis: builder.mutation<Hypothesis, { data: Partial<Hypothesis> }>({
+      query: ({ data }) => ({
+        url: `hypotheses/${data.id}`,
+        headers: DISK.headers,
         method: 'PUT',
         body: data,
       }),
     }),
-    postHypothesis: builder.query<Hypothesis, {data: Partial<Hypothesis>}>({
+    postHypothesis: builder.mutation<Hypothesis, {data: Partial<Hypothesis>}>({
       query: ({ data }) => ({
         url: `hypotheses`,
+        headers: DISK.headers,
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: ['Hypotheses'],
     }),
-  }),
+
+    deleteHypothesis: builder.mutation<Hypothesis, {id:string}>({
+      // note: an optional `queryFn` may be used in place of `query`
+      query: ({ id }) => ({
+        url: `hypotheses/${id}`,
+        headers: DISK.headers,
+        method: 'DELETE'
+      }),
+      invalidatesTags: ['Hypotheses'],
+      // onQueryStarted is useful for optimistic updates
+      // The 2nd parameter is the destructured `MutationLifecycleApi`
+      async onQueryStarted(
+        arg,
+        { dispatch, getState, queryFulfilled, requestId, extra, getCacheEntry }
+      ) {
+        console.log("A", arg, getState());
+      },
+      // The 2nd parameter is the destructured `MutationCacheLifecycleApi`
+      async onCacheEntryAdded(
+        arg,
+        {
+          dispatch,
+          getState,
+          extra,
+          requestId,
+          cacheEntryRemoved,
+          cacheDataLoaded,
+          getCacheEntry,
+        }
+      ) {
+        console.log("B", arg, getState(), getCacheEntry());
+      },
+    })
+  })
 });
  
 export const {
   useGetHypothesesQuery,
   useGetHypothesisByIdQuery,
   usePutHypothesisMutation,
-  usePostHypothesisQuery,
+  usePostHypothesisMutation,
+  useDeleteHypothesisMutation,
 } = hypothesisAPI;
 
 

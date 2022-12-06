@@ -2,7 +2,7 @@ import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, IconButt
 import { DISKAPI } from "DISK/API";
 import { Hypothesis, idPattern, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
@@ -14,6 +14,8 @@ import { RootState } from "redux/store";
 import { setErrorSelected, setLoadingSelected, setSelectedHypothesis, add as addHypothesis } from "redux/hypothesis";
 import React from "react";
 import { HypothesisRequest } from "DISK/requests";
+import { useGetHypothesisByIdQuery, usePostHypothesisMutation, usePutHypothesisMutation } from "DISK/queries";
+import { closeBackdrop, openBackdrop } from "redux/stores/backdrop";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -28,16 +30,22 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 
 export const HypothesisEditor = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const { hypothesisId } = useParams();
+    const selectedId = hypothesisId as string;
+
     const [searchParams, setSearchParams]= useSearchParams();
-    let navigate = useNavigate();
     let initQuestion = searchParams.get("q");
 
+    const [postHypothesis, { isLoading: isCreating }] = usePostHypothesisMutation();
+    const [putHypothesis, { isLoading: isUpdating }] = usePutHypothesisMutation();
+
     // Redux data
-    const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
-    const selectedId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
-    const loading = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
-    const error = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
-    const dispatch = useAppDispatch();
+    const getByIdQuery = useGetHypothesisByIdQuery(selectedId, {skip:!selectedId});
+    const loading = getByIdQuery.isLoading;
+    const error = getByIdQuery.isError;
+    const hypothesis = getByIdQuery.data;
 
     // Form values:
     const [name, setName] = React.useState("");
@@ -50,7 +58,7 @@ export const HypothesisEditor = () => {
     const [editedGraph, setEditedGraph] = React.useState<Triple[]>([]);
 
     // State errors...
-    const [waiting, setWaiting] = React.useState<boolean>(false);
+    //const [waiting, setWaiting] = React.useState<boolean>(false);
     const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
     const [errorSaveNotification, setErrorSaveNotification] = React.useState<boolean>(false);;
     const [errorName, setErrorName] = React.useState<boolean>(false);
@@ -66,28 +74,13 @@ export const HypothesisEditor = () => {
     }, [initQuestion])
 
     useEffect(() => {
-        let match = PATH_HYPOTHESIS_ID_EDIT_RE.exec(location.pathname);
-        if (match != null && match.length === 2) {
-            let id : string = match[1];
-            if (!loading && !error && selectedId !== id) {
-                dispatch(setLoadingSelected(id));
-                DISKAPI.getHypothesis(id)
-                    .then((hypothesis:Hypothesis) => {
-                        dispatch(setSelectedHypothesis(hypothesis));
-                        loadForm(hypothesis);
-                    })
-                    .catch(() => {
-                        dispatch(setErrorSelected());
-                    }); 
-            } else if (selectedId === id && hypothesis) {
-                loadForm(hypothesis);
-            }
-        } else if (location.pathname === PATH_HYPOTHESIS_NEW) {
-            dispatch(setSelectedHypothesis(null));
+        if (hypothesis) {
+            loadForm(hypothesis);
+        } else {
             clearForm();
             if (initQuestion) setQuestionId(initQuestion);
         }
-    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [hypothesis])
 
     const loadForm = (hypothesis:Hypothesis) => {
         setName(hypothesis.name);
@@ -114,10 +107,9 @@ export const HypothesisEditor = () => {
             return;
         }
 
-        let newHypothesis : Hypothesis | HypothesisRequest;
+        let newHypothesis : Hypothesis;
         let previous : any = {};
         let editing : boolean = false;
-        //TODO: fix dates and author!! (server side)
         if (hypothesis) {
             previous = {...hypothesis};
             editing = true;
@@ -133,20 +125,25 @@ export const HypothesisEditor = () => {
             graph: { triples: editedGraph }
         };
 
-        setWaiting(true);
+        dispatch(openBackdrop());
         console.log("SEND:", newHypothesis);
-        (editing?DISKAPI.updateHypothesis:DISKAPI.createHypothesis)(newHypothesis)
-            .then((savedHypothesis) => {
-                console.log("RETURNED:", savedHypothesis);
-                setSaveNotification(true);
-                setWaiting(false);
-                dispatch(addHypothesis(savedHypothesis));
-                navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+        //(editing?DISKAPI.updateHypothesis:DISKAPI.createHypothesis)(newHypothesis)
+        (editing?putHypothesis:postHypothesis)({data:newHypothesis})
+            .then((data : {data:Hypothesis} | {error: any}) => {
+                let savedHypothesis = (data as {data:Hypothesis}).data;
+                if (savedHypothesis) {
+                    console.log("RETURNED:", savedHypothesis);
+                    setSaveNotification(true);
+                    navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                }
+                //dispatch(addHypothesis(savedHypothesis));
             })
             .catch((e) => {
                 setErrorSaveNotification(true)
                 console.warn(e);
-                setWaiting(false);
+            })
+            .finally(() => {
+                dispatch(closeBackdrop());
             });
     }
 
@@ -171,26 +168,24 @@ export const HypothesisEditor = () => {
             }})
         };
 
-        setWaiting(true);
+        dispatch(openBackdrop());
         console.log("SEND:", newHypothesis);
-        DISKAPI.createHypothesis(newHypothesis)
+        postHypothesis({data:newHypothesis})
             .then((savedHypothesis) => {
                 setSaveNotification(true);
-                setWaiting(false);
-                dispatch(addHypothesis(savedHypothesis));
-                navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                //dispatch(addHypothesis(savedHypothesis));
+                //navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
             })
             .catch((e) => {
                 setErrorSaveNotification(true);
                 console.warn(e);
-                setWaiting(false);
+            })
+            .finally(()=>{
+                dispatch(closeBackdrop());
             });
     };
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
-            <CircularProgress color="inherit" />
-        </Backdrop>
         <Snackbar open={saveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
             <Alert severity="success" sx={{ width: '100%' }} onClose={() => setSaveNotification(false)}>
                 Successfully saved

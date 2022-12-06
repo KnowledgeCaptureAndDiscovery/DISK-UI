@@ -7,10 +7,10 @@ interface ConfirmDialogProps {
     title: string,
     msg: string,
     children: React.ReactNode,
-    disabled: boolean,
+    disabled?: boolean,
 }
 
-export const ConfirmDialog = ({title, msg, onCancel, onConfirm, children, disabled}:ConfirmDialogProps) => {
+export const ConfirmDialog = ({title, msg, onCancel, onConfirm, children, disabled=false}:ConfirmDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const handleOnCancel = () => {

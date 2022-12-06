@@ -12,7 +12,6 @@ import IconButton from '@mui/material/IconButton';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -29,15 +28,14 @@ import { AccountCircle } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
 import NewTabIcon from '@mui/icons-material/OpenInNew';
-
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { Hypothesis, LineOfInquiry } from 'DISK/interfaces';
+import { Hypothesis, idPattern, LineOfInquiry } from 'DISK/interfaces';
 import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
-import { setToken } from 'redux/keycloak';
 import { VERSION } from 'constants/config';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
+import { useGetHypothesisByIdQuery } from 'DISK/queries';
 
 const drawerWidth = 240;
 
@@ -137,7 +135,7 @@ const MainBox = styled(Box)(
 );
 
 
-const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI:LineOfInquiry|null) => {
+const renderTitle = (url:string, selectedHypothesis:Hypothesis|undefined, selectedLOI:LineOfInquiry|null) => {
   if (PATH_HYPOTHESIS_ID_RE.test(url)) {
     return <Box>Hypothesis: { selectedHypothesis ? selectedHypothesis.name : "..."}</Box>
   } else if (PATH_HYPOTHESIS_ID_EDIT_RE.test(url)) {
@@ -182,11 +180,12 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|null, selectedLOI
 export default function MiniDrawer(props: { children: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) {
   const theme = useTheme();
   const location = useLocation();
-  const dispatch = useAppDispatch();
+  console.log(location);
+
+  const {data:selectedHypothesis} = useGetHypothesisByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_HYPOTHESES+ "/")});
 
   const { keycloak, initialized } = useKeycloak();
   
-  const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
   const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
   const selectedTLOI = useAppSelector((state:RootState) => state.tlois.selectedTLOI);
   const username = useAppSelector((state:RootState) => state.keycloak.username);

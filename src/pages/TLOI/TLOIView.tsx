@@ -18,12 +18,12 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { ResultTable } from "components/ResultTable";
 import { WorkflowList } from "components/WorkflowList";
-import { loadHypothesis } from "redux/loader";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
 import { DISKAPI } from "DISK/API";
 import { setErrorSelected, setLoadingSelected, setSelectedTLOI } from "redux/tlois";
+import { useGetHypothesisByIdQuery } from "DISK/queries";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -68,10 +68,12 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const loading = useAppSelector((state:RootState) => state.tlois.loadingSelected);
     const error = useAppSelector((state:RootState) => state.tlois.errorSelected);
 
-    const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
-    const selectedHypId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
-    const loadingHyp = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
-    const errorHyp = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
+    const { data:selectedHypothesis, isLoading:loadingHyp } = useGetHypothesisByIdQuery(TLOI? TLOI.parentHypothesisId : '', {skip:!!TLOI&&!!TLOI.parentHypothesisId});
+
+    //const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
+    //const selectedHypId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
+    //const loadingHyp = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
+    //const errorHyp = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
 
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
     const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
@@ -89,9 +91,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     }, []);
 
     useEffect(() => {
-        if (!!TLOI && TLOI.parentHypothesisId && TLOI.parentHypothesisId !== selectedHypId && !loadingHyp && !errorHyp) {
-            loadHypothesis(dispatch, TLOI.parentHypothesisId);
-        }
         if (!!TLOI && TLOI.notes) {
             setNotes(TLOI.notes);
         }

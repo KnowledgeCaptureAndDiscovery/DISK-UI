@@ -11,6 +11,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { closeBackdrop, openBackdrop } from "redux/stores/backdrop";
 import { DISKAPI } from "DISK/API";
 import { openNotification } from "redux/stores/notifications";
+import { useDeleteHypothesisMutation } from "DISK/queries";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -34,25 +35,22 @@ interface HypothesisPreviewProps {
 export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, displayEditButton=true} : HypothesisPreviewProps) => {
     const dispatch = useAppDispatch();
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const [
+        deleteHypothesis, // This is the mutation trigger
+        { isLoading: isDeleting }, // This is the destructured mutation result
+      ] = useDeleteHypothesisMutation();
 
     const onDeleteHypothesis = () => {
         console.log("DELETING: ", hypothesis.id);
         dispatch(openBackdrop());
         const name = hypothesis.name;
-        DISKAPI.deleteHypothesis(hypothesis.id)
-            .then((b:boolean) => {
-                if (b) {
-                    //dispatch(remove(h.id)); TODO!
-                    dispatch(openNotification({
-                        severity: 'info',
-                        text: 'Hypothesis ' + name + ' was deleted'
-                    }));
-                } else {
-                    dispatch(openNotification({
-                        severity: 'error',
-                        text: 'Error trying to delete ' + name + '. The hypothesis was not deleted'
-                    }));
-                }
+        deleteHypothesis({id: hypothesis.id})
+        //DISKAPI.deleteHypothesis(hypothesis.id)
+            .then(() => {
+                dispatch(openNotification({
+                    severity: 'info',
+                    text: 'Hypothesis ' + name + ' was deleted'
+                }));
             })
             .catch((e) => {
                 dispatch(openNotification({

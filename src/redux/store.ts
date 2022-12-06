@@ -18,7 +18,7 @@ export const store = configureStore({
   reducer: {
     brain: brainSlice.reducer,
     server: serverSlice.reducer,
-    hypotheses: hypothesisSlice.reducer,
+    //hypotheses: hypothesisSlice.reducer,
     //question: questionSlice.reducer,
     lois: loisSlice.reducer,
     workflows: workflowSlice.reducer,

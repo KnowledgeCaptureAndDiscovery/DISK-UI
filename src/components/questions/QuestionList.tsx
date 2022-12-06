@@ -48,10 +48,9 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     const dispatch = useAppDispatch();
     const { data: questions, isLoading, isError } = useGetQuestionsQuery();
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const { data: hypotheses } = useGetHypothesesQuery();
 
-    const initHyp : boolean = useAppSelector((state:RootState) => state.hypotheses.initialized);
     const initLOI : boolean = useAppSelector((state:RootState) => state.lois.initialized);
-    const hypotheses : Hypothesis[] = useAppSelector((state:RootState) => state.hypotheses.hypotheses);
     const lois : LineOfInquiry[] = useAppSelector((state:RootState) => state.lois.LOIs);
 
     const [count, setCount] = useState<{[id:string] : number}>({});
@@ -70,7 +69,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     useEffect(() => {
-        countQuestions(hypotheses);
+        if (hypotheses) countQuestions(hypotheses);
     }, [hypotheses])
 
     useEffect(() => {
@@ -90,7 +89,6 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
 
     useEffect(() => {
         if (expanded) {
-            if (kind === 'hypothesis' && !initHyp) loadHypotheses(dispatch);
             if (kind === 'loi' && !initLOI) loadLOIs(dispatch);
         }
     }, [expanded])
@@ -114,7 +112,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     const renderQuestionHypotheses = (q:Question) => {
-         let myHyp : Hypothesis[] = hypotheses.filter((h:Hypothesis) => h.question === q.id);
+         let myHyp : Hypothesis[] = hypotheses ? hypotheses.filter((h:Hypothesis) => h.question === q.id) : [];
          if (myHyp.length === 0)
             return null
          return <Fragment>
