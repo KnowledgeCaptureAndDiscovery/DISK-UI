@@ -3,7 +3,7 @@ import { ReactKeycloakProvider } from "@react-keycloak/web";
 import { AppRouter } from "AppRouter";
 import { Provider } from "react-redux";
 import { useAppDispatch } from "redux/hooks";
-import { setToken } from "redux/keycloak";
+import { setToken } from "redux/stores/keycloak";
 import { store } from "redux/store";
 import keycloak from "./keycloak";
 

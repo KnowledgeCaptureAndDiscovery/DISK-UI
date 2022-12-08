@@ -18,7 +18,8 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
-import { WorkflowList } from "components/WorkflowList";
+import { WorkflowList } from "components/methods/WorkflowList";
+import { useGetEndpointsQuery } from "DISK/queries";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -55,9 +56,11 @@ export const LOIView = () => {
     const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
     const error = useAppSelector((state:RootState) => state.lois.errorSelected);
 
-    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-    const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
+    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    //const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
+    //const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
+    const { data:endpoints, isLoading:loadingEndpoints } = useGetEndpointsQuery();
+
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>();
     const [formalView, setFormalView] = React.useState<boolean>(false);
@@ -73,9 +76,6 @@ export const LOIView = () => {
                 .catch(() => {
                     dispatch(setErrorSelected());
                 });
-        }
-        if (!initializedEndpoint) {
-            loadDataEndpoints(dispatch);
         }
     }
 

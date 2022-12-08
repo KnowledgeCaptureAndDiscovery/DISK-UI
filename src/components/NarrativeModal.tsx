@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Hypothesis, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { WorkflowList } from "./WorkflowList";
+import { WorkflowList } from "./methods/WorkflowList";
 
 interface NarrativeModalProps {
     hypothesis : Hypothesis,

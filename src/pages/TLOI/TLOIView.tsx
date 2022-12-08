@@ -17,13 +17,13 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { ResultTable } from "components/ResultTable";
-import { WorkflowList } from "components/WorkflowList";
+import { WorkflowList } from "components/methods/WorkflowList";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
 import { DISKAPI } from "DISK/API";
 import { setErrorSelected, setLoadingSelected, setSelectedTLOI } from "redux/tlois";
-import { useGetHypothesisByIdQuery } from "DISK/queries";
+import { useGetEndpointsQuery, useGetHypothesisByIdQuery } from "DISK/queries";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -69,6 +69,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const error = useAppSelector((state:RootState) => state.tlois.errorSelected);
 
     const { data:selectedHypothesis, isLoading:loadingHyp } = useGetHypothesisByIdQuery(TLOI? TLOI.parentHypothesisId : '', {skip:!!TLOI&&!!TLOI.parentHypothesisId});
+    const { data:endpoints, isLoading:loadingEndpoints } = useGetEndpointsQuery();
 
     //const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
     //const selectedHypId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
@@ -76,19 +77,13 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     //const errorHyp = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
 
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
-    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-    const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
+    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    //const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
+    //const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
 
     const [waiting, setWaiting] = React.useState<boolean>(false);;
     const [doneNotification, setDoneNotification] = React.useState<boolean>(false);
     const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
-
-    useEffect(() => {
-        if (!initializedEndpoint) {
-            loadDataEndpoints(dispatch);
-        }
-    }, []);
 
     useEffect(() => {
         if (!!TLOI && TLOI.notes) {
@@ -97,7 +92,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     }, [TLOI]);
 
     useEffect(() => {
-        if (!!TLOI && TLOI.dataSource && endpoints.length > 0) {
+        if (!!TLOI && TLOI.dataSource && !!endpoints && endpoints.length > 0) {
             for (let i = 0; i < endpoints.length; i++) {
                 let endpoint : DataEndpoint = endpoints[i];
                 if (endpoint.url === TLOI.dataSource) {
@@ -241,16 +236,12 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                 <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
                 {loadingEndpoints ? 
                     <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    (dataSource ?
-                        <Fragment>
-                            <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                            <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                                {renderDescription(dataSource.description)}
-                            </Box>
-                        </Fragment>
-                    :
-                        null
-                    )
+                    (dataSource && (<Fragment>
+                        <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
+                        <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
+                            {renderDescription(dataSource.description)}
+                        </Box>
+                    </Fragment>))
                 }
             </Box>
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>

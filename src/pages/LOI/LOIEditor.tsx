@@ -16,11 +16,12 @@ import { QuestionLinker } from "components/questions/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
-import { WorkflowList } from "components/WorkflowList";
+import { WorkflowList } from "components/methods/WorkflowList";
 import { LineOfInquiryRequest } from "DISK/requests";
 import { QueryTester } from "components/QueryTester";
 import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
+import { useGetEndpointsQuery } from "DISK/queries";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -50,9 +51,10 @@ export const LOIEditor = () => {
     const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
     const error = useAppSelector((state:RootState) => state.lois.errorSelected);
 
-    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    const initEndpoints : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-    const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
+    const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
+    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    //const initEndpoints : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
+    //const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
 
     const [sparqlVariableNames, setSparqlVariableNames] = React.useState<string[]>([]);
     const [sparqlVariableOptions, setSparqlVariableOptions] = React.useState<string[]>([]);
@@ -98,7 +100,7 @@ export const LOIEditor = () => {
     }, [sparqlVariableNames, dataQuery]);
 
     useEffect(() => {
-        if (selectedDataSource) {
+        if (selectedDataSource && !!endpoints) {
             for (let i = 0; i < endpoints.length; i++) {
                 let ds : DataEndpoint = endpoints[i];
                 if (selectedDataSource === ds.url) {
@@ -108,14 +110,6 @@ export const LOIEditor = () => {
         }
     }, [selectedDataSource, endpoints])
     
-    const loadEndpoints = () => {
-        if (!initEndpoints && !loadingEndpoints) {
-            loadDataEndpoints(dispatch);
-        }
-    };
-
-    useEffect(loadEndpoints, [endpoints]);// eslint-disable-line react-hooks/exhaustive-deps
-
     useEffect(() => {
         let match = PATH_LOI_ID_EDIT_RE.exec(location.pathname);
         if (match != null && match.length === 2) {
@@ -347,7 +341,7 @@ export const LOIEditor = () => {
                         <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
                                 error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
                             <MenuItem value="" disabled> None </MenuItem>
-                            {endpoints.map((endpoint:DataEndpoint) => 
+                            {(endpoints||[]).map((endpoint:DataEndpoint) => 
                                 <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
                                     {endpoint.name}
                                 </MenuItem>)

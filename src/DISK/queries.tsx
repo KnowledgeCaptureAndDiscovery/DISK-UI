@@ -1,6 +1,6 @@
 import { REACT_APP_DISK_API } from "config";
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Hypothesis, Question, QuestionOptionsRequest, VariableOption } from "./interfaces";
+import { DataEndpoint, Hypothesis, Method, MethodInput, Question, QuestionOptionsRequest, VariableOption, Vocabularies } from "./interfaces";
  
 
 export class DISK {
@@ -62,29 +62,6 @@ export const hypothesisAPI = createApi({
         method: 'DELETE'
       }),
       invalidatesTags: ['Hypotheses'],
-      // onQueryStarted is useful for optimistic updates
-      // The 2nd parameter is the destructured `MutationLifecycleApi`
-      async onQueryStarted(
-        arg,
-        { dispatch, getState, queryFulfilled, requestId, extra, getCacheEntry }
-      ) {
-        console.log("A", arg, getState());
-      },
-      // The 2nd parameter is the destructured `MutationCacheLifecycleApi`
-      async onCacheEntryAdded(
-        arg,
-        {
-          dispatch,
-          getState,
-          extra,
-          requestId,
-          cacheEntryRemoved,
-          cacheDataLoaded,
-          getCacheEntry,
-        }
-      ) {
-        console.log("B", arg, getState(), getCacheEntry());
-      },
     })
   })
 });
@@ -130,3 +107,45 @@ export const {
   useGetVariableOptionsQuery,
   useGetDynamicOptionsQuery,
 } = questionsAPI;
+
+
+export const serverApi = createApi({
+  reducerPath: 'server',
+  baseQuery: fetchBaseQuery({
+    baseUrl: REACT_APP_DISK_API,
+  }),
+  endpoints: (builder) => ({
+    getEndpoints: builder.query<DataEndpoint[], void>({
+      query: () => 'server/endpoints',
+    }),
+    getVocabularies: builder.query<Vocabularies, void>({
+      query: () => 'vocabulary',
+    }),
+  }),
+});
+ 
+export const {
+  useGetEndpointsQuery,
+  useGetVocabulariesQuery,
+} = serverApi;
+
+
+export const workflowsApi = createApi({
+  reducerPath: 'workflows',
+  baseQuery: fetchBaseQuery({
+    baseUrl: REACT_APP_DISK_API,
+  }),
+  endpoints: (builder) => ({
+    getWorkflows: builder.query<Method[], void>({
+      query: () => 'workflows',
+    }),
+    getWorkflowVariables: builder.query<MethodInput[], {id:string, source:string}>({
+      query: ({id, source}) => `workflows/${source}/${id}`,
+    }),
+  }),
+});
+ 
+export const {
+  useGetWorkflowsQuery,
+  useGetWorkflowVariablesQuery,
+} = workflowsApi;

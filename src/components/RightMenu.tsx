@@ -180,7 +180,6 @@ const renderTitle = (url:string, selectedHypothesis:Hypothesis|undefined, select
 export default function MiniDrawer(props: { children: string | number | boolean | {} | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactNodeArray | React.ReactPortal | null | undefined; }) {
   const theme = useTheme();
   const location = useLocation();
-  console.log(location);
 
   const {data:selectedHypothesis} = useGetHypothesisByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_HYPOTHESES+ "/")});
 
