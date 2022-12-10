@@ -1,15 +1,12 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, Typography } from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
-import { DISKAPI } from "DISK/API";
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
 import { DataEndpoint } from "DISK/interfaces";
 import { ResultTable } from "./ResultTable";
-import { useGetEndpointsQuery } from "DISK/queries";
+import { useGetEndpointsQuery } from "redux/apis/server";
 
 interface QueryTesterProps {
     name?: string,

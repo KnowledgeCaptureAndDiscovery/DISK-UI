@@ -2,8 +2,8 @@ import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, T
 import { Method, VariableBinding, Workflow } from "DISK/interfaces";
 import React, { useEffect } from "react"
 import AddIcon from '@mui/icons-material/Add';
-import { useGetWorkflowsQuery } from "DISK/queries";
 import { MethodVariableList } from "./MethodVariableList";
+import { useGetWorkflowsQuery } from "redux/apis/workflows";
 
 interface WorkflowEditorProps {
     options:    string[],

@@ -3,7 +3,7 @@ import { DataEndpoint } from "DISK/interfaces";
 import StorageIcon from '@mui/icons-material/Storage';
 import { renderDescription } from "DISK/util";
 import { QueryTester } from "components/QueryTester";
-import { useGetEndpointsQuery } from "DISK/queries";
+import { useGetEndpointsQuery } from "redux/apis/server";
 
 export const DataView = () => {
     const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();

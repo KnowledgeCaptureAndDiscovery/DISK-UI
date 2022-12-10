@@ -2,7 +2,7 @@ import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, Toolt
 import { DISKAPI } from "DISK/API";
 import { LineOfInquiry, idPattern, DataEndpoint } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
@@ -16,10 +16,10 @@ import { StreamLanguage } from '@codemirror/language';
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
 import { WorkflowList } from "components/methods/WorkflowList";
-import { useGetEndpointsQuery } from "DISK/queries";
+import { useGetEndpointsQuery } from "redux/apis/server";
+import { useGetLOIByIdQuery } from "redux/apis/lois";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -51,33 +51,15 @@ export const LOIView = () => {
     const dispatch = useAppDispatch();
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
-    const LOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
-    const selectedId = useAppSelector((state:RootState) => state.lois.selectedId);
-    const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
-    const error = useAppSelector((state:RootState) => state.lois.errorSelected);
+    const { loiId } = useParams();
+    const selectedId = loiId as string;
 
-    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    //const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-    //const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
-    const { data:endpoints, isLoading:loadingEndpoints } = useGetEndpointsQuery();
+    const {data:LOI, isLoading:loading, isError:error} = useGetLOIByIdQuery(selectedId, {skip:!selectedId});
+    const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
 
     const [selectedDataSource, setSelectedDataSource] = React.useState("");
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>();
     const [formalView, setFormalView] = React.useState<boolean>(false);
-
-    const loadLOI = () => {
-        let id : string = location.pathname.replace(idPattern, '');
-        if (!!id && !loading && !error && selectedId !== id) {
-            dispatch(setLoadingSelected(id));
-            DISKAPI.getLOI(id)
-                .then((LOI:LineOfInquiry) => {
-                    dispatch(setSelectedLOI(LOI));
-                })
-                .catch(() => {
-                    dispatch(setErrorSelected());
-                });
-        }
-    }
 
     useEffect(() => {
         if (LOI) {
@@ -95,8 +77,6 @@ export const LOIView = () => {
     }
 
     useEffect(updateDataSourceLabel, [endpoints, selectedDataSource]);
-
-    useEffect(loadLOI, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
         {loading ? 

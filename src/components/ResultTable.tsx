@@ -1,7 +1,7 @@
 import { Box, Button, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Link as MuiLink, } from "@mui/material";
-import { DISKAPI } from "DISK/API";
 import { DataEndpoint } from "DISK/interfaces";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryExternalSourceQuery } from "redux/apis/server";
 
 interface ResultTableProps {
   query: string;
@@ -13,46 +13,37 @@ interface ResultTableProps {
 const MAX_PER_PAGE = 10;
 
 export const ResultTable = ({query, variables, dataSource, indexes = true}: ResultTableProps) => {
-  const [results, setResults] = useState<{ [varName: string]: string[] }>({});
-  const [waiting, setWaiting] = useState(false);
   const [total, setTotal] = useState(0);
   const [nCols, setNCols] = useState(0);
   const [curPage, setCurPage] = useState(0);
+  const {data:results,isLoading:waiting,isError} = useQueryExternalSourceQuery({dataSource:dataSource.url,query:query,variables:variables.split(" ")});
 
   useEffect(() => {
-    if (!!query && !!variables && !!dataSource) {
-      setWaiting(true);
-      DISKAPI.testQuery(dataSource.url, query, variables.split(" ")).then(
-        (results) => {
-          let cols: number = Object.values(results).length;
-          if (cols > 0) {
-            setNCols(cols);
-            setTotal(Object.values(results)[0].length);
-          } else {
-            setNCols(0);
-            setTotal(0);
-          }
-          // If the data source has a prefix resolution, we replace it over the prefix.
-          if (dataSource.prefix && dataSource.namespace && dataSource.prefixResolution) {
-            Object.keys(results).forEach((varName: string) => {
-              let newValues: string[] = [];
-              results[varName].forEach((val) =>
-                newValues.push(
-                  val.replace(dataSource.namespace, dataSource.prefixResolution)
-                )
-              );
-              results[varName] = newValues;
-            });
-          }
-          setResults(results);
-          setWaiting(false);
-        }
-      );
+    if (results) {
+      let cols: number = Object.values(results).length;
+      setNCols(cols);
+      setTotal(Object.values(results)[0].length);
+    } else {
+      setNCols(0);
+      setTotal(0);
     }
-  }, [query, variables, dataSource]);
+
+    // If the data source has a prefix resolution, we replace it over the prefix.
+    if (results && dataSource.prefix && dataSource.namespace && dataSource.prefixResolution) {
+      Object.keys(results).forEach((varName: string) => {
+        let newValues: string[] = [];
+        results[varName].forEach((val) =>
+          newValues.push(
+            val.replace(dataSource.namespace, dataSource.prefixResolution)
+          )
+        );
+        results[varName] = newValues;
+      });
+    }
+  }, [results]);
 
   const renderText = (txt: string) => {
-    if (txt !== null) {
+    if (txt) {
       let name: string = txt.replace(/.*\//g, "").replace(/.*#/g, "");
       if (txt.startsWith("http"))
         return (
@@ -68,7 +59,7 @@ export const ResultTable = ({query, variables, dataSource, indexes = true}: Resu
     <Box>
       {waiting ? (
         <Skeleton />
-      ) : Object.keys(results).length > 0 ? (
+      ) : results && Object.keys(results).length > 0 ? (
         <Box>
           <TableContainer sx={{ display: "flex", justifyContent: "center" }}>
             <Table sx={{ width: "unset", border: "1px solid rgb(223 223 223)", borderRadius: "5px", mt: "4px", }}>

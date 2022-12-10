@@ -1,5 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
-import { DISKAPI } from "DISK/API";
+import { Alert, Box, Button, Card, Divider, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
 import { Hypothesis, idPattern, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -7,15 +6,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
-import { PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_NEW } from "constants/routes";
+import { PATH_HYPOTHESES } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
-import { setErrorSelected, setLoadingSelected, setSelectedHypothesis, add as addHypothesis } from "redux/hypothesis";
+import { useAppDispatch } from "redux/hooks";
 import React from "react";
-import { HypothesisRequest } from "DISK/requests";
-import { useGetHypothesisByIdQuery, usePostHypothesisMutation, usePutHypothesisMutation } from "DISK/queries";
-import { closeBackdrop, openBackdrop } from "redux/stores/backdrop";
+import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
+import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -29,7 +25,6 @@ const TypographySubtitle = styled(Typography)(({ theme }) => ({
 }));
 
 export const HypothesisEditor = () => {
-    const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { hypothesisId } = useParams();
@@ -42,10 +37,7 @@ export const HypothesisEditor = () => {
     const [putHypothesis, { isLoading: isUpdating }] = usePutHypothesisMutation();
 
     // Redux data
-    const getByIdQuery = useGetHypothesisByIdQuery(selectedId, {skip:!selectedId});
-    const loading = getByIdQuery.isLoading;
-    const error = getByIdQuery.isError;
-    const hypothesis = getByIdQuery.data;
+    const {data :hypothesis, isLoading:loading, isError:error} = useGetHypothesisByIdQuery(selectedId, {skip:!selectedId});
 
     // Form values:
     const [name, setName] = React.useState("");

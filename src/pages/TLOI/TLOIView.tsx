@@ -1,7 +1,7 @@
 import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
-import { DataEndpoint, idPattern, TriggeredLineOfInquiry } from "DISK/interfaces";
+import { DataEndpoint, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { styled } from '@mui/material/styles';
@@ -11,7 +11,6 @@ import { RootState } from "redux/store";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
-import { loadTLOI } from "redux/loader";
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -19,11 +18,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { ResultTable } from "components/ResultTable";
 import { WorkflowList } from "components/methods/WorkflowList";
 import { QuestionPreview } from "components/questions/QuestionPreview";
-import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
-import { DISKAPI } from "DISK/API";
-import { setErrorSelected, setLoadingSelected, setSelectedTLOI } from "redux/tlois";
-import { useGetEndpointsQuery, useGetHypothesisByIdQuery } from "DISK/queries";
+import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { useGetEndpointsQuery } from "redux/apis/server";
+import { useGetTLOIByIdQuery, usePostTLOIMutation, usePutTLOIMutation } from "redux/apis/tlois";
+import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
+import { openNotification } from "redux/slices/notifications";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -56,34 +56,19 @@ const TypographySection = styled(Typography)(({ theme }) => ({
 }));
 
 export const TLOIView = ({edit} : TLOIViewProps) => {
-    const location = useLocation();
     const dispatch = useAppDispatch();
+    const {tloiId} = useParams();
+    const selectedId = tloiId as string; // Could be undefined?
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
     const [formalView, setFormalView] = React.useState<boolean>(false);
     const [editMode, setEditMode] = React.useState<boolean>(false);
     const [notes, setNotes] = React.useState<string>("");
 
-    const TLOI = useAppSelector((state:RootState) => state.tlois.selectedTLOI);
-    const selectedId = useAppSelector((state:RootState) => state.tlois.selectedId);
-    const loading = useAppSelector((state:RootState) => state.tlois.loadingSelected);
-    const error = useAppSelector((state:RootState) => state.tlois.errorSelected);
-
+    const { data:TLOI, isError:error, isLoading:loading} = useGetTLOIByIdQuery(selectedId);
     const { data:selectedHypothesis, isLoading:loadingHyp } = useGetHypothesisByIdQuery(TLOI? TLOI.parentHypothesisId : '', {skip:!!TLOI&&!!TLOI.parentHypothesisId});
     const { data:endpoints, isLoading:loadingEndpoints } = useGetEndpointsQuery();
-
-    //const selectedHypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
-    //const selectedHypId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
-    //const loadingHyp = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
-    //const errorHyp = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
-
+    const [putTLOI, { isLoading: isUpdating }] = usePutTLOIMutation();
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
-    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    //const initializedEndpoint : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-    //const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
-
-    const [waiting, setWaiting] = React.useState<boolean>(false);;
-    const [doneNotification, setDoneNotification] = React.useState<boolean>(false);
-    const [errorNotification, setErrorNotification] = React.useState<boolean>(false);
 
     useEffect(() => {
         if (!!TLOI && TLOI.notes) {
@@ -103,63 +88,33 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         }
     }, [TLOI, endpoints]);
 
-    useEffect(() => {
-        let id : string = location.pathname.replace(idPattern, '');
-        if (!!id && !loading && !error && selectedId !== id) {
-            loadTLOI(dispatch, id);
-        }
-    }, [location, dispatch, error, loading, selectedId]);
-
     const updateNotes = () => {
         if (TLOI) {
             let editedTLOI : TriggeredLineOfInquiry = { ...TLOI, notes: notes };
-            setSelectedTLOI(null);
-            setLoadingSelected(editedTLOI.id);
-            setWaiting(true);
-            DISKAPI.updateTLOI(editedTLOI)
-                    .then((tloi:TriggeredLineOfInquiry) => {
-                        //FIXME: UI does not update.
-                        console.log("SUCCESS:", tloi.notes);
-                        setNotes(tloi.notes);
-                        setSelectedTLOI(tloi);
-                        setDoneNotification(true);
+            dispatch(openBackdrop())
+            putTLOI({data:editedTLOI})
+                    .then((data : {data:TriggeredLineOfInquiry} | {error: any}) => {
+                        let savedTLOI = (data as {data:TriggeredLineOfInquiry}).data;
+                        if (savedTLOI) {
+                            //FIXME: UI does not update.
+                            console.log("SUCCESS:", savedTLOI.notes);
+                            setNotes(savedTLOI.notes);
+                            dispatch(openNotification({severity:'success', text:'Notes were updated successfully'}));
+                        }
                     })
                     .catch((e) =>{
-                        setErrorNotification(true);
-                        setErrorSelected();
+                        dispatch(openNotification({severity:'error', text:'Error trying to update notes. TLOI was not edited'}));
                         console.warn(e);
                     })
                     .finally(() => {
-                        setWaiting(false);
+                        dispatch(closeBackdrop())
                         setEditMode(false);
                     })
         }
         return;
     }
 
-    const handleNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setDoneNotification(false);
-        setErrorNotification(false);
-    };
-
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
-            <CircularProgress color="inherit" />
-        </Backdrop>
-        <Snackbar open={doneNotification} autoHideDuration={3000} onClose={handleNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="info" sx={{ width: '100%' }} onClose={handleNotificationClose}>
-                Notes were updated successfully
-            </Alert>
-        </Snackbar>
-        <Snackbar open={errorNotification} autoHideDuration={3000} onClose={handleNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="error" sx={{ width: '100%' }} onClose={handleNotificationClose}>
-                Error trying to update notes. TLOI was not edited
-            </Alert>
-        </Snackbar>
-
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
@@ -178,14 +133,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         }
         <Divider/>
         <Box sx={{padding:"10px"}}>
-            {
-            //<Box>
-            //    <TypographyLabel>Description: </TypographyLabel>
-            //    <TypographyInline>
-            //        {!loading && !!TLOI ? TLOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}} />}
-            //    </TypographyInline>
-            //</Box>
-            }
             {!loadingHyp && !!selectedHypothesis ? 
                 <QuestionPreview selected={selectedHypothesis.question as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis or question tested"/>
                 : <Skeleton/>}

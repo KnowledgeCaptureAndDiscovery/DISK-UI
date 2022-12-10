@@ -1,11 +1,11 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { Question, QuestionVariable, VariableOption } from "DISK/interfaces";
-import { useGetDynamicOptionsQuery } from "DISK/queries";
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { setQuestionBindings } from "redux/stores/forms";
+import { setQuestionBindings } from "redux/slices/forms";
 import { OptionBinding } from "./BoundingBoxMap";
+import { useGetDynamicOptionsQuery } from "redux/apis/questions";
 
 interface QuestionVariableProps {
     question: Question,
@@ -31,8 +31,21 @@ export const QuestionVariableSelector = ({question, variable, onChange}: Questio
         }
     }, [data, variable]);
 
+    useEffect(() => {
+        if (options && bindings) {
+            let curValue : string = bindings[variable.id];
+            if (options.length === 0 || !curValue || !options.some(o => o.value === curValue)) {
+                setSelectedOption(null);
+                setSelectedOptionLabel("");
+            } else {
+                let selectedOption : VariableOption = options.filter(o => o.value === curValue)[0];
+                setSelectedOption(selectedOption);
+                setSelectedOptionLabel(selectedOption.label);
+            }
+        }
+    }, [bindings, options]);
+
     function onOptionChange(value: VariableOption|null): void {
-        setSelectedOption(value);
         let newBindings = { ...bindings };
         if (value) {
             newBindings[variable.variableName] = value.value;
@@ -40,6 +53,15 @@ export const QuestionVariableSelector = ({question, variable, onChange}: Questio
             delete newBindings[variable.variableName];
         }
         dispatch(setQuestionBindings(newBindings));
+        if (onChange) onChange([
+            {
+                variable: variable,
+                value: value != null ? {
+                    id: value.value,
+                    name: value.label,
+                } : null
+            } as OptionBinding,
+        ]);
     }
 
     return (

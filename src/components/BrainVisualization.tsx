@@ -8,6 +8,7 @@ import { Box } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { addMesh, BrainFiles, setFilelist } from "redux/brain";
 import { RootState } from "redux/store";
+import { useGetPublicFileQuery } from "redux/apis/server";
 
 export interface BrainCfgItem {
     name: string,
@@ -20,8 +21,7 @@ interface BrainVisualizationProps {
 
 export const BrainVisualization = ({configuration}: BrainVisualizationProps) => {
     const dispatch = useAppDispatch();
-    const [error, setError] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const {data:jsonString, isLoading:loading, isError} = useGetPublicFileQuery("files.json");
 
     const canvas = useRef<null|HTMLCanvasElement>(null);
     const [meshes, setMeshes] = useState<Mesh<BufferGeometry,MeshLambertMaterial>[]>([]); // Brain parts
@@ -106,23 +106,11 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     }, [meshes, loading, configuration]);
 
     useEffect(() => {
-        if (!init) {
-            setLoading(true);
-            DISKAPI.getPublic("files.json")
-                .then((text:string) => {
-                    let ok : boolean = text.startsWith('{');
-                    setError(!ok)
-                    if (ok) {
-                        dispatch(setFilelist(JSON.parse(text)));
-                        console.log("asd", Object.keys(JSON.parse(text)["filename"]).length );
-                    }
-                })
-                .catch(() => {
-                    setError(true);
-                    setLoading(false);
-                })
+        if (jsonString) {
+            dispatch(setFilelist(JSON.parse(jsonString)));
+            console.log("asd", Object.keys(JSON.parse(jsonString)["filename"]).length);
         }
-    }, [])
+    }, [jsonString])
 
     useEffect(() => {
         if (filelist) {
@@ -157,17 +145,8 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
                 mesh.rotation.z = (Math.PI * 1.5 * (name.indexOf("rh_") == -1 ? 1 : -1));
                 mesh.name = name;
                 return mesh
-                //newMeshes.push(mesh);
-
-                /*setMeshes((cur) => {
-                    let next = [...cur];
-                    next.push(mesh);
-                    return next;
-                })*/
             });
-
             setMeshes(newMeshes);
-            setLoading(false);
         }
     }, [meshesStr]);
 

@@ -14,19 +14,18 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { FileList } from "components/FileList";
-import { loadTLOIs } from "redux/loader";
 import { DISKAPI } from "DISK/API";
-import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
-import { TLOIEdit } from "components/TLOIEdit";
+import { TLOIEdit } from "components/tlois/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
 import { ShinyModal } from "components/ShinyModal";
 import { NarrativeModal } from "components/NarrativeModal";
 import { BrainModal } from "components/BrainModal";
 
-import { useGetHypothesisByIdQuery } from "DISK/queries";
-import { closeBackdrop, openBackdrop } from "redux/stores/backdrop";
-import { openNotification } from "redux/stores/notifications";
+import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
+import { openNotification } from "redux/slices/notifications";
 import { ConfirmDialog } from "components/ConfirmDialog";
+import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { useDeleteTLOIMutation, useExecuteHypothesisByIdMutation, useGetTLOIsQuery, usePostTLOIMutation } from "redux/apis/tlois";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -61,27 +60,18 @@ export const HypothesisView = () => {
 
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
-    const getByIdQuery = useGetHypothesisByIdQuery(selectedId);
-    const loading = getByIdQuery.isLoading;
-    const error = getByIdQuery.isError;
-    const hypothesis = getByIdQuery.data;
-
-    const TLOIs = useAppSelector((state:RootState) => state.tlois.TLOIs);
-    const TLOIloading = useAppSelector((state:RootState) => state.tlois.loadingAll);
-    const TLOIerror = useAppSelector((state:RootState) => state.tlois.errorAll);
-    const TLOIInit = useAppSelector((state:RootState) => state.tlois.initialized);
+    const { data:hypothesis, isError:error, isLoading:loading} = useGetHypothesisByIdQuery(selectedId);
+    const { data:TLOIs, isLoading:TLOIloading} = useGetTLOIsQuery();
+    const [postTLOI, { isLoading: isCreating }] = usePostTLOIMutation();
+    const [deleteTLOI, { isLoading: isDeleting }] = useDeleteTLOIMutation();
+    const [execHypothesis, { isLoading: isExecuting }] = useExecuteHypothesisByIdMutation();
 
     const [myTLOIs, setMyTLOIs] = useState<TLOIMap>({});
     const [newTlOIs, setNewTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
 
     useEffect(() => {
-        if (!TLOIInit)
-            loadTLOIs(dispatch);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
         let map : TLOIMap = {};
-        TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
+        (TLOIs||[]).filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
             if (!map[tloi.parentLoiId]) {
                 map[tloi.parentLoiId] = {
                     value: [],
@@ -119,15 +109,12 @@ export const HypothesisView = () => {
         console.log("DELETING: ", id);
         dispatch(openBackdrop());
 
-        DISKAPI.deleteTLOI(id)
-            .then((b:boolean) => {
-                if (b) {
-                    dispatch(removeTLOI(id));
-                    dispatch(openNotification({
-                        severity: 'info',
-                        text: "Triggered Line of Inquiry was deleted"
-                    }));
-                }
+        deleteTLOI({id:id})
+            .then(() => {
+                dispatch(openNotification({
+                    severity: 'info',
+                    text: "Triggered Line of Inquiry was deleted"
+                }));
             })
             .catch((e) => {
                 dispatch(openNotification({
@@ -147,16 +134,28 @@ export const HypothesisView = () => {
             severity: 'info',
             text: "Looking for new executions..."
         }));
-        DISKAPI.queryHypothesis(selectedId)
-                .then((tlois:TriggeredLineOfInquiry[]) => {
-                    setNewTLOIs(tlois.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL'));
-                    tlois.forEach((tloi:TriggeredLineOfInquiry) => {
-                        dispatch(addTLOI(tloi));
-                    });
+        execHypothesis(selectedId)
+                .then((value: {data:TriggeredLineOfInquiry[]} | {error:any}) => {
+                    let newTLOIs = (value as {data:TriggeredLineOfInquiry[]}).data;
+                    if (newTLOIs) {
+                        setNewTLOIs(newTLOIs.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL'));
+                        dispatch(openNotification({
+                            severity: 'success',
+                            text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                        }));
+                    } else if ((value as {error:any}).error) {
+                        dispatch(openNotification({
+                            severity: 'error',
+                            text: "An error has ocurred while searching new executions."
+                        }));
+                    }
+                })
+                .catch((e) => {
                     dispatch(openNotification({
-                        severity: 'success',
-                        text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                        severity: 'error',
+                        text: "An error has ocurred while searching new executions."
                     }));
+                    console.warn(e);
                 })
                 .finally(() => {
                     dispatch(closeBackdrop());
@@ -169,14 +168,17 @@ export const HypothesisView = () => {
             severity: 'info',
             text: "Sending new execution..."
         }));
-        DISKAPI.createTLOI(tloi)
-                .then((tloi:TriggeredLineOfInquiry) => {
-                    setNewTLOIs([tloi]);
-                    dispatch(addTLOI(tloi));
-                    dispatch(openNotification({
-                        severity: 'success',
-                        text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
-                    }));
+        postTLOI({data:tloi})
+                .then((data : {data:TriggeredLineOfInquiry} | {error: any}) => {
+                    let savedTLOI = (data as {data:TriggeredLineOfInquiry}).data;
+                    if (savedTLOI) {
+                        console.log("RETURNED:", savedTLOI);
+                        setNewTLOIs([tloi]);
+                        dispatch(openNotification({
+                            severity: 'success',
+                            text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                        }));
+                    }
                 })
                 .finally(() => {
                     dispatch(closeBackdrop());

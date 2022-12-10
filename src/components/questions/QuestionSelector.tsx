@@ -2,15 +2,15 @@ import { Autocomplete, Box, Card, CircularProgress, FormHelperText, IconButton, 
 import { idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple, VariableOption } from "DISK/interfaces"
 import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
-import { RootState } from "redux/store";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch } from "redux/hooks";
 import { setLoadingOptions, setOptions, Option } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
 import { StartTimeURI, StopTimeURI, TimeIntervalVariable, TimeTypeURI } from "./TimeIntervalVariable";
-import { useGetQuestionsQuery, useGetDynamicOptionsQuery } from "DISK/queries";
 import { QuestionVariableSelector } from "./QuestionVariableSelector";
+import { useGetQuestionsQuery } from "redux/apis/questions";
+import { setQuestionBindings, SimpleMap } from "redux/slices/forms";
 
 export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
 export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
@@ -31,8 +31,6 @@ const TextPart = styled(Box)(({ theme }) => ({
 
 export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questionBindings, onQuestionChange:sendQuestionChange, error:exError=false} : QuestionProps) => {
     const dispatch = useAppDispatch();
-    //const varOptions = useAppSelector((state:RootState) => state.question.options);
-
     const { data: questions, isLoading, isError } = useGetQuestionsQuery();
 
     const [formalView, setFormalView] = React.useState<boolean>(false);
@@ -42,9 +40,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
     const [selectedOptionValues, setSelectedOptionValues] = React.useState<{[id:string] : Option|null}>({});
-    const [selectedOptionLabels, setSelectedOptionLabels] = React.useState<{[id:string] : string}>({});
     const [lastQuery, setLastQuery] = React.useState<string>("-1");
-    const [pristine, setPristine] = React.useState<boolean>(true);
     const [initialBoundingBox, setInitialBoundingBox] = React.useState<{minLat:number,minLng:number,maxLat:number,maxLng:number}|null>(null);
 
     //MAPS varname -> variable
@@ -97,6 +93,15 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         }
     }, [questionBindings, varOptions, pristine]); // eslint-disable-line react-hooks/exhaustive-deps
     */
+
+    React.useEffect(() => {
+        let newBindings : SimpleMap = {};
+        (questionBindings||[]).forEach((qb:VariableBinding) => {
+            newBindings[qb.variable] = qb.binding;
+        });
+        dispatch( setQuestionBindings(newBindings) );
+        console.log(newBindings);
+    }, [questionBindings]);
   
     const onQuestionChange = (value: Question | null) => {
         if (value && (!selectedQuestion || value.id !== selectedQuestion.id)) {
@@ -222,7 +227,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 } else if (timeIntervalVariable[qv.variableName]) {
                     [[StartTimeURI,'?MinTime'], [StopTimeURI, '?MaxTime'], [TimeTypeURI, '?TimeType']].forEach(([id,name]) => {
                         let val = selectedOptionValues[id];
-                    console.log(id, val);
                         if (val) {
                             values[name] = val.id;
                             newBindings.push({
@@ -301,15 +305,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         return obj.type === 'URI' ? displayURI(obj.value) : obj.value;
     }
 
-    const onOptionChange = (value: Option | null, varName:string) => {
-        setSelectedOptionValues((values) => {
-            let newValues = { ...values };
-            newValues[nameToId[varName]] = value;
-            return newValues;
-        })
-    }
-    
-    const onBoundingBoxOptionChange = (bindings:OptionBinding[]) => {
+    const onOptionChange = (bindings:OptionBinding[]) => {
         setSelectedOptionValues((values) => {
             let newValues = { ...values };
             bindings.forEach((optBin:OptionBinding) => {
@@ -363,13 +359,13 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                             <TextPart key={`qPart${i}`}> {part} </TextPart>
                         : (boundingBoxVariable[part] ? 
                             <BoundingBoxMap key={`qVars${i}`} 
-                                    onChange={onBoundingBoxOptionChange}
+                                    onChange={onOptionChange}
                                     variable={boundingBoxVariable[part]}
                                     bindings={initialBoundingBox}/>
                             : (timeIntervalVariable[part] ? 
-                                <TimeIntervalVariable key={`qVars${i}`} variable={timeIntervalVariable[part]} onChange={onBoundingBoxOptionChange}/>
+                                <TimeIntervalVariable key={`qVars${i}`} variable={timeIntervalVariable[part]} onChange={onOptionChange}/>
                                 : (selectedQuestion &&
-                                    <QuestionVariableSelector key={`qVars${i}`} question={selectedQuestion} variable={questionVariable[part]} onChange={onBoundingBoxOptionChange}/>)
+                                    <QuestionVariableSelector key={`qVars${i}`} question={selectedQuestion} variable={questionVariable[part]} onChange={onOptionChange}/>)
                             )
                         ))
                     : ""}
@@ -399,32 +395,3 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         : null}
     </Box>;
 }
-
-
-
-                                /*
-                                : <Autocomplete key={`qVars${i}`} size="small" sx={{display: 'inline-block', minWidth: "250px"}}
-                                    options={varOptions[nameToId[part]]? varOptions[nameToId[part]].values : []}
-                                    value={selectedOptionValues[nameToId[part]] ? selectedOptionValues[nameToId[part]] : null}
-                                    onChange={(_, value: Option | null) => onOptionChange(value, part)}
-                                    inputValue={selectedOptionLabels[nameToId[part]] ? selectedOptionLabels[nameToId[part]] : ""}
-                                    onInputChange={(_,newIn) => setSelectedOptionLabels((map) => {
-                                        let newMap = { ...map };
-                                        newMap[nameToId[part]] = newIn;
-                                        return newMap;
-                                    })}
-                                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                                    getOptionLabel={(option) => option.name}
-                                    loading={!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading}
-                                    renderInput={(params) => (
-                                        <TextField {...params} label={part} variant="standard" InputProps={{
-                                            ...params.InputProps,
-                                            endAdornment: (
-                                                <React.Fragment>
-                                                    {!varOptions[nameToId[part]] || varOptions[nameToId[part]].loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                    {params.InputProps.endAdornment}
-                                                </React.Fragment>
-                                            ),
-                                        }}/>
-                                    )}
-                                />)*/

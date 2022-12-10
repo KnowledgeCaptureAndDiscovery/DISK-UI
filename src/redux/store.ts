@@ -1,40 +1,39 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-//import { hypothesisSlice } from './hypothesis';
-import { keycloakSlice } from './stores/keycloak';
+import { keycloakSlice } from './slices/keycloak';
 import { loisSlice } from './lois';
-//import { questionSlice } from './questions';
-//import { serverSlice } from './server';
 import { tloisSlice } from './tlois';
-import { workflowSlice } from './workflows';
 import { brainSlice } from './brain';
-
-import { hypothesisAPI, questionsAPI, serverApi, workflowsApi } from '../DISK/queries';
 import { setupListeners } from '@reduxjs/toolkit/dist/query';
-import { notificationSlice } from './stores/notifications';
-import { backdropSlice } from './stores/backdrop';
-import { formsSlice } from './stores/forms';
+import { notificationSlice } from './slices/notifications';
+import { backdropSlice } from './slices/backdrop';
+import { formsSlice } from './slices/forms';
+import { questionsAPI } from './apis/questions';
+import { serverApi } from './apis/server';
+import { workflowsApi } from './apis/workflows';
+import { hypothesesAPI } from './apis/hypotheses';
+import { loisAPI } from './apis/lois';
+import { tloisAPI } from './apis/tlois';
 
 export const store = configureStore({
   reducer: {
-    lois: loisSlice.reducer,
-    tlois: tloisSlice.reducer,
+    //lois: loisSlice.reducer,
+    //tlois: tloisSlice.reducer,
     brain: brainSlice.reducer,
-    //workflows: workflowSlice.reducer,
-    //hypotheses: hypothesisSlice.reducer,
-    //question: questionSlice.reducer,
-    //server: serverSlice.reducer,
-
+    //Slices
     [formsSlice.name]: formsSlice.reducer,
     [backdropSlice.name]: backdropSlice.reducer,
     [keycloakSlice.name]: keycloakSlice.reducer,
     [notificationSlice.name]: notificationSlice.reducer,
+    //APIS
+    [loisAPI.reducerPath]: loisAPI.reducer,
+    [tloisAPI.reducerPath]: tloisAPI.reducer,
     [serverApi.reducerPath]: serverApi.reducer,
     [workflowsApi.reducerPath]: workflowsApi.reducer,
     [questionsAPI.reducerPath]: questionsAPI.reducer,
-    [hypothesisAPI.reducerPath]: hypothesisAPI.reducer,
+    [hypothesesAPI.reducerPath]: hypothesesAPI.reducer,
   },
   middleware: (getDefaultMiddleware) => 
-    getDefaultMiddleware().concat(hypothesisAPI.middleware, questionsAPI.middleware),
+    getDefaultMiddleware().concat(hypothesesAPI.middleware, questionsAPI.middleware, serverApi.middleware, workflowsApi.middleware),
 });
 
 setupListeners(store.dispatch);

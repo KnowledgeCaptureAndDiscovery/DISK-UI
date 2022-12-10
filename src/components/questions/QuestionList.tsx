@@ -2,7 +2,6 @@ import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, Li
 import { Hypothesis, idPattern, LineOfInquiry, Question, QuestionVariable, VariableBinding } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { loadHypotheses, loadLOIs, loadQuestions } from "redux/loader";
 import { RootState } from "redux/store";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import AddIcon from '@mui/icons-material/Add';
@@ -12,7 +11,9 @@ import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "c
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { isBoundingBoxVariable } from "./QuestionSelector";
-import { useGetHypothesesQuery, useGetQuestionsQuery } from "DISK/queries";
+import { useGetHypothesesQuery } from "redux/apis/hypotheses";
+import { useGetQuestionsQuery } from "redux/apis/questions";
+import { useGetLOIsQuery } from "redux/apis/lois";
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -46,17 +47,16 @@ export const normalizeTextValue = (text:string) => {
 
 export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     const dispatch = useAppDispatch();
-    const { data: questions, isLoading, isError } = useGetQuestionsQuery();
+    const { data: questions, isLoading, isError, refetch } = useGetQuestionsQuery();
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
     const { data: hypotheses } = useGetHypothesesQuery();
-
-    const initLOI : boolean = useAppSelector((state:RootState) => state.lois.initialized);
-    const lois : LineOfInquiry[] = useAppSelector((state:RootState) => state.lois.LOIs);
+    const { data: lois } = useGetLOIsQuery();
 
     const [count, setCount] = useState<{[id:string] : number}>({});
     const [sortedQuestions, setSortedQuestions] = useState<Question[]>([]);
 
-    const countQuestions = (items: Hypothesis[] | LineOfInquiry[]) => {
+    const countQuestions = (items: Hypothesis[] | LineOfInquiry[] | undefined) => {
+        if (!items) return;
         let newCount : {[id:string] : number} = {};
         items.forEach((item:Hypothesis|LineOfInquiry) => {
             if (item.question) {
@@ -86,12 +86,6 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         let b : number = count[q2.id] ? count[q2.id] : 0;
         return a < b ? 1 : -1;
     }
-
-    useEffect(() => {
-        if (expanded) {
-            if (kind === 'loi' && !initLOI) loadLOIs(dispatch);
-        }
-    }, [expanded])
 
     const renderQuestion = (q:Question) => {
         let variableStep : number = q.name.charAt(0) === '?' ? 1 : 0;
@@ -136,12 +130,12 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         let tmp : {[url:string]:string} = {};
         q.variables.forEach((variable:QuestionVariable) => {
             tmp[variable.id] = variable.variableName;
-        })
-        h.questionBindings.forEach((binding:VariableBinding) => {
+        });
+        (h.questionBindings||[]).forEach((binding:VariableBinding) => {
             if (tmp[binding.variable]) {
                 values[tmp[binding.variable]] = binding.binding;
             }
-        })
+        });
         q.variables.forEach((variable:QuestionVariable) => {
             if (isBoundingBoxVariable(variable)) {
                 if (variable.representation != null) {
@@ -151,7 +145,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                     values[variable.variableName] = val;
                 }
             }
-        })
+        });
         return <Fragment>
             <ScienceIcon sx={{mx: "5px", color:'darkorange'}}/>
             {parts.map((part:string,i:number) => part.startsWith('?') ? 
@@ -167,7 +161,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     const renderQuestionLOIs = (q:Question) => {
-         let myLOI : LineOfInquiry[] = lois.filter((l:LineOfInquiry) => l.question === q.id);
+         let myLOI : LineOfInquiry[] = (lois||[]).filter((l:LineOfInquiry) => l.question === q.id);
          if (myLOI.length === 0)
             return null
          return <Fragment>
@@ -193,7 +187,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                     <span style={{marginRight:'5px'}}>
                         An error has ocurred while loading.
                     </span>
-                    <MuiLink onClick={() => loadQuestions(dispatch)} sx={{cursor: 'pointer'}}>
+                    <MuiLink onClick={() => refetch()} sx={{cursor: 'pointer'}}>
                         Click here to reload
                     </MuiLink>
                 </Box>

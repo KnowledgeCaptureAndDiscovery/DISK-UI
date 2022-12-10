@@ -1,7 +1,7 @@
 import { Box, Grid, Skeleton } from "@mui/material";
 import { Method, MethodInput, VariableBinding } from "DISK/interfaces";
-import { useGetWorkflowVariablesQuery } from "DISK/queries";
 import { Fragment, useEffect, useState } from "react";
+import { useGetWorkflowVariablesQuery } from "redux/apis/workflows";
 import { MethodVariableSelector } from "./MethodVariableSelector";
 
 interface QuestionVariableProps {
@@ -14,7 +14,7 @@ interface QuestionVariableProps {
 //TODO: Continue adding bindings here!
 export const MethodVariableList = ({method, options, bindings, onChange}: QuestionVariableProps) => {
     const [bindingsMap, setBindingsMap] = useState<{[id:string]:VariableBinding}>({});
-    const {data:methodVariables, isLoading, isError} = useGetWorkflowVariablesQuery(
+    const {data:methodVariables, isLoading } = useGetWorkflowVariablesQuery(
         {id:method.name, source:method.source},
         {skip:!method}
     );

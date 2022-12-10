@@ -35,7 +35,9 @@ import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
 import { VERSION } from 'constants/config';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
-import { useGetHypothesisByIdQuery } from 'DISK/queries';
+import { useGetHypothesisByIdQuery } from 'redux/apis/hypotheses';
+import { useGetLOIByIdQuery } from 'redux/apis/lois';
+import { useGetTLOIByIdQuery } from 'redux/apis/tlois';
 
 const drawerWidth = 240;
 
@@ -135,7 +137,7 @@ const MainBox = styled(Box)(
 );
 
 
-const renderTitle = (url:string, selectedHypothesis:Hypothesis|undefined, selectedLOI:LineOfInquiry|null) => {
+const renderTitle = (url:string, selectedHypothesis:Hypothesis|undefined, selectedLOI:LineOfInquiry|undefined) => {
   if (PATH_HYPOTHESIS_ID_RE.test(url)) {
     return <Box>Hypothesis: { selectedHypothesis ? selectedHypothesis.name : "..."}</Box>
   } else if (PATH_HYPOTHESIS_ID_EDIT_RE.test(url)) {
@@ -182,11 +184,10 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const location = useLocation();
 
   const {data:selectedHypothesis} = useGetHypothesisByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_HYPOTHESES+ "/")});
+  const {data:selectedLOI} = useGetLOIByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_LOIS+ "/")});
+  const {data:selectedTLOI} = useGetTLOIByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_TLOIS+ "/")});
 
   const { keycloak, initialized } = useKeycloak();
-  
-  const selectedLOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
-  const selectedTLOI = useAppSelector((state:RootState) => state.tlois.selectedTLOI);
   const username = useAppSelector((state:RootState) => state.keycloak.username);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -202,14 +203,6 @@ export default function MiniDrawer(props: { children: string | number | boolean 
       keycloak.updateToken(300);
     }
    }, [keycloak.authenticated, initialized, keycloak]);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
 
   const [open, setOpen] = React.useState(true);
 

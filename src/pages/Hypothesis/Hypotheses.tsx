@@ -6,9 +6,9 @@ import { useAppSelector } from "redux/hooks";
 import SearchIcon from '@mui/icons-material/Search';
 import { PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
-import { useGetHypothesesQuery } from "DISK/queries";
 import { HypothesisList } from "components/hypothesis/HypothesesList";
 import { RootState } from "redux/store";
+import { useGetHypothesesQuery } from "redux/apis/hypotheses";
 
 type OrderType = 'date'|'author';
 
@@ -64,12 +64,10 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
                 {isLoading ?
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :
-                    (isError ? 
+                    (isError || !data? 
                         <Box> Error loading Hypotheses </Box>
                     :
-                        (data && (
-                            <HypothesisList list={data.filter(applyFilters)} enableDeletion enableEdition/>
-                        ))
+                        <HypothesisList list={data.filter(applyFilters)} enableDeletion enableEdition/>
                     )
                 }
             </Card>

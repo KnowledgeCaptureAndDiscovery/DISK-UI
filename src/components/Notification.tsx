@@ -1,7 +1,7 @@
 import { Box, Backdrop, CircularProgress, Snackbar, Alert } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { closeNotification } from "redux/stores/notifications";
+import { closeNotification } from "redux/slices/notifications";
 
 export const Notification = () => {
     const dispatch = useAppDispatch();

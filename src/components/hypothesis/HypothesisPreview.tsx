@@ -7,11 +7,10 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { ConfirmDialog } from "./ConfirmDialog";
-import { closeBackdrop, openBackdrop } from "redux/stores/backdrop";
-import { DISKAPI } from "DISK/API";
-import { openNotification } from "redux/stores/notifications";
-import { useDeleteHypothesisMutation } from "DISK/queries";
+import { ConfirmDialog } from "../ConfirmDialog";
+import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
+import { openNotification } from "redux/slices/notifications";
+import { useDeleteHypothesisMutation } from "redux/apis/hypotheses";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",

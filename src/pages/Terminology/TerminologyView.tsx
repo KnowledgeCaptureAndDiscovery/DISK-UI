@@ -4,7 +4,7 @@ import { Vocabulary, VocabularyIndividual, VocabularyProperty, VocabularyType } 
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { renderDescription } from "DISK/util";
-import { useGetVocabulariesQuery } from "DISK/queries";
+import { useGetVocabulariesQuery } from "redux/apis/server";
 
 export const TerminologyView = () => {
     const { data:vocabularies, isLoading:loading, isError:error } = useGetVocabulariesQuery();

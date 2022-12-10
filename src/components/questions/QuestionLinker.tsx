@@ -1,7 +1,7 @@
 import { Autocomplete, Box, Card, CircularProgress, FormHelperText, MenuItem, Select, styled, TextField } from "@mui/material"
 import { Question, QuestionVariable, varPattern } from "DISK/interfaces"
 import React, { useEffect } from "react";
-import { useGetQuestionsQuery } from "DISK/queries";
+import { useGetQuestionsQuery } from "redux/apis/questions";
 
 interface QuestionLinkerProps {
     selected: string,

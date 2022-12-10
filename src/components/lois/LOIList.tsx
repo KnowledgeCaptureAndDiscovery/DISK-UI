@@ -1,15 +1,15 @@
 import { Box, Typography } from "@mui/material";
-import { HypothesisPreview } from "components/hypothesis/HypothesisPreview";
 import { QuestionList } from "components/questions/QuestionList";
-import { Hypothesis } from "DISK/interfaces"
+import { LineOfInquiry } from "DISK/interfaces"
+import { LOIPreview } from "./LOIPreview";
 
-interface HypothesisListProps {
-    list: Hypothesis[],
+interface LOIListProps {
+    list: LineOfInquiry[],
     enableDeletion: boolean,
     enableEdition: boolean,
 }
 
-export const HypothesisList = ({list=[], enableDeletion=true, enableEdition=true} : HypothesisListProps) => {
+export const LOIList = ({list=[], enableDeletion=true, enableEdition=true} : LOIListProps) => {
     if (list.length === 0)
         return (
             <Box sx={{p:"5px"}}>
@@ -20,7 +20,7 @@ export const HypothesisList = ({list=[], enableDeletion=true, enableEdition=true
             </Box>
         );
     return (<Box>
-        {list.map((h: Hypothesis) => <HypothesisPreview key={h.id} hypothesis={h}/>)}
+        {list.map((loi: LineOfInquiry) => <LOIPreview key={loi.id} loi={loi}/>)}
     </Box>
     );
 }

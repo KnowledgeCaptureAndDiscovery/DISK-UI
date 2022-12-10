@@ -1,15 +1,12 @@
 import { Box, Card, FormHelperText, IconButton, styled, Table, TableBody, TableCell, TableContainer, TableRow, Tooltip } from "@mui/material"
 import { idPattern, Question, VariableBinding, QuestionVariable, varPattern } from "DISK/interfaces"
-import { DISKAPI } from "DISK/API";
 import React from "react";
-import { RootState } from "redux/store";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setErrorAll, setLoadingAll, setQuestions } from "redux/questions";
+import { useAppDispatch } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { normalizeTextValue, normalizeURI } from "./QuestionList";
 import { isBoundingBoxVariable } from "./QuestionSelector";
-import { useGetQuestionsQuery } from "DISK/queries";
+import { useGetQuestionsQuery } from "redux/apis/questions";
 
 interface QuestionPreviewProps {
     selected: string,
