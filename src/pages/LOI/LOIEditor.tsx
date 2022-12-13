@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
 import { Box, Button, Card, Checkbox, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { DISKAPI } from "DISK/API";
 import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -10,13 +9,11 @@ import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
 import { useAppDispatch } from "redux/hooks";
-import { setErrorSelected, setLoadingSelected, setSelectedLOI, add as addLOI } from "redux/lois";
 import { QuestionLinker } from "components/questions/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
 import { WorkflowList } from "components/methods/WorkflowList";
-import { LineOfInquiryRequest } from "DISK/requests";
 import { QueryTester } from "components/QueryTester";
 import { renderDescription } from "DISK/util";
 import { useGetEndpointsQuery } from "redux/apis/server";
@@ -151,7 +148,7 @@ export const LOIEditor = () => {
             return;
         }
 
-        let newLOI : LineOfInquiry | LineOfInquiryRequest;
+        let newLOI : LineOfInquiry;
         let previous : any = {};
         let editing : boolean = false;
         if (LOI) {

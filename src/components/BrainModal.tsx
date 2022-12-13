@@ -2,8 +2,8 @@ import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, Di
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import ThreeDRotationIcon from '@mui/icons-material/ThreeDRotation';
-import { DISKAPI } from "DISK/API";
 import { BrainCfgItem, BrainVisualization } from "./BrainVisualization";
+import { useGetPrivateFileQuery } from "redux/apis/server";
 
 interface BrainModalProps {
     source: string,
@@ -12,35 +12,28 @@ interface BrainModalProps {
 
 export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
     const [brainCfg, setBrainCfg] = useState<BrainCfgItem[]|null>(null);
+    const {data, isLoading:loading} = useGetPrivateFileQuery({dataSource: source, dataId: brainUrl}, {skip:!open});
 
     useEffect(() => {
         if (brainUrl)
             setBrainCfg(null);
     }, [brainUrl]);
 
+    useEffect(() => {
+        if (data) {
+            if (data.startsWith('[')) {
+                console.log("Brain config: " + data);
+                let cfg: BrainCfgItem[] = JSON.parse(data);
+                setBrainCfg(cfg);
+            } else {
+                console.warn("Could not decode:", data);
+            }
+        }
+    }, [data]);
+
     const onOpenDialog = () => {
         setOpen(true);
-        setLoading(true);
-        if (brainUrl && brainCfg == null) {
-            DISKAPI.getData(source, brainUrl)
-                    .then((text:string) => {
-                        let ok : boolean = text.startsWith('[');
-                        setError(ok)
-                        if (ok) {
-                            console.log("Brain config: " + text);
-                            let cfg : BrainCfgItem[] = JSON.parse(text);
-                            setBrainCfg(cfg);
-                        } else {
-                            console.log("Error response:", text);
-                        }
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    })
-        }
     }
 
     const onCloseDialog = () => {

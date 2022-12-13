@@ -33,7 +33,14 @@ export const store = configureStore({
     [hypothesesAPI.reducerPath]: hypothesesAPI.reducer,
   },
   middleware: (getDefaultMiddleware) => 
-    getDefaultMiddleware().concat(hypothesesAPI.middleware, questionsAPI.middleware, serverApi.middleware, workflowsApi.middleware),
+    getDefaultMiddleware().concat(
+      loisAPI.middleware,
+      tloisAPI.middleware,
+      serverApi.middleware,
+      workflowsApi.middleware,
+      questionsAPI.middleware,
+      hypothesesAPI.middleware,
+    ),
 });
 
 setupListeners(store.dispatch);

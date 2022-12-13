@@ -1,5 +1,5 @@
 import { Box, Card, FormHelperText, IconButton, styled, Table, TableBody, TableCell, TableContainer, TableRow, Tooltip } from "@mui/material"
-import { idPattern, Question, VariableBinding, QuestionVariable, varPattern } from "DISK/interfaces"
+import { idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple } from "DISK/interfaces"
 import React from "react";
 import { useAppDispatch } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -7,6 +7,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { normalizeTextValue, normalizeURI } from "./QuestionList";
 import { isBoundingBoxVariable } from "./QuestionSelector";
 import { useGetQuestionsQuery } from "redux/apis/questions";
+import { FormalExpressionView } from "./FormalExpressionView";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -22,14 +23,13 @@ const TextPart = styled(Box)(({ theme }) => ({
 }));
 
 export const QuestionPreview = ({selected:selectedId, bindings, label} : QuestionPreviewProps) => {
-    const dispatch = useAppDispatch();
     const { data: questions, isLoading, isError } = useGetQuestionsQuery();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [formalView, setFormalView] = React.useState<boolean>(false);
 
     const [nameToValue, setNameToValue] = React.useState<{[id:string]:string}>({});
     const [questionParts, setQuestionParts] = React.useState<string[]>([]);
-    const [triplePattern, setTriplePattern] = React.useState<string[][]>([]);
+    const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
 
     const setFromQuestionList = (list:Question[], id:string) => {
         if (list.length > 0 && !!id) {
@@ -48,6 +48,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     }, [selectedId, questions]);
 
     React.useEffect(() => {
+        let emptyTriple: Triple = {subject:'', predicate: '', object: {value:'', type:'URI'}};
         if (selectedQuestion && bindings.length > 0) {
             //Create map id -> name
             let map : {[id:string] : string} = {};
@@ -79,8 +80,8 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
 
             let pattern:string[] = noOptionalsPattern.split(/\s/);
-            let triples:string[][] = [];
-            let curArr:string[] = [];
+            let triples:Triple[] = [];
+            let curTriple: Triple = { ...emptyTriple };
             let newBindings: VariableBinding[] = [];
             for (let i:number=0; i<pattern.length; i++){
                 let part : string = pattern[i];
@@ -89,28 +90,38 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                     part = map2[part];
                 }
 
-                curArr.push(part);
-                if (curArr.length === 3) {
-                    triples.push(curArr);
-                    curArr = [];
+                if (!curTriple.subject) curTriple.subject = part;
+                else if (!curTriple.predicate) curTriple.predicate = part;
+                else if (!curTriple.object.value) {
+                    curTriple.object = {
+                        value: part,
+                        type: part.startsWith("http") || part.startsWith("www") ? 'URI' : 'LITERAL'
+                    }
+                    triples.push(curTriple);
+                    curTriple = {...emptyTriple};
+                } else {
+                    console.warn("Something when wrong on triple creation.");
                 }
             }
-            if (curArr.length !== 0)
-                console.warn("Something when wrong creating the triple representation")
             setTriplePattern(triples);
         } else if (selectedQuestion && bindings.length === 0) {
             let pattern:string[] = selectedQuestion.pattern.split(/\s/);
-            let triples : string[][] = [];
-            let cur : string[] = [];
+            let triples : Triple[] = [];
+            let curTriple : Triple = { ...emptyTriple };
             pattern.forEach((part:string, i:number) => {
-                cur.push(part);
-                if (cur.length === 3) {
-                    triples.push(cur);
-                    cur = [];
+                if (!curTriple.subject) curTriple.subject = part;
+                else if (!curTriple.predicate) curTriple.predicate = part;
+                else if (!curTriple.object.value) {
+                    curTriple.object = {
+                        value: part,
+                        type: part.startsWith("http") || part.startsWith("www") ? 'URI' : 'LITERAL'
+                    }
+                    triples.push(curTriple);
+                    curTriple = {...emptyTriple};
+                } else {
+                    console.warn("Something when wrong on triple creation.");
                 }
             });
-            if (cur.length !== 0) 
-                console.warn("Something when wrong creating the triple representation")
             setTriplePattern(triples);
         }
     }, [bindings, selectedQuestion])
@@ -164,19 +175,6 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                 </Tooltip>
             </Box>
         </Card>
-        {formalView ?
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", visibility: (questionParts.length > 0 ? "visible" : "collapse"), position:"relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Formal expression: </FormHelperText>
-            <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
-                <Table sx={{width:"unset"}}>
-                    <TableBody>
-                        {triplePattern.map((triple:string[], index:number) => <TableRow key={`row_${index}`}>
-                            {triple.map((res:string) => <TableCell key={`cell${index}${res}`} sx={{padding: "2px 10px"}}> {normalizeURI(res)} </TableCell>)}
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Card>
-        : null }
+        {formalView && <FormalExpressionView triplePattern={triplePattern} />}
     </Box>;
 }

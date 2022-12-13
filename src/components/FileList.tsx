@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { downloadFile } from "DISK/util";
+import { PrivateLink } from "./PrivateLink";
 
 interface FileListProps {
     type: 'input' | 'output',
@@ -47,15 +47,6 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
         }
     }, [tloi])
 
-    const renderFile = (run:RunStatus, id:string) => {
-        let fileMap = getFileMap(run);
-        let url : string = fileMap[id];
-        let filename : string = url.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}$/,'');
-        return <MuiLink color="inherit" onClick={() => downloadFile(run.source, url, filename)}>
-            {filename}
-        </MuiLink>
-    }
-
     const renderRunTitle = (id:string) => {
         return id.replace(/.*#/,'').replace(/--.*/,'');
     }
@@ -87,16 +78,20 @@ export const FileList = ({type:displayType, tloi, label: title} : FileListProps)
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {Object.keys(getFileMap(run)).map((id:string, i:number) => 
-                                        <TableRow key={i}>
+                                    {Object.keys(getFileMap(run)).map((id:string, i:number) => {
+                                        let fileMap = getFileMap(run);
+                                        let url: string = fileMap[id];
+                                        let filename: string = url.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/, '').replace(/-\w{24,25}$/, '');
+                                        return <TableRow key={i}>
                                             <TableCell key={`x_${i}`} sx={{padding: "0 10px", textAlign:"end"}}>
                                                 {i+1}
                                             </TableCell>
                                             <TableCell key={`y_${i}`} sx={{padding: "0 10px"}}>
-                                                {renderFile(run, id)}
+                                                <PrivateLink source={run.source} filename={filename} url={url}/>
+                                                {/*renderFile(run, id)*/}
                                             </TableCell>
                                         </TableRow>
-                                    )}
+                                    })}
                                 </TableBody>
                             </Table>
                         </TableContainer>

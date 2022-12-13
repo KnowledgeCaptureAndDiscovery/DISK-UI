@@ -28,6 +28,7 @@ export const questionsAPI = createApi({
  
 export const {
   useGetQuestionsQuery,
+  useLazyGetDynamicOptionsQuery,
   useGetVariableOptionsQuery,
   useGetDynamicOptionsQuery,
 } = questionsAPI;

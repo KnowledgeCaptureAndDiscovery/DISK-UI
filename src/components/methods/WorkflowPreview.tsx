@@ -5,7 +5,8 @@ import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Fragment, useEffect, useState } from "react";
-import { downloadFile, getBindingAsArray, getFileName } from "DISK/util";
+import { getBindingAsArray, getFileName } from "DISK/util";
+import { PrivateLink } from "components/PrivateLink";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -59,10 +60,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
 
     const renderDownloadLink = (url:string) => {
         let filename : string = url.replaceAll(/.*#/g,'').replace(/SHA[\d\w]{6}_/,'');
-
-        return (<MuiLink onClick={() => downloadFile(wf.source, url, filename)} sx={{cursor:"pointer"}}>
-            {filename}
-        </MuiLink>)
+        return <PrivateLink filename={filename} source={wf.source}  url={url}/>;
     }
 
     return (

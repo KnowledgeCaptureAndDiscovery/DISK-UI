@@ -1,5 +1,5 @@
 import { Canvas, ThreeElements } from "@react-three/fiber";
-import { DISKAPI } from "DISK/API";
+//import { DISKAPI } from "DISK/API";
 import { useEffect, useRef, useState } from "react";
 import { BufferGeometry, DirectionalLight, Mesh, MeshLambertMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { VTKParser } from "VTKParser";
@@ -8,7 +8,7 @@ import { Box } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { addMesh, BrainFiles, setFilelist } from "redux/brain";
 import { RootState } from "redux/store";
-import { useGetPublicFileQuery } from "redux/apis/server";
+import { useGetPrivateFileQuery, useGetPublicFileQuery, useLazyGetPublicFileQuery } from "redux/apis/server";
 
 export interface BrainCfgItem {
     name: string,
@@ -22,6 +22,7 @@ interface BrainVisualizationProps {
 export const BrainVisualization = ({configuration}: BrainVisualizationProps) => {
     const dispatch = useAppDispatch();
     const {data:jsonString, isLoading:loading, isError} = useGetPublicFileQuery("files.json");
+    const [getPublicFile] = useLazyGetPublicFileQuery();
 
     const canvas = useRef<null|HTMLCanvasElement>(null);
     const [meshes, setMeshes] = useState<Mesh<BufferGeometry,MeshLambertMaterial>[]>([]); // Brain parts
@@ -117,7 +118,9 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
             let allRequests = Object.keys(filelist.filename)
                     .filter((id:string) => !meshesStr[id] )
                     .map((id:string) => {
-                DISKAPI.getPublic("models/" + filelist.filename[id])
+                //DISKAPI.getPublic("models/" + filelist.filename[id])
+                getPublicFile("models/" + filelist.filename[id])
+                    .unwrap()
                     .then((vtkMesh: string) => {
                         dispatch(addMesh([id, vtkMesh]));
                     });

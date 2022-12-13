@@ -14,7 +14,6 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { FileList } from "components/FileList";
-import { DISKAPI } from "DISK/API";
 import { TLOIEdit } from "components/tlois/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
 import { ShinyModal } from "components/ShinyModal";

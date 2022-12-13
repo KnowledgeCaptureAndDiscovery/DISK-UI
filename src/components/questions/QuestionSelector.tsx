@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Card, CircularProgress, FormHelperText, IconButton, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Tooltip } from "@mui/material"
 import { idPattern, Question, VariableBinding, QuestionVariable, varPattern, Triple, VariableOption } from "DISK/interfaces"
-import { DISKAPI } from "DISK/API";
+//import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
 import { useAppDispatch } from "redux/hooks";
 import { setLoadingOptions, setOptions, Option } from "redux/questions";
@@ -9,8 +9,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
 import { StartTimeURI, StopTimeURI, TimeIntervalVariable, TimeTypeURI } from "./TimeIntervalVariable";
 import { QuestionVariableSelector } from "./QuestionVariableSelector";
-import { useGetQuestionsQuery } from "redux/apis/questions";
+import { useGetQuestionsQuery, useLazyGetDynamicOptionsQuery } from "redux/apis/questions";
 import { setQuestionBindings, SimpleMap } from "redux/slices/forms";
+import { FormalExpressionView } from "./FormalExpressionView";
 
 export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
 export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
@@ -32,6 +33,7 @@ const TextPart = styled(Box)(({ theme }) => ({
 export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questionBindings, onQuestionChange:sendQuestionChange, error:exError=false} : QuestionProps) => {
     const dispatch = useAppDispatch();
     const { data: questions, isLoading, isError } = useGetQuestionsQuery();
+    const [ getDynamicOptions ] = useLazyGetDynamicOptionsQuery();
 
     const [formalView, setFormalView] = React.useState<boolean>(false);
     const [nameToId, setNameToId] = React.useState<{[id:string]:string}>({});
@@ -189,7 +191,9 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             });
 
             //useGetDynamicOptionsQuery({cfg: {id:question.id, bindings:bindings}});
-            DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
+            //DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
+            getDynamicOptions({cfg:{id:question.id, bindings:bindings}})
+                    .unwrap()
                     .then((options:{[name:string] : VariableOption[]}) => {
                         question.variables.forEach((qv:QuestionVariable) => {
                             let curOpts = options[qv.variableName];
@@ -289,22 +293,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         }
     }, [selectedQuestion, selectedOptionValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const displayURI = (uri:string) => {
-        if (uri.startsWith("http") || uri.startsWith("www")) 
-            uri = uri.replace(idPattern, "");
-        
-        //WIKI Specific 
-        if (uri.startsWith("Property-3A"))
-            uri = uri.replace("Property-3A","").replace("-28E-29","");
-
-        uri = uri.replaceAll("_","");
-        return uri;
-    }
-
-    const displayObj = (obj:Triple["object"]) => {
-        return obj.type === 'URI' ? displayURI(obj.value) : obj.value;
-    }
-
     const onOptionChange = (bindings:OptionBinding[]) => {
         setSelectedOptionValues((values) => {
             let newValues = { ...values };
@@ -377,21 +365,6 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                 </Tooltip>
             </Box>
         </Card>
-        {formalView ? 
-        <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Formal expression: </FormHelperText>
-            <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
-                <Table aria-label="Hypothesis graph" sx={{width: "auto"}}>
-                    <TableBody>
-                        {triplePattern.map((triple:Triple, index:number) => <TableRow key={`row_${index}`}>
-                            <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.subject)} </TableCell>
-                            <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.predicate)} </TableCell>
-                            <TableCell sx={{padding: "2px 10px"}}> {displayObj(triple.object)} </TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Card>
-        : null}
+        {formalView && <FormalExpressionView triplePattern={triplePattern}/>}
     </Box>;
 }

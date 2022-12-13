@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, Di
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
-import { DISKAPI } from "DISK/API";
+import { useGetPrivateFileQuery } from "redux/apis/server";
 
 interface ShinyModalProps {
     source: string,
@@ -11,7 +11,7 @@ interface ShinyModalProps {
 
 export const ShinyModal = ({source, shinyUrl} : ShinyModalProps) => {
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const {data, isLoading:loading} = useGetPrivateFileQuery({dataSource: source, dataId: shinyUrl}, {skip:!open});
     const [url, setUrl] = useState("");
 
     useEffect(() => {
@@ -19,25 +19,21 @@ export const ShinyModal = ({source, shinyUrl} : ShinyModalProps) => {
             setUrl("");
     }, [shinyUrl]);
 
+    useEffect(() => {
+        console.log(data);
+        if (data) {
+            let json : any = null;
+            try {
+                json = JSON.parse(data);
+            } catch (error) {
+                console.warn("Could not decode:", data);
+            }
+            setUrl(json && json["url"] ? json["url"] : "");
+        }
+    }, [data]);
+
     const onOpenDialog = () => {
         setOpen(true);
-        setLoading(true);
-        if (shinyUrl && !url) {
-            DISKAPI.getData(source, shinyUrl)
-                    .then((text:string) => {
-                        let j : any = JSON.parse(text);
-                        if (j["url"])
-                            setUrl(j["url"]);
-                        else 
-                            setUrl("");
-                    })
-                    .finally(() => {
-                        // Give it two extra seconds
-                        setTimeout(() => {
-                            setLoading(false);
-                        }, 2000)
-                    })
-        }
     }
 
     const onCloseDialog = () => {

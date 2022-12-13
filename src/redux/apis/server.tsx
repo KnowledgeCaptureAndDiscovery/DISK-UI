@@ -43,5 +43,7 @@ export const {
   useGetVocabulariesQuery,
   useQueryExternalSourceQuery,
   useGetPrivateFileQuery,
+  useLazyGetPrivateFileQuery,
   useGetPublicFileQuery,
+  useLazyGetPublicFileQuery,
 } = serverApi;

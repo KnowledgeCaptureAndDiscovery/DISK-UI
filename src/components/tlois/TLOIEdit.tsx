@@ -4,13 +4,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
-import { DISKAPI } from "DISK/API";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { DataEndpoint, TriggeredLineOfInquiry, VariableBinding, Workflow, WorkflowRun } from "DISK/interfaces";
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
-import { downloadFile, getBindingAsArray } from "DISK/util";
+import { getBindingAsArray } from "DISK/util";
 
 interface FileListProps {
     tloi: TriggeredLineOfInquiry | null,
