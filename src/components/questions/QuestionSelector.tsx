@@ -103,12 +103,23 @@ export const QuestionSelector = ({initialQuestionId:selectedQuestionId, initialB
     */
 
     React.useEffect(() => {
+        if (!selectedQuestion)
+            return;
         let newBindings : SimpleMap = {};
         (questionBindings||[]).forEach((qb:VariableBinding) => {
-            newBindings[qb.variable] = qb.binding;
+            let curVar = selectedQuestion.variables.filter(v => v.variableName === qb.variable)[0];
+            if (curVar)
+                newBindings[curVar.id] = qb.binding;
         });
+        // FIXME: find a better way to pass the pattern.
+        let pattern = selectedQuestion.pattern
+        selectedQuestion.variables.forEach((v) => {
+            pattern = pattern.replace(v.variableName, v.id);
+        });
+
         if (selectedQuestion) dispatch( setQuestionBindings({
             id: selectedQuestion.id,
+            pattern: pattern,
             map: newBindings,
         }));
         console.log(selectedQuestion, newBindings);

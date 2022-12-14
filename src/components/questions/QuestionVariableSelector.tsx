@@ -34,7 +34,7 @@ export const QuestionVariableSelector = ({variable, onChange}: QuestionVariableP
 
     useEffect(() => {
         if (options && bindings) {
-            let curValue : string = bindings[variable.variableName];
+            let curValue : string = bindings[variable.id];
             if (options.length === 0 || !curValue || !options.some(o => o.value === curValue)) {
                 setSelectedOption(null);
                 setSelectedOptionLabel("");
@@ -49,9 +49,9 @@ export const QuestionVariableSelector = ({variable, onChange}: QuestionVariableP
     function onOptionChange(value: VariableOption|null): void {
         let newBindings = { ...bindings };
         if (value) {
-            newBindings[variable.variableName] = value.value;
-        } else if (bindings[variable.variableName]) {
-            delete newBindings[variable.variableName];
+            newBindings[variable.id] = value.value;
+        } else if (bindings[variable.id]) {
+            delete newBindings[variable.id];
         }
         dispatch(setQuestionBindings({
             id: questionId,

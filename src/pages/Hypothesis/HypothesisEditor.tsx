@@ -8,11 +8,12 @@ import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import React from "react";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { openNotification } from "redux/slices/notifications";
+import { RootState } from "redux/store";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -49,6 +50,9 @@ export const HypothesisEditor = () => {
     const [editedQuestionId, setEditedQuestionId] = React.useState("");
     const [editedQuestionBindings, setEditedQuestionBindings] = React.useState<VariableBinding[]>([]);
     const [editedGraph, setEditedGraph] = React.useState<Triple[]>([]);
+
+    const formQuestionBindings = useAppSelector((state:RootState) => state.forms.questionBindings);
+    const formQuestionPattern = useAppSelector((state:RootState) => state.forms.selectedPattern);
 
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);
@@ -88,6 +92,49 @@ export const HypothesisEditor = () => {
         setQuestionId("");
     }
 
+
+    const getCurrentGraph = () => {
+        console.log(formQuestionBindings, formQuestionPattern);
+        let noOptionalsPattern : string = formQuestionPattern.replace(/optional\s*\{.+\}/g, '').trim();
+        let pattern:string[] = noOptionalsPattern.split(/\s/);
+        let updatedGraph: Triple[] = [];
+        let emptyTriple: Triple = {
+            subject: "",
+            predicate: "",
+            object: {
+                type: 'LITERAL',
+                value: '',
+                datatype: ''
+            }
+        };
+        let curTriple: Triple = emptyTriple;
+        for (let i: number = 0; i < pattern.length; i++) {
+            let part: string = pattern[i];
+            let value: string = formQuestionBindings[part] ? formQuestionBindings[part] : part;
+            let c: number = i % 3;
+            switch (c) {
+                case 0:
+                    curTriple = { ...emptyTriple };
+                    curTriple.subject = value;
+                    break;
+                case 1:
+                    curTriple.predicate = value;
+                    break;
+                case 2:
+                    let isURI: boolean = value.startsWith("http") || value.startsWith("www");
+                    curTriple.object = {
+                        type: isURI ? 'URI' : 'LITERAL',
+                        value: value,
+                        datatype: isURI ? undefined : "http://www.w3.org/2001/XMLSchema#string"
+                    }
+                    updatedGraph.push(curTriple);
+                    break;
+            }
+        }
+        console.log(updatedGraph);
+        return updatedGraph;
+    }
+
     const onSaveButtonClicked = () => {
         if (!name || !description || !editedQuestionId) {
             if (!name) setErrorName(true);
@@ -109,8 +156,15 @@ export const HypothesisEditor = () => {
             description: description,
             notes: notes,
             question: editedQuestionId,
-            questionBindings: editedQuestionBindings,
-            graph: { triples: editedGraph }
+            questionBindings: Object.keys(formQuestionBindings).map((varId:string) => {
+                return {
+                    variable: varId,
+                    binding: formQuestionBindings[varId],
+                    type: null
+                } as VariableBinding;
+            }),
+            //editedQuestionBindings,
+            graph: { triples: getCurrentGraph() }
         };
 
         dispatch(openBackdrop());

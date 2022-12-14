@@ -1,6 +1,8 @@
 import { Box } from "@mui/material"
 import { Question, QuestionVariable, varPattern } from "DISK/interfaces"
 import React from "react"
+import { useAppSelector } from "redux/hooks"
+import { RootState } from "redux/store"
 import { BoundingBoxMap } from "./BoundingBoxMap"
 import { TextPart } from "./QuestionHelpers"
 import { isBoundingBoxVariable, isTimeIntervalVariable } from "./QuestionHelpers"
