@@ -1,5 +1,5 @@
 import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
-import { LineOfInquiry, idPattern, DataEndpoint } from "DISK/interfaces";
+import { DataEndpoint } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useLocation, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
@@ -7,7 +7,6 @@ import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { setSelectedLOI, setLoadingSelected, setErrorSelected } from 'redux/lois';
 import { QuestionLinker } from "components/questions/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';

@@ -8,15 +8,16 @@ import { OptionBinding } from "./BoundingBoxMap";
 import { useGetDynamicOptionsQuery } from "redux/apis/questions";
 
 interface QuestionVariableProps {
-    question: Question,
     variable: QuestionVariable,
     onChange?: (bindings:OptionBinding[]) => void
 }
 
-export const QuestionVariableSelector = ({question, variable, onChange}: QuestionVariableProps) => {
+export const QuestionVariableSelector = ({variable, onChange}: QuestionVariableProps) => {
     const dispatch = useAppDispatch();
     const bindings = useAppSelector((state:RootState) => state.forms.questionBindings);
-    const { data, isLoading, isError, refetch } = useGetDynamicOptionsQuery({cfg: {id:question.id, bindings:bindings}});
+    const questionId = useAppSelector((state:RootState) => state.forms.selectedQuestionId);
+
+    const { data, isLoading, isError, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:bindings}});
     const [options, setOptions] = useState<VariableOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<VariableOption|null>(null);
     const [selectedOptionLabel, setSelectedOptionLabel] = useState<string>("");
@@ -33,7 +34,7 @@ export const QuestionVariableSelector = ({question, variable, onChange}: Questio
 
     useEffect(() => {
         if (options && bindings) {
-            let curValue : string = bindings[variable.id];
+            let curValue : string = bindings[variable.variableName];
             if (options.length === 0 || !curValue || !options.some(o => o.value === curValue)) {
                 setSelectedOption(null);
                 setSelectedOptionLabel("");
@@ -52,7 +53,10 @@ export const QuestionVariableSelector = ({question, variable, onChange}: Questio
         } else if (bindings[variable.variableName]) {
             delete newBindings[variable.variableName];
         }
-        dispatch(setQuestionBindings(newBindings));
+        dispatch(setQuestionBindings({
+            id: questionId,
+            map: newBindings
+        }));
         if (onChange) onChange([
             {
                 variable: variable,

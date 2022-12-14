@@ -16,9 +16,9 @@ import { QuestionPreview } from "components/questions/QuestionPreview";
 import { FileList } from "components/FileList";
 import { TLOIEdit } from "components/tlois/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
-import { ShinyModal } from "components/ShinyModal";
-import { NarrativeModal } from "components/NarrativeModal";
-import { BrainModal } from "components/BrainModal";
+import { ShinyModal } from "components/modal/ShinyModal";
+import { NarrativeModal } from "components/modal/NarrativeModal";
+import { BrainModal } from "components/modal/BrainModal";
 
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";

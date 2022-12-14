@@ -1,7 +1,5 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { keycloakSlice } from './slices/keycloak';
-import { loisSlice } from './lois';
-import { tloisSlice } from './tlois';
 import { brainSlice } from './brain';
 import { setupListeners } from '@reduxjs/toolkit/dist/query';
 import { notificationSlice } from './slices/notifications';

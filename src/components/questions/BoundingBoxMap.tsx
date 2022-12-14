@@ -3,12 +3,16 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import GoogleMapReact, { ClickEventValue } from 'google-map-react';
-import { Question, QuestionVariable } from "DISK/interfaces";
-import { Option } from "redux/questions";
+import { QuestionVariable } from "DISK/interfaces";
 
 interface MapPoint {
     lat: number,
     lng: number,
+}
+
+interface Option {
+    id: string,
+    name: string
 }
 
 export interface OptionBinding {
@@ -24,7 +28,7 @@ interface BoundingBoxMapProps {
         maxLat: number,
         maxLng: number
     } | null,
-    onChange: (bindings:OptionBinding[]) => void
+    onChange?: (bindings:OptionBinding[]) => void
 }
 
 export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: BoundingBoxMapProps) => {
@@ -45,7 +49,7 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
             setSimpleBox(initialBindings);
             setPointA({lat:initialBindings.minLat, lng:initialBindings.minLng});
             setPointB({lat:initialBindings.maxLat, lng:initialBindings.maxLng});
-            onChange([
+            if (onChange) onChange([
                 {variable:variable.minLat, value:{id: initialBindings.minLat.toFixed(6), name: initialBindings.minLat.toFixed(2)}},
                 {variable:variable.minLng, value:{id: initialBindings.minLng.toFixed(6), name: initialBindings.minLng.toFixed(2)}},
                 {variable:variable.maxLat, value:{id: initialBindings.maxLat.toFixed(6), name: initialBindings.maxLat.toFixed(2)}},
@@ -78,7 +82,7 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
                 {variable:variable.maxLat, value:{id: simpleBox.maxLat.toFixed(6), name: simpleBox.maxLat.toFixed(2)}},
                 {variable:variable.maxLng, value:{id: simpleBox.maxLng.toFixed(6), name: simpleBox.maxLng.toFixed(2)}},
             ];
-            onChange(bindings);
+            if (onChange) onChange(bindings);
             onCloseDialog();
         } else {
             //TODO: show some error;

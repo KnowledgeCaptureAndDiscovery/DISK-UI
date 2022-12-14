@@ -3,7 +3,6 @@ import { idPattern, Question, VariableBinding, QuestionVariable, varPattern, Tri
 //import { DISKAPI } from "DISK/API";
 import React, { useEffect } from "react";
 import { useAppDispatch } from "redux/hooks";
-import { setLoadingOptions, setOptions, Option } from "redux/questions";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { BoundingBoxMap, OptionBinding } from "./BoundingBoxMap";
@@ -12,15 +11,22 @@ import { QuestionVariableSelector } from "./QuestionVariableSelector";
 import { useGetQuestionsQuery, useLazyGetDynamicOptionsQuery } from "redux/apis/questions";
 import { setQuestionBindings, SimpleMap } from "redux/slices/forms";
 import { FormalExpressionView } from "./FormalExpressionView";
+import { QuestionTemplateSelector } from "./QuestionTemplateSelector";
+import { QuestionTemplateFiller } from "./QuestionTemplateFiller";
 
 export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
 export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
 
+interface Option {
+    id: string,
+    name: string
+}
+
 interface QuestionProps {
-    questionId: string,
-    bindings: VariableBinding[],
+    initialQuestionId: string,
+    initialBindings: VariableBinding[],
     onQuestionChange: (selectedId:string, bindings:VariableBinding[], updatedPattern:Triple[]) => void,
-    error?: boolean
+    required?: boolean
 }
 
 const TextPart = styled(Box)(({ theme }) => ({
@@ -30,7 +36,7 @@ const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questionBindings, onQuestionChange:sendQuestionChange, error:exError=false} : QuestionProps) => {
+export const QuestionSelector = ({initialQuestionId:selectedQuestionId, initialBindings:questionBindings, onQuestionChange:sendQuestionChange, required:exError=false} : QuestionProps) => {
     const dispatch = useAppDispatch();
     const { data: questions, isLoading, isError } = useGetQuestionsQuery();
     const [ getDynamicOptions ] = useLazyGetDynamicOptionsQuery();
@@ -52,7 +58,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
 
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
 
-    React.useEffect(() => {
+    /*React.useEffect(() => {
         if (selectedQuestionId && questions && questions.length > 0) {
             let selectedQuestion : Question = questions.filter((q) => q.id === selectedQuestionId)?.[0];
             if (selectedQuestion)
@@ -60,7 +66,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             else
                 console.warn("Selected question not found on question catalog")
         }
-    }, [selectedQuestionId, questions]);
+    }, [selectedQuestionId, questions]);/*
 
     /*React.useEffect(() => {
         if (pristine && questionBindings.length > 0) {
@@ -101,9 +107,12 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
         (questionBindings||[]).forEach((qb:VariableBinding) => {
             newBindings[qb.variable] = qb.binding;
         });
-        dispatch( setQuestionBindings(newBindings) );
-        console.log(newBindings);
-    }, [questionBindings]);
+        if (selectedQuestion) dispatch( setQuestionBindings({
+            id: selectedQuestion.id,
+            map: newBindings,
+        }));
+        console.log(selectedQuestion, newBindings);
+    }, [questionBindings, selectedQuestion]);
   
     const onQuestionChange = (value: Question | null) => {
         if (value && (!selectedQuestion || value.id !== selectedQuestion.id)) {
@@ -125,7 +134,7 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             setTimeIntervalVariable(tiVars);
             setQuestionVariable(simpleVars);
 
-            setSelectedQuestion(value);
+            setSelectedQuestion(value);// FIXME
             loadQuestionDynamicOptions(value);
             updateQuestionFiller(value);
         }
@@ -186,20 +195,11 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
             if (queryId)
                 setLastQuery(queryId);
 
-            question.variables.forEach((qv:QuestionVariable) => {
-                dispatch(setLoadingOptions(qv.id))
-            });
-
-            //useGetDynamicOptionsQuery({cfg: {id:question.id, bindings:bindings}});
-            //DISKAPI.getDynamicOptions({id:question.id, bindings:bindings})
             getDynamicOptions({cfg:{id:question.id, bindings:bindings}})
                     .unwrap()
                     .then((options:{[name:string] : VariableOption[]}) => {
                         question.variables.forEach((qv:QuestionVariable) => {
                             let curOpts = options[qv.variableName];
-                            if (curOpts) {
-                                dispatch(setOptions({id:qv.id, options:curOpts}));
-                            }
                         });
                     });
         }
@@ -310,37 +310,14 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
     }, [selectedOptionValues]);
 
     return <Box>
-        <Box>
-            <FormHelperText sx={{margin: "2px"}}>Select a template that can express your hypothesis or question:</FormHelperText>
-            <Autocomplete id="select-question" size="small" fullWidth sx={{marginTop: "5px"}} 
-                value={selectedQuestion}
-                onChange={(_,newQ) => onQuestionChange(newQ)}
-                inputValue={selectedQuestionLabel}
-                onInputChange={(_,newIn) => setSelectedQuestionLabel(newIn)}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                getOptionLabel={(option) => option.name}
-                options={questions ? questions : []}
-                loading={isLoading}
-                renderInput={(params) => (
-                    <TextField {...params} error={exError} label="Templates"
-                        InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                                <React.Fragment>
-                                    {isLoading && (<CircularProgress color="inherit" size={20} />)}
-                                    {params.InputProps.endAdornment}
-                                </React.Fragment>
-                            ),
-                        }}
-                    />
-                )}
-            />
-        </Box>
+        <QuestionTemplateSelector initialQuestionId={selectedQuestionId} onChange={onQuestionChange} required={exError}/>
+
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (questionParts.length > 0 ? "block" : "none"), position:"relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
                 Fill in the template:
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                {/*
                 <Box sx={{display:'inline-flex', flexWrap: "wrap", alignItems: "end"}}>
                     {questionParts.length > 0 ? questionParts.map((part:string, i:number, parts: string[]) => 
                         part.charAt(0) !== '?' ? 
@@ -358,6 +335,8 @@ export const QuestionSelector = ({questionId:selectedQuestionId, bindings:questi
                         ))
                     : ""}
                 </Box>
+                */}
+                <QuestionTemplateFiller question={selectedQuestion?selectedQuestion:undefined}/>
                 <Tooltip arrow title={(formalView? "Hide" : "Show") + " formal expression"}>
                     <IconButton onClick={() => setFormalView(!formalView)}>
                         {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}

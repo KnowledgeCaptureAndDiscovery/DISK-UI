@@ -12,6 +12,7 @@ import { useAppDispatch } from "redux/hooks";
 import React from "react";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { openNotification } from "redux/slices/notifications";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -29,15 +30,13 @@ export const HypothesisEditor = () => {
     const dispatch = useAppDispatch();
     const { hypothesisId } = useParams();
     const selectedId = hypothesisId as string;
-
-    const [searchParams, setSearchParams]= useSearchParams();
-    let initQuestion = searchParams.get("q");
-
-    const [postHypothesis, { isLoading: isCreating }] = usePostHypothesisMutation();
-    const [putHypothesis, { isLoading: isUpdating }] = usePutHypothesisMutation();
+    const [searchParams, _]= useSearchParams();
+    let initialQuestionId = searchParams.get("q");
 
     // Redux data
-    const {data :hypothesis, isLoading:loading, isError:error} = useGetHypothesisByIdQuery(selectedId, {skip:!selectedId});
+    const {data :hypothesis, isLoading:loading } = useGetHypothesisByIdQuery(selectedId, {skip:!selectedId});
+    const [postHypothesis] = usePostHypothesisMutation();
+    const [putHypothesis] = usePutHypothesisMutation();
 
     // Form values:
     const [name, setName] = React.useState("");
@@ -45,32 +44,31 @@ export const HypothesisEditor = () => {
     const [notes, setNotes] = React.useState("");
     const [questionId, setQuestionId] = React.useState("");
     const [questionBindings, setQuestionBindings] = React.useState<VariableBinding[]>([]);
+
+
     const [editedQuestionId, setEditedQuestionId] = React.useState("");
     const [editedQuestionBindings, setEditedQuestionBindings] = React.useState<VariableBinding[]>([]);
     const [editedGraph, setEditedGraph] = React.useState<Triple[]>([]);
 
     // State errors...
-    //const [waiting, setWaiting] = React.useState<boolean>(false);
-    const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
-    const [errorSaveNotification, setErrorSaveNotification] = React.useState<boolean>(false);;
     const [errorName, setErrorName] = React.useState<boolean>(false);
     const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
-    const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
+    //const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
 
     const onNameChange = (name:string) => { setName(name); setErrorName(name.length === 0); }
     const onDescChange = (desc:string) => { setDescription(desc); setErrorDesc(desc.length === 0); }
 
     useEffect(() => {
-        if (initQuestion)
-            setQuestionId(initQuestion);
-    }, [initQuestion])
+        if (initialQuestionId)
+            setQuestionId(initialQuestionId);
+    }, [initialQuestionId])
 
     useEffect(() => {
         if (hypothesis) {
             loadForm(hypothesis);
         } else {
             clearForm();
-            if (initQuestion) setQuestionId(initQuestion);
+            if (initialQuestionId) setQuestionId(initialQuestionId);
         }
     }, [hypothesis])
 
@@ -78,8 +76,8 @@ export const HypothesisEditor = () => {
         setName(hypothesis.name);
         setDescription(hypothesis.description);
         setNotes(hypothesis.notes ? hypothesis.notes : "");
-        setQuestionBindings(hypothesis.questionBindings);
         setQuestionId(hypothesis.question ? hypothesis.question : "");
+        setQuestionBindings(hypothesis.questionBindings);
     }
 
     const clearForm = () => {
@@ -91,15 +89,13 @@ export const HypothesisEditor = () => {
     }
 
     const onSaveButtonClicked = () => {
-        // Check required fields;
         if (!name || !description || !editedQuestionId) {
             if (!name) setErrorName(true);
             if (!description) setErrorDesc(true);
-            if (!editedQuestionId) setErrorQuestion(true);
+            //if (!editedQuestionId) setErrorQuestion(true); this should be solved by required.
             return;
         }
 
-        let newHypothesis : Hypothesis;
         let previous : any = {};
         let editing : boolean = false;
         if (hypothesis) {
@@ -107,7 +103,7 @@ export const HypothesisEditor = () => {
             editing = true;
         }
         // Add form data
-        newHypothesis = {
+        let newHypothesis : Hypothesis = {
             ...previous,
             name: name,
             description: description,
@@ -118,32 +114,22 @@ export const HypothesisEditor = () => {
         };
 
         dispatch(openBackdrop());
-        console.log("SEND:", newHypothesis);
-        //(editing?DISKAPI.updateHypothesis:DISKAPI.createHypothesis)(newHypothesis)
         (editing?putHypothesis:postHypothesis)({data:newHypothesis})
             .then((data : {data:Hypothesis} | {error: any}) => {
                 let savedHypothesis = (data as {data:Hypothesis}).data;
                 if (savedHypothesis) {
-                    console.log("RETURNED:", savedHypothesis);
-                    setSaveNotification(true);
+                    dispatch(openNotification({severity:'success', text:'Successfully saved'}))
                     navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
                 }
-                //dispatch(addHypothesis(savedHypothesis));
             })
             .catch((e) => {
-                setErrorSaveNotification(true)
+                dispatch(openNotification({severity:'error', text:'Error saving hypothesis. Please try again'}))
                 console.warn(e);
             })
             .finally(() => {
                 dispatch(closeBackdrop());
             });
     }
-
-    const onQuestionChange = (selectedQuestionId: string, bindings: VariableBinding[], pattern: Triple[]) => {
-        setEditedQuestionId(selectedQuestionId);
-        setEditedQuestionBindings(bindings);
-        setEditedGraph(pattern);
-    };
 
     const onDuplicateClicked = () => {
         if (!hypothesis) {
@@ -153,23 +139,24 @@ export const HypothesisEditor = () => {
             ...hypothesis,
             id: '',
             name: hypothesis.name + " (copy)",
-            questionBindings: hypothesis.questionBindings.map((qv) => {return {
-                ...qv,
-                collection: undefined,
-                bindingAsArray: undefined,
-            }})
+            //questionBindings: hypothesis.questionBindings.map((qv) => {return {
+            //    ...qv,
+            //    collection: undefined,
+            //    bindingAsArray: undefined,
+            //}})
         };
 
         dispatch(openBackdrop());
-        console.log("SEND:", newHypothesis);
         postHypothesis({data:newHypothesis})
-            .then((savedHypothesis) => {
-                setSaveNotification(true);
-                //dispatch(addHypothesis(savedHypothesis));
-                //navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+            .then((data : {data:Hypothesis} | {error: any}) => {
+                let savedHypothesis = (data as {data:Hypothesis}).data;
+                if (savedHypothesis) {
+                    dispatch(openNotification({severity:'success', text:'Successfully saved'}))
+                    navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                }
             })
             .catch((e) => {
-                setErrorSaveNotification(true);
+                dispatch(openNotification({severity:'error', text:'Error saving hypothesis. Please try again'}))
                 console.warn(e);
             })
             .finally(()=>{
@@ -177,18 +164,14 @@ export const HypothesisEditor = () => {
             });
     };
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
-        <Snackbar open={saveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="success" sx={{ width: '100%' }} onClose={() => setSaveNotification(false)}>
-                Successfully saved
-            </Alert>
-        </Snackbar>
-        <Snackbar open={errorSaveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setErrorSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="error" sx={{ width: '100%' }} onClose={() => setErrorSaveNotification(false)}>
-                Error saving hypothesis. Please try again
-            </Alert>
-        </Snackbar>
 
+    const onQuestionChange = (selectedQuestionId: string, bindings: VariableBinding[], pattern: Triple[]) => {
+        setEditedQuestionId(selectedQuestionId);
+        setEditedQuestionBindings(bindings);
+        setEditedGraph(pattern);
+    };
+
+    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
                 <TextField fullWidth size="small" label="Short name" required sx={{backgroundColor: "white"}}
@@ -221,7 +204,7 @@ export const HypothesisEditor = () => {
                 Hypothesis or question:
             </TypographySubtitle>
             {!loading ?
-                <QuestionSelector questionId={questionId} bindings={questionBindings} onQuestionChange={onQuestionChange} error={errorQuestion}/>
+                <QuestionSelector initialQuestionId={questionId} initialBindings={questionBindings} onQuestionChange={onQuestionChange} required/>
             : <Skeleton/>}
         </Box>
 
