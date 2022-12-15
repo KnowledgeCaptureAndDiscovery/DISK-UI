@@ -23,7 +23,7 @@
     "@types/three": "^0.143.2",
     "@uiw/react-codemirror": "^4.7.0",
     "google-map-react": "^2.2.0",
-    "keycloak-js": "^10.0.2",
+    "keycloak-js": "^19.0.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-redux": "^7.2.0",
