@@ -5,9 +5,9 @@ import { useAppDispatch } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { normalizeTextValue, normalizeURI } from "./QuestionList";
-import { isBoundingBoxVariable } from "./QuestionSelector";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { FormalExpressionView } from "./FormalExpressionView";
+import { isBoundingBoxVariable } from "./QuestionHelpers";
 
 interface QuestionPreviewProps {
     selected: string,

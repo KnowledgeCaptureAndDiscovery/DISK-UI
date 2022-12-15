@@ -1,5 +1,5 @@
 import { Box, Button, FormHelperText, Card, Typography, IconButton, Tooltip } from "@mui/material"
-import { Workflow } from "DISK/interfaces"
+import { VariableBinding, Workflow } from "DISK/interfaces"
 import { WorkflowEditor } from "./WorkflowEditor"
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
@@ -53,6 +53,18 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     }
 
     const onWorkflowSave = (wf:Workflow) => {
+        wf.bindings = wf.bindings.map((vb:VariableBinding) => {
+            let curBinding = vb.binding;
+            //FIXME: this is a hack,
+            if (vb.variable === 'demographic_value') {
+                curBinding = '[' + curBinding + "]";
+            }
+            return {
+                variable: vb.variable,
+                binding: curBinding,
+                type: vb.type,
+            } as VariableBinding;
+        });
         if (notifyChange) {
             let curWfs : Workflow[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
             if (selectedWorkflow) curWfs[editingIndex] = wf; //Editing

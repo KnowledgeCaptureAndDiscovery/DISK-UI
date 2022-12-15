@@ -1,62 +1,35 @@
 import { Box } from "@mui/material"
-import { Question, QuestionVariable, varPattern } from "DISK/interfaces"
+import { Question, QuestionVariable } from "DISK/interfaces"
 import React from "react"
-import { useAppSelector } from "redux/hooks"
-import { RootState } from "redux/store"
 import { BoundingBoxMap } from "./BoundingBoxMap"
-import { TextPart } from "./QuestionHelpers"
+import { createTemplateFragments, TemplateFragment, TextPart } from "./QuestionHelpers"
 import { isBoundingBoxVariable, isTimeIntervalVariable } from "./QuestionHelpers"
 import { QuestionVariableSelector } from "./QuestionVariableSelector"
 import { TimeIntervalVariable } from "./TimeIntervalVariable"
 
 interface QuestionTemplateSelectorProps {
-    question?: Question,
-    required?: boolean,
+    question: Question|null,
 }
 
-export const QuestionTemplateFiller = ({ required, question }: QuestionTemplateSelectorProps) => {
-    const [questionParts, setQuestionParts] = React.useState<string[]>([]);
-    const [variables, setVariables] = React.useState<{[name:string]:QuestionVariable}>({});
+export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorProps) => {
+    const [templateFragments, setTemplateFragments] = React.useState<TemplateFragment[]>([]);
 
     React.useEffect(()=>{
         if (!question)
             return;
 
-        let nameToVariable : {[id:string] : QuestionVariable} = {};
-        question.variables.forEach((qv:QuestionVariable) => nameToVariable[qv.variableName] = qv);
-        setVariables(nameToVariable);
-        
-        //Split question template in text and inputs
-        let textParts : string[] = question.template.split(varPattern);
-        let varParts : string [] = [];
-        let varIterator : RegExpMatchArray | null = question.template.match(varPattern);
-        if (varIterator) varIterator.forEach((cur:string) => varParts.push(cur));
-        let startWithText : boolean = question.template.charAt(0) !== '?';
-
-        let ordered : string[] = [];
-        textParts = textParts.reverse();
-        varParts = varParts.reverse();
-
-        let cur : string | undefined = startWithText ? textParts.pop() : undefined;
-        do {
-            if (cur) ordered.push(cur);
-            cur = varParts.pop();
-            if (cur) ordered.push(cur);
-            cur = textParts.pop();
-
-        } while (cur);
-        setQuestionParts(ordered);
+        setTemplateFragments(createTemplateFragments(question));
     },[question]);
 
-    if (!questionParts || questionParts.length === 0)
+    if (!templateFragments || templateFragments.length === 0 || !question)
         return null;
 
     return <Box sx={{ display: 'inline-flex', flexWrap: "wrap", alignItems: "end" }}>
-        {questionParts.map((part: string, i: number) => {
-            if (part.startsWith('?')) { //Is a variable
-                let curVariable : QuestionVariable = variables[part];
+        {templateFragments.map((frag: TemplateFragment, i: number) => {
+            if (frag.type === 'variable') { //Is a variable
+                let curVariable : QuestionVariable = frag.value;
                 if (!curVariable) {
-                    console.warn("Question not found!", part);
+                    console.warn("Question not found!", frag);
                     return null;
                 }
                 if (isBoundingBoxVariable(curVariable)) {
@@ -64,10 +37,10 @@ export const QuestionTemplateFiller = ({ required, question }: QuestionTemplateS
                 } else if (isTimeIntervalVariable(curVariable)) {
                     return <TimeIntervalVariable key={`qVars${i}`} variable={curVariable} />
                 } else {
-                    return <QuestionVariableSelector key={`qVars${i}`} variable={curVariable}/>
+                    return <QuestionVariableSelector key={`qVars${i}`} questionId={question.id} variable={curVariable}/>
                 }
             } else {
-                return <TextPart key={`qPart${i}`}> {part} </TextPart>;
+                return <TextPart key={`qPart${i}`}> {frag.value} </TextPart>;
             }
         })}
     </Box>

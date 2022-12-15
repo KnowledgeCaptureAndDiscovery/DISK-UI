@@ -1,23 +1,20 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { Question, QuestionVariable, VariableOption } from "DISK/interfaces";
+import { QuestionVariable, VariableOption } from "DISK/interfaces";
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
 import { setQuestionBindings } from "redux/slices/forms";
-import { OptionBinding } from "./BoundingBoxMap";
 import { useGetDynamicOptionsQuery } from "redux/apis/questions";
 
 interface QuestionVariableProps {
+    questionId: string,
     variable: QuestionVariable,
-    onChange?: (bindings:OptionBinding[]) => void
 }
 
-export const QuestionVariableSelector = ({variable, onChange}: QuestionVariableProps) => {
+export const QuestionVariableSelector = ({questionId, variable}: QuestionVariableProps) => {
     const dispatch = useAppDispatch();
     const bindings = useAppSelector((state:RootState) => state.forms.questionBindings);
-    const questionId = useAppSelector((state:RootState) => state.forms.selectedQuestionId);
-
-    const { data, isLoading, isError, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:bindings}});
+    const { data, isLoading, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:bindings}});
     const [options, setOptions] = useState<VariableOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<VariableOption|null>(null);
     const [selectedOptionLabel, setSelectedOptionLabel] = useState<string>("");
@@ -54,18 +51,9 @@ export const QuestionVariableSelector = ({variable, onChange}: QuestionVariableP
             delete newBindings[variable.id];
         }
         dispatch(setQuestionBindings({
-            id: questionId,
             map: newBindings
         }));
-        if (onChange) onChange([
-            {
-                variable: variable,
-                value: value != null ? {
-                    id: value.value,
-                    name: value.label,
-                } : null
-            } as OptionBinding,
-        ]);
+        refetch();
     }
 
     return (

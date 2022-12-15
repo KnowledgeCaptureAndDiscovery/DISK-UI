@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Card, Divider, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
-import { Hypothesis, idPattern, Triple, VariableBinding } from "DISK/interfaces";
+import { Hypothesis, idPattern, Question, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -46,10 +46,7 @@ export const HypothesisEditor = () => {
     const [questionId, setQuestionId] = React.useState("");
     const [questionBindings, setQuestionBindings] = React.useState<VariableBinding[]>([]);
 
-
     const [editedQuestionId, setEditedQuestionId] = React.useState("");
-    const [editedQuestionBindings, setEditedQuestionBindings] = React.useState<VariableBinding[]>([]);
-    const [editedGraph, setEditedGraph] = React.useState<Triple[]>([]);
 
     const formQuestionBindings = useAppSelector((state:RootState) => state.forms.questionBindings);
     const formQuestionPattern = useAppSelector((state:RootState) => state.forms.selectedPattern);
@@ -163,7 +160,6 @@ export const HypothesisEditor = () => {
                     type: null
                 } as VariableBinding;
             }),
-            //editedQuestionBindings,
             graph: { triples: getCurrentGraph() }
         };
 
@@ -193,11 +189,11 @@ export const HypothesisEditor = () => {
             ...hypothesis,
             id: '',
             name: hypothesis.name + " (copy)",
-            //questionBindings: hypothesis.questionBindings.map((qv) => {return {
-            //    ...qv,
-            //    collection: undefined,
-            //    bindingAsArray: undefined,
-            //}})
+            questionBindings: hypothesis.questionBindings.map((qv) => {return {
+                ...qv,
+                collection: undefined,
+                bindingAsArray: undefined,
+            }})
         };
 
         dispatch(openBackdrop());
@@ -219,10 +215,8 @@ export const HypothesisEditor = () => {
     };
 
 
-    const onQuestionChange = (selectedQuestionId: string, bindings: VariableBinding[], pattern: Triple[]) => {
-        setEditedQuestionId(selectedQuestionId);
-        setEditedQuestionBindings(bindings);
-        setEditedGraph(pattern);
+    const onQuestionChange = (selectedQuestion: Question|null, bindings: VariableBinding[], graph: Triple[]) => {
+        setEditedQuestionId(selectedQuestion? selectedQuestion.id : '');
     };
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
@@ -258,7 +252,7 @@ export const HypothesisEditor = () => {
                 Hypothesis or question:
             </TypographySubtitle>
             {!loading ?
-                <QuestionSelector initialQuestionId={questionId} initialBindings={questionBindings} onQuestionChange={onQuestionChange} required/>
+                <QuestionSelector questionId={questionId} bindings={questionBindings} onChange={onQuestionChange} required/>
             : <Skeleton/>}
         </Box>
 

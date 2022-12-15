@@ -10,10 +10,10 @@ import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "c
 
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { isBoundingBoxVariable } from "./QuestionSelector";
 import { useGetHypothesesQuery } from "redux/apis/hypotheses";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { useGetLOIsQuery } from "redux/apis/lois";
+import { isBoundingBoxVariable } from "./QuestionHelpers";
 
 interface QuestionListProps {
     expanded?: boolean,

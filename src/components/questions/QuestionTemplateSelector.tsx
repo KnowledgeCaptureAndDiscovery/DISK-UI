@@ -5,21 +5,22 @@ import { useGetQuestionsQuery } from "redux/apis/questions";
 
 interface QuestionTemplateSelectorProps {
     required?: boolean,
-    initialQuestionId?: string,
+    questionId?: string,
     onChange?: (question:Question|null) => void, 
 }
 
-export const QuestionTemplateSelector = ({required, initialQuestionId, onChange}:QuestionTemplateSelectorProps) => {
+export const QuestionTemplateSelector = ({required, questionId, onChange}:QuestionTemplateSelectorProps) => {
     const { data: questions, isLoading } = useGetQuestionsQuery();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
 
     React.useEffect(() => {
-        if (questions && questions.length > 0 && initialQuestionId) {
-            let question = questions.filter(q => q.id === initialQuestionId)[0]
-            if (question) onQuestionChange(question);
+        if (questions && questions.length > 0 && questionId) {
+            let question = questions.filter(q => q.id === questionId)[0]
+            if (question && (!selectedQuestion || question.id != selectedQuestion.id))
+                onQuestionChange(question);
         }
-    }, [questions, initialQuestionId]);
+    }, [questions, questionId]);
 
     const onQuestionChange = (newQuestion:Question|null) => {
         setSelectedQuestion(newQuestion);
