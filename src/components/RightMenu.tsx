@@ -237,8 +237,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader sx={{justifyContent:"space-between"}}>
           <Box sx={{display:"inline-flex", alignItems:"center", textDecoration: 'unset'}} component={Link} to={PATH_HOME}>
-            <img alt='DISK Logo' src='/logo256.png' style={{width:"auto", height: "38px", padding: "0 15px 0 5px"}} />
-            <Typography variant='h4' sx={{display:"inline-block", fontWeight: 700, color: "gray"}} >DISK</Typography>
+            <img alt='DISK Logo' src='/Logo-neuro.png' style={{width:"auto", height: "38px", padding: "0 15px 0 5px"}} />
+            <Typography variant='h5' sx={{display:"inline-block", fontWeight: 700, color: "gray"}} >NeuroDISK</Typography>
           </Box>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
