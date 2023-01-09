@@ -11,6 +11,13 @@ export const questionsAPI = createApi({
   endpoints: (builder) => ({
     getQuestions: builder.query<Question[], void>({
       query: () => 'questions',
+      transformResponse: (response:Question[], meta, arg) => {
+        return response.sort((q1,q2) => {
+          if (!q1.category) return -1;
+          if (!q2.category) return 1;
+          return q1.category.id.localeCompare(q2.category.id);
+        })
+      }
     }),
     getVariableOptions: builder.query<VariableOption[], string>({
       query: (id: string) => `question/${id}/options`,

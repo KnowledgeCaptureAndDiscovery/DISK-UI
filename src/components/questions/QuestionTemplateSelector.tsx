@@ -13,6 +13,18 @@ export const QuestionTemplateSelector = ({required, questionId, onChange}:Questi
     const { data: questions, isLoading } = useGetQuestionsQuery();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
+    const [categories, setCategories] = React.useState<{[id:string]:string}>({});
+
+    React.useEffect(() => {
+        if (questions && questions.length > 0) {
+            let newCategories : {[id:string]:string} = {};
+            questions.forEach((q:Question) => {
+                if (q.category)
+                    newCategories[q.category.id] = q.category.name;
+            });
+            setCategories(newCategories);
+        }
+    }, [questions]);
 
     React.useEffect(() => {
         if (questions && questions.length > 0 && questionId) {
@@ -33,6 +45,7 @@ export const QuestionTemplateSelector = ({required, questionId, onChange}:Questi
         </FormHelperText>
         <Autocomplete id="select-question" size="small" fullWidth sx={{ marginTop: "5px" }}
             value={selectedQuestion}
+            groupBy={(option) => option.category ? option.category.name : 'No category'}
             onChange={(_, newQ) => onQuestionChange(newQ)}
             inputValue={selectedQuestionLabel}
             onInputChange={(_, newIn) => setSelectedQuestionLabel(newIn)}

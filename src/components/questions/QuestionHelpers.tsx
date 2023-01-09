@@ -97,3 +97,16 @@ export const simpleMapToGraph : (question:Question, bindings:SimpleMap)  => Trip
         }
         return updatedGraph;
 }
+
+export const getAllQuestionVariables : (question:Question)  => QuestionVariable[] = (question) => {
+    let allVariables : QuestionVariable[] = []
+    question.variables.forEach((v:QuestionVariable) => {
+        allVariables.push(v);
+        if (isBoundingBoxVariable(v)) {
+            allVariables = allVariables.concat( [v.maxLat, v.minLat, v.maxLng, v.minLng] );
+        } else if (isTimeIntervalVariable(v)) {
+            //TODO
+        }
+    })
+    return allVariables;
+}

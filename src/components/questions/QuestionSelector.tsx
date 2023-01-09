@@ -9,7 +9,7 @@ import { FormalExpressionView } from "./FormalExpressionView";
 import { QuestionTemplateSelector } from "./QuestionTemplateSelector";
 import { QuestionTemplateFiller } from "./QuestionTemplateFiller";
 import { RootState } from "redux/store";
-import { simpleMapToGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
+import { getAllQuestionVariables, isBoundingBoxVariable, simpleMapToGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
 
 interface QuestionProps {
     questionId: string,
@@ -38,8 +38,9 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
         if (!selectedQuestion)
             return;
         let newBindings : SimpleMap = {};
+        let allVariables = getAllQuestionVariables(selectedQuestion);
         (bindings||[]).forEach((varBindings:VariableBinding) => {
-            let curVar = selectedQuestion.variables.filter(v => v.id === varBindings.variable)[0];
+            let curVar = allVariables.filter((v:QuestionVariable) => (v.id === varBindings.variable))[0];
             if (curVar)
                 newBindings[curVar.id] = varBindings.binding;
         });
@@ -48,12 +49,12 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
         selectedQuestion.variables.forEach((v) => {
             pattern = pattern.replace(v.variableName, v.id);
         });
+        console.log("SEND:", newBindings);
 
         if (selectedQuestion) dispatch(setQuestionBindings({
             pattern: pattern,
             map: newBindings,
         }));
-        console.log(bindings, newBindings);
     }, [bindings, selectedQuestion]);
 
     const onQuestionChange = (value: Question | null) => {

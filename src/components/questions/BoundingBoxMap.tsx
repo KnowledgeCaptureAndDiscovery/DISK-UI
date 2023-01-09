@@ -3,7 +3,9 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import GoogleMapReact, { ClickEventValue } from 'google-map-react';
-import { QuestionVariable } from "DISK/interfaces";
+import { Question, QuestionVariable } from "DISK/interfaces";
+import { useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
 
 interface MapPoint {
     lat: number,
@@ -31,10 +33,11 @@ interface BoundingBoxMapProps {
     onChange?: (bindings:OptionBinding[]) => void
 }
 
-export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: BoundingBoxMapProps) => {
+export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
     const [open, setOpen] = useState(false);
     const [map, setMap] = useState<any>();
     const [maps, setMaps] = useState<any>();
+    const bindings = useAppSelector((state:RootState) => state.forms.questionBindings);
 
     const [pointA, setPointA] = useState<MapPoint|null>(null);
     const [pointB, setPointB] = useState<MapPoint|null>(null);
@@ -44,7 +47,14 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
 
     const [pristine, setPristine] = useState<boolean>(true);
 
-    useEffect(() => {
+    //useEffect(() => {
+    //    if (variable && bindings variable.maxLat, variable.minLng, variable.maxLng&& & && && variable.minLatt &&
+    //        [, ].forEach((expVar:QuestionVariable) => {
+    //        });
+    //    }
+    //}, [variable, bindings]);
+
+    /*useEffect(() => {
         if (initialBindings) {
             setSimpleBox(initialBindings);
             setPointA({lat:initialBindings.minLat, lng:initialBindings.minLng});
@@ -56,7 +66,21 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
                 {variable:variable.maxLng, value:{id: initialBindings.maxLng.toFixed(6), name: initialBindings.maxLng.toFixed(2)}},
             ]);
         }
-    }, [initialBindings]);
+    }, [initialBindings]);*/
+
+    /*useEffect(() => {
+        if (initialBindings) {
+            setSimpleBox(initialBindings);
+            setPointA({lat:initialBindings.minLat, lng:initialBindings.minLng});
+            setPointB({lat:initialBindings.maxLat, lng:initialBindings.maxLng});
+            if (onChange) onChange([
+                {variable:variable.minLat, value:{id: initialBindings.minLat.toFixed(6), name: initialBindings.minLat.toFixed(2)}},
+                {variable:variable.minLng, value:{id: initialBindings.minLng.toFixed(6), name: initialBindings.minLng.toFixed(2)}},
+                {variable:variable.maxLat, value:{id: initialBindings.maxLat.toFixed(6), name: initialBindings.maxLat.toFixed(2)}},
+                {variable:variable.maxLng, value:{id: initialBindings.maxLng.toFixed(6), name: initialBindings.maxLng.toFixed(2)}},
+            ]);
+        }
+    }, [initialBindings]);*/
 
     const defaultProps = {
         center: {
@@ -82,7 +106,7 @@ export const BoundingBoxMap = ({variable, onChange, bindings:initialBindings}: B
                 {variable:variable.maxLat, value:{id: simpleBox.maxLat.toFixed(6), name: simpleBox.maxLat.toFixed(2)}},
                 {variable:variable.maxLng, value:{id: simpleBox.maxLng.toFixed(6), name: simpleBox.maxLng.toFixed(2)}},
             ];
-            if (onChange) onChange(bindings);
+            //if (onChange) onChange(bindings);
             onCloseDialog();
         } else {
             //TODO: show some error;
