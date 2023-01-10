@@ -20,6 +20,7 @@ import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux/apis/lois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
+import { alignWorkflow } from "components/questions/QuestionHelpers";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -165,8 +166,8 @@ export const LOIEditor = () => {
             dataQuery: dataQuery,
             hypothesisQuery: hypothesisQuery,
             dataSource: selectedDataSource,
-            workflows: workflows,
-            metaWorkflows: metaWorkflows,
+            workflows: workflows.map(alignWorkflow),
+            metaWorkflows: metaWorkflows.map(alignWorkflow),
             tableDescription: tableExplanation,
             tableVariables: tableVariables,
             dataQueryExplanation: dataQueryExplanation,

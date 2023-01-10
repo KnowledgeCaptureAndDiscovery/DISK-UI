@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Box } from "@mui/material";
-import { Question, QuestionVariable, Triple, VariableBinding } from "DISK/interfaces";
+import { Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
 import { SimpleMap } from "redux/slices/forms";
 
 export type TemplateFragment = {
@@ -109,4 +109,25 @@ export const getAllQuestionVariables : (question:Question)  => QuestionVariable[
         }
     })
     return allVariables;
+}
+
+//This is to align data structures to the server
+export const  alignVariableBinding : (binding:VariableBinding) => VariableBinding = (binding) => {
+    return {
+        variable:   binding.variable,
+        binding:    binding.binding,
+        type:       binding.type,
+    };
+}
+
+export const  alignWorkflow : (wf:Workflow) => Workflow = (wf) => {
+    return {
+        source: wf.source,
+        description: wf.description,
+        workflow: wf.workflow,
+        workflowLink: wf.workflowLink,
+        bindings: wf.bindings.map(alignVariableBinding),
+        run: wf.run,
+        meta: wf.meta,       
+    }
 }
