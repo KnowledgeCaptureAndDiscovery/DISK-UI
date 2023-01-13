@@ -1,6 +1,6 @@
-import { Box, Card, CircularProgress, FormHelperText, IconButton, styled, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Tooltip } from "@mui/material"
-import { Question, VariableBinding, QuestionVariable, varPattern, Triple, VariableOption } from "DISK/interfaces"
-import React, { useEffect } from "react";
+import { Box, Card, FormHelperText, IconButton, Tooltip } from "@mui/material"
+import { Question, VariableBinding, QuestionVariable, Triple } from "DISK/interfaces"
+import React from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -9,7 +9,7 @@ import { FormalExpressionView } from "./FormalExpressionView";
 import { QuestionTemplateSelector } from "./QuestionTemplateSelector";
 import { QuestionTemplateFiller } from "./QuestionTemplateFiller";
 import { RootState } from "redux/store";
-import { getAllQuestionVariables, isBoundingBoxVariable, simpleMapToGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
+import { getAllQuestionVariables, simpleMapToGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
 
 interface QuestionProps {
     questionId: string,
@@ -64,7 +64,7 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     }
 
     return <Box>
-        <QuestionTemplateSelector questionId={questionId} onChange={onQuestionChange} required={required}/>
+        <QuestionTemplateSelector questionId={questionId} onChange={onQuestionChange} required={required} title={"Select a template that can express your hypothesis or question:"}/>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", position:"relative", overflow:"visible", display: selectedQuestion ? 'block' : 'none' }}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
                 Fill in the template:

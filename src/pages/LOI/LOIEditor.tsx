@@ -2,12 +2,12 @@ import React, { Fragment } from "react";
 import { Box, Button, Card, Checkbox, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
-import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
+import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
@@ -39,7 +39,6 @@ const TypographySection = styled(Typography)(({ theme }) => ({
 }));
 
 export const LOIEditor = () => {
-    const location = useLocation();
     let navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [searchParams, setSearchParams]= useSearchParams();
@@ -257,16 +256,6 @@ export const LOIEditor = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <FormGroup row={true}>
-                <TypographySubtitle sx={{mr:'5px'}}>Update on </TypographySubtitle>
-                <Tooltip arrow title="This line of inquiry will be trigger when changes on the data source are detected">
-                    <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="data changes"/>
-                </Tooltip>
-                <Tooltip arrow title="This line of inquiry will be trigger when changes on the workflow are detected">
-                    <FormControlLabel control={<Checkbox size="small"/>} label="workflow changes"/>
-                </Tooltip>
-            </FormGroup>
-
             <TypographySubtitle>Description:</TypographySubtitle>
             {!loading ?
                 <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="Brief description"
@@ -276,6 +265,16 @@ export const LOIEditor = () => {
                 <TextFieldBlock multiline fullWidth size="small" id="LOINotes" label="Additional notes"
                     value={notes} onChange={(e) => setNotes(e.target.value)}/>
             : <Skeleton/> }
+
+            <FormGroup row={true}>
+                <TypographySubtitle sx={{mr:'5px', fontSize: '1.05em'}}>This line of inquiry will trigger on</TypographySubtitle>
+                <Tooltip arrow title="This line of inquiry will be trigger when changes on the data source are detected">
+                    <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="data changes"/>
+                </Tooltip>
+                <Tooltip arrow title="This line of inquiry will be trigger when changes on the workflow are detected">
+                    <FormControlLabel control={<Checkbox size="small"/>} label="workflow changes"/>
+                </Tooltip>
+            </FormGroup>
         </Box>
         <Divider/>
 
