@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material"
-import { QuestionList } from "components/QuestionList"
+import { QuestionList } from "components/questions/QuestionList"
 
 export const LOIQuestion = () => {
     return (

@@ -1,4 +1,4 @@
-import { QuestionList } from "components/QuestionList"
+import { QuestionList } from "components/questions/QuestionList"
 
 export const Home = () => {
     return (<div>

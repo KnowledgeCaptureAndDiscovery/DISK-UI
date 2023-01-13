@@ -1,14 +1,12 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Select, Typography } from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
-import { DISKAPI } from "DISK/API";
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
 import { DataEndpoint } from "DISK/interfaces";
 import { ResultTable } from "./ResultTable";
+import { useGetEndpointsQuery } from "redux/apis/server";
 
 interface QueryTesterProps {
     name?: string,
@@ -22,7 +20,8 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
     const [query, setQuery] = useState("SELECT * WHERE {\n ?a ?b ?c \n} LIMIT 10");
     const [queryToSend, setQueryToSend] = useState("");
 
-    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
+    const { data:endpoints } = useGetEndpointsQuery();
 
     useEffect(() => {
         if (initQuery) setQuery(initQuery);
@@ -66,7 +65,7 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
                         <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
                                 value={dataSource?.url} onChange={(e) => setDataSourceByUrl(e.target.value)} error={dataSource === null} >
                             <MenuItem value="" disabled> None </MenuItem>
-                            {endpoints.map((endpoint:DataEndpoint) =>
+                            {(endpoints||[]).map((endpoint:DataEndpoint) =>
                                 <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
                                     {endpoint.name}
                                 </MenuItem>)

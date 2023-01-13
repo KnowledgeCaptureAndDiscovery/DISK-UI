@@ -1,9 +1,8 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, Skeleton, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
-import { idPattern, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
+import { Box, Button, Card, Divider, IconButton, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
+import { TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import ErrorIcon from '@mui/icons-material/ErrorOutline';
 import WaitIcon from '@mui/icons-material/HourglassBottom';
 import CheckIcon from '@mui/icons-material/Check';
@@ -13,17 +12,19 @@ import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES, PATH_TLOIS } from "constants/routes";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { QuestionPreview } from "components/QuestionPreview";
+import { QuestionPreview } from "components/questions/QuestionPreview";
 import { FileList } from "components/FileList";
-import { loadTLOIs, loadHypothesis } from "redux/loader";
-import { DISKAPI } from "DISK/API";
-import { add as addTLOI, remove as removeTLOI } from "redux/tlois";
-import { TLOIEdit } from "components/TLOIEdit";
+import { TLOIEdit } from "components/tlois/TLOIEdit";
 import CachedIcon from '@mui/icons-material/Cached';
-import { ShinyModal } from "components/ShinyModal";
-import { NarrativeModal } from "components/NarrativeModal";
-import { BrainModal } from "components/BrainModal";
-import { BrainVisualization } from "components/BrainVisualization";
+import { ShinyModal } from "components/modal/ShinyModal";
+import { NarrativeModal } from "components/modal/NarrativeModal";
+import { BrainModal } from "components/modal/BrainModal";
+
+import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
+import { openNotification } from "redux/slices/notifications";
+import { ConfirmDialog } from "components/ConfirmDialog";
+import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { useDeleteTLOIMutation, useExecuteHypothesisByIdMutation, useGetTLOIsQuery, usePostTLOIMutation } from "redux/apis/tlois";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -52,45 +53,24 @@ type TLOIMap = {[id:string]: {
 }};
 
 export const HypothesisView = () => {
-    const location = useLocation();
     const dispatch = useAppDispatch();
+    const {hypothesisId} = useParams();
+    const selectedId = hypothesisId as string; // Could be undefined?
+
     const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
 
-    const hypothesis = useAppSelector((state:RootState) => state.hypotheses.selectedHypothesis);
-    const selectedId = useAppSelector((state:RootState) => state.hypotheses.selectedId);
-    const loading = useAppSelector((state:RootState) => state.hypotheses.loadingSelected);
-    const error = useAppSelector((state:RootState) => state.hypotheses.errorSelected);
-
-    const TLOIs = useAppSelector((state:RootState) => state.tlois.TLOIs);
-    const TLOIloading = useAppSelector((state:RootState) => state.tlois.loadingAll);
-    const TLOIerror = useAppSelector((state:RootState) => state.tlois.errorAll);
-    const TLOIInit = useAppSelector((state:RootState) => state.tlois.initialized);
+    const { data:hypothesis, isError:error, isLoading:loading} = useGetHypothesisByIdQuery(selectedId);
+    const { data:TLOIs, isLoading:TLOIloading} = useGetTLOIsQuery();
+    const [postTLOI, { isLoading: isCreating }] = usePostTLOIMutation();
+    const [deleteTLOI, { isLoading: isDeleting }] = useDeleteTLOIMutation();
+    const [execHypothesis, { isLoading: isExecuting }] = useExecuteHypothesisByIdMutation();
 
     const [myTLOIs, setMyTLOIs] = useState<TLOIMap>({});
     const [newTlOIs, setNewTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
-    const [TLOIToDelete, setTLOIToDelete] = useState<TriggeredLineOfInquiry|null>(null);
-
-    const [waiting, setWaiting] = useState<boolean>(false);;
-    const [deleteNotification, setDeleteNotification] = useState<boolean>(false);
-    const [errorNotification, setErrorNotification] = useState<boolean>(false);
-    const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
-    const [queryNotification, setQueryNotification] = useState<boolean>(false);
-
-    useEffect(() => {
-        let id : string = location.pathname.replace(idPattern, '');
-        if (!!id && !loading && !error && selectedId !== id) {
-            loadHypothesis(dispatch, id);
-        }
-    }, [location, dispatch, error, loading, selectedId]);
-
-    useEffect(() => {
-        if (!TLOIInit)
-            loadTLOIs(dispatch);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         let map : TLOIMap = {};
-        TLOIs.filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
+        (TLOIs||[]).filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
             if (!map[tloi.parentLoiId]) {
                 map[tloi.parentLoiId] = {
                     value: [],
@@ -124,77 +104,85 @@ export const HypothesisView = () => {
             return <WaitIcon/>;
     }
     
-    const onDeleteConfirmed = () => {
-        if (TLOIToDelete === null) {
-            //maybe close the alert
-            return;
-        }
-        console.log("DELETING: ", TLOIToDelete.id);
-        setWaiting(true);
-        //setLastDeletedNamed(hypothesis.name);
+    const deleteTLOIById = (id:string) => {
+        console.log("DELETING: ", id);
+        dispatch(openBackdrop());
 
-        DISKAPI.deleteTLOI(TLOIToDelete.id)
-            .then((b:boolean) => {
-                if (b) {
-                    dispatch(removeTLOI(TLOIToDelete.id));
-                    setDeleteNotification(true);
-                }
+        deleteTLOI({id:id})
+            .then(() => {
+                dispatch(openNotification({
+                    severity: 'info',
+                    text: "Triggered Line of Inquiry was deleted"
+                }));
             })
             .catch((e) => {
-                setErrorNotification(true);
+                dispatch(openNotification({
+                    severity: 'error',
+                    text: "Error trying to delete Triggered Line of Inquiry"
+                }));
                 console.warn(e);
             })
             .finally(() => {
-                setWaiting(false);
+                dispatch(closeBackdrop());
             })
-        setConfirmDialogOpen(false);
-        setTLOIToDelete(null);
     }
 
-    const handleDeleteNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setDeleteNotification(false);
-        setErrorNotification(false);
-    };
-
     const onTestHypothesisClicked = () => {
-        setWaiting(true);
-        setQueryNotification(true);
-        DISKAPI.queryHypothesis(selectedId)
-                .then((tlois:TriggeredLineOfInquiry[]) => {
-                    setNewTLOIs(tlois.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL'));
-                    tlois.forEach((tloi:TriggeredLineOfInquiry) => {
-                        dispatch(addTLOI(tloi));
-                    });
-                    setQueryNotification(true);
+        dispatch(openBackdrop());
+        dispatch(openNotification({
+            severity: 'info',
+            text: "Looking for new executions..."
+        }));
+        execHypothesis(selectedId)
+                .then((value: {data:TriggeredLineOfInquiry[]} | {error:any}) => {
+                    let newTLOIs = (value as {data:TriggeredLineOfInquiry[]}).data;
+                    if (newTLOIs) {
+                        setNewTLOIs(newTLOIs.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL'));
+                        dispatch(openNotification({
+                            severity: 'success',
+                            text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                        }));
+                    } else if ((value as {error:any}).error) {
+                        dispatch(openNotification({
+                            severity: 'error',
+                            text: "An error has ocurred while searching new executions."
+                        }));
+                    }
+                })
+                .catch((e) => {
+                    dispatch(openNotification({
+                        severity: 'error',
+                        text: "An error has ocurred while searching new executions."
+                    }));
+                    console.warn(e);
                 })
                 .finally(() => {
-                    setWaiting(false);
+                    dispatch(closeBackdrop());
                 });
     }
 
     const onSendEditedRun = (tloi:TriggeredLineOfInquiry) => {
-        setWaiting(true);
-        setQueryNotification(true);
-        DISKAPI.createTLOI(tloi)
-                .then((tloi:TriggeredLineOfInquiry) => {
-                    setNewTLOIs([tloi]);
-                    dispatch(addTLOI(tloi));
-                    setQueryNotification(true);
+        dispatch(openBackdrop());
+        dispatch(openNotification({
+            severity: 'info',
+            text: "Sending new execution..."
+        }));
+        postTLOI({data:tloi})
+                .then((data : {data:TriggeredLineOfInquiry} | {error: any}) => {
+                    let savedTLOI = (data as {data:TriggeredLineOfInquiry}).data;
+                    if (savedTLOI) {
+                        console.log("RETURNED:", savedTLOI);
+                        setNewTLOIs([tloi]);
+                        dispatch(openNotification({
+                            severity: 'success',
+                            text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                        }));
+                    }
                 })
                 .finally(() => {
-                    setWaiting(false);
+                    dispatch(closeBackdrop());
                 });
     }
-
-    const handleQueryNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setQueryNotification(false);
-    };
 
     const renderOptionalButtons = (cur:TriggeredLineOfInquiry) => {
         const SHINY_FILENAME = "shiny_visualization";
@@ -224,46 +212,6 @@ export const HypothesisView = () => {
     }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
-            <CircularProgress color="inherit" />
-        </Backdrop>
-        <Snackbar open={queryNotification} autoHideDuration={3000} onClose={handleQueryNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity={newTlOIs && newTlOIs.length > 0 ? 'success' : 'info'} sx={{ width: '100%' }} onClose={handleQueryNotificationClose}>
-                {waiting ? "Looking for new executions..." : (
-                    newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
-                )}
-            </Alert>
-        </Snackbar>
-        <Snackbar open={deleteNotification} autoHideDuration={3000} onClose={handleDeleteNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="info" sx={{ width: '100%' }} onClose={handleDeleteNotificationClose}>
-                Triggered Line of Inquiry was deleted
-            </Alert>
-        </Snackbar>
-        <Snackbar open={errorNotification} autoHideDuration={3000} onClose={handleDeleteNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="error" sx={{ width: '100%' }} onClose={handleDeleteNotificationClose}>
-                Error trying to delete Triggered Line of Inquiry
-            </Alert>
-        </Snackbar>
-        <Dialog open={confirmDialogOpen}>
-            <DialogTitle id="alert-tloi-delete-title">
-                {"Delete this Triggered Line of Inquiry?"}
-            </DialogTitle>
-            <DialogContent>
-                <DialogContentText id="alert-tloi-delete-description">
-                    Are you sure you want to delete this Triggered Line of Inquiry?
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => {
-                    setConfirmDialogOpen(false);
-                    setTLOIToDelete(null);
-                }}>Cancel</Button>
-                <Button color="error" autoFocus onClick={onDeleteConfirmed}>
-                    Delete
-                </Button>
-            </DialogActions>
-      </Dialog>
-
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
@@ -400,13 +348,16 @@ export const HypothesisView = () => {
                                             {authenticated && renderOptionalButtons(tloi) }
                                             {authenticated && (
                                                 <Tooltip arrow placement="top" title="Delete">
-                                                    <IconButton sx={{padding:"0"}} onClick={() => {
-                                                        setConfirmDialogOpen(true);
-                                                        setTLOIToDelete(tloi);
-                                                    }}>
-                                                        <DeleteIcon/>
-                                                    </IconButton>
-                                            </Tooltip>
+                                                    <Box sx={{ display: "inline-block" }}>
+                                                        <ConfirmDialog title="Delete this Triggered Line of Inquiry"
+                                                            msg={"Are you sure you want to delete this triggered line of inquiry?"}
+                                                            onConfirm={() => deleteTLOIById(tloi.id)}>
+                                                            <IconButton sx={{ padding: "0" }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </ConfirmDialog>
+                                                    </Box>
+                                                </Tooltip>
                                             )}
                                         </Box>
                                     </TableCell>

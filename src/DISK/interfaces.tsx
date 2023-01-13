@@ -17,7 +17,7 @@ export interface Hypothesis {
     }
 }
 
-export interface VariableBinding {
+export interface VariableBinding { /// variable = binding
     variable:   string,
     binding:    string,
     type:       string|null,

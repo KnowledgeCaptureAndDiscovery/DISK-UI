@@ -1,23 +1,12 @@
-import { Box, Typography, Skeleton, Card, Button, Divider } from "@mui/material"
+import { Box, Typography, Skeleton, Card, Divider } from "@mui/material"
 import { DataEndpoint } from "DISK/interfaces";
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { loadDataEndpoints } from "redux/loader";
-import { RootState } from "redux/store";
 import StorageIcon from '@mui/icons-material/Storage';
 import { renderDescription } from "DISK/util";
 import { QueryTester } from "components/QueryTester";
+import { useGetEndpointsQuery } from "redux/apis/server";
 
 export const DataView = () => {
-    const dispatch = useAppDispatch();
-    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    const loadingEndpoints : boolean = useAppSelector((state:RootState) => state.server.loadingEndpoints);
-    const initEndpoints : boolean    = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-
-    useEffect(() => {
-        if (!initEndpoints)
-            loadDataEndpoints(dispatch);
-    }, []);
+    const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
 
     return <Box>
         <Typography variant="h5">Data sources:</Typography>
@@ -26,7 +15,7 @@ export const DataView = () => {
         </Typography>
         {loadingEndpoints ? 
             <Skeleton/>
-            : (endpoints.map((d:DataEndpoint) => 
+            : ((endpoints||[]).map((d:DataEndpoint) => 
             <Card variant="outlined" sx={{mb:"5px",p: "0 5px"}} key={`data_${d.url}`}>
                 <Box sx={{display:'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <Box sx={{display:'flex', alignItems: 'center'}}>
@@ -38,9 +27,7 @@ export const DataView = () => {
                     <QueryTester name="Query" initSource={d.url} initQuery={"SELECT ?a ?b ?c {\n  ?a ?b ?c .\n} LIMIT 10"}/>
                 </Box>
                 <Divider/>
-                <Typography>
-                    {renderDescription(d.description)}
-                </Typography>
+                {renderDescription(d.description)}
 
                 {false && d.prefix && d.namespace && <Typography sx={{fontFamily: "monospace"}}>
                     PREFIX {d.prefix}: &lt;{d.namespace}&gt;

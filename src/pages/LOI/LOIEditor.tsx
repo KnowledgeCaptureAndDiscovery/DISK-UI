@@ -1,26 +1,26 @@
 import React, { Fragment } from "react";
-import { Alert, Backdrop, Box, Button, Card, Checkbox, CircularProgress, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
-import { DISKAPI } from "DISK/API";
+import { Box, Button, Card, Checkbox, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_NEW } from "constants/routes";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
-import { setErrorSelected, setLoadingSelected, setSelectedLOI, add as addLOI } from "redux/lois";
-import { QuestionLinker } from "components/QuestionLinker";
+import { useAppDispatch } from "redux/hooks";
+import { QuestionLinker } from "components/questions/QuestionLinker";
 import CodeMirror from '@uiw/react-codemirror';
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { StreamLanguage } from '@codemirror/language';
-import { WorkflowList } from "components/WorkflowList";
-import { LineOfInquiryRequest } from "DISK/requests";
+import { WorkflowList } from "components/methods/WorkflowList";
 import { QueryTester } from "components/QueryTester";
-import { loadDataEndpoints } from "redux/loader";
 import { renderDescription } from "DISK/util";
+import { useGetEndpointsQuery } from "redux/apis/server";
+import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux/apis/lois";
+import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
+import { openNotification } from "redux/slices/notifications";
+import { alignWorkflow } from "components/questions/QuestionHelpers";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -45,14 +45,14 @@ export const LOIEditor = () => {
     const [searchParams, setSearchParams]= useSearchParams();
     let initQuestion = searchParams.get("q");
 
-    const LOI = useAppSelector((state:RootState) => state.lois.selectedLOI);
-    const selectedId = useAppSelector((state:RootState) => state.lois.selectedId);
-    const loading = useAppSelector((state:RootState) => state.lois.loadingSelected);
-    const error = useAppSelector((state:RootState) => state.lois.errorSelected);
+    const { loiId } = useParams();
+    const selectedId = loiId as string;
 
-    const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
-    const initEndpoints : boolean = useAppSelector((state:RootState) => state.server.initializedEndpoints);
-    const loadingEndpoints = useAppSelector((state:RootState) => state.server.loadingEndpoints);
+    const {data:LOI, isLoading:loading, isError:error} = useGetLOIByIdQuery(selectedId, {skip:!selectedId});
+    const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
+
+    const [postLOI, { isLoading: isCreating }] = usePostLOIMutation();
+    const [putLOI, { isLoading: isUpdating }] = usePutLOIMutation();
 
     const [sparqlVariableNames, setSparqlVariableNames] = React.useState<string[]>([]);
     const [sparqlVariableOptions, setSparqlVariableOptions] = React.useState<string[]>([]);
@@ -74,9 +74,6 @@ export const LOIEditor = () => {
     const [hypothesisQuery, setHypothesisQuery] = React.useState<string>("");
 
     // State errors...
-    const [waiting, setWaiting] = React.useState<boolean>(false);
-    const [saveNotification, setSaveNotification] = React.useState<boolean>(false);;
-    const [errorSaveNotification, setErrorSaveNotification] = React.useState<boolean>(false);;
     const [errorName, setErrorName] = React.useState<boolean>(false);
     const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
     const [errorDataSource, setErrorDataSource] = React.useState<boolean>(false);
@@ -98,7 +95,7 @@ export const LOIEditor = () => {
     }, [sparqlVariableNames, dataQuery]);
 
     useEffect(() => {
-        if (selectedDataSource) {
+        if (selectedDataSource && !!endpoints) {
             for (let i = 0; i < endpoints.length; i++) {
                 let ds : DataEndpoint = endpoints[i];
                 if (selectedDataSource === ds.url) {
@@ -108,34 +105,13 @@ export const LOIEditor = () => {
         }
     }, [selectedDataSource, endpoints])
     
-    const loadEndpoints = () => {
-        if (!initEndpoints && !loadingEndpoints) {
-            loadDataEndpoints(dispatch);
-        }
-    };
-
-    useEffect(loadEndpoints, [endpoints]);// eslint-disable-line react-hooks/exhaustive-deps
-
     useEffect(() => {
-        let match = PATH_LOI_ID_EDIT_RE.exec(location.pathname);
-        if (match != null && match.length === 2) {
-            let id : string = match[1];
-            if (!loading && !error && selectedId !== id) {
-                dispatch(setLoadingSelected(id));
-                DISKAPI.getLOI(id)
-                    .then((LOI:LineOfInquiry) => {
-                        dispatch(setSelectedLOI(LOI));
-                        loadForm(LOI);
-                    })
-                    .catch(() => dispatch(setErrorSelected())); 
-            } else if (LOI && selectedId === id) {
-                loadForm(LOI);
-            }
-        } else if (location.pathname === PATH_LOI_NEW) {
-            dispatch(setSelectedLOI(null));
+        if (LOI) {
+            loadForm(LOI);
+        } else {
             clearForm();
         }
-    }, [location]);// eslint-disable-line react-hooks/exhaustive-deps
+    }, [LOI]);// eslint-disable-line react-hooks/exhaustive-deps
 
     const loadForm = (loi:LineOfInquiry) => {
         setName(loi.name);
@@ -173,7 +149,7 @@ export const LOIEditor = () => {
             return;
         }
 
-        let newLOI : LineOfInquiry | LineOfInquiryRequest;
+        let newLOI : LineOfInquiry;
         let previous : any = {};
         let editing : boolean = false;
         if (LOI) {
@@ -190,26 +166,30 @@ export const LOIEditor = () => {
             dataQuery: dataQuery,
             hypothesisQuery: hypothesisQuery,
             dataSource: selectedDataSource,
-            workflows: workflows,
-            metaWorkflows: metaWorkflows,
+            workflows: workflows.map(alignWorkflow),
+            metaWorkflows: metaWorkflows.map(alignWorkflow),
             tableDescription: tableExplanation,
             tableVariables: tableVariables,
             dataQueryExplanation: dataQueryExplanation,
         };
 
-        setWaiting(true);
+        dispatch(openBackdrop());
         console.log("SEND:", newLOI);
-        (editing?DISKAPI.updateLOI:DISKAPI.createLOI)(newLOI as LineOfInquiry)
-            .then((savedLOI) => {
-                setSaveNotification(true);
-                setWaiting(false);
-                dispatch(addLOI(savedLOI));
-                navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+        (editing?putLOI:postLOI)({data:newLOI as LineOfInquiry})
+            .then((data : {data:LineOfInquiry} | {error: any}) => {
+                let savedLOI = (data as {data:LineOfInquiry}).data;
+                if (savedLOI) {
+                    console.log("RETURNED:", savedLOI);
+                    navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+                    dispatch(openNotification({severity:'success', text:'Line of Inquiry successfully saved'}));
+                }
             })
-            .catch((e) => {
-                setErrorSaveNotification(true);
+            .catch((e:any) => {
+                dispatch(openNotification({severity:'error', text:'Error saving Line of Inquiry'}));
                 console.warn(e);
-                setWaiting(false);
+            })
+            .finally(() => {
+                dispatch(closeBackdrop());
             });
     };
 
@@ -223,25 +203,23 @@ export const LOIEditor = () => {
             name: LOI.name + " (copy)"
         };
 
-        setWaiting(true);
-        DISKAPI.createLOI(newLOI)
-            .then((savedLOI) => {
-                setSaveNotification(true);
-                setWaiting(false);
-                dispatch(addLOI(savedLOI));
-                navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+        dispatch(openBackdrop())
+        postLOI({data:newLOI})
+            .then((data : {data:LineOfInquiry} | {error: any}) => {
+                let savedLOI = (data as {data:LineOfInquiry}).data;
+                if (savedLOI) {
+                    console.log("RETURNED:", savedLOI);
+                    navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+                    dispatch(openNotification({severity:'success', text:'Line of Inquiry successfully saved'}));
+                }
             })
             .catch((e) => {
-                setErrorSaveNotification(true);
+                dispatch(openNotification({severity:'error', text:'Error saving Line of Inquiry'}));
                 console.warn(e);
-                setWaiting(false);
+            })
+            .finally(() => {
+                dispatch(closeBackdrop())
             });
-    };
-
-    const handleSaveNotificationClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway')
-            return;
-        setWaiting(false);
     };
 
     const onWorkflowListChange = (wfs:Workflow[], metaWfs:Workflow[]) => {
@@ -264,29 +242,6 @@ export const LOIEditor = () => {
     }
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
-            <CircularProgress color="inherit" />
-        </Backdrop>
-        <Snackbar open={saveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="success" sx={{ width: '100%' }} onClose={() => setSaveNotification(false)}>
-                Successfully saved
-            </Alert>
-        </Snackbar>
-        <Snackbar open={errorSaveNotification} autoHideDuration={2000} onClose={(_,r) => r!=='clickaway' && setErrorSaveNotification(false)} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="error" sx={{ width: '100%' }} onClose={() => setErrorSaveNotification(false)}>
-                Error saving Line of Inquiry. Please try again
-            </Alert>
-        </Snackbar>
-
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={waiting}>
-            <CircularProgress color="inherit" />
-        </Backdrop>
-        <Snackbar open={saveNotification} autoHideDuration={2000} onClose={handleSaveNotificationClose} anchorOrigin={{vertical:'bottom', horizontal: 'right'}}>
-            <Alert severity="success" sx={{ width: '100%' }} onClose={handleSaveNotificationClose}>
-                Saved!
-            </Alert>
-        </Snackbar>
-
         <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
             {!loading ? 
                 <TextField fullWidth size="small" id="LOIName" label="Short name" required sx={{backgroundColor: "white"}}
@@ -347,7 +302,7 @@ export const LOIEditor = () => {
                         <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
                                 error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
                             <MenuItem value="" disabled> None </MenuItem>
-                            {endpoints.map((endpoint:DataEndpoint) => 
+                            {(endpoints||[]).map((endpoint:DataEndpoint) => 
                                 <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
                                     {endpoint.name}
                                 </MenuItem>)

@@ -1,25 +1,14 @@
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
-import { loadVocabularies } from "redux/loader";
+import { useState } from "react";
 import { Box, Button, Card, Divider, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Vocabulary, VocabularyIndividual, VocabularyProperty, VocabularyType } from "DISK/interfaces";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { renderDescription } from "DISK/util";
+import { useGetVocabulariesQuery } from "redux/apis/server";
 
 export const TerminologyView = () => {
-    const dispatch = useAppDispatch();
-    const vocabularies = useAppSelector((state:RootState) => state.server.vocabularies);
-    const loading = useAppSelector((state:RootState) => state.server.loadingVocabularies);
-    const error = useAppSelector((state:RootState) => state.server.errorVocabularies);
-
+    const { data:vocabularies, isLoading:loading, isError:error } = useGetVocabulariesQuery();
     const [showMore, setShowMore] = useState<{[id:string]:boolean}>({});
-
-    useEffect(() => {
-        if (!vocabularies && !loading)
-            loadVocabularies(dispatch);
-    }, []);
 
     return <Box>
         <Typography variant="h5">Terminology:</Typography>
@@ -47,10 +36,7 @@ export const TerminologyView = () => {
                         </IconButton>
                     </Box>
                     <Divider/>
-                    {v.description && (<Typography>
-                        {renderDescription(v.description)}
-                    </Typography>)}
-
+                    {v.description && renderDescription(v.description)}
                     <Typography sx={{fontFamily: "monospace"}}>
                         PREFIX {v.prefix}: &lt;{v.namespace}&gt;
                     </Typography>

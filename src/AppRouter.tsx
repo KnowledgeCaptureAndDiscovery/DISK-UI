@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Backdrop, Box, CircularProgress } from "@mui/material";
 import RightMenu from "components/RightMenu";
 import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_HYP_QUESTIONS, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_LOI_QUESTIONS, PATH_MY_HYPOTHESES, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOI_ID } from "constants/routes";
 import { Home } from "pages/Home";
@@ -14,9 +14,9 @@ import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
-import { useKeycloak } from "@react-keycloak/web";
 import { HypothesisQuestion } from "pages/Questions/HypothesisQuestions";
 import { LOIQuestion } from "pages/Questions/LOIQuestion";
+import { Notification } from "components/Notification";
 
 const notAuthMsg = () => {
   return (<Box sx={{display: 'flex', width: "100%", alignItems: 'center', justifyContent: 'center', height: "75vh", fontSize: "1.2em", color: "#777"}}>
@@ -26,10 +26,14 @@ const notAuthMsg = () => {
 
 export const AppRouter = () => {
   const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-  //const {initialized} = useKeycloak();
-  //if (!initialized) return <div>Loading...</div>;
+  const backdropOpen = useAppSelector((state:RootState) => state.backdrop.open);
+
   return (
     <BrowserRouter>
+      <Notification/>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={backdropOpen}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <RightMenu>
         <Routes>
           <Route path={PATH_HOME} element={<Home/>}></Route>
