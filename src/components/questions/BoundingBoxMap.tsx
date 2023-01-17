@@ -1,11 +1,13 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
-import { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useRef } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
-import GoogleMapReact, { ClickEventValue } from 'google-map-react';
 import { Question, QuestionVariable } from "DISK/interfaces";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { RootState } from "redux/store";
+
+import { MapContainer, TileLayer, useMap, Marker, Popup, LayersControl} from 'react-leaflet'
+import { setQuestionBindings } from "redux/slices/forms";
 
 interface MapPoint {
     lat: number,
@@ -24,28 +26,18 @@ export interface OptionBinding {
 
 interface BoundingBoxMapProps {
     variable: QuestionVariable,
-    bindings: {
-        minLat: number,
-        minLng: number,
-        maxLat: number,
-        maxLng: number
-    } | null,
     onChange?: (bindings:OptionBinding[]) => void
 }
 
 export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
+    const dispatch = useAppDispatch();
     const [open, setOpen] = useState(false);
-    const [map, setMap] = useState<any>();
-    const [maps, setMaps] = useState<any>();
+    const [boundingBox, setBoundingBox] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
     const bindings = useAppSelector((state:RootState) => state.forms.questionBindings);
 
-    const [pointA, setPointA] = useState<MapPoint|null>(null);
-    const [pointB, setPointB] = useState<MapPoint|null>(null);
-    const [boundingBox, setBoundingBox] = useState<any>();
-    const [marker, setMarker] = useState<any>();
-    const [simpleBox, setSimpleBox] = useState<{minLat:number,minLng:number,maxLat?:number,maxLng?:number}|null>(null);
-
-    const [pristine, setPristine] = useState<boolean>(true);
+    useEffect(() => {
+        console.log(variable)
+    }, [variable]);
 
     //useEffect(() => {
     //    if (variable && bindings variable.maxLat, variable.minLng, variable.maxLng&& & && && variable.minLatt &&
@@ -82,14 +74,6 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
         }
     }, [initialBindings]);*/
 
-    const defaultProps = {
-        center: {
-            lat: 35.0,
-            lng: -40.0
-        },
-        zoom: 1
-    };
-
     const onOpenDialog = () => {
         setOpen(true);
     }
@@ -99,39 +83,33 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
     }
 
     const onSelect = () => {
-        if (simpleBox && simpleBox.maxLat && simpleBox.maxLng) {
-            let bindings : OptionBinding[] = [
-                {variable:variable.minLat, value:{id: simpleBox.minLat.toFixed(6), name: simpleBox.minLat.toFixed(2)}},
-                {variable:variable.minLng, value:{id: simpleBox.minLng.toFixed(6), name: simpleBox.minLng.toFixed(2)}},
-                {variable:variable.maxLat, value:{id: simpleBox.maxLat.toFixed(6), name: simpleBox.maxLat.toFixed(2)}},
-                {variable:variable.maxLng, value:{id: simpleBox.maxLng.toFixed(6), name: simpleBox.maxLng.toFixed(2)}},
-            ];
+        let newBindings = { ...bindings };
+        if (boundingBox && variable) {
+            newBindings[variable.minLat.id] = boundingBox[0].toFixed(6);
+            newBindings[variable.minLng.id] = boundingBox[1].toFixed(6);
+            newBindings[variable.maxLat.id] = boundingBox[2].toFixed(6);
+            newBindings[variable.maxLng.id] = boundingBox[3].toFixed(6);
+            //let bindings : OptionBinding[] = [
+            //    {variable:variable.minLat, value:{id: boundingBox[0].toFixed(6), name: boundingBox[0].toFixed(2)}},
+            //    {variable:variable.minLng, value:{id: boundingBox[1].toFixed(6), name: boundingBox[1].toFixed(2)}},
+            //    {variable:variable.maxLat, value:{id: boundingBox[2].toFixed(6), name: boundingBox[2].toFixed(2)}},
+            //    {variable:variable.maxLng, value:{id: boundingBox[3].toFixed(6), name: boundingBox[3].toFixed(2)}},
+            //];
             //if (onChange) onChange(bindings);
             onCloseDialog();
         } else {
+            delete newBindings[variable.minLat.id];
+            delete newBindings[variable.minLng.id];
+            delete newBindings[variable.maxLat.id];
+            delete newBindings[variable.maxLng.id];
             //TODO: show some error;
         }
+        dispatch(setQuestionBindings({
+            map: newBindings
+        }));
     }
 
-    const onClick = (value: ClickEventValue) => {
-        let clickedPoint : MapPoint = {lat: value.lat, lng: value.lng};
-        if (pointA == null && pointB == null) {
-            // Set first point
-            setPointA(clickedPoint);
-        } else if (pointA != null && pointB == null) {
-            // Set second point
-            setPointB(clickedPoint);
-        } else {
-            // Nothing happens?
-        }
-    }
-
-    const clearMap = () => {
-        setPointA(null);
-        setPointB(null);
-    }
-
-    useEffect(() => {
+    /*useEffect(() => {
         if (map && maps) {
             if (pointA) {
                 if (pointB) {
@@ -181,18 +159,17 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
             }
         }
 
-    }, [pointA, pointB, map, maps])
+    }, [pointA, pointB, map, maps])*/
 
-    const handleApiLoaded = (map:any, maps:any) => {
-        setMap(map);
-        setMaps(maps);
-    };
+    const onBoundingBoxChange : (geometry:[number, number, number, number]|null) => void = (geometry) => {
+        setBoundingBox(geometry);
+    }
 
     return (
         <Fragment>
             <Button onClick={onOpenDialog} sx={{p:'4px'}}>
-                {simpleBox && simpleBox.maxLat && simpleBox.maxLng ? 
-                "(" + simpleBox.minLat.toFixed(2) + ", " + simpleBox.minLng.toFixed(2) + ") - (" + simpleBox.maxLat.toFixed(2) + ", " + simpleBox.maxLng.toFixed(2) + ")"
+                {boundingBox ? 
+                "(" + boundingBox[0].toFixed(2) + ", " + boundingBox[1].toFixed(2) + ") - (" + boundingBox[2].toFixed(2) + ", " + boundingBox[3].toFixed(2) + ")"
                 : "Set bounding box"}
                 <TravelExploreIcon sx={{color: "gray", ml: "4px"}}/>
             </Button>
@@ -205,18 +182,14 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                    <Box sx={{height: '60vh', width: '100%', position:'relative'}}>
-                        <Button style={{position: 'absolute', zIndex: 1000, margin: '10px', background: 'white'}} onClick={clearMap}>Clear</Button>
-                        <GoogleMapReact
-                            bootstrapURLKeys={{ key: "" }}
-                            defaultCenter={pointA ? (pointB ? {lat: (pointA.lat + pointB.lat)/2, lng: (pointA.lng + pointB.lng)/2} : pointA) : defaultProps.center}
-                            defaultZoom={defaultProps.zoom}
-                            yesIWantToUseGoogleMapApiInternals
-                            onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
-                            onClick={onClick}
-                        >
-                        </GoogleMapReact>
-                    </Box>
+                    <MapContainer center={[47, -101]} zoom={3} scrollWheelZoom={false} style={{ height: '400px' }}>
+                        <MapController onChange={onBoundingBoxChange} />
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                    </MapContainer>
+                    
                     <Box>
                     <TableContainer sx={{display: "flex", justifyContent: "center"}}>
                         <Table sx={{width:"unset"}}>
@@ -230,13 +203,13 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
                             <TableBody>
                                 <TableRow>
                                     <TableCell sx={{padding: "0 10px"}}><b>Min</b></TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>{simpleBox ? simpleBox.minLat.toFixed(3) : '-'}</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>{simpleBox ? simpleBox.minLng.toFixed(3) : '-'}</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>{boundingBox ? boundingBox[0].toFixed(3) : '-'}</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>{boundingBox ? boundingBox[1].toFixed(3) : '-'}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell sx={{padding: "0 10px"}}><b>Max</b></TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>{simpleBox && pointB ? simpleBox.maxLat?.toFixed(3) : '-'}</TableCell>
-                                    <TableCell sx={{padding: "0 10px"}}>{simpleBox && pointB ? simpleBox.maxLng?.toFixed(3) : '-'}</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>{boundingBox ? boundingBox[2].toFixed(3) : '-'}</TableCell>
+                                    <TableCell sx={{padding: "0 10px"}}>{boundingBox ? boundingBox[3].toFixed(3) : '-'}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -244,7 +217,7 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={onSelect} disabled={!pointB}>
+                    <Button autoFocus onClick={onSelect} disabled={!boundingBox}>
                         Select
                     </Button>
                 </DialogActions>
@@ -253,3 +226,68 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
     );
 }
 
+interface SpatialExtendMapProps {
+    onChange?: (geometry:[number, number, number, number]|null) => void
+}
+
+const MapController = ({onChange}:SpatialExtendMapProps) => {
+    const map = useMap();
+    const [geometry, setGeometry] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
+
+    map.on('pm:create', (e) => {
+        let shapes = map.pm.getGeomanLayers(true);
+        let json = shapes.toGeoJSON();
+        let curBB : [number, number, number, number]|null = null;
+
+        if (json.type === 'FeatureCollection' && json.features.length > 0) {
+            let firstGeo = json.features[0].geometry;
+            if (firstGeo.type === 'Polygon' && firstGeo.coordinates.length === 1 && firstGeo.coordinates[0].length === 5) { // X = lng, Y = lat,
+                let firstLng = (firstGeo.coordinates[0][0] as [number, number])[0];
+                let fistLat = (firstGeo.coordinates[0][0] as [number, number])[1];
+                let minLng = firstLng;
+                let minLat = fistLat;
+                let maxLng = firstLng;
+                let maxLat = fistLat;
+                firstGeo.coordinates[0].forEach((pos) => {
+                    let lng = (pos as [number, number])[0];
+                    let lat = (pos as [number, number])[1];
+                    if (lng < minLng) minLng = lng;
+                    if (lng > maxLng) maxLng = lng;
+                    if (lat < minLat) minLat = lat;
+                    if (lat > maxLat) maxLat = lat;
+                });
+                curBB = [minLat, minLng, maxLat, maxLng];
+                setGeometry(curBB);
+                console.log(curBB);
+            } else {
+                setGeometry(null);
+            }
+        } else {
+            setGeometry(null);
+        }
+
+        if (onChange) onChange(curBB);
+    });
+
+    map.pm.addControls({
+        drawMarker: false,
+        drawText: false,
+        drawPolyline: false,
+        drawCircleMarker: false,
+        drawPolygon: false,
+        drawCircle: false,
+        cutPolygon: false,
+        rotateMode: false,
+        //drawRectangle: !geometry,
+        editMode: !!geometry,
+        dragMode: !!geometry,
+        removalMode: !!geometry,
+    });
+
+    map.pm.setGlobalOptions({
+        snapDistance: 15,
+        allowSelfIntersection: false,
+    });
+
+    return <></>;
+}

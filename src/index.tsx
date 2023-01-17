@@ -6,6 +6,10 @@ import { store } from 'redux/store';
 import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
 
+import "@geoman-io/leaflet-geoman-free";
+import "leaflet/dist/leaflet.css";
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>

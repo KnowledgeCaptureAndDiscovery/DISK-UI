@@ -33,7 +33,7 @@ export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorPro
                     return null;
                 }
                 if (isBoundingBoxVariable(curVariable)) {
-                    return <BoundingBoxMap key={`qVars${i}`} variable={curVariable} bindings={null} />
+                    return <BoundingBoxMap key={`qVars${i}`} variable={curVariable}/>
                 } else if (isTimeIntervalVariable(curVariable)) {
                     return <TimeIntervalVariable key={`qVars${i}`} variable={curVariable} />
                 } else {

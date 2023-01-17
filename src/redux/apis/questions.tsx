@@ -15,7 +15,7 @@ export const questionsAPI = createApi({
         return response.sort((q1,q2) => {
           if (!q1.category) return -1;
           if (!q2.category) return 1;
-          return q1.category.id.localeCompare(q2.category.id);
+          return q2.category.id.localeCompare(q1.category.id);
         })
       }
     }),
