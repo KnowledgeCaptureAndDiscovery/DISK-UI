@@ -128,6 +128,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     }, [bindings, selectedQuestion])
   
     const updateQuestionFiller = (q:Question) => {
+        if (!q) return;
         //Split question template in text and inputs
         let textParts : string[] = q.template.split(varPattern);
         let varParts : string [] = [];

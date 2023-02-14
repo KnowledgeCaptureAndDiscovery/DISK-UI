@@ -1,4 +1,4 @@
-import { Alert, Backdrop, Box, Button, Card, CircularProgress, Divider, FormHelperText, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
 import { Link, useParams } from 'react-router-dom'
@@ -6,8 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
@@ -21,7 +20,7 @@ import { QuestionPreview } from "components/questions/QuestionPreview";
 import { renderDescription } from "DISK/util";
 import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { useGetEndpointsQuery } from "redux/apis/server";
-import { useGetTLOIByIdQuery, usePostTLOIMutation, usePutTLOIMutation } from "redux/apis/tlois";
+import { useGetTLOIByIdQuery, usePutTLOIMutation } from "redux/apis/tlois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 
@@ -59,7 +58,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const dispatch = useAppDispatch();
     const {tloiId} = useParams();
     const selectedId = tloiId as string; // Could be undefined?
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const authenticated = useAuthenticated();
     const [formalView, setFormalView] = React.useState<boolean>(false);
     const [editMode, setEditMode] = React.useState<boolean>(false);
     const [notes, setNotes] = React.useState<string>("");

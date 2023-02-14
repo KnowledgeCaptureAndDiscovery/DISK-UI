@@ -2,8 +2,7 @@ import { Box, Button, Card, InputAdornment, MenuItem, Select, SelectChangeEvent,
 import { PATH_LOI_NEW } from "constants/routes";
 import { LineOfInquiry } from "DISK/interfaces";
 import React from "react";
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useUser } from "redux/hooks";
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router-dom";
@@ -19,8 +18,7 @@ interface ViewProps {
 export const LinesOfInquiry = ({myPage=false} : ViewProps) => {
     const [order, setOrder] = React.useState<OrderType>('date');
     const [searchTerm, setSearchTerm] = React.useState<string>("");
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-    const username = useAppSelector((state:RootState) => state.keycloak.username);
+    const [authenticated, username] = useUser();
     const {data:LOIs, isLoading:loading, isError:error} = useGetLOIsQuery();
 
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {

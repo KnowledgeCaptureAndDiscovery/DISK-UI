@@ -1,18 +1,11 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
-import React, { Fragment, useEffect, useState, useRef } from "react";
+import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
-import { Question, QuestionVariable } from "DISK/interfaces";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
-
-import { MapContainer, TileLayer, useMap, Marker, Popup, LayersControl} from 'react-leaflet'
+import { QuestionVariable } from "DISK/interfaces";
+import { useAppDispatch, useQuestionBindings } from "redux/hooks";
+import { MapContainer, TileLayer, useMap, Rectangle} from 'react-leaflet'
 import { setQuestionBindings } from "redux/slices/forms";
-
-interface MapPoint {
-    lat: number,
-    lng: number,
-}
 
 interface Option {
     id: string,
@@ -33,48 +26,27 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
     const dispatch = useAppDispatch();
     const [open, setOpen] = useState(false);
     const [boundingBox, setBoundingBox] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
-    const bindings = useAppSelector((state:RootState) => state.forms.questionBindings);
+    const bindings = useQuestionBindings();
+    const [initBB, setInitBB] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
 
     useEffect(() => {
-        console.log(variable)
+        console.log("var:", variable);
     }, [variable]);
 
-    //useEffect(() => {
-    //    if (variable && bindings variable.maxLat, variable.minLng, variable.maxLng&& & && && variable.minLatt &&
-    //        [, ].forEach((expVar:QuestionVariable) => {
-    //        });
-    //    }
-    //}, [variable, bindings]);
-
-    /*useEffect(() => {
-        if (initialBindings) {
-            setSimpleBox(initialBindings);
-            setPointA({lat:initialBindings.minLat, lng:initialBindings.minLng});
-            setPointB({lat:initialBindings.maxLat, lng:initialBindings.maxLng});
-            if (onChange) onChange([
-                {variable:variable.minLat, value:{id: initialBindings.minLat.toFixed(6), name: initialBindings.minLat.toFixed(2)}},
-                {variable:variable.minLng, value:{id: initialBindings.minLng.toFixed(6), name: initialBindings.minLng.toFixed(2)}},
-                {variable:variable.maxLat, value:{id: initialBindings.maxLat.toFixed(6), name: initialBindings.maxLat.toFixed(2)}},
-                {variable:variable.maxLng, value:{id: initialBindings.maxLng.toFixed(6), name: initialBindings.maxLng.toFixed(2)}},
-            ]);
-        }
-    }, [initialBindings]);*/
-
-    /*useEffect(() => {
-        if (initialBindings) {
-            setSimpleBox(initialBindings);
-            setPointA({lat:initialBindings.minLat, lng:initialBindings.minLng});
-            setPointB({lat:initialBindings.maxLat, lng:initialBindings.maxLng});
-            onChange([
-                {variable:variable.minLat, value:{id: initialBindings.minLat.toFixed(6), name: initialBindings.minLat.toFixed(2)}},
-                {variable:variable.minLng, value:{id: initialBindings.minLng.toFixed(6), name: initialBindings.minLng.toFixed(2)}},
-                {variable:variable.maxLat, value:{id: initialBindings.maxLat.toFixed(6), name: initialBindings.maxLat.toFixed(2)}},
-                {variable:variable.maxLng, value:{id: initialBindings.maxLng.toFixed(6), name: initialBindings.maxLng.toFixed(2)}},
-            ]);
-        }
-    }, [initialBindings]);*/
-
     const onOpenDialog = () => {
+        // Create initial bounding box if variables are binding.
+        let initVal :[number, number, number, number] | null = null;
+        if (variable && bindings) {
+            let minLat = bindings[variable.minLat.id];
+            let minLng = bindings[variable.minLng.id];
+            let maxLat = bindings[variable.maxLat.id];
+            let maxLng = bindings[variable.maxLng.id];
+            if (minLat && minLng && maxLat && maxLng) {
+                initVal = [Number(minLat), Number(minLng), Number(maxLat), Number(maxLng)];
+            }
+            console.log("SET", initVal);
+        }
+        setInitBB(initVal);
         setOpen(true);
     }
 
@@ -89,77 +61,17 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
             newBindings[variable.minLng.id] = boundingBox[1].toFixed(6);
             newBindings[variable.maxLat.id] = boundingBox[2].toFixed(6);
             newBindings[variable.maxLng.id] = boundingBox[3].toFixed(6);
-            //let bindings : OptionBinding[] = [
-            //    {variable:variable.minLat, value:{id: boundingBox[0].toFixed(6), name: boundingBox[0].toFixed(2)}},
-            //    {variable:variable.minLng, value:{id: boundingBox[1].toFixed(6), name: boundingBox[1].toFixed(2)}},
-            //    {variable:variable.maxLat, value:{id: boundingBox[2].toFixed(6), name: boundingBox[2].toFixed(2)}},
-            //    {variable:variable.maxLng, value:{id: boundingBox[3].toFixed(6), name: boundingBox[3].toFixed(2)}},
-            //];
-            //if (onChange) onChange(bindings);
             onCloseDialog();
         } else {
             delete newBindings[variable.minLat.id];
             delete newBindings[variable.minLng.id];
             delete newBindings[variable.maxLat.id];
             delete newBindings[variable.maxLng.id];
-            //TODO: show some error;
         }
         dispatch(setQuestionBindings({
             map: newBindings
         }));
     }
-
-    /*useEffect(() => {
-        if (map && maps) {
-            if (pointA) {
-                if (pointB) {
-                    // Draws the bounding box
-                    let minLat = pointA.lat < pointB.lat ? pointA.lat : pointB.lat;
-                    let maxLat = pointA.lat > pointB.lat ? pointA.lat : pointB.lat;
-                    let minLng = pointA.lng < pointB.lng ? pointA.lng : pointB.lng;
-                    let maxLng = pointA.lng > pointB.lng ? pointA.lng : pointB.lng;
-                    let BBCoords : MapPoint[] = [
-                        {lat:minLat, lng:minLng},
-                        {lat:maxLat, lng:minLng},
-                        {lat:maxLat, lng:maxLng},
-                        {lat:minLat, lng:maxLng},
-                        {lat:minLat, lng:maxLng},
-                    ]
-                    setSimpleBox({minLat:minLat,maxLat:maxLat,minLng:minLng,maxLng:maxLng});
-
-                    let box = new maps.Polygon({
-                        paths: BBCoords,
-                        strokeColor: "#FF0000",
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        fillColor: "#FF0000",
-                        fillOpacity: 0.35
-                    });
-                    box.setMap(map);
-
-                    setBoundingBox(box);
-                    console.log(box);
-                    if (marker) marker.setMap(null);
-                } else {
-                    // Draws dot
-                    let newMarker = new maps.Marker({
-                        position: pointA,
-                    });
-                    newMarker.setMap(map);
-                    setSimpleBox({minLat:pointA.lat,minLng:pointA.lng});
-
-                    setMarker(newMarker);
-                    if (boundingBox) boundingBox.setMap(null);
-                }
-            } else {
-                // Clear bounding box
-                if (boundingBox) boundingBox.setMap(null);
-                if (marker) marker.setMap(null);
-                setSimpleBox(null);
-            }
-        }
-
-    }, [pointA, pointB, map, maps])*/
 
     const onBoundingBoxChange : (geometry:[number, number, number, number]|null) => void = (geometry) => {
         setBoundingBox(geometry);
@@ -184,6 +96,9 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
                 <DialogContent dividers>
                     <MapContainer center={[47, -101]} zoom={3} scrollWheelZoom={false} style={{ height: '400px' }}>
                         <MapController onChange={onBoundingBoxChange} />
+                        {initBB && (
+                            <Rectangle bounds={[[initBB[0],initBB[1]],[initBB[2],initBB[3]]]}/>
+                        )}
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -227,12 +142,13 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
 }
 
 interface SpatialExtendMapProps {
+    initialValue?:[number, number, number, number]|null,
     onChange?: (geometry:[number, number, number, number]|null) => void
 }
 
-const MapController = ({onChange}:SpatialExtendMapProps) => {
+const MapController = ({initialValue,onChange}:SpatialExtendMapProps) => {
     const map = useMap();
-    const [geometry, setGeometry] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
+    //const [geometry, setGeometry] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
 
     map.on('pm:create', (e) => {
         let shapes = map.pm.getGeomanLayers(true);
@@ -257,13 +173,13 @@ const MapController = ({onChange}:SpatialExtendMapProps) => {
                     if (lat > maxLat) maxLat = lat;
                 });
                 curBB = [minLat, minLng, maxLat, maxLng];
-                setGeometry(curBB);
+                //setGeometry(curBB);
                 console.log(curBB);
             } else {
-                setGeometry(null);
+                //setGeometry(null);
             }
         } else {
-            setGeometry(null);
+            //setGeometry(null);
         }
 
         if (onChange) onChange(curBB);
@@ -279,9 +195,9 @@ const MapController = ({onChange}:SpatialExtendMapProps) => {
         cutPolygon: false,
         rotateMode: false,
         //drawRectangle: !geometry,
-        editMode: !!geometry,
-        dragMode: !!geometry,
-        removalMode: !!geometry,
+        //editMode: !!geometry,
+        //dragMode: !!geometry,
+        //removalMode: !!geometry,
     });
 
     map.pm.setGlobalOptions({

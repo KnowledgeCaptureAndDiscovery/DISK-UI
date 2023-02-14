@@ -14,8 +14,6 @@ import { tloisAPI } from './apis/tlois';
 
 export const store = configureStore({
   reducer: {
-    //lois: loisSlice.reducer,
-    //tlois: tloisSlice.reducer,
     brain: brainSlice.reducer,
     //Slices
     [formsSlice.name]: formsSlice.reducer,

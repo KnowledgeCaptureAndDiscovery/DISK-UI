@@ -6,6 +6,8 @@ import { createTemplateFragments, TemplateFragment, TextPart } from "./QuestionH
 import { isBoundingBoxVariable, isTimeIntervalVariable } from "./QuestionHelpers"
 import { QuestionVariableSelector } from "./QuestionVariableSelector"
 import { TimeIntervalVariable } from "./TimeIntervalVariable"
+import { useGetDynamicOptionsQuery } from "redux/apis/questions"
+import { useQuestionBindings } from "redux/hooks"
 
 interface QuestionTemplateSelectorProps {
     question: Question|null,
@@ -14,12 +16,20 @@ interface QuestionTemplateSelectorProps {
 export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorProps) => {
     const [templateFragments, setTemplateFragments] = React.useState<TemplateFragment[]>([]);
 
+    const bindings = useQuestionBindings();
+    const { refetch } = useGetDynamicOptionsQuery({cfg: {id: (question ? question.id : ''), bindings:bindings}}, {skip:!question});
+
     React.useEffect(()=>{
         if (!question)
             return;
 
         setTemplateFragments(createTemplateFragments(question));
     },[question]);
+
+    React.useEffect(() => {
+        console.log("Bindings have changed!", bindings);
+        refetch();
+    }, [bindings]);
 
     if (!templateFragments || templateFragments.length === 0 || !question)
         return null;

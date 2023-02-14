@@ -1,19 +1,18 @@
-import { Alert, Box, Button, Card, Divider, IconButton, Skeleton, Snackbar, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
 import { Hypothesis, idPattern, Question, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch, useQuestionBindings, useQuestionPattern } from "redux/hooks";
 import React from "react";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { openNotification } from "redux/slices/notifications";
-import { RootState } from "redux/store";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -48,8 +47,8 @@ export const HypothesisEditor = () => {
 
     const [editedQuestionId, setEditedQuestionId] = React.useState("");
 
-    const formQuestionBindings = useAppSelector((state:RootState) => state.forms.questionBindings);
-    const formQuestionPattern = useAppSelector((state:RootState) => state.forms.selectedPattern);
+    const formQuestionBindings = useQuestionBindings();
+    const formQuestionPattern = useQuestionPattern();
 
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);

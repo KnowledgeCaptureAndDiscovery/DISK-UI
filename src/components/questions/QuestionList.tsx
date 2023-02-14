@@ -1,8 +1,7 @@
 import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, ListItem, Tooltip, Typography } from "@mui/material";
 import { Hypothesis, idPattern, LineOfInquiry, Question, QuestionVariable, VariableBinding } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useAuthenticated } from "redux/hooks";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from "react-router-dom";
@@ -13,7 +12,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useGetHypothesesQuery } from "redux/apis/hypotheses";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { useGetLOIsQuery } from "redux/apis/lois";
-import { isBoundingBoxVariable } from "./QuestionHelpers";
+import { TextPart, isBoundingBoxVariable } from "./QuestionHelpers";
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -46,9 +45,8 @@ export const normalizeTextValue = (text:string) => {
 
 
 export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
-    const dispatch = useAppDispatch();
     const { data: questions, isLoading, isError, refetch } = useGetQuestionsQuery();
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const authenticated = useAuthenticated();
     const { data: hypotheses } = useGetHypothesesQuery();
     const { data: lois } = useGetLOIsQuery();
 
@@ -92,7 +90,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         let name = q.name.endsWith('?') ? q.name.substring(0, q.name.length-1) : q.name;
         let parts : string[] = name.split(/<(.*?)>/); // parse <var> FIXME: this is old.
         if (parts.length === 1) {
-            parts = name.split(/(\?[A-Za-z0-9_]*)/); // parse ?var
+            parts = name.split(/(\?[A-Za-z0-9_]*) [a-z]/); // parse ?var
         }
         return (<Fragment>
             {parts.map((txt:string, i:number) => i%2===variableStep ?
@@ -153,9 +151,9 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                     {normalizeTextValue(values[part])}
                 </b>
             :
-                <span key={`p_${i}`}>
+                <TextPart key={`p_${i}`}>
                     {part}
-                </span>
+                </TextPart>
             )}
         </Fragment>
     }

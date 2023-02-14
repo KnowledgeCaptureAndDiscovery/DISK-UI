@@ -28,8 +28,7 @@ import { AccountCircle } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
 import NewTabIcon from '@mui/icons-material/OpenInNew';
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useUsername } from "redux/hooks";
 import { Hypothesis, idPattern, LineOfInquiry } from 'DISK/interfaces';
 import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
@@ -188,7 +187,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const {data:selectedTLOI} = useGetTLOIByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_TLOIS+ "/")});
 
   const { keycloak, initialized } = useKeycloak();
-  const username = useAppSelector((state:RootState) => state.keycloak.username);
+  const username = useUsername();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const logoutDialogOpen = Boolean(anchorEl);

@@ -5,7 +5,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector, useAuthenticated } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionLinker } from "components/questions/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
@@ -47,7 +47,7 @@ const TypographySection = styled(Typography)(({ theme }) => ({
 export const LOIView = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const authenticated = useAuthenticated();
 
     const { loiId } = useParams();
     const selectedId = loiId as string;

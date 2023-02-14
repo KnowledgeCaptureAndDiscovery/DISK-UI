@@ -1,14 +1,12 @@
-import { Canvas, ThreeElements } from "@react-three/fiber";
-//import { DISKAPI } from "DISK/API";
+import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { BufferGeometry, DirectionalLight, Mesh, MeshLambertMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { VTKParser } from "VTKParser";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Box } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { addMesh, BrainFiles, setFilelist } from "redux/brain";
-import { RootState } from "redux/store";
-import { useGetPrivateFileQuery, useGetPublicFileQuery, useLazyGetPublicFileQuery } from "redux/apis/server";
+import { useAppDispatch, useBrainVisualization } from "redux/hooks";
+import { addMesh, setFilelist } from "redux/brain";
+import { useGetPublicFileQuery, useLazyGetPublicFileQuery } from "redux/apis/server";
 
 export interface BrainCfgItem {
     name: string,
@@ -31,9 +29,7 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     const [controls, setControls]= useState<null|OrbitControls>(null);
     const [renderer, setRenderer]= useState<null|WebGLRenderer>(null);
 
-    const init : boolean = useAppSelector((state:RootState) => state.brain.initialized);
-    const filelist : BrainFiles | null = useAppSelector((state:RootState) => state.brain.filelist);
-    const meshesStr : {[id:string]: string} = useAppSelector((state:RootState) => state.brain.meshes);
+    const [init, filelist, meshesStr] = useBrainVisualization();
     
     useEffect(() => {
         if (canvas && canvas.current) {

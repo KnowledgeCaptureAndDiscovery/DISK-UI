@@ -10,7 +10,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES, PATH_TLOIS } from "constants/routes";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector, useAuthenticated } from "redux/hooks";
 import { RootState } from "redux/store";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { FileList } from "components/FileList";
@@ -57,8 +57,7 @@ export const HypothesisView = () => {
     const {hypothesisId} = useParams();
     const selectedId = hypothesisId as string; // Could be undefined?
 
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-
+    const authenticated = useAuthenticated();
     const { data:hypothesis, isError:error, isLoading:loading} = useGetHypothesisByIdQuery(selectedId);
     const { data:TLOIs, isLoading:TLOIloading} = useGetTLOIsQuery();
     const [postTLOI, { isLoading: isCreating }] = usePostTLOIMutation();

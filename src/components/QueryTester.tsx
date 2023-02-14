@@ -19,8 +19,6 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
     const [dataSource, setDataSource] = useState<DataEndpoint|null>(null);
     const [query, setQuery] = useState("SELECT * WHERE {\n ?a ?b ?c \n} LIMIT 10");
     const [queryToSend, setQueryToSend] = useState("");
-
-    //const endpoints : DataEndpoint[] = useAppSelector((state:RootState) => state.server.endpoints);
     const { data:endpoints } = useGetEndpointsQuery();
 
     useEffect(() => {

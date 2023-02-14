@@ -1,14 +1,13 @@
 import { Box, Card, FormHelperText, IconButton, Tooltip } from "@mui/material"
 import { Question, VariableBinding, QuestionVariable, Triple } from "DISK/interfaces"
 import React from "react";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { setQuestionBindings, SimpleMap } from "redux/slices/forms";
 import { FormalExpressionView } from "./FormalExpressionView";
 import { QuestionTemplateSelector } from "./QuestionTemplateSelector";
 import { QuestionTemplateFiller } from "./QuestionTemplateFiller";
-import { RootState } from "redux/store";
 import { getAllQuestionVariables, simpleMapToGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
 
 interface QuestionProps {
@@ -23,7 +22,7 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [showGraph, setShowGraph] = React.useState<boolean>(false);
     const [graph, setGraph] = React.useState<Triple[]>([]);
-    const questionBindings = useAppSelector((state:RootState) => state.forms.questionBindings);
+    const questionBindings = useQuestionBindings();
 
     React.useEffect(() => {
         if (onChange) {

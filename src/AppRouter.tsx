@@ -12,8 +12,7 @@ import { TerminologyView } from "pages/Terminology/TerminologyView";
 import { DataView } from "pages/Data/DataView";
 import { TLOIView } from "pages/TLOI/TLOIView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useAuthenticated, useBackdrop } from "redux/hooks";
 import { HypothesisQuestion } from "pages/Questions/HypothesisQuestions";
 import { LOIQuestion } from "pages/Questions/LOIQuestion";
 import { Notification } from "components/Notification";
@@ -25,8 +24,8 @@ const notAuthMsg = () => {
 }
 
 export const AppRouter = () => {
-  const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-  const backdropOpen = useAppSelector((state:RootState) => state.backdrop.open);
+  const authenticated = useAuthenticated();
+  const backdropOpen = useBackdrop();
 
   return (
     <BrowserRouter>

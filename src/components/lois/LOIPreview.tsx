@@ -3,8 +3,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { PATH_LOIS } from "constants/routes";
 import { Card, Box, Typography, Tooltip, IconButton, Divider, styled } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ConfirmDialog } from "../ConfirmDialog";
@@ -33,7 +32,7 @@ interface LOIPreviewProps {
 
 export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=true} : LOIPreviewProps) => {
     const dispatch = useAppDispatch();
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const authenticated = useAuthenticated();
     const [
         deleteLOI, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result

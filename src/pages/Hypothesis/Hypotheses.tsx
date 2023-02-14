@@ -2,12 +2,11 @@ import { Box, Button, Card, InputAdornment, MenuItem, Select, SelectChangeEvent,
 import { Hypothesis } from "DISK/interfaces";
 import React from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { useAppSelector } from "redux/hooks";
+import { useUser } from "redux/hooks";
 import SearchIcon from '@mui/icons-material/Search';
 import { PATH_HYPOTHESIS_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
 import { HypothesisList } from "components/hypothesis/HypothesesList";
-import { RootState } from "redux/store";
 import { useGetHypothesesQuery } from "redux/apis/hypotheses";
 
 type OrderType = 'date'|'author';
@@ -20,8 +19,7 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
     const { data, isLoading, isError } = useGetHypothesesQuery();
     const [order, setOrder] = React.useState<OrderType>('date');
     const [searchTerm, setSearchTerm] = React.useState<string>("");
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
-    const username = useAppSelector((state:RootState) => state.keycloak.username);
+    const [authenticated, username] = useUser();
 
     const handleChangeOrder = (event: SelectChangeEvent<OrderType>) => {
         let order : OrderType = event.target!.value as OrderType;

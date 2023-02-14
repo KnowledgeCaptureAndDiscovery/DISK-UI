@@ -3,8 +3,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { Card, Box, Typography, Tooltip, IconButton, Divider, styled } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ConfirmDialog } from "../ConfirmDialog";
@@ -29,11 +28,9 @@ interface HypothesisPreviewProps {
     displayDeleteButton?: boolean
 }
 
-                    
-
 export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, displayEditButton=true} : HypothesisPreviewProps) => {
     const dispatch = useAppDispatch();
-    const authenticated = useAppSelector((state:RootState) => state.keycloak.authenticated);
+    const authenticated = useAuthenticated();
     const [
         deleteHypothesis, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result
@@ -44,7 +41,6 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
         dispatch(openBackdrop());
         const name = hypothesis.name;
         deleteHypothesis({id: hypothesis.id})
-        //DISKAPI.deleteHypothesis(hypothesis.id)
             .then(() => {
                 dispatch(openNotification({
                     severity: 'info',

@@ -1,13 +1,10 @@
-import { Box, Backdrop, CircularProgress, Snackbar, Alert } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
+import { Box, Snackbar, Alert } from "@mui/material";
+import { useAppDispatch, useNotification } from "redux/hooks";
 import { closeNotification } from "redux/slices/notifications";
 
 export const Notification = () => {
     const dispatch = useAppDispatch();
-    const open : boolean = useAppSelector((state:RootState) => state.notification.open);
-    const severity : 'error' | 'info' | 'success' | 'warning' = useAppSelector((state:RootState) => state.notification.severity);
-    const text : string = useAppSelector((state:RootState) => state.notification.text);
+    const [open, severity, text] = useNotification();
 
     const handleOnClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
