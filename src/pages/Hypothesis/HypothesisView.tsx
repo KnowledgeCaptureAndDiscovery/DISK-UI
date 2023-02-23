@@ -25,6 +25,7 @@ import { openNotification } from "redux/slices/notifications";
 import { ConfirmDialog } from "components/ConfirmDialog";
 import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { useDeleteTLOIMutation, useExecuteHypothesisByIdMutation, useGetTLOIsQuery, usePostTLOIMutation } from "redux/apis/tlois";
+import { cleanTLOI } from "DISK/util";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -134,12 +135,13 @@ export const HypothesisView = () => {
         }));
         execHypothesis(selectedId)
                 .then((value: {data:TriggeredLineOfInquiry[]} | {error:any}) => {
-                    let newTLOIs = (value as {data:TriggeredLineOfInquiry[]}).data;
-                    if (newTLOIs) {
-                        setNewTLOIs(newTLOIs.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL'));
+                    let curTLOIs = (value as {data:TriggeredLineOfInquiry[]}).data;
+                    if (curTLOIs) {
+                        curTLOIs = curTLOIs.filter((tloi) => tloi.status !== 'FAILED' && tloi.status !== 'SUCCESSFUL');
+                        setNewTLOIs(curTLOIs);
                         dispatch(openNotification({
                             severity: 'success',
-                            text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                            text: curTLOIs && curTLOIs.length > 0 ? (curTLOIs.length + " new executions found") : "No new executions"
                         }));
                     } else if ((value as {error:any}).error) {
                         dispatch(openNotification({
@@ -166,7 +168,7 @@ export const HypothesisView = () => {
             severity: 'info',
             text: "Sending new execution..."
         }));
-        postTLOI({data:tloi})
+        postTLOI({data:cleanTLOI(tloi)})
                 .then((data : {data:TriggeredLineOfInquiry} | {error: any}) => {
                     let savedTLOI = (data as {data:TriggeredLineOfInquiry}).data;
                     if (savedTLOI) {
@@ -174,7 +176,7 @@ export const HypothesisView = () => {
                         setNewTLOIs([tloi]);
                         dispatch(openNotification({
                             severity: 'success',
-                            text: newTlOIs && newTlOIs.length > 0 ? (newTlOIs.length + " new executions found") : "No new executions"
+                            text: "1 new execution found"
                         }));
                     }
                 })
@@ -184,7 +186,7 @@ export const HypothesisView = () => {
     }
 
     const renderOptionalButtons = (cur:TriggeredLineOfInquiry) => {
-        const SHINY_FILENAME = "shiny_visualization";
+        const SHINY_FILENAME = "log";
         const BRAIN_FILENAME = "brain_visualization";
         let shinyUrl : string = "";
         let shinySource : string = "";
@@ -249,7 +251,7 @@ export const HypothesisView = () => {
                 Hypothesis or question:
             </TypographySubtitle>
             {!loading && !!hypothesis ? 
-                <QuestionPreview selected={hypothesis.question as string} bindings={hypothesis.questionBindings}/>
+                <QuestionPreview selected={hypothesis.questionId as string} bindings={hypothesis.questionBindings}/>
                 : <Skeleton/>}
         </Box>
 

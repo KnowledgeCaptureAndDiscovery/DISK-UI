@@ -9,7 +9,7 @@ export interface Hypothesis {
     notes?:           string,
     dateCreated?:     string,
     dateModified?:    string,
-    question?:        string, //Should be question ID
+    questionId?:        string,
     parentId?:        string, //Parent hypothesis ID
     questionBindings: VariableBinding[],
     graph?: {
@@ -118,7 +118,7 @@ export interface LineOfInquiry {
     tableDescription: string,
     dataQueryExplanation: string,
     dataSource: string,
-    question: string,
+    questionId: string,
 }
 
 export interface TriggeredLineOfInquiry {

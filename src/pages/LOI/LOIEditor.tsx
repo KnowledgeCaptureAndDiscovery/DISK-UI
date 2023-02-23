@@ -161,7 +161,7 @@ export const LOIEditor = () => {
             name: name,
             description: description,
             notes: notes,
-            question: questionId,
+            questionId: questionId,
             dataQuery: dataQuery,
             hypothesisQuery: hypothesisQuery,
             dataSource: selectedDataSource,
@@ -280,7 +280,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.question : "")} onQuestionChange={onQuestionChange} error={errorQuestion}/>
+            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.questionId : "")} onQuestionChange={onQuestionChange} error={errorQuestion}/>
         </Box>
         <Divider/>
 

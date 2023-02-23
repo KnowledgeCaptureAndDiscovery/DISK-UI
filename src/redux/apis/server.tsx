@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { FetchBaseQueryMeta, createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_DISK_API } from "config";
 import { DataEndpoint, Vocabularies } from 'DISK/interfaces';
 import { DISK } from './DISK';
@@ -25,7 +25,10 @@ export const serverApi = createApi({
       }`,
     }),
     getPublicFile: builder.query<string, string>({
-      query: (path:string) => `https://s3.mint.isi.edu/neurodisk/${path}`,
+      query: (path:string) => ({
+        url: `https://s3.mint.isi.edu/neurodisk/${path}`,
+        responseHandler: (response) => response.text(),
+      }),
     }),
     getPrivateFile: builder.query<string, {dataSource:string, dataId:string}>({
       query: ({ dataSource, dataId }) => ({
@@ -33,6 +36,7 @@ export const serverApi = createApi({
         headers: DISK.headers,
         method: 'POST',
         body: {'source':dataSource, 'dataId': dataId.replace(/.*#/,"")},
+        responseHandler: (response) => response.text(),
       }),
     }),
   }),

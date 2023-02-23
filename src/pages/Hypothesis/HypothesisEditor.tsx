@@ -76,7 +76,7 @@ export const HypothesisEditor = () => {
         setName(hypothesis.name);
         setDescription(hypothesis.description);
         setNotes(hypothesis.notes ? hypothesis.notes : "");
-        setQuestionId(hypothesis.question ? hypothesis.question : "");
+        setQuestionId(hypothesis.questionId ? hypothesis.questionId : "");
         setQuestionBindings(hypothesis.questionBindings);
     }
 
@@ -151,7 +151,7 @@ export const HypothesisEditor = () => {
             name: name,
             description: description,
             notes: notes,
-            question: editedQuestionId,
+            questionId: editedQuestionId,
             questionBindings: Object.keys(formQuestionBindings).map((varId:string) => {
                 return {
                     variable: varId,

@@ -57,10 +57,10 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         if (!items) return;
         let newCount : {[id:string] : number} = {};
         items.forEach((item:Hypothesis|LineOfInquiry) => {
-            if (item.question) {
-                if (!newCount[item.question])
-                    newCount[item.question] = 0;
-                newCount[item.question] += 1;
+            if (item.questionId) {
+                if (!newCount[item.questionId])
+                    newCount[item.questionId] = 0;
+                newCount[item.questionId] += 1;
             }
         });
         setCount(newCount);
@@ -104,7 +104,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     const renderQuestionHypotheses = (q:Question) => {
-         let myHyp : Hypothesis[] = hypotheses ? hypotheses.filter((h:Hypothesis) => h.question === q.id) : [];
+         let myHyp : Hypothesis[] = hypotheses ? hypotheses.filter((h:Hypothesis) => h.questionId === q.id) : [];
          if (myHyp.length === 0)
             return null
          return <Fragment>
@@ -159,7 +159,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     const renderQuestionLOIs = (q:Question) => {
-         let myLOI : LineOfInquiry[] = (lois||[]).filter((l:LineOfInquiry) => l.question === q.id);
+         let myLOI : LineOfInquiry[] = (lois||[]).filter((l:LineOfInquiry) => l.questionId === q.id);
          if (myLOI.length === 0)
             return null
          return <Fragment>

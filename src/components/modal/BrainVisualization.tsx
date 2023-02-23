@@ -28,19 +28,30 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     const [camera, setCamera]= useState<null|PerspectiveCamera>(null);
     const [controls, setControls]= useState<null|OrbitControls>(null);
     const [renderer, setRenderer]= useState<null|WebGLRenderer>(null);
+    const [contextLost, setContextLost]= useState<boolean>(false);
 
     const [init, filelist, meshesStr] = useBrainVisualization();
-    
+
     useEffect(() => {
         if (canvas && canvas.current) {
             canvas.current.width = 800;
             canvas.current.height = 600;
+            canvas.current.addEventListener(
+                'webglcontextlost',
+                function (event) {
+                    console.log("context LOST!!!")
+                    event.preventDefault();
+                    setContextLost(true);
+                },
+                false
+            );
 
             let renderer = new WebGLRenderer({canvas:canvas.current, antialias:true, alpha:true});
             renderer.setPixelRatio(devicePixelRatio)
             renderer.setSize(800,600);
             renderer.autoClear = false;
             setRenderer(renderer);
+            //renderer.forceContextRestore();
 
             let camera = new PerspectiveCamera(50, 8/6, 0.1, 1e10);
             camera.position.z = 1;
@@ -69,6 +80,11 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
 
     useEffect(() => {
         if (!loading && !!scene && meshes.length > 0 && !!renderer && !!camera&& !!controls) {
+            if (contextLost) {
+                //FIXME: this does not work!
+                renderer.forceContextRestore();
+                console.log(renderer.getContext());
+            }
             meshes.forEach((mesh) => {
                 scene.add(mesh);
             });
@@ -105,7 +121,6 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     useEffect(() => {
         if (jsonString) {
             dispatch(setFilelist(JSON.parse(jsonString)));
-            console.log("asd", Object.keys(JSON.parse(jsonString)["filename"]).length);
         }
     }, [jsonString])
 
@@ -114,7 +129,6 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
             let allRequests = Object.keys(filelist.filename)
                     .filter((id:string) => !meshesStr[id] )
                     .map((id:string) => {
-                //DISKAPI.getPublic("models/" + filelist.filename[id])
                 getPublicFile("models/" + filelist.filename[id])
                     .unwrap()
                     .then((vtkMesh: string) => {
@@ -124,6 +138,7 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
             Promise.all(allRequests)
                 .finally(() => {
                     console.log("All models downloaded");
+                    //if (renderer && contextLost) renderer.forceContextRestore();
                 })
         }
     }, [filelist]);

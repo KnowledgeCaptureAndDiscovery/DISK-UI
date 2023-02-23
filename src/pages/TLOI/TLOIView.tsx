@@ -133,7 +133,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         <Divider/>
         <Box sx={{padding:"10px"}}>
             {!loadingHyp && !!selectedHypothesis ? 
-                <QuestionPreview selected={selectedHypothesis.question as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis or question tested"/>
+                <QuestionPreview selected={selectedHypothesis.questionId as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis or question tested"/>
                 : <Skeleton/>}
             <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 0px;", position:"relative", overflow:"visible", mb: "5px"}}>
                 <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Line of inquiry: </FormHelperText>

@@ -21,16 +21,19 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
     }, [brainUrl]);
 
     useEffect(() => {
-        if (data) {
+        if (data && open) {
             if (data.startsWith('[')) {
-                console.log("Brain config: " + data);
                 let cfg: BrainCfgItem[] = JSON.parse(data);
+                console.log("Brain config: ", cfg);
                 setBrainCfg(cfg);
             } else {
                 console.warn("Could not decode:", data);
+                setBrainCfg(null);
             }
+        } else {
+            setBrainCfg(null);
         }
-    }, [data]);
+    }, [data, open]);
 
     const onOpenDialog = () => {
         setOpen(true);
@@ -58,7 +61,7 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
                         {loading ?
                             <CircularProgress sx={{alignSelf:'center'}}/> : 
                             <Fragment>
-                                <BrainVisualization configuration={brainCfg ? brainCfg : undefined}/>
+                                {brainCfg && <BrainVisualization configuration={brainCfg}/>}
                                 <Box sx={{width: '40px', margin: "50px 0px", display: 'flex', justifyContent: 'space-between', flexDirection: 'column', background: 'linear-gradient(#ff0000, #ffdddd)'}}>
                                     <Box sx={{position: 'relative', left: '-12px', top: '-12px'}}>1</Box>
                                     <Box sx={{position: 'relative', left: '-12px', bottom: '-12px'}}>0</Box>

@@ -76,7 +76,6 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                 }
             });
             setNameToValue(map2);
-            console.log(map, map2)
 
             let noOptionalsPattern : string = selectedQuestion.pattern.replace(/optional\s*\{.+\}/g, '').trim();
 

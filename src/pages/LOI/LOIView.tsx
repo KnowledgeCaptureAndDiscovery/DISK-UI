@@ -113,7 +113,7 @@ export const LOIView = () => {
         </Box>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.question : ""} disabled={true}/>
+            <QuestionLinker selected={LOI? LOI.questionId : ""} disabled={true}/>
         </Box>
         <Divider/>
 

@@ -20,15 +20,14 @@ export const ShinyModal = ({source, shinyUrl} : ShinyModalProps) => {
     }, [shinyUrl]);
 
     useEffect(() => {
-        console.log(data);
         if (data) {
-            let json : any = null;
-            try {
-                json = JSON.parse(data);
-            } catch (error) {
+            let m = data.match("Application successfully deployed to (.*)");
+            if (m && m.length === 2) {
+                setUrl(m[1]);
+            } else {
                 console.warn("Could not decode:", data);
+                setUrl("");
             }
-            setUrl(json && json["url"] ? json["url"] : "");
         }
     }, [data]);
 
