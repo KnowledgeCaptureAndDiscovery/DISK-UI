@@ -431,6 +431,9 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               </Box>)
             }
             <Menu open={logoutDialogOpen} anchorEl={anchorEl} onClose={() => setAnchorEl(null)} >
+              <MenuItem disabled>
+                {username}
+              </MenuItem>
               <MenuItem disableRipple>
                 <Button onClick={() => keycloak.logout()}>
                   <LogoutIcon/> LOGOUT
@@ -441,7 +444,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           <Divider />
             <Typography variant="body2" color="textSecondary" align="center">
               <MuiLink  underline="none" href={"https://disk.readthedocs.io/en/stable/"}>
-                Documentation <NewTabIcon sx={{p:0, height: '14px'}}/>
+                {open ? "Documentation" : "Docs"}
+                <NewTabIcon sx={{p:0, height: '14px'}}/>
               </MuiLink>
             </Typography>
           <Divider />

@@ -59,21 +59,16 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const {tloiId} = useParams();
     const selectedId = tloiId as string; // Could be undefined?
     const authenticated = useAuthenticated();
+
     const [formalView, setFormalView] = React.useState<boolean>(false);
     const [editMode, setEditMode] = React.useState<boolean>(false);
     const [notes, setNotes] = React.useState<string>("");
 
     const { data:TLOI, isError:error, isLoading:loading} = useGetTLOIByIdQuery(selectedId);
-    const { data:selectedHypothesis, isLoading:loadingHyp } = useGetHypothesisByIdQuery(TLOI? TLOI.parentHypothesisId : '', {skip:!!TLOI&&!!TLOI.parentHypothesisId});
+    const { data:selectedHypothesis, isLoading:loadingHyp } = useGetHypothesisByIdQuery(TLOI? TLOI.parentHypothesisId : "invalid", {skip: (!TLOI || !TLOI.parentHypothesisId) });
     const { data:endpoints, isLoading:loadingEndpoints } = useGetEndpointsQuery();
-    const [putTLOI, { isLoading: isUpdating }] = usePutTLOIMutation();
+    const [ putTLOI, { isLoading: isUpdating }] = usePutTLOIMutation();
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
-
-    useEffect(() => {
-        if (!!TLOI && TLOI.notes) {
-            setNotes(TLOI.notes);
-        }
-    }, [TLOI]);
 
     useEffect(() => {
         if (!!TLOI && TLOI.dataSource && !!endpoints && endpoints.length > 0) {
@@ -86,6 +81,12 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             }
         }
     }, [TLOI, endpoints]);
+
+    useEffect(() => {
+        if (!!TLOI && TLOI.notes) {
+            setNotes(TLOI.notes);
+        }
+    }, [TLOI]);
 
     const updateNotes = () => {
         if (TLOI) {
@@ -172,7 +173,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                     }
                 </Box>
             }
-
         </Box>
         <Divider/>
 
@@ -211,10 +211,9 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             {formalView && <Fragment>
                 <TypographySection>Data query:</TypographySection>
                 <Box sx={{fontSize: "0.94rem"}} >
-                    <CodeMirror value={!!TLOI? TLOI.dataQuery : ""}
+                    <CodeMirror readOnly value={!!TLOI? TLOI.dataQuery : ""}
                         extensions={[StreamLanguage.define(sparql)]}
                         onChange={(value, viewUpdate) => {
-                            console.log('value:', value);
                         }}
                     />
                 </Box>

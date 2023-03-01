@@ -15,14 +15,29 @@ export const serverApi = createApi({
     getVocabularies: builder.query<Vocabularies, void>({
       query: () => 'vocabulary',
     }),
-    queryExternalSource: builder.query<{[varName:string] : string[]}, {dataSource:string, query:string, variables:string[]}>({
+    queryExternalSource: builder.query<{[varName:string] : string[]}, {dataSource:DataEndpoint, query:string, variables:string[]}>({
       query: ({dataSource,query,variables}) => `externalQuery?${
         new URLSearchParams({
-            endpoint: dataSource,
+            endpoint: dataSource.url,
             query: query,
             variables: variables.length === 0 ? "*" : variables.join(" ")
         })
       }`,
+      transformResponse: (returnValue: { [varName: string]: string[]; } , meta: FetchBaseQueryMeta | undefined, arg: { dataSource: DataEndpoint; query: string; variables: string[]; }) => {
+        // If the data source has a prefix resolution, we replace it over the prefix.
+        if (returnValue && arg.dataSource.prefix && arg.dataSource.namespace && arg.dataSource.prefixResolution) {
+          Object.keys(returnValue).forEach((varName: string) => {
+            let newValues: string[] = [];
+            returnValue[varName].forEach((val) =>
+              newValues.push(
+                val.replace(arg.dataSource.namespace, arg.dataSource.prefixResolution)
+              )
+            );
+            returnValue[varName] = newValues;
+          });
+        }
+        return returnValue;
+      }
     }),
     getPublicFile: builder.query<string, string>({
       query: (path:string) => ({

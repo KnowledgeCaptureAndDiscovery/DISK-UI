@@ -7,7 +7,7 @@ export interface BrainFiles {
 }
 
 interface BrainState {
-  initialized: boolean,
+  loaded: boolean,
   filelist: BrainFiles | null,
   meshes: {[id:string]: string}
 }
@@ -15,7 +15,7 @@ interface BrainState {
 export const brainSlice = createSlice({
   name: 'brain',
   initialState: {
-    initialized: false,
+    loaded: false,
     filelist: null,
     meshes: {},
   } as BrainState,
@@ -24,8 +24,6 @@ export const brainSlice = createSlice({
       let cfg : BrainFiles = action.payload;
       let newState = { ...state };
       newState.filelist = cfg;
-      newState.initialized = true;
-      console.log("new state");
       return newState;
     },
     addMesh: (state:BrainState, action: PayloadAction<string[]>) => {
@@ -42,7 +40,13 @@ export const brainSlice = createSlice({
       }
       return state;
     },
+    setFullyDone: (state:BrainState, action:PayloadAction<boolean>) => {
+      return {
+        ...state,
+        loaded: action.payload
+      }
+    }
   },
 });
 
-export const { setFilelist, addMesh } = brainSlice.actions;
+export const { setFilelist, addMesh, setFullyDone } = brainSlice.actions;

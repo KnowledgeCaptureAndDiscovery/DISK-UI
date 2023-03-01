@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton} from "@mui/material"
+import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import ThreeDRotationIcon from '@mui/icons-material/ThreeDRotation';
@@ -24,7 +24,6 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
         if (data && open) {
             if (data.startsWith('[')) {
                 let cfg: BrainCfgItem[] = JSON.parse(data);
-                console.log("Brain config: ", cfg);
                 setBrainCfg(cfg);
             } else {
                 console.warn("Could not decode:", data);
@@ -69,13 +68,6 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
                             </Fragment>}
                     </Box>
                 </DialogContent>
-                {
-                //<DialogActions>
-                //    <Button autoFocus onClick={onCloseDialog}>
-                //        Close
-                //    </Button>
-                //</DialogActions>
-                }
             </Dialog>
         </Fragment>
     );

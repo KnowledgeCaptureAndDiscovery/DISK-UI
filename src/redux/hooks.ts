@@ -27,7 +27,7 @@ export const useNotification : () => [boolean, SeverityLevel, string] = () => [
 ];
 
 export const useBrainVisualization : () => [boolean, BrainFiles|null, {[id:string]: string}] = () => [
-    useAppSelector((state:RootState) => state.brain.initialized),
+    useAppSelector((state:RootState) => state.brain.loaded),
     useAppSelector((state:RootState) => state.brain.filelist),
     useAppSelector((state:RootState) => state.brain.meshes)
 ]

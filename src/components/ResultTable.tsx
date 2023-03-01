@@ -16,7 +16,7 @@ export const ResultTable = ({query, variables, dataSource, indexes = true}: Resu
   const [total, setTotal] = useState(0);
   const [nCols, setNCols] = useState(0);
   const [curPage, setCurPage] = useState(0);
-  const {data:results,isLoading:waiting,isError} = useQueryExternalSourceQuery({dataSource:dataSource.url,query:query,variables:variables.split(" ")});
+  const {data:results,isLoading:waiting,isError} = useQueryExternalSourceQuery({dataSource:dataSource,query:query,variables:variables.split(" ")});
 
   useEffect(() => {
     if (results) {
@@ -26,19 +26,6 @@ export const ResultTable = ({query, variables, dataSource, indexes = true}: Resu
     } else {
       setNCols(0);
       setTotal(0);
-    }
-
-    // If the data source has a prefix resolution, we replace it over the prefix.
-    if (results && dataSource.prefix && dataSource.namespace && dataSource.prefixResolution) {
-      Object.keys(results).forEach((varName: string) => {
-        let newValues: string[] = [];
-        results[varName].forEach((val) =>
-          newValues.push(
-            val.replace(dataSource.namespace, dataSource.prefixResolution)
-          )
-        );
-        results[varName] = newValues;
-      });
     }
   }, [results]);
 
