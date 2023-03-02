@@ -14,6 +14,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PeopleIcon from '@mui/icons-material/People';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ScienceIcon from '@mui/icons-material/Science';
 import QuestionIcon from '@mui/icons-material/QuestionMark';
@@ -24,7 +25,7 @@ import { Link } from 'react-router-dom';
 import { Link as MuiLink, ListItem, Menu, MenuItem } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID_EDIT_RE, PATH_HYPOTHESIS_ID_RE, PATH_HYPOTHESIS_NEW, PATH_HYP_QUESTIONS, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_LOI_NEW, PATH_LOI_QUESTIONS, PATH_MY_HYPOTHESES, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, People } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
 import NewTabIcon from '@mui/icons-material/OpenInNew';
@@ -315,6 +316,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
             <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && (!inLocation(PATH_HYP_QUESTIONS)) && (!selectedHypothesis || selectedHypothesis.author !== username) ? "darkorange" : "orange" }} >
               <ScienceIcon />
+              <PeopleIcon sx={{color: "darkslategray", ml:"-12px", pt:"5px"}}/>
             </ListItemIcon>
             <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
               <Typography sx={{fontWeight: location.pathname === PATH_HYPOTHESES || ((!selectedHypothesis || selectedHypothesis.author !== username) && !inLocation(PATH_HYP_QUESTIONS) && (inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS))) ? 700 : 400}}>All Hypotheses</Typography>
@@ -349,7 +351,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           <ListItemButton key={PATH_LOIS} component={Link} to={PATH_LOIS}
               sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
             <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && !inLocation(PATH_LOI_QUESTIONS) && (!selectedLOI || selectedLOI.author !== username)) ? "darkgreen" : "green" }} >
-              <SettingIcon />
+              <SettingIcon sx={{ color:"lightseagreen" }} />
+              <PeopleIcon sx={{color: "darkslategray", ml:"-12px", pt:"5px"}}/>
             </ListItemIcon>
             <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
               <Typography sx={{fontWeight: location.pathname === PATH_LOIS || (inLocation(PATH_LOIS) && !inLocation(PATH_LOI_QUESTIONS) && (!selectedLOI || selectedLOI.author !== username)) ? 700 : 400}}>All Lines of Inquiry</Typography>

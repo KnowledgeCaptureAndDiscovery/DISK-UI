@@ -7,6 +7,7 @@ import ErrorIcon from '@mui/icons-material/ErrorOutline';
 import WaitIcon from '@mui/icons-material/HourglassBottom';
 import CheckIcon from '@mui/icons-material/Check';
 import SettingsIcon from '@mui/icons-material/Settings';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES, PATH_TLOIS } from "constants/routes";
@@ -273,7 +274,8 @@ export const HypothesisView = () => {
                 <Card variant="outlined" key={loiId} sx={{marginBottom: "5px", padding: "2px 10px"}}>
                     <Box sx={{display: 'flex', alignItems: 'center', justifyContent:"space-between"}}>
                         <Box sx={{display: 'flex', alignItems: 'center'}}>
-                            <SettingsIcon sx={{color: "green", mr: "5px"}}/>
+                            <SettingsIcon sx={{color: "darkgray", mr: "5px"}}/>
+                            <PlayArrowIcon sx={{color: "green", ml: "-23px", mb: "-10px"}}/>
                             <span style={{marginRight: ".5em"}}> Triggered line of inquiry: </span> 
                             <b> {myTLOIs[loiId].name}</b>
                         </Box>

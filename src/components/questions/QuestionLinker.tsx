@@ -22,9 +22,9 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
     }
 
     return <Box>
-        {!disabled && (<Box>
+        <Box style={{display: disabled ? 'none' : 'initial'}}>
             <QuestionTemplateSelector required title="Select a pattern that this line of inquiry will investigate:" onChange={onQuestionChange} questionId={selectedId}/>
-        </Box>)}
+        </Box>
 
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (selectedQuestion ? "block" : "none"), position: "relative", overflow:"visible"}}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
