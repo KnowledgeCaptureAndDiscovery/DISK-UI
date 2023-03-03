@@ -251,15 +251,15 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             <ListItemButton  key={PATH_MY_HYPOTHESES} component={Link} to={PATH_MY_HYPOTHESES}
                 sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center',
-                  color: inLocation(PATH_MY_HYPOTHESES) || ((location.pathname !== PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && selectedHypothesis && selectedHypothesis.author === username) ? "darkorange" : "orange" }} >
+                  color: (inLocation(PATH_MY_HYPOTHESES) || ((location.pathname !== PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && selectedHypothesis && selectedHypothesis.author === username)) && !inLocation(PATH_HYP_QUESTIONS) ? "darkorange" : "orange" }} >
                 <ScienceIcon />
               </ListItemIcon>
               <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                <Typography sx={{fontWeight: inLocation(PATH_MY_HYPOTHESES)|| ((location.pathname !== PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && selectedHypothesis && selectedHypothesis.author === username) ? 700 : 400}}>My Hypotheses</Typography>
+                <Typography sx={{fontWeight:!inLocation(PATH_HYP_QUESTIONS) && (inLocation(PATH_MY_HYPOTHESES)|| ((location.pathname !== PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES) || inLocation(PATH_TLOIS)) && selectedHypothesis && selectedHypothesis.author === username)) ? 700 : 400}}>My Hypotheses</Typography>
               }/>
             </ListItemButton>
 
-            {selectedHypothesis && selectedHypothesis.author === username && (inLocation(PATH_TLOIS) || (location.pathname != PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES))) &&
+            {selectedHypothesis && selectedHypothesis.author === username && (inLocation(PATH_TLOIS) || (location.pathname != PATH_HYPOTHESES && inLocation(PATH_HYPOTHESES))) && !inLocation(PATH_HYP_QUESTIONS) &&
               <ListItemButton  key={PATH_HYPOTHESES + selectedHypothesis.id} component={Link} to={PATH_HYPOTHESES + "/" + selectedHypothesis.id}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px', py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
@@ -287,15 +287,15 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             <ListItemButton key={PATH_MY_LOIS} component={Link} to={PATH_MY_LOIS}
                 sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', 
-                  color: inLocation(PATH_MY_LOIS) || (inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && selectedLOI && selectedLOI.author === username) ? "darkgreen" : "green" }} >
+                  color: (inLocation(PATH_MY_LOIS) || (inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && selectedLOI && selectedLOI.author === username)) && !inLocation(PATH_LOI_QUESTIONS) ? "darkgreen" : "green" }} >
                 <SettingIcon />
               </ListItemIcon>
               <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
-                <Typography sx={{fontWeight: inLocation(PATH_MY_LOIS)  || (location.pathname !== PATH_LOIS && inLocation(PATH_LOIS) && selectedLOI && selectedLOI.author === username) ? 700 : 400}}>My Lines of Inquiry</Typography>
+                <Typography sx={{fontWeight: (inLocation(PATH_MY_LOIS)  || (location.pathname !== PATH_LOIS && inLocation(PATH_LOIS) && selectedLOI && selectedLOI.author === username)) && !inLocation(PATH_LOI_QUESTIONS) ? 700 : 400}}>My Lines of Inquiry</Typography>
               }/>
             </ListItemButton>
 
-            {selectedLOI && selectedLOI.author === username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS &&
+            {selectedLOI && selectedLOI.author === username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && !inLocation(PATH_LOI_QUESTIONS) &&
               <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + selectedLOI.id}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "25px", py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
