@@ -23,7 +23,7 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
     useEffect(() => {
         if (data && open) {
             if (data.startsWith('[')) {
-                let cfg: BrainCfgItem[] = JSON.parse(data);
+                let cfg: BrainCfgItem[] = JSON.parse(data.replaceAll('\n', ' ').replaceAll('\t', ''));
                 setBrainCfg(cfg);
             } else {
                 console.warn("Could not decode:", data);
