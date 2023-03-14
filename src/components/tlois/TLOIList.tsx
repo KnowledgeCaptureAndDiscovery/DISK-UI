@@ -205,7 +205,7 @@ export const TLOIList = ({hypothesis, loiId} : TLOIListProps) => {
         <Table sx={{ width: "unset" }}>
             <TableHead>
                 <TableRow>
-                    {visibleColumns.map((name:string) => <TableCell sx={{ padding: "0 10px" }}>{name}</TableCell>)}
+                    {visibleColumns.map((name:string) => <TableCell key={name} sx={{ padding: "0 10px" }}>{name}</TableCell>)}
                 </TableRow>
             </TableHead>
             <TableBody>

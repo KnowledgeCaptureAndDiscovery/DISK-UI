@@ -59,13 +59,20 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
                     <Box sx={{p: 0, display: 'flex', minWidth: '600px', minHeight: '400px', justifyContent: (loading? 'space-around' : 'unset')}}>
                         {loading ?
                             <CircularProgress sx={{alignSelf:'center'}}/> : 
-                            <Fragment>
-                                {brainCfg && <BrainVisualization configuration={brainCfg}/>}
-                                <Box sx={{width: '40px', margin: "50px 0px", display: 'flex', justifyContent: 'space-between', flexDirection: 'column', background: 'linear-gradient(#ff0000, #ffdddd)'}}>
-                                    <Box sx={{position: 'relative', left: '-12px', top: '-12px'}}>1</Box>
-                                    <Box sx={{position: 'relative', left: '-12px', bottom: '-12px'}}>0</Box>
+                            (brainCfg != null ? 
+                                <Fragment>
+                                    <BrainVisualization configuration={brainCfg}/>
+                                    <Box sx={{width: '40px', margin: "50px 0px", display: 'flex', justifyContent: 'space-between', flexDirection: 'column', background: 'linear-gradient(#ff0000, #ffdddd)'}}>
+                                        <Box sx={{position: 'relative', left: '-12px', top: '-12px'}}>1</Box>
+                                        <Box sx={{position: 'relative', left: '-12px', bottom: '-12px'}}>0</Box>
+                                    </Box>
+                                </Fragment>
+                            :
+                                <Box sx={{width: "100%", margin: "0 auto", textAlign: "center", lineHeight: "400px", fontWeight: "bold", fontSize: "1.1em"}}>
+                                    An error has occurred reading the brain visualization configuration.
                                 </Box>
-                            </Fragment>}
+                            )
+                        }
                     </Box>
                 </DialogContent>
             </Dialog>

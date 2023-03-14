@@ -1,12 +1,11 @@
 import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint } from "DISK/interfaces";
 import { Fragment, useEffect } from "react";
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
-import { useAppDispatch, useAppSelector, useAuthenticated } from "redux/hooks";
-import { RootState } from "redux/store";
+import { useAuthenticated } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import CodeMirror from '@uiw/react-codemirror';
@@ -45,10 +44,7 @@ const TypographySection = styled(Typography)(({ theme }) => ({
 }));
 
 export const LOIView = () => {
-    const location = useLocation();
-    const dispatch = useAppDispatch();
     const authenticated = useAuthenticated();
-
     const { loiId } = useParams();
     const selectedId = loiId as string;
 
