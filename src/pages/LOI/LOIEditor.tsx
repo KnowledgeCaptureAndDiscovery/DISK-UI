@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { Box, Button, Card, Checkbox, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { DataEndpoint, idPattern, LineOfInquiry, Question, Workflow } from "DISK/interfaces";
+import { DataEndpoint, idPattern, LineOfInquiry, Question, QuestionVariable, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -20,7 +20,7 @@ import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux/apis/lois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
-import { alignWorkflow } from "components/questions/QuestionHelpers";
+import { alignWorkflow, createQueryForGraph, getAllQuestionVariables, getCompleteQuestionGraph } from "components/questions/QuestionHelpers";
 
 export const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -231,10 +231,11 @@ export const LOIEditor = () => {
         setQuestionId(q ? q.id : "");
         setErrorQuestion(q === null || q.id.length ===0);
         if (q!=null) {
-            //TODO: removing optional parameters, this should be handled server side.
-            let noOptPattern : string = q.pattern.replace(/optional\s*\{.+\}/g, '').trim();
-            // Replace all sub-resources (:example) for variables (?example) for hypothesis matching.
-            setHypothesisQuery( noOptPattern.replaceAll(/([\s]|^):([\w\d]+)/g, "$1?$2") );
+            let allVars = getAllQuestionVariables(q).reduce((acc, cur) => {
+                acc[cur.id] = cur;
+                return acc;
+            }, {} as {[uri:string]:QuestionVariable});
+            setHypothesisQuery(createQueryForGraph(getCompleteQuestionGraph(q), allVars));
         } else {
             setHypothesisQuery("");
         }

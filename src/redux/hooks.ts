@@ -18,7 +18,7 @@ export const useUsername = () => useAppSelector((state:RootState) => state.keycl
 export const useBackdrop = () => useAppSelector((state:RootState) => state.backdrop.open);
 
 export const useQuestionBindings = () => useAppSelector((state:RootState) => state.forms.questionBindings);
-export const useQuestionPattern = () => useAppSelector((state:RootState) => state.forms.selectedPattern);
+export const useSelectedQuestion = () => useAppSelector((state:RootState) => state.forms.selectedQuestion);
 
 export const useNotification : () => [boolean, SeverityLevel, string] = () => [
     useAppSelector((state:RootState) => state.notification.open),

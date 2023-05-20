@@ -23,6 +23,7 @@ import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetTLOIByIdQuery, usePutTLOIMutation } from "redux/apis/tlois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
+import { SHINY_FILENAME, BRAIN_FILENAME } from "constants/general";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -70,6 +71,41 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const [ putTLOI, { isLoading: isUpdating }] = usePutTLOIMutation();
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
 
+    // Viz
+    const [shinyData, setShinyData] = React.useState<{url:string,source:string}>({url:'',source:''});
+    const [brainData, setBrainData] = React.useState<{url:string,source:string}>({url:'',source:''});
+    const [nViz, setNViz] = React.useState<number>(0);
+
+    useEffect(() => {
+        if (TLOI) {
+            let n = 0;
+            [ ...TLOI.workflows, ...TLOI.metaWorkflows ].forEach((wf) => {
+                if (wf.run && wf.run.outputs) {
+                    Object.keys(wf.run.outputs).forEach(((name:string) => {
+                        if (name === SHINY_FILENAME) {
+                          console.log( wf.run ? wf.run.outputs[name] : "");
+                            setShinyData({
+                                source: wf.source,
+                                url: wf.run ? wf.run.outputs[name] : ""
+                            });
+                            n += 1;
+                        } else if (name === BRAIN_FILENAME) {
+                            setBrainData({
+                                source: wf.source,
+                                url: wf.run ? wf.run.outputs[name] : ""
+                            });
+                            n += 1;
+                        }
+                    }));
+                }
+            });
+            setNViz(n);
+        }
+
+    }, [TLOI])
+
+
+
     useEffect(() => {
         if (!!TLOI && TLOI.dataSource && !!endpoints && endpoints.length > 0) {
             for (let i = 0; i < endpoints.length; i++) {
@@ -113,6 +149,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         }
         return;
     }
+
 
     return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
         {loading ? 
@@ -242,5 +279,10 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
             {!!TLOI && <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaWorkflows} options={[]}/>}
         </Box>
+
+        {nViz > 0 && <Box>
+            <TypographySubtitle sx={{display: "inline-block"}}>Visualizations generated:</TypographySubtitle>
+            {shinyData.url && (<iframe style={{width: "100%", height: "100%", border: "0"}} src={shinyData.url}/>)}
+        </Box>}
     </Card>
 }

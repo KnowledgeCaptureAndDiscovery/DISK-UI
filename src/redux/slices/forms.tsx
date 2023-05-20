@@ -1,27 +1,35 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Question } from "DISK/interfaces";
 
-export type SimpleMap = {[id:string]: string};
+export type StrStrMap = {[id:string]: string};
 
 export interface FormsState {
-  selectedPattern: string,
-  questionBindings: SimpleMap,
+  selectedQuestion: Question | null,
+  questionBindings: StrStrMap,
 }
 
 export const formsSlice = createSlice({
   name: 'forms',
   initialState: {
-    selectedPattern: '',
+    selectedQuestion: null,
     questionBindings: {}
   } as FormsState,
   reducers: {
-    setQuestionBindings: (state:FormsState, action: PayloadAction<{map:SimpleMap, pattern?:string}>) => {
+    setSelectedQuestion: (state:FormsState, action: PayloadAction<Question>) => {
+      // Pattern is optional 
       return { 
         ...state,
-        questionBindings: action.payload.map,
-        selectedPattern: action.payload.pattern ? action.payload.pattern : state.selectedPattern,
+        selectedQuestion: action.payload
+      };
+    },
+    setQuestionBindings: (state:FormsState, action: PayloadAction<StrStrMap>) => {
+      // Pattern is optional 
+      return { 
+        ...state,
+        questionBindings: action.payload,
       };
     },
   },
 });
 
-export const { setQuestionBindings } = formsSlice.actions;
+export const { setQuestionBindings, setSelectedQuestion } = formsSlice.actions;

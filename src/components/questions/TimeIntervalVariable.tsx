@@ -1,62 +1,60 @@
-import { Box, FormControlLabel, FormGroup, Switch, TextField, Tooltip } from "@mui/material"
-import { QuestionVariable } from "DISK/interfaces"
+import { Box, FormGroup, Switch, TextField, Tooltip } from "@mui/material"
+import { TimeIntervalQuestionVariable } from "DISK/interfaces"
 import { useState } from "react";
 import { OptionBinding } from "./BoundingBoxMap";
+import { setQuestionBindings } from "redux/slices/forms";
+import { useAppDispatch, useQuestionBindings } from "redux/hooks";
+import { StartTimeURI, TimeTypeURI, CETimeURI, BPTimeURI, StopTimeURI } from "constants/general";
 
 interface TimeIntervalVariableProps {
-    variable: QuestionVariable,
+    variable: TimeIntervalQuestionVariable,
     onChange?: (bindings:OptionBinding[]) => void
 }
 
-export const CETimeURI = 'http://disk-project.org/resources/climate/variable/CETime';
-export const BPTimeURI = 'http://disk-project.org/resources/climate/variable/BPTime';
-export const TimeTypeURI = 'http://disk-project.org/resources/climate/variable/TimeType';
-export const StartTimeURI = 'http://disk-project.org/resources/climate/variable/StartTime';
-export const StopTimeURI = 'http://disk-project.org/resources/climate/variable/StopTime';
+export const TimeIntervalVariable = ({variable}: TimeIntervalVariableProps) => {
+    const dispatch = useAppDispatch();
+    const bindings = useQuestionBindings();
 
-export const TimeIntervalVariable = ({variable, onChange}: TimeIntervalVariableProps) => {
     const [CETime, setCETime] = useState<boolean>(true);
     const [startTimeError, setStartTimeError] = useState<boolean>(false);
     const [stopTimeError, setStopTimeError] = useState<boolean>(false);
     const [startTime, setStartTime] = useState<number|null>(null);
     const [stopTime, setStopTime] = useState<number|null>(null);
+    const [startTimeout, setStartTimeout] = useState<NodeJS.Timeout|null>(null);
+    const [stopTimeout, setStopTimeout] = useState<NodeJS.Timeout|null>(null);
 
-    const onStartTimeChange = (ev: any) => {
+    const changeTimeBinding = (timeUri:string, time:number|null) => {
+        let newBindings = { ...bindings };
+        if (time) {
+            newBindings[timeUri] = time.toString();
+            newBindings[TimeTypeURI] = CETime ? CETimeURI : BPTimeURI;
+        } else {
+            delete newBindings[timeUri];
+            delete newBindings[TimeTypeURI];
+        }
+        dispatch(setQuestionBindings(newBindings));
+    };
+    
+    const onStartTimeChange : React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>  = (ev) => {
+        let value : number | null = null;
         if (ev.target.value) {
-            let value : number = parseInt(ev.target.value);
+            value = parseInt(ev.target.value);
             setStartTime(value);
             setStartTimeError(!!stopTime && stopTime < value);
             if (stopTimeError && stopTime && stopTime > value) {
                 setStopTimeError(false);
             }
-            if (onChange) {
-                onChange([
-                    {
-                        variable: {
-                            id: StartTimeURI,
-                            variableName: '?MinTime'
-                        } as QuestionVariable,
-                        value: {
-                            id: value.toString(),
-                            name: value.toString()
-                        }
-                    },
-                    {
-                        variable: {
-                            id: TimeTypeURI,
-                            variableName: '?TimeType'
-                        } as QuestionVariable,
-                        value: {
-                            id: CETime ? CETimeURI : BPTimeURI,
-                            name: CETime ? "CE Time" : "BP Time",
-                        }
-                    },
-                ]);
-            }
         }
+
+        if (startTimeout) clearTimeout(startTimeout)
+        setStartTimeout(setTimeout(() => {
+            changeTimeBinding(StartTimeURI, value);
+            setStartTimeout(null);
+        }, 500));
     }
 
-    const onStopTimeChange = (ev: any) => {
+    const onStopTimeChange : React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>  = (ev) => {
+        let value : number | null = null;
         if (ev.target.value) {
             let value = parseInt(ev.target.value);
             setStopTime(value);
@@ -64,49 +62,20 @@ export const TimeIntervalVariable = ({variable, onChange}: TimeIntervalVariableP
             if (startTimeError && startTime && startTime < value) {
                 setStartTimeError(false);
             }
-            if (onChange) {
-                onChange([
-                    {
-                        variable: {
-                            id: StopTimeURI,
-                            variableName: '?MaxTime'
-                        } as QuestionVariable,
-                        value: {
-                            id: value.toString(),
-                            name: value.toString()
-                        }
-                    },
-                    {
-                        variable: {
-                            id: TimeTypeURI,
-                            variableName: '?TimeType'
-                        } as QuestionVariable,
-                        value: {
-                            id: CETime ? CETimeURI : BPTimeURI,
-                            name: CETime ? "CE Time" : "BP Time",
-                        }
-                    },
-                ]);
-            }
         }
+
+        if (stopTimeout) clearTimeout(stopTimeout)
+        setStopTimeout(setTimeout(() => {
+            changeTimeBinding(StopTimeURI, value);
+            setStopTimeout(null);
+        }, 500));
     }
 
     const onTimeToggle = () => {
+        let newBindings = { ...bindings };
+        newBindings[TimeTypeURI] = !CETime ? CETimeURI : BPTimeURI;
         setCETime(!CETime);
-        if (onChange) {
-            onChange([
-                {
-                    variable: {
-                        id: TimeTypeURI,
-                        variableName: '?TimeType'
-                    } as QuestionVariable,
-                    value: {
-                        id: !CETime ? CETimeURI : BPTimeURI,
-                        name: !CETime ? "CE Time" : "BP Time",
-                    }
-                },
-            ]);
-        }
+        dispatch(setQuestionBindings(newBindings));
     }
 
     return (

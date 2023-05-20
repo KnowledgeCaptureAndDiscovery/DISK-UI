@@ -1,5 +1,5 @@
 import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, ListItem, Tooltip, Typography } from "@mui/material";
-import { Hypothesis, idPattern, LineOfInquiry, Question, QuestionVariable, VariableBinding } from "DISK/interfaces";
+import { AnyQuestionVariable, Hypothesis, idPattern, LineOfInquiry, Question, VariableBinding, varPattern } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import { useAuthenticated } from "redux/hooks";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
@@ -12,7 +12,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useGetHypothesesQuery } from "redux/apis/hypotheses";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { useGetLOIsQuery } from "redux/apis/lois";
-import { TextPart, isBoundingBoxVariable } from "./QuestionHelpers";
+import { TextPart } from "./QuestionHelpers";
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -33,6 +33,8 @@ export const normalizeURI = (uri:string) => {
 
 export const normalizeTextValue = (text:string) => {
     if (!text) return "";
+    if (text === "SA") return "Surface Area";
+    if (text === "TH") return "Thickness";
     //If is an url use the last part of the path
     if (text.startsWith("http") || text.startsWith("www"))
         text = text.replace(idPattern, "");
@@ -76,22 +78,20 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
 
     useEffect(() => {
         let q : Question[] = questions ? [ ...questions ] : [];
-        setSortedQuestions(q.sort(sortQuestions));
+        setSortedQuestions(q.sort((q1, q2) => {
+            let a: number = count[q1.id] ? count[q1.id] : 0;
+            let b: number = count[q2.id] ? count[q2.id] : 0;
+            return a < b ? 1 : -1;
+        }));
     }, [questions, count])
-
-    const sortQuestions = (q1:Question, q2:Question) => {
-        let a : number = count[q1.id] ? count[q1.id] : 0;
-        let b : number = count[q2.id] ? count[q2.id] : 0;
-        return a < b ? 1 : -1;
-    }
 
     const renderQuestion = (q:Question) => {
         let variableStep : number = q.name.charAt(0) === '?' ? 1 : 0;
         let name = q.name.endsWith('?') ? q.name.substring(0, q.name.length-1) : q.name;
-        let parts : string[] = name.split(/<(.*?)>/); // parse <var> FIXME: this is old.
-        if (parts.length === 1) {
-            parts = name.split(/(\?[A-Za-z0-9_]*) [a-z]/); // parse ?var
-        }
+        let parts : string[] = name.split(varPattern);
+
+        console.log(parts);
+
         return (<Fragment>
             {parts.map((txt:string, i:number) => i%2===variableStep ?
                 <span key={i}>{txt}</span>
@@ -126,7 +126,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         let parts = q.template.split(/(\?[A-Za-z0-9_]*)/);
         let values : {[name:string]:string} = {};
         let tmp : {[url:string]:string} = {};
-        q.variables.forEach((variable:QuestionVariable) => {
+        q.variables.forEach((variable:AnyQuestionVariable) => {
             tmp[variable.id] = variable.variableName;
         });
         (h.questionBindings||[]).forEach((binding:VariableBinding) => {
@@ -134,8 +134,8 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                 values[tmp[binding.variable]] = binding.binding;
             }
         });
-        q.variables.forEach((variable:QuestionVariable) => {
-            if (isBoundingBoxVariable(variable)) {
+        q.variables.forEach((variable:AnyQuestionVariable) => {
+            if (variable ) {
                 if (variable.representation != null) {
                     let explanationParts: string[] = variable.representation.split(/(\?[a-zA-Z0-9]*)/g);
                     console.log(values, explanationParts);

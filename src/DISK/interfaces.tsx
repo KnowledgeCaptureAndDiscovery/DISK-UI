@@ -1,5 +1,5 @@
 export const idPattern = new RegExp(/.*\//); 
-export const varPattern = new RegExp(/\?[a-zA-Z0-9]*/g);
+export const varPattern = new RegExp(/(\?[a-zA-Z0-9]*)/g);
 
 export interface Hypothesis {
     id:               string,
@@ -25,12 +25,11 @@ export interface VariableBinding { /// variable = binding
 }
 
 export interface Triple {
-    details?:    string,
     subject:    string,
     predicate:  string, 
     object: {
         type:       'LITERAL' | 'URI',
-        value:      string,
+        value:      string, //FIXME: this is an Object in the server, maybe can return a Date, not sure.
         datatype?:  string,
     }
 }
@@ -39,9 +38,10 @@ export interface Question {
     id:         string,
     name:       string,
     template:   string,
-    pattern:    string,
+    constraint: string,
+    pattern:    Triple[],
     category:   QuestionCategory | null,
-    variables:  QuestionVariable[],
+    variables:  AnyQuestionVariable[],
 }
 
 export interface QuestionCategory {
@@ -49,30 +49,54 @@ export interface QuestionCategory {
     name:   string,
 }
 
-export interface QuestionVariable {
+export type QuestionVariable = {
     id:                 string,
     variableName:       string,
-    optionsQuery:       string,
-    options:            VariableOption[],
     minCardinality:     number,
     maxCardinality:     number,
     representation:     string | null,
     explanation:        string | null,
-    explanationQuery:   string | null,
-    subType:            string | null,
-    // Possible subtypes are BoundingBox, TimeInterval and UserInput
-    // For UserInputs:
-    inputDatatype:      string | null,
-    // For BoundingBox:
-    minLat:             QuestionVariable,
-    minLng:             QuestionVariable,
-    maxLat:             QuestionVariable,
-    maxLng:             QuestionVariable;
+    patternFragment:    Triple[]
 }
+
+export type UserInputQuestionVariable = {
+    subType: 'USER_INPUT',
+    inputDatatype: string
+} & QuestionVariable;
+
+export type DynamicOptionsQuestionVariable = {
+    subType: 'DYNAMIC_OPTIONS',
+    optionsQuery: string
+} & QuestionVariable;
+
+export type StaticOptionsQuestionVariable = {
+    subType: 'STATIC_OPTIONS',
+    options: VariableOption[]
+} & QuestionVariable;
+
+export type BoundingBoxQuestionVariable = {
+    subType: 'BOUNDING_BOX',
+    optionsQuery: string
+    minLat: UserInputQuestionVariable,
+    minLng: UserInputQuestionVariable,
+    maxLat: UserInputQuestionVariable,
+    maxLng: UserInputQuestionVariable
+} & QuestionVariable;
+
+export type TimeIntervalQuestionVariable = {
+    subType: 'TIME_INTERVAL',
+    optionsQuery: string
+    startTime: UserInputQuestionVariable,
+    endTime: UserInputQuestionVariable,
+    timeType: StaticOptionsQuestionVariable
+} & QuestionVariable;
+
+export type AnyQuestionVariable = UserInputQuestionVariable | DynamicOptionsQuestionVariable | StaticOptionsQuestionVariable | BoundingBoxQuestionVariable | TimeIntervalQuestionVariable;
 
 export interface VariableOption {
     value:  string,
     label:  string,
+    commnet: string | null,
 }
 
 export interface WorkflowRun {
@@ -139,6 +163,7 @@ export interface TriggeredLineOfInquiry {
     tableDescription: string,
     dataQueryExplanation: string,
     dataSource: string,
+    queryResults: string,
     // All of these are workflow-run related.
     confidenceValue: number,
     confidenceType: string,
@@ -209,6 +234,5 @@ export interface QuestionOptionsRequest {
 }
 
 const _names = {}
-
 
 export default _names;

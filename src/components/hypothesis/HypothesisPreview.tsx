@@ -1,7 +1,7 @@
-import { Hypothesis } from "DISK/interfaces"
+import { Hypothesis, TriggeredLineOfInquiry } from "DISK/interfaces"
 import ScienceIcon from '@mui/icons-material/Science';
 import { PATH_HYPOTHESES } from "constants/routes";
-import { Card, Box, Typography, Tooltip, IconButton, Divider, styled } from "@mui/material";
+import { Card, Box, Typography, Tooltip, IconButton, Divider, styled, Skeleton } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import EditIcon from '@mui/icons-material/Edit';
@@ -10,6 +10,9 @@ import { ConfirmDialog } from "../ConfirmDialog";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 import { useDeleteHypothesisMutation } from "redux/apis/hypotheses";
+import { useGetTLOIsQuery } from "redux/apis/tlois";
+import { useEffect, useState } from "react";
+import { TLOIPreview } from "components/tlois/TLOIPreview";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -19,7 +22,7 @@ const TwoLines = styled(Typography)(({ theme }) => ({
     fontSize: "0.9rem",
     lineHeight: "1rem",
     color:"#444",
-    height: "2rem"
+    maxHeight: "2rem"
 }));
 
 interface HypothesisPreviewProps {
@@ -35,6 +38,26 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
         deleteHypothesis, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result
       ] = useDeleteHypothesisMutation();
+
+    const { data:TLOIs, isLoading} = useGetTLOIsQuery();
+
+    const [latestTLOIs, setLatestTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
+
+    useEffect(() => {
+        let latest : TriggeredLineOfInquiry[] = [];
+        if (TLOIs) {
+            let usedLOIs = new Set<string>();
+            [...TLOIs].sort((t1, t2) => {
+                return new Date(t2.dateCreated).getTime() - new Date(t1.dateCreated).getTime();
+            }).forEach((t) => {
+                if (t.parentHypothesisId === hypothesis.id && !usedLOIs.has(t.parentLoiId)) {
+                    usedLOIs.add(t.parentLoiId);
+                    latest.push(t);
+                }
+            });
+        }
+        setLatestTLOIs(latest);
+    }, [TLOIs])
 
     const onDeleteHypothesis = () => {
         console.log("DELETING: ", hypothesis.id);
@@ -91,7 +114,17 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
         </Box>
         <Divider/>
         <Box sx={{padding: "5px 10px 0"}}>
-            <TwoLines> {hypothesis.description} </TwoLines>
+            <TwoLines style={{height: latestTLOIs.length > 0 ? 'unset' : '2em'}}> {hypothesis.description} </TwoLines>
+            {isLoading ? 
+                <Skeleton/>
+                : (latestTLOIs.length === 0 ?
+                    null 
+                    : <Box>
+                        <b>Latest executions:</b>
+                        {latestTLOIs.map((tloi) => <TLOIPreview tloi={tloi} key={`k_${tloi.id}`}/>)}
+                    </Box>
+                )
+            }
         </Box>
         <Box sx={{display: "inline-flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "0 10px", fontSize: "0.85rem"}}>
             <Box>

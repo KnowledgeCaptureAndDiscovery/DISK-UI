@@ -2,10 +2,11 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconBut
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
-import { QuestionVariable } from "DISK/interfaces";
+import { BoundingBoxQuestionVariable } from "DISK/interfaces";
 import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import { MapContainer, TileLayer, useMap, Rectangle} from 'react-leaflet'
 import { setQuestionBindings } from "redux/slices/forms";
+import { LatLngExpression } from "leaflet";
 
 interface Option {
     id: string,
@@ -13,40 +14,40 @@ interface Option {
 }
 
 export interface OptionBinding {
-    variable: QuestionVariable,
+    variable: BoundingBoxQuestionVariable,
     value: Option,
 }
 
 interface BoundingBoxMapProps {
-    variable: QuestionVariable,
-    onChange?: (bindings:OptionBinding[]) => void
+    variable: BoundingBoxQuestionVariable,
 }
 
 export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
     const dispatch = useAppDispatch();
+    const bindings = useQuestionBindings();
+
     const [open, setOpen] = useState(false);
     const [boundingBox, setBoundingBox] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
-    const bindings = useQuestionBindings();
-    const [initBB, setInitBB] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
+    const [initBB, setInitBB] = useState<[[number,number],[number,number]]|null>(null); //[[MinLat, MinLng], [MaxLat, MaxLng]]
 
     useEffect(() => {
-        console.log("var:", variable);
-    }, [variable]);
-
-    const onOpenDialog = () => {
-        // Create initial bounding box if variables are binding.
-        let initVal :[number, number, number, number] | null = null;
+        let initVal : [[number,number],[number,number]] | null = null;
         if (variable && bindings) {
             let minLat = bindings[variable.minLat.id];
             let minLng = bindings[variable.minLng.id];
             let maxLat = bindings[variable.maxLat.id];
             let maxLng = bindings[variable.maxLng.id];
             if (minLat && minLng && maxLat && maxLng) {
-                initVal = [Number(minLat), Number(minLng), Number(maxLat), Number(maxLng)];
+                initVal = [[Number(minLat), Number(minLng)], [Number(maxLat), Number(maxLng)]];
             }
-            console.log("SET", initVal);
         }
         setInitBB(initVal);
+        setBoundingBox(initVal ? 
+            [initVal[0][0], initVal[0][1], initVal[1][0],initVal[1][1]]
+            : null);
+    }, [variable, bindings]);
+
+    const onOpenDialog = () => {
         setOpen(true);
     }
 
@@ -68,13 +69,21 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
             delete newBindings[variable.maxLat.id];
             delete newBindings[variable.maxLng.id];
         }
-        dispatch(setQuestionBindings({
-            map: newBindings
-        }));
+        dispatch(setQuestionBindings(newBindings));
     }
 
     const onBoundingBoxChange : (geometry:[number, number, number, number]|null) => void = (geometry) => {
         setBoundingBox(geometry);
+    }
+
+    const getMapCenter :  (box: [[number,number],[number,number]] | null) => LatLngExpression = (box) => {
+        if (box) {
+            return [
+                (box[0][0] + box[1][0])/2,
+                (box[0][1] + box[1][1])/2
+            ]
+        }
+        return [47, -101];
     }
 
     return (
@@ -94,10 +103,10 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                    <MapContainer center={[47, -101]} zoom={3} scrollWheelZoom={false} style={{ height: '400px' }}>
+                    <MapContainer center={getMapCenter(initBB)} zoom={3} scrollWheelZoom={false} style={{ height: '400px' }}>
                         <MapController onChange={onBoundingBoxChange} />
                         {initBB && (
-                            <Rectangle bounds={[[initBB[0],initBB[1]],[initBB[2],initBB[3]]]}/>
+                            <Rectangle bounds={initBB}/>
                         )}
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -142,13 +151,11 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
 }
 
 interface SpatialExtendMapProps {
-    initialValue?:[number, number, number, number]|null,
     onChange?: (geometry:[number, number, number, number]|null) => void
 }
 
-const MapController = ({initialValue,onChange}:SpatialExtendMapProps) => {
+const MapController = ({onChange}:SpatialExtendMapProps) => {
     const map = useMap();
-    //const [geometry, setGeometry] = useState<[number, number, number, number]|null>(null); //MinLat, MinLng, MaxLat, MaxLng
 
     map.on('pm:create', (e) => {
         let shapes = map.pm.getGeomanLayers(true);
@@ -173,13 +180,15 @@ const MapController = ({initialValue,onChange}:SpatialExtendMapProps) => {
                     if (lat > maxLat) maxLat = lat;
                 });
                 curBB = [minLat, minLng, maxLat, maxLng];
-                //setGeometry(curBB);
-                console.log(curBB);
-            } else {
-                //setGeometry(null);
             }
-        } else {
-            //setGeometry(null);
+
+            // Remove all layers except the last one
+            let layers = shapes.getLayers();
+            layers.forEach((l, index) => {
+                if (index !== layers.length -1) {
+                    map.removeLayer(l);
+                }
+            });
         }
 
         if (onChange) onChange(curBB);

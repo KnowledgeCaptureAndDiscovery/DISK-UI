@@ -49,10 +49,14 @@ export const QuestionVariableSelector = ({questionId, variable}: QuestionVariabl
         } else if (bindings[variable.id]) {
             delete newBindings[variable.id];
         }
-        dispatch(setQuestionBindings({
-            map: newBindings
-        }));
+        dispatch(setQuestionBindings( newBindings));
         refetch();
+    }
+
+    function fixOptionLabel (opt:VariableOption) : string {
+        if (opt.label === "SA") return "Surface Area";
+        if (opt.label === "TH") return "Thickness";
+        return opt.label;
     }
 
     return (
@@ -63,7 +67,7 @@ export const QuestionVariableSelector = ({questionId, variable}: QuestionVariabl
             inputValue={selectedOptionLabel}
             onInputChange={(_, newIn) => setSelectedOptionLabel(newIn)}
             isOptionEqualToValue={(option, value) => option.value === value.value}
-            getOptionLabel={(option) => option.label}
+            getOptionLabel={fixOptionLabel}
             loading={isLoading}
             renderInput={(params) => (
                 <TextField {...params} label={variable.variableName} variant="standard" InputProps={{

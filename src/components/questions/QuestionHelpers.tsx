@@ -1,16 +1,15 @@
 import styled from "@emotion/styled";
 import { Box } from "@mui/material";
-import { Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
-import { SimpleMap } from "redux/slices/forms";
+import { AnyQuestionVariable, Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
+import { StrStrMap } from "redux/slices/forms";
 
 export type TemplateFragment = {
     type: 'string',
     value: string
 } | {
     type: 'variable',
-    value: QuestionVariable
+    value: AnyQuestionVariable
 };
-
 
 export const TextPart = styled(Box)(({ theme }) => ({
     display: 'inline-block',
@@ -19,15 +18,11 @@ export const TextPart = styled(Box)(({ theme }) => ({
     whiteSpace: "nowrap"
 }));
 
-export const isBoundingBoxVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("BoundingBoxQuestionVariable");
-
-export const isTimeIntervalVariable = (v:QuestionVariable) => v.subType != null && v.subType.endsWith("TimeIntervalQuestionVariable");
-
 export const createTemplateFragments : (question:Question)  => TemplateFragment[] = (question) => {
     let fragments : TemplateFragment[] = [];
     if (question) {
-        let nameToVariable : {[name:string] : QuestionVariable} = {};
-        question.variables.forEach((qv:QuestionVariable) => nameToVariable[qv.variableName] = qv);
+        let nameToVariable : {[name:string] : AnyQuestionVariable} = {};
+        question.variables.forEach((qv:AnyQuestionVariable) => nameToVariable[qv.variableName] = qv);
         let strFragments = question.template.split(/(\?[a-zA-Z0-9]*)/);
         fragments = strFragments.filter(s => !!s).map((strFrag:string) => {
             if (strFrag.startsWith('?')) {
@@ -46,7 +41,15 @@ export const createTemplateFragments : (question:Question)  => TemplateFragment[
     return fragments;
 }
 
-export const simpleMapToVariableBindings : (bindings:SimpleMap)  => VariableBinding[] = (bindings) => {
+export const bindingsToIdValueMap : (bindings:VariableBinding[])  => StrStrMap = (bindings) => {
+    let r : StrStrMap = {};
+    (bindings||[]).forEach((vb: VariableBinding) => {
+        r[vb.variable] = vb.binding
+    });
+    return r;
+}
+
+export const simpleMapToVariableBindings : (bindings:StrStrMap) => VariableBinding[] = (bindings) => {
     return Object.keys(bindings).map((varId: string) => {
         return {
             variable: varId,
@@ -56,56 +59,55 @@ export const simpleMapToVariableBindings : (bindings:SimpleMap)  => VariableBind
     });
 }
 
-export const simpleMapToGraph : (question:Question, bindings:SimpleMap)  => Triple[] = (question, bindings) => {
-        let noOptionalsPattern : string = question.pattern.replace(/optional\s*\{.+\}/g, '').trim();
-        let pattern:string[] = noOptionalsPattern.split(/\s/);
-        let nameToValue : SimpleMap = {};
-        question.variables.forEach((qv) => nameToValue[qv.variableName] = bindings[qv.id]);
-        let updatedGraph: Triple[] = [];
-        let emptyTriple: Triple = {
-            subject: "",
-            predicate: "",
-            object: {
-                type: 'LITERAL',
-                value: '',
-                datatype: ''
+export const getCompleteQuestionGraph : (question:Question) => Triple[] = (question) => {
+    return [
+        ...question.pattern,
+        ...getAllQuestionVariables(question).filter(q => q.patternFragment).map(q => [...q.patternFragment]).flat(2),
+    ];
+}
+
+export const validURL = (str:string) => {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+  }
+
+
+export const addBindingsToQuestionGraph : (question:Question, bindings:StrStrMap)  => Triple[] = (question, bindings) => {
+        let graph = getCompleteQuestionGraph(question);
+        // Add binding values
+        let updatedGraph : Triple[] = []
+        graph.forEach((t:Triple) => {
+            let obj = t.object;
+            let objVal : string = bindings[t.object.value];
+            if (objVal) {
+                obj = {
+                    type: validURL(objVal) ? 'URI' : 'LITERAL',
+                    value: objVal,
+                }
             }
-        };
-        let curTriple: Triple = emptyTriple;
-        for (let i: number = 0; i < pattern.length; i++) {
-            let part: string = pattern[i];
-            let value: string = nameToValue[part] ? nameToValue[part] : part;
-            let c: number = i % 3;
-            switch (c) {
-                case 0:
-                    curTriple = { ...emptyTriple };
-                    curTriple.subject = value;
-                    break;
-                case 1:
-                    curTriple.predicate = value;
-                    break;
-                case 2:
-                    let isURI: boolean = value.startsWith("http") || value.startsWith("www");
-                    curTriple.object = {
-                        type: isURI ? 'URI' : 'LITERAL',
-                        value: value,
-                        datatype: isURI ? undefined : "http://www.w3.org/2001/XMLSchema#string"
-                    }
-                    updatedGraph.push(curTriple);
-                    break;
-            }
-        }
+
+            updatedGraph.push({
+                subject: bindings[t.subject] || t.subject,
+                predicate: bindings[t.predicate] || t.predicate,
+                object: obj
+            });
+        });
         return updatedGraph;
 }
 
-export const getAllQuestionVariables : (question:Question)  => QuestionVariable[] = (question) => {
-    let allVariables : QuestionVariable[] = []
-    question.variables.forEach((v:QuestionVariable) => {
+export const getAllQuestionVariables : (question:Question)  => AnyQuestionVariable[] = (question) => {
+    let allVariables : AnyQuestionVariable[] = []
+    question.variables.forEach((v:AnyQuestionVariable) => {
         allVariables.push(v);
-        if (isBoundingBoxVariable(v)) {
-            allVariables = allVariables.concat( [v.maxLat, v.minLat, v.maxLng, v.minLng] );
-        } else if (isTimeIntervalVariable(v)) {
-            //TODO
+        if (v.subType === 'BOUNDING_BOX' ){
+            allVariables = allVariables.concat([v.maxLat, v.minLat, v.maxLng, v.minLng]);
+        } else if (v.subType === 'TIME_INTERVAL') {
+            allVariables = allVariables.concat([v.startTime, v.endTime, v.timeType]);
         }
     })
     return allVariables;
@@ -130,4 +132,18 @@ export const  alignWorkflow : (wf:Workflow) => Workflow = (wf) => {
         run: wf.run,
         meta: wf.meta,       
     }
+}
+
+export const createQueryForGraph : (triples: Triple[], varMap:{[uri:string]:QuestionVariable}) => string = (triples, varMap) => {
+    let query : string = "";
+    const toVariable = (uri:string) =>
+        uri ? (varMap[uri]? varMap[uri].variableName : '<' + uri + '>') : "?goal";
+
+    triples.forEach((t:Triple) => {
+        query += 
+            toVariable(t.subject) + " " + toVariable(t.predicate) + " " 
+            + (t.object.type === "URI" ? toVariable(t.object.value) : '"' + t.object.value + '"' //TODO: should add xsd:datatype
+        ) + ".\n"
+    });
+    return query;
 }

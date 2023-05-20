@@ -8,11 +8,12 @@ import CopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
-import { useAppDispatch, useQuestionBindings, useQuestionPattern } from "redux/hooks";
+import { useAppDispatch, useQuestionBindings, useSelectedQuestion } from "redux/hooks";
 import React from "react";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { openNotification } from "redux/slices/notifications";
+import { addBindingsToQuestionGraph } from "components/questions/QuestionHelpers";
 
 const TextFieldBlock = styled(TextField)(({ theme }) => ({
     display: "block",
@@ -48,7 +49,7 @@ export const HypothesisEditor = () => {
     const [editedQuestionId, setEditedQuestionId] = React.useState("");
 
     const formQuestionBindings = useQuestionBindings();
-    const formQuestionPattern = useQuestionPattern();
+    const formSelectedQuestion = useSelectedQuestion();
 
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);
@@ -88,8 +89,8 @@ export const HypothesisEditor = () => {
         setQuestionId("");
     }
 
-
     const getCurrentGraph = () => {
+        /*
         console.log(formQuestionBindings, formQuestionPattern);
         let noOptionalsPattern : string = formQuestionPattern.replace(/optional\s*\{.+\}/g, '').trim();
         let pattern:string[] = noOptionalsPattern.split(/\s/);
@@ -129,10 +130,11 @@ export const HypothesisEditor = () => {
         }
         console.log(updatedGraph);
         return updatedGraph;
+        */
     }
 
     const onSaveButtonClicked = () => {
-        if (!name || !description || !editedQuestionId) {
+        if (!name || !description || !editedQuestionId || !formSelectedQuestion) {
             if (!name) setErrorName(true);
             if (!description) setErrorDesc(true);
             //if (!editedQuestionId) setErrorQuestion(true); this should be solved by required.
@@ -159,7 +161,7 @@ export const HypothesisEditor = () => {
                     type: null
                 } as VariableBinding;
             }),
-            graph: { triples: getCurrentGraph() }
+            graph: { triples: addBindingsToQuestionGraph(formSelectedQuestion, formQuestionBindings)}
         };
 
         dispatch(openBackdrop());
@@ -212,7 +214,6 @@ export const HypothesisEditor = () => {
                 dispatch(closeBackdrop());
             });
     };
-
 
     const onQuestionChange = (selectedQuestion: Question|null, bindings: VariableBinding[], graph: Triple[]) => {
         setEditedQuestionId(selectedQuestion? selectedQuestion.id : '');

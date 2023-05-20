@@ -1,14 +1,14 @@
 import { Box, Card, FormHelperText, IconButton, Tooltip } from "@mui/material"
-import { Question, VariableBinding, QuestionVariable, Triple } from "DISK/interfaces"
+import { Question, VariableBinding, QuestionVariable, Triple, AnyQuestionVariable } from "DISK/interfaces"
 import React from "react";
 import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { setQuestionBindings, SimpleMap } from "redux/slices/forms";
+import { setQuestionBindings, StrStrMap, setSelectedQuestion as setQuestion } from "redux/slices/forms";
 import { FormalExpressionView } from "./FormalExpressionView";
 import { QuestionTemplateSelector } from "./QuestionTemplateSelector";
 import { QuestionTemplateFiller } from "./QuestionTemplateFiller";
-import { getAllQuestionVariables, simpleMapToGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
+import { getAllQuestionVariables, addBindingsToQuestionGraph, simpleMapToVariableBindings } from "./QuestionHelpers";
 
 interface QuestionProps {
     questionId: string,
@@ -27,7 +27,7 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     React.useEffect(() => {
         if (onChange) {
             let varBindings : VariableBinding[] = simpleMapToVariableBindings(questionBindings);
-            let newGraph : Triple[] = selectedQuestion && varBindings ? simpleMapToGraph(selectedQuestion, questionBindings) : [];
+            let newGraph : Triple[] = selectedQuestion && varBindings ? addBindingsToQuestionGraph(selectedQuestion, questionBindings) : [];
             setGraph(newGraph);
             onChange(selectedQuestion, varBindings, newGraph);
         }
@@ -36,24 +36,17 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     React.useEffect(() => {
         if (!selectedQuestion)
             return;
-        let newBindings : SimpleMap = {};
+        let idToValue : StrStrMap = {};
         let allVariables = getAllQuestionVariables(selectedQuestion);
         (bindings||[]).forEach((varBindings:VariableBinding) => {
-            let curVar = allVariables.filter((v:QuestionVariable) => (v.id === varBindings.variable))[0];
+            let curVar = allVariables.filter((v:AnyQuestionVariable) => (v.id === varBindings.variable))[0];
             if (curVar)
-                newBindings[curVar.id] = varBindings.binding;
+                idToValue[curVar.id] = varBindings.binding;
         });
-        //FIXME:
-        let pattern = selectedQuestion.pattern;
-        selectedQuestion.variables.forEach((v) => {
-            pattern = pattern.replace(v.variableName, v.id);
-        });
-        console.log("SEND:", newBindings);
-
-        if (selectedQuestion) dispatch(setQuestionBindings({
-            pattern: pattern,
-            map: newBindings,
-        }));
+        if (selectedQuestion) {
+            dispatch(setQuestionBindings(idToValue));
+            dispatch(setQuestion(selectedQuestion));
+        }
     }, [bindings, selectedQuestion]);
 
     const onQuestionChange = (value: Question | null) => {

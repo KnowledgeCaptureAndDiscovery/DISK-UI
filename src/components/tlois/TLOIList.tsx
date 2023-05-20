@@ -18,6 +18,7 @@ import { BrainModal } from "components/modal/BrainModal";
 import { ShinyModal } from "components/modal/ShinyModal";
 import { openBackdrop, closeBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
+import { BRAIN_FILENAME, SHINY_FILENAME, displayConfidenceValue } from "constants/general";
 
 const getColorStatus = (status: TriggeredLineOfInquiry["status"]) => {
     return 'unset';
@@ -88,17 +89,7 @@ export const TLOIList = ({hypothesis, loiId} : TLOIListProps) => {
             }</Fragment>,
         'Confidence Value': (tloi: TriggeredLineOfInquiry, i: number) =>
             <Fragment>
-                {
-                    tloi.status === 'SUCCESSFUL' && (
-                        tloi.confidenceValue > 0 ?
-                            (tloi.confidenceValue < 0.0001 ?
-                                tloi.confidenceValue.toExponential(3)
-                                :
-                                tloi.confidenceValue.toFixed(4))
-                            :
-                            0
-                    )
-                }
+                {tloi.status === 'SUCCESSFUL' && displayConfidenceValue(tloi.confidenceValue)}
                 {tloi.confidenceType ? ` (${tloi.confidenceType})` : " (P-value)"}
             </Fragment>,
         'Extras': (tloi: TriggeredLineOfInquiry, i: number) =>
@@ -173,8 +164,6 @@ export const TLOIList = ({hypothesis, loiId} : TLOIListProps) => {
     }
 
     const renderOptionalButtons = (cur:TriggeredLineOfInquiry) => {
-        const SHINY_FILENAME = "log";
-        const BRAIN_FILENAME = "brain_visualization";
         let shinyUrl : string = "";
         let shinySource : string = "";
         let brainUrl : string = "";

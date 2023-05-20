@@ -1,9 +1,8 @@
 import { Box } from "@mui/material"
-import { Question, QuestionVariable } from "DISK/interfaces"
+import { AnyQuestionVariable, Question, QuestionVariable } from "DISK/interfaces"
 import React from "react"
 import { BoundingBoxMap } from "./BoundingBoxMap"
 import { createTemplateFragments, TemplateFragment, TextPart } from "./QuestionHelpers"
-import { isBoundingBoxVariable, isTimeIntervalVariable } from "./QuestionHelpers"
 import { QuestionVariableSelector } from "./QuestionVariableSelector"
 import { TimeIntervalVariable } from "./TimeIntervalVariable"
 import { useGetDynamicOptionsQuery } from "redux/apis/questions"
@@ -22,12 +21,10 @@ export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorPro
     React.useEffect(()=>{
         if (!question)
             return;
-
         setTemplateFragments(createTemplateFragments(question));
     },[question]);
 
     React.useEffect(() => {
-        console.log("Bindings have changed!", bindings);
         refetch();
     }, [bindings]);
 
@@ -37,14 +34,14 @@ export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorPro
     return <Box sx={{ display: 'inline-flex', flexWrap: "wrap", alignItems: "end" }}>
         {templateFragments.map((frag: TemplateFragment, i: number) => {
             if (frag.type === 'variable') { //Is a variable
-                let curVariable : QuestionVariable = frag.value;
+                let curVariable : AnyQuestionVariable = frag.value;
                 if (!curVariable) {
                     console.warn("Question not found!", frag);
                     return null;
                 }
-                if (isBoundingBoxVariable(curVariable)) {
+                if (curVariable.subType === 'BOUNDING_BOX') {
                     return <BoundingBoxMap key={`qVars${i}`} variable={curVariable}/>
-                } else if (isTimeIntervalVariable(curVariable)) {
+                } else if (curVariable.subType === 'TIME_INTERVAL') {
                     return <TimeIntervalVariable key={`qVars${i}`} variable={curVariable} />
                 } else {
                     return <QuestionVariableSelector key={`qVars${i}`} questionId={question.id} variable={curVariable}/>

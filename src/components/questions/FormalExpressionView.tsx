@@ -28,7 +28,7 @@ export const FormalExpressionView = ({triplePattern}:FormalExpressionViewProps) 
             <Table aria-label="Hypothesis graph" sx={{width: "auto"}}>
                 <TableBody>
                     {triplePattern.map((triple:Triple, index:number) => <TableRow key={`row_${index}`}>
-                        <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.subject)} </TableCell>
+                        <TableCell sx={{padding: "2px 10px"}}> {triple.subject ? displayURI(triple.subject) : ":goal" } </TableCell>
                         <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.predicate)} </TableCell>
                         <TableCell sx={{padding: "2px 10px"}}> {displayObj(triple.object)} </TableCell>
                     </TableRow>)}
