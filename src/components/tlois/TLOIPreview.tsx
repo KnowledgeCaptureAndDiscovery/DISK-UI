@@ -20,13 +20,15 @@ export const TLOIPreview = ({tloi} : TLOIPreviewProps) => {
 
     let nViz = 0;
     [ ...tloi.workflows, ...tloi.metaWorkflows ].forEach((wf) => {
-        if (wf.run && wf.run.outputs) {
-            Object.keys(wf.run.outputs).forEach(((name:string) => {
-                if (name === SHINY_FILENAME || name === BRAIN_FILENAME) {
-                    nViz += 1;
-                }
-            }));
-        }
+        Object.values(wf.runs||{}).forEach((run) => {
+            if (run.outputs) {
+                Object.keys(run.outputs).forEach(((name:string) => {
+                    if (name === SHINY_FILENAME || name === BRAIN_FILENAME) {
+                        nViz += 1;
+                    }
+                }));
+            }
+        });
     });
 
 

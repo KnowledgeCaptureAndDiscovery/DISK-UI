@@ -67,13 +67,13 @@ export const getCompleteQuestionGraph : (question:Question) => Triple[] = (quest
 }
 
 export const validURL = (str:string) => {
-    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-    return !!pattern.test(str);
+    let url;
+    try {
+        url = new URL(str);
+    } catch (_) {
+        return false;  
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
   }
 
 
@@ -129,7 +129,7 @@ export const  alignWorkflow : (wf:Workflow) => Workflow = (wf) => {
         workflow: wf.workflow,
         workflowLink: wf.workflowLink,
         bindings: wf.bindings.map(alignVariableBinding),
-        run: wf.run,
+        runs: wf.runs,
         meta: wf.meta,       
     }
 }

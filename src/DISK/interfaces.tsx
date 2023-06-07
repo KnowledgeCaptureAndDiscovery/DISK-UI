@@ -99,14 +99,26 @@ export interface VariableOption {
     commnet: string | null,
 }
 
+export interface ExecutionInfo {
+    status:  'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL' | 'PENDING';
+    startTime: string,
+    endTime: string
+    log: string,
+}
+
+export interface RunBinding {
+    id: string | null,
+    datatype: string | null,
+    value: string | null,
+    type: 'URI' | 'LITERAL',
+}
+
 export interface WorkflowRun {
     id: string,
     link: string,
-    status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESS',
-    outputs: {[name:string] :string},
-    files: {[name:string] :string},
-    startDate: string,
-    endDate: string
+    outputs: {[name:string]: RunBinding},
+    inputs: {[name:string]: RunBinding},
+    executionInfo: ExecutionInfo;
 }
 
 export interface MetaInfo {
@@ -119,7 +131,9 @@ export interface Workflow {
     workflow: string, //Same as method id
     workflowLink: string,
     bindings: VariableBinding[],
-    run?: WorkflowRun,
+    runs?: {
+        [uri:string]: WorkflowRun
+    },
     meta?: {
         hypothesis: MetaInfo,
         revisedHypothesis: MetaInfo,

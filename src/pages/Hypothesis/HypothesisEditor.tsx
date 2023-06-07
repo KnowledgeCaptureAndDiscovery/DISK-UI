@@ -89,50 +89,6 @@ export const HypothesisEditor = () => {
         setQuestionId("");
     }
 
-    const getCurrentGraph = () => {
-        /*
-        console.log(formQuestionBindings, formQuestionPattern);
-        let noOptionalsPattern : string = formQuestionPattern.replace(/optional\s*\{.+\}/g, '').trim();
-        let pattern:string[] = noOptionalsPattern.split(/\s/);
-        let updatedGraph: Triple[] = [];
-        let emptyTriple: Triple = {
-            subject: "",
-            predicate: "",
-            object: {
-                type: 'LITERAL',
-                value: '',
-                datatype: ''
-            }
-        };
-        let curTriple: Triple = emptyTriple;
-        for (let i: number = 0; i < pattern.length; i++) {
-            let part: string = pattern[i];
-            let value: string = formQuestionBindings[part] ? formQuestionBindings[part] : part;
-            let c: number = i % 3;
-            switch (c) {
-                case 0:
-                    curTriple = { ...emptyTriple };
-                    curTriple.subject = value;
-                    break;
-                case 1:
-                    curTriple.predicate = value;
-                    break;
-                case 2:
-                    let isURI: boolean = value.startsWith("http") || value.startsWith("www");
-                    curTriple.object = {
-                        type: isURI ? 'URI' : 'LITERAL',
-                        value: value,
-                        datatype: isURI ? undefined : "http://www.w3.org/2001/XMLSchema#string"
-                    }
-                    updatedGraph.push(curTriple);
-                    break;
-            }
-        }
-        console.log(updatedGraph);
-        return updatedGraph;
-        */
-    }
-
     const onSaveButtonClicked = () => {
         if (!name || !description || !editedQuestionId || !formSelectedQuestion) {
             if (!name) setErrorName(true);

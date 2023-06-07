@@ -51,7 +51,7 @@ export const serverApi = createApi({
         headers: DISK.headers,
         method: 'POST',
         body: {'source':dataSource, 'dataId': dataId.replace(/.*#/,"")},
-        responseHandler: (response) => response.text(),
+        //responseHandler: (response) => response.text(),
       }),
     }),
   }),

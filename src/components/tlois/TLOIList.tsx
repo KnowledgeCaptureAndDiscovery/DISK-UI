@@ -85,7 +85,7 @@ export const TLOIList = ({hypothesis, loiId} : TLOIListProps) => {
             <FileList type="input" tloi={tloi} label="Input files" />,
         'Output Files': (tloi: TriggeredLineOfInquiry, i: number) =>
             <Fragment>{
-                (tloi.status === 'SUCCESSFUL' && <FileList type="output" tloi={tloi} label="Output files" />)
+                (tloi.status === 'SUCCESSFUL' && <FileList type="output" tloi={tloi} label="Output files" renderFiles/>)
             }</Fragment>,
         'Confidence Value': (tloi: TriggeredLineOfInquiry, i: number) =>
             <Fragment>
@@ -169,17 +169,19 @@ export const TLOIList = ({hypothesis, loiId} : TLOIListProps) => {
         let brainUrl : string = "";
         let brainSource : string = "";
         [ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:Workflow) => {
-            if (wf.run && wf.run.outputs) {
-                Object.keys(wf.run.outputs).forEach(((name:string) => {
-                    if (name === SHINY_FILENAME) {
-                        shinyUrl = wf.run ? wf.run.outputs[name] : "";
-                        shinySource = wf.source;
-                    } else if (name === BRAIN_FILENAME) {
-                        brainUrl = wf.run ? wf.run.outputs[name] : "";
-                        brainSource = wf.source;
-                    }
-                }));
-            }
+            Object.values(wf.runs||{}).forEach((run) => {
+                if (run.outputs) {
+                    Object.keys(run.outputs).forEach(((name:string) => {
+                        if (name === SHINY_FILENAME) {
+                            shinyUrl = run ? run.outputs[name].id || "" : "";
+                            shinySource = wf.source;
+                        } else if (name === BRAIN_FILENAME) {
+                            brainUrl = run ? run.outputs[name].id || "" : "";
+                            brainSource = wf.source;
+                        }
+                    }));
+                }
+            })
         });
 
         return (<Fragment>

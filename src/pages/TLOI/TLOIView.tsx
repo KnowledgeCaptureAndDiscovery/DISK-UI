@@ -79,25 +79,29 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     useEffect(() => {
         if (TLOI) {
             let n = 0;
+            // I saw this code in other place
             [ ...TLOI.workflows, ...TLOI.metaWorkflows ].forEach((wf) => {
-                if (wf.run && wf.run.outputs) {
-                    Object.keys(wf.run.outputs).forEach(((name:string) => {
-                        if (name === SHINY_FILENAME) {
-                          console.log( wf.run ? wf.run.outputs[name] : "");
-                            setShinyData({
-                                source: wf.source,
-                                url: wf.run ? wf.run.outputs[name] : ""
-                            });
-                            n += 1;
-                        } else if (name === BRAIN_FILENAME) {
-                            setBrainData({
-                                source: wf.source,
-                                url: wf.run ? wf.run.outputs[name] : ""
-                            });
-                            n += 1;
-                        }
-                    }));
-                }
+                Object.values(wf.runs||{}).forEach((run) => {
+                    if (run.outputs) {
+                        Object.keys(run.outputs).forEach(((name:string) => {
+                            if (name === SHINY_FILENAME) {
+                            console.log( run ? run.outputs[name] : "");
+                                setShinyData({
+                                    source: wf.source,
+                                    url: run ? (run.outputs[name].id || "") : ""
+                                });
+                                n += 1;
+                            } else if (name === BRAIN_FILENAME) {
+                                setBrainData({
+                                    source: wf.source,
+                                    url: run ? (run.outputs[name].id || "") : ""
+                                });
+                                n += 1;
+                            }
+                        }));
+                    }
+
+                })
             });
             setNViz(n);
         }

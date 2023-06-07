@@ -1,12 +1,13 @@
 import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip, TableHead, Button, Table, TableBody, TableCell, TableContainer, TableRow,
     styled, Link as MuiLink } from "@mui/material"
-import { Workflow, VariableBinding, WorkflowRun } from "DISK/interfaces"
+import { Workflow, VariableBinding, WorkflowRun, RunBinding } from "DISK/interfaces"
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Fragment, useEffect, useState } from "react";
 import { getBindingAsArray, getFileName } from "DISK/util";
 import { PrivateLink } from "components/PrivateLink";
+import { StrStrMap } from "redux/slices/forms";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -26,6 +27,9 @@ const MAX_PER_PAGE = 10;
 export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} : WorkflowPreviewProps) => {
     const [total, setTotal] = useState(0);
     const [curPage, setCurPage] = useState(0);
+    const [allRuns, setAllRuns] = useState<WorkflowRun[]>([]);
+    const [allInputs, setAllInputs] = useState<{[name:string]: RunBinding}>({});
+    const [allOutputs, setAllOutputs] = useState<{[name:string]: RunBinding}>({});
 
     useEffect(() => {
         if (!!wf) {
@@ -37,6 +41,18 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 }
             })
             setTotal(max);
+            // Get all runs
+            let newRuns : WorkflowRun[] = [];
+            let newInputs : {[name:string]: RunBinding} = {};
+            let newOutputs : {[name:string]: RunBinding} = {};
+            Object.values(wf.runs||{}).forEach(run => {
+                newRuns.push(run);
+                if (run.inputs) newInputs = { ...newInputs, ...run.inputs };
+                if (run.outputs) newOutputs = { ...newOutputs, ...run.outputs };
+            })
+            setAllRuns(newRuns);
+            setAllInputs(newInputs);
+            setAllOutputs(newOutputs);
         }
     }, [wf]);
 
@@ -45,14 +61,8 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
             getBindingAsArray(binding.binding)[index]
             : binding.binding;
 
-        if (value.startsWith('SHA') && wf.run && wf.run.files) {
-            let url : string = '';
-            Object.keys(wf.run.files).forEach((name:string) => {
-                if (name === value) {
-                    url = (wf.run as WorkflowRun).files[name];
-                }
-            })
-            return renderDownloadLink(url);
+        if (value.startsWith('SHA') && allInputs[value]) {
+            return renderDownloadLink(allInputs[value].id || "");
         }
 
         return (<span>{value}</span>);
@@ -82,7 +92,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
             <Divider/>
             {wf.description && (<Typography sx={{p:"0 10px", fontSize:"0.95em", color:"#333"}}>{wf.description}</Typography>)}
 
-            {!wf.run || !wf.run.id ?  //If theres no run, we are looking at a workflow config
+            {!wf.runs || Object.keys(wf.runs).length === 0 ?  //If theres no run, we are looking at a workflow config
                 <Box sx={{fontSize:".85rem"}}>
                     { wf.bindings.map((binding:VariableBinding) =>
                         <Grid key={`var_${binding.variable}`} container spacing={1}>
@@ -152,7 +162,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                         </Table>
                     </TableContainer>
 
-                    {wf.run.status === 'SUCCESS' && wf.run.outputs && Object.keys(wf.run.outputs).length > 0 && (
+                    {Object.keys(allOutputs).length > 0 && (
                     <Fragment>
                         <TypographyLabel sx={{ml:"5px"}}>Outputs: </TypographyLabel>
                         <TableContainer sx={{mb:"10px"}}>
@@ -165,7 +175,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                {Object.keys(wf.run.outputs).map((name:string, i:number) => (
+                                {Object.keys(allOutputs).map((name:string, i:number) => (
                                     <TableRow key={`out_r_${i}`}>
                                         <TableCell sx={{padding: "0 10px", textAlign: 'end'}}>
                                             {i+1}
@@ -174,7 +184,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                                             {getFileName(name)}
                                         </TableCell>
                                         <TableCell sx={{padding: "0 10px"}}>
-                                            {renderDownloadLink((wf.run as WorkflowRun).outputs[name])}
+                                            {renderDownloadLink(allOutputs[name].id || "")}
                                         </TableCell>
                                     </TableRow>
                                 ))}

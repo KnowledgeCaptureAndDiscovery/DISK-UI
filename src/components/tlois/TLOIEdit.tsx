@@ -54,19 +54,18 @@ export const TLOIEdit = ({tloi, label: title, onSave} : FileListProps) => {
                         }
                     }),
                 meta: undefined,
-                run: undefined,
-            } as Workflow);
+                runs: undefined,
+            });
         });
         return wfs;
     }
 
-    const cleanWorkflows = (wfs:Workflow[]) => {
+    const cleanWorkflows : (wfs:Workflow[]) => Workflow[] = (wfs:Workflow[]) => {
         return wfs.map((wf:Workflow) => {
-            return {
-                ...wf,
-                meta: undefined,
-                run: undefined,
-            };
+            let newWf : Workflow = { ...wf };
+            newWf.meta = undefined;
+            newWf.runs = undefined;
+            return newWf;
         })
     }
 
@@ -136,7 +135,7 @@ export const TLOIEdit = ({tloi, label: title, onSave} : FileListProps) => {
                 <DialogContent dividers>
                     {editableWfs.map((wf:Workflow, i:number) =>
                     <Box key={`table_${i}`} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                        <Box sx={{p: '0 10px'}}> <b>Editing workflow:</b> {renderRunTitle(wf.run ? wf.run.id : wf.workflow)}</Box>
+                        <Box sx={{p: '0 10px'}}> <b>Editing workflow:</b> {renderRunTitle(wf.runs && Object.keys(wf.runs)[0] ? Object.keys(wf.runs)[0] : wf.workflow)}</Box>
                         <TableContainer sx={{display: "flex", justifyContent: "center"}}>
                             <Table sx={{width:"unset", border: "1px solid rgb(223 223 223)", borderRadius: "5px", mt:"4px"}}>
                                 <TableHead>

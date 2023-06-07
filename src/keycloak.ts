@@ -7,4 +7,8 @@ const keycloak = Keycloak({
   clientId: 'enigma-disk',
 });
 
+export const initOptions = {
+  checkLoginIframe: false
+};
+
 export default keycloak;

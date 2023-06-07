@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { useAppDispatch } from "redux/hooks";
 import { setToken } from "redux/slices/keycloak";
 import { store } from "redux/store";
-import keycloak from "./keycloak";
+import keycloak, { initOptions } from "./keycloak";
 
 // Theme
 const theme = createTheme({
@@ -32,6 +32,7 @@ function App() {
       <Provider store={store}>
         <ReactKeycloakProvider
           authClient={keycloak}
+          initOptions={initOptions}
           onTokens={() => {
             dispatch(
               setToken(

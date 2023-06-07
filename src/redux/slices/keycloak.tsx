@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import Keycloak from "keycloak-js";
 import { DISK } from "redux/apis/DISK";
 
 interface KeycloakState {
