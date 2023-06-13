@@ -52,7 +52,6 @@ export const FileList = ({type:displayType, tloi, label: title, renderFiles} : F
     }, [tloi])
 
     const renderRunTitle = (run:RunStatus) => {
-        console.log(run);
         return run.id.replace(/.*#/,'').replace(/--.*/,'');
     }
 
@@ -86,11 +85,10 @@ export const FileList = ({type:displayType, tloi, label: title, renderFiles} : F
                                     {Object.keys(getFileMap(run)).map((id:string, i:number) => {
                                         let fileMap = getFileMap(run);
                                         let value: RunBinding = fileMap[id];
-                                        console.log(id, value);
                                         if (value.id == null)
-                                            return <></>;
+                                            return null
                                         let filename: string = value.id.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/, '').replace(/-\w{24,25}$/, '');
-                                        return <TableRow key={i}>
+                                        return <TableRow key={`row_${i}`}>
                                             <TableCell key={`x_${i}`} sx={{padding: "0 10px", textAlign:"end", verticalAlign:"top"}}>
                                                 {i+1}
                                             </TableCell>

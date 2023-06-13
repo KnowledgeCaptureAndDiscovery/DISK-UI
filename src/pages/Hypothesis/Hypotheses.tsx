@@ -58,7 +58,7 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
                     </Box>
                 </Tooltip>
             </Box>
-            <Card variant="outlined" sx={{height: "calc(100vh - 157px)", overflowY: "auto"}}>
+            <Card variant="outlined">
                 {isLoading ?
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :

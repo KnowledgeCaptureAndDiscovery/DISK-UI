@@ -1,3 +1,10 @@
+import { REACT_APP_DISK_API } from "config";
+
+export interface DownloadFileRequest {
+    source: string;
+    dataId: string;
+}
+
 export class DISK {
     public static headers : RequestInit["headers"] = {
         "Content-Type": "application/json;charset=UTF-8",
@@ -15,4 +22,17 @@ export class DISK {
             }
         }
     }
+
+    public static downloadPrivateFile (req:DownloadFileRequest) {
+        return fetch(
+            REACT_APP_DISK_API + 'getData', 
+            {
+                method: 'POST',
+                headers: DISK.headers,
+                body: JSON.stringify(req)
+            }
+        );
+    }
+
+
 }

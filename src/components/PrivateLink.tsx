@@ -1,8 +1,6 @@
 import { Link as MuiLink } from "@mui/material"
-import { REACT_APP_DISK_API } from "config";
 import { useState } from "react";
 import { DISK } from "redux/apis/DISK";
-import { useLazyGetPrivateFileQuery } from "redux/apis/server";
 
 interface PrivateLinkProp {
     filename: string,
@@ -17,13 +15,7 @@ export const PrivateLink = ({filename, url, source, preview}:PrivateLinkProp) =>
     const [cType, setCType] = useState<string>("");
 
     const downloadFile = () => {
-        const requestOptions = {
-            method: 'POST',
-            //headers: { 'Content-Type': 'application/json' },
-            headers: DISK.headers,
-            body: JSON.stringify( {'source':source, 'dataId': url.replace(/.*#/,"")},)
-        };
-        fetch(REACT_APP_DISK_API + 'getData', requestOptions)
+        DISK.downloadPrivateFile({source:source, dataId: url.replace(/.*#/,"")})
             .then((response) => {
                 if (response.status === 200) {
                     let contentType = response.headers.has('content-type') ? response.headers.get('content-type') as string: "";
@@ -48,30 +40,6 @@ export const PrivateLink = ({filename, url, source, preview}:PrivateLinkProp) =>
                     setCType("");
                 }
             })
-
-        //getPrivateFile({ dataSource: source, dataId: url })
-        //    .unwrap()
-        //    .then((r: string) => {
-        //        console.log(r);
-        //        let element = document.createElement('a');
-
-        //        let datatype = "text/plain;charset=utf-8,";
-        //        if (r[0] === '[' || r[0] === '{') {
-        //            datatype = "text/json;charset=utf-8,";
-        //        } else {
-        //            if (r.startsWith("%PDF")) {
-        //                //var blob=new Blob([data]);
-        //                datatype = "application/pdf;charset=utf-8,";
-        //            }
-        //        }
-        //        element.setAttribute('href', 'data:' + datatype + encodeURIComponent(r));
-        //        element.setAttribute('download', filename);
-
-        //        element.style.display = 'none';
-        //        document.body.appendChild(element);
-        //        element.click();
-        //        document.body.removeChild(element);
-        //    });
     }
 
     console.log(cType);

@@ -15,6 +15,7 @@ import { openNotification } from "redux/slices/notifications";
 import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/tlois";
 import { TLOIList } from "components/tlois/TLOIList";
+import { ConfidencePlot } from "components/tlois/ConfidencePlot";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -102,7 +103,7 @@ export const HypothesisView = () => {
                 });
     }
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: "auto"}}>
+    return <Card variant="outlined">
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :
@@ -173,6 +174,7 @@ export const HypothesisView = () => {
                     <Divider/>
                     <TypographyLabel>Overview of results:</TypographyLabel>
                     <TLOIList hypothesis={hypothesis} loiId={loiId}/>
+                    <ConfidencePlot hypothesis={hypothesis} loiId={loiId}/>
                 </Card>))
             }
         </Box>
