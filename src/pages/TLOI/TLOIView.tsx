@@ -155,7 +155,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     }
 
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
+    return <Card variant="outlined">
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :

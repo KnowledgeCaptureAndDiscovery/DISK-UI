@@ -5,7 +5,7 @@ const RE_LINKS = /\[(.*?)\]\((.*?)\)/g;
 export const renderDescription = (text:string) => {
     if (text !== null) {
         let htmlText : string = text.replaceAll(RE_LINKS, '<a target="_blank" href="$2">$1</a>');
-        return <div dangerouslySetInnerHTML={{__html: htmlText}}/>
+        return <i dangerouslySetInnerHTML={{__html: htmlText}} style={{display: 'inline', fontSize: '.9em'}}/>
     } else {
         return <div> No description provided </div>    
     }

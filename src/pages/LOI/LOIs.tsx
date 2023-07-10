@@ -58,7 +58,7 @@ export const LinesOfInquiry = ({myPage=false} : ViewProps) => {
                     </Box>
                 </Tooltip>
             </Box>
-            <Card variant="outlined" sx={{height: "calc(100vh - 157px)", overflowY:"auto"}}>
+            <Card variant="outlined">
                 {loading ?
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :

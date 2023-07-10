@@ -157,6 +157,7 @@ export interface LineOfInquiry {
     dataQueryExplanation: string,
     dataSource: string,
     questionId: string,
+    updateCondition: number,
 }
 
 export interface TriggeredLineOfInquiry {

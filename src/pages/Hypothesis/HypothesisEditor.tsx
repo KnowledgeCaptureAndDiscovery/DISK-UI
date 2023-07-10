@@ -5,7 +5,6 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
-import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
 import { useAppDispatch, useQuestionBindings, useSelectedQuestion } from "redux/hooks";
@@ -14,17 +13,8 @@ import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { openNotification } from "redux/slices/notifications";
 import { addBindingsToQuestionGraph } from "components/questions/QuestionHelpers";
-
-const TextFieldBlock = styled(TextField)(({ theme }) => ({
-    display: "block",
-    marginBottom: "4px",
-}));
-
-const TypographySubtitle = styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.2em",
-    padding: "5px 5px 0px 5px",
-}));
+import { EditableHeader } from "components/Fields";
+import { TextFieldBlock, TypographySubtitle } from "components/Styles";
 
 export const HypothesisEditor = () => {
     const navigate = useNavigate();
@@ -175,22 +165,10 @@ export const HypothesisEditor = () => {
         setEditedQuestionId(selectedQuestion? selectedQuestion.id : '');
     };
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
-        <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
-            {!loading ? 
-                <TextField fullWidth size="small" label="Short name" required sx={{backgroundColor: "white"}}
-                    value={name}
-                    error={errorName}
-                    onChange={(ev) => onNameChange(ev.target.value)}/>
-            : <Skeleton/> }
-
-            <Tooltip arrow title="Cancel">
-                <IconButton component={Link} to={PATH_HYPOTHESES + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}>
-                    <CancelIcon /> 
-                </IconButton>
-            </Tooltip>
-        </Box>
+    return <Card variant="outlined">
+        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_HYPOTHESES + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}/>
         <Divider/>
+
         <Box sx={{padding:"10px"}}>
             {!loading ?
                 <TextFieldBlock multiline fullWidth required size="small" label="Brief description" sx={{marginTop: "5px"}}

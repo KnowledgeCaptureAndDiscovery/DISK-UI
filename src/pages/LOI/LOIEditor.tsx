@@ -3,10 +3,8 @@ import { Box, Button, Card, Checkbox, Divider, FormControlLabel, FormGroup, Form
 import { DataEndpoint, idPattern, LineOfInquiry, Question, QuestionVariable, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
-import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
@@ -21,22 +19,9 @@ import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 import { alignWorkflow, createQueryForGraph, getAllQuestionVariables, getCompleteQuestionGraph } from "components/questions/QuestionHelpers";
-
-export const TextFieldBlock = styled(TextField)(({ theme }) => ({
-    display: "block",
-    margin: "6px 0",
-}));
-
-const TypographySubtitle = styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.2em",
-    padding: "5px 5px 0px 5px",
-}));
-
-const TypographySection = styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.05em"
-}));
+import { TypographySubtitle, TypographySection, TextFieldBlock, FieldBox } from "components/Styles";
+import CancelIcon from '@mui/icons-material/Cancel';
+import { EditableHeader, TriggerConditionEditor } from "components/Fields";
 
 export const LOIEditor = () => {
     let navigate = useNavigate();
@@ -71,6 +56,7 @@ export const LOIEditor = () => {
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
     const [questionId, setQuestionId] = React.useState<string>("");
     const [hypothesisQuery, setHypothesisQuery] = React.useState<string>("");
+    const [updateCondition, setUpdateCondition] = React.useState<number>(1);
 
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);
@@ -123,6 +109,7 @@ export const LOIEditor = () => {
         setDataQueryExplanation(loi.dataQueryExplanation ? loi.dataQueryExplanation : "");
         setWorkflows(loi.workflows);
         setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
+        setUpdateCondition(loi.updateCondition ? loi.updateCondition : 1);
     };
 
     const clearForm = () => {
@@ -136,6 +123,7 @@ export const LOIEditor = () => {
         setDataQueryExplanation("");
         setWorkflows([]);
         setMetaWorkflows([]);
+        setUpdateCondition(1);
     };
 
     const onSaveButtonClicked = () => {
@@ -170,6 +158,7 @@ export const LOIEditor = () => {
             tableDescription: tableExplanation,
             tableVariables: tableVariables,
             dataQueryExplanation: dataQueryExplanation,
+            updateCondition: updateCondition
         };
 
         dispatch(openBackdrop());
@@ -241,42 +230,20 @@ export const LOIEditor = () => {
         }
     }
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY: 'auto'}}>
-        <Box sx={{padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor: "whitesmoke"}}>
-            {!loading ? 
-                <TextField fullWidth size="small" id="LOIName" label="Short name" required sx={{backgroundColor: "white"}}
-                    value={name} error={errorName} onChange={(e) => onNameChange(e.target.value)}/>
-            : <Skeleton/> }
-
-            <Tooltip arrow title="Cancel">
-                <IconButton component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
-                    <CancelIcon /> 
-                </IconButton>
-            </Tooltip>
-        </Box>
+    return <Card variant="outlined">
+        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_LOIS + (LOI ? "/" + LOI.id : "")}/>
         <Divider/>
 
-        <Box sx={{padding:"5px 10px"}}>
+        <FieldBox>
             <TypographySubtitle>Description:</TypographySubtitle>
-            {!loading ?
+            {loading ? <Skeleton/> :
                 <TextFieldBlock multiline fullWidth required size="small" id="LOIDescription" label="Brief description"
-                    value={description} error={errorDesc} onChange={(e) => onDescChange(e.target.value)}/>
-            : <Skeleton/> }
-            {!loading ?
+                    value={description} error={errorDesc} onChange={(e) => onDescChange(e.target.value)}/>}
+            {loading ?  <Skeleton/> :
                 <TextFieldBlock multiline fullWidth size="small" id="LOINotes" label="Additional notes"
-                    value={notes} onChange={(e) => setNotes(e.target.value)}/>
-            : <Skeleton/> }
-
-            <FormGroup row={true}>
-                <TypographySubtitle sx={{mr:'5px', fontSize: '1.05em'}}>This line of inquiry will trigger on</TypographySubtitle>
-                <Tooltip arrow title="This line of inquiry will be trigger when changes on the data source are detected">
-                    <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="data changes"/>
-                </Tooltip>
-                <Tooltip arrow title="This line of inquiry will be trigger when changes on the workflow are detected">
-                    <FormControlLabel control={<Checkbox size="small"/>} label="workflow changes"/>
-                </Tooltip>
-            </FormGroup>
-        </Box>
+                    value={notes} onChange={(e) => setNotes(e.target.value)}/>}
+            <TriggerConditionEditor defaultValue={LOI ? LOI.updateCondition : 1} onChange={setUpdateCondition}/>
+        </FieldBox>
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
@@ -294,12 +261,10 @@ export const LOIEditor = () => {
                 <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
             <Box sx={{display: "flex", alignItems: "end"}}>
-                <Typography sx={{display: "inline-block", marginRight: "5px"}}> Data source: </Typography>
-                {loadingEndpoints ?
-                    <Skeleton sx={{display:"inline-block"}}/>
-                :
-                    <Fragment>
-                        <Select size="small" sx={{display: 'inline-block', minWidth: "150px"}} variant="standard"  label={"Data source:"} required
+                {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/> :
+                    <Box>
+                        <Box sx={{display: "inline", marginRight: "10px", fontWeight: 'bold', }}>Data source:</Box>
+                        <Select size="small" sx={{display: 'inline-block', minWidth: "150px", marginRight: '10px'}} variant="standard"  label={"Data source:"} required
                                 error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
                             <MenuItem value="" disabled> None </MenuItem>
                             {(endpoints||[]).map((endpoint:DataEndpoint) => 
@@ -308,10 +273,8 @@ export const LOIEditor = () => {
                                 </MenuItem>)
                             }
                         </Select>
-                        <Box sx={{display: 'inline', ml:"5px", fontSize:".85em"}}>
-                            {renderDescription(dataSourceDescription)}
-                        </Box>
-                    </Fragment>
+                        {renderDescription(dataSourceDescription)}
+                    </Box>
                 }
             </Box>
             <Box sx={{fontSize: "0.94rem"}} >

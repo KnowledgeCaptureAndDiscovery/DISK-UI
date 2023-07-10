@@ -17,31 +17,7 @@ import { renderDescription } from "DISK/util";
 import { WorkflowList } from "components/methods/WorkflowList";
 import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
-
-const TypographyLabel = styled(Typography)(({ theme }) => ({
-    color: 'gray',
-    display: "inline",
-    fontWeight: "bold",
-}));
-
-const InfoInline = styled(Typography)(({ theme }) => ({
-    display: "inline",
-    color: "darkgray"
-}));
-
-const TypographyInline = styled(Typography)(({ theme }) => ({
-    display: "inline",
-}));
-
-const TypographySubtitle = styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.2em"
-}));
-
-const TypographySection = styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.05em"
-}));
+import { InfoInline, TypographyInline, TypographyLabel, TypographySection, TypographySubtitle } from "components/Styles";
 
 export const LOIView = () => {
     const authenticated = useAuthenticated();
@@ -72,7 +48,7 @@ export const LOIView = () => {
 
     useEffect(updateDataSourceLabel, [endpoints, selectedDataSource]);
 
-    return <Card variant="outlined" sx={{height: "calc(100vh - 112px)", overflowY:"auto"}}>
+    return <Card variant="outlined">
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
         :

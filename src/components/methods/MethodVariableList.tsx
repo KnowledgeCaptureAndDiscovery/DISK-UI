@@ -50,14 +50,17 @@ export const MethodVariableList = ({method, options, bindings, onChange}: Questi
         :
             <Fragment>
                 <Grid container spacing={1}  sx={{alignItems: "center"}}>
-                    <Grid item xs={2} md={3} sm={4} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
+                    <Grid item xs={2} md={2} sm={2} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
                         Workflow input
                     </Grid>
-                    <Grid item xs={6} md={5} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
-                        Dataset information
+                    <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        Connection type
+                    </Grid>
+                    <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        Connection value
                     </Grid>
                     <Grid item xs={2} md={2} sm={2} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
-                        Type
+                        Datatype
                     </Grid>
                 </Grid>
                 { methodVariables.filter(i => i.input).map((inp:MethodInput) => 

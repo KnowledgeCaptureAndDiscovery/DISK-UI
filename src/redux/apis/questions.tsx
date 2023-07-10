@@ -19,9 +19,6 @@ export const questionsAPI = createApi({
         })
       }
     }),
-    getVariableOptions: builder.query<VariableOption[], string>({
-      query: (id: string) => `question/${id}/options`,
-    }),
     getDynamicOptions: builder.query<{[name:string]:VariableOption[]}, { cfg: Partial<QuestionOptionsRequest> }>({
       query: ({cfg}) => ({
         url: `question/options/`,
@@ -36,6 +33,5 @@ export const questionsAPI = createApi({
 export const {
   useGetQuestionsQuery,
   useLazyGetDynamicOptionsQuery,
-  useGetVariableOptionsQuery,
   useGetDynamicOptionsQuery,
 } = questionsAPI;
