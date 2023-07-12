@@ -1,5 +1,5 @@
 import { Grid, Select, MenuItem, Typography, Box, Tooltip, TextField } from "@mui/material";
-import { MethodInput, VariableBinding } from "DISK/interfaces";
+import { MethodVariables, VariableBinding } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -7,23 +7,29 @@ import zIndex from "@mui/material/styles/zIndex";
 import { FieldBox } from "components/Styles";
 
 interface MethodVariableProps {
-    variable: MethodInput,
+    variable: MethodVariables,
     options: string[],
     value?: VariableBinding,
     onChange?: (newBinding:VariableBinding) => void,
 }
 
-type SelectorIds = 'VARIABLE_SELECTOR' | 'DEFAULT_VALUE' | 'FULL_QUERY' | 'USER_INPUT' ;
+type InputSelectorIds = 'VARIABLE_SELECTOR' | 'DEFAULT_VALUE' | 'FULL_QUERY' | 'USER_INPUT' ;
 interface SelectorField {
     label:string,
     tooltip:string,
 }
 
-type FieldMap = {
-    [key in SelectorIds]: SelectorField
+type OutputSelectorIds = 'DO_NO_STORE' | 'DOWNLOAD_ONLY' | 'IMAGE' | 'VISUALIZE';// | 'DEFAULT_VALUE';
+
+type InputFieldMap = {
+    [key in InputSelectorIds]: SelectorField
 }
 
-const SELECTORS : FieldMap = {
+type OutputFieldMap = {
+    [key in OutputSelectorIds]: SelectorField
+}
+
+const INPUT_SELECTORS : InputFieldMap = {
     VARIABLE_SELECTOR: {
         label: "Use a DISK variable",
         tooltip: "Use a variable defined on the question template or data query. Values will be send after the query execution."
@@ -42,24 +48,65 @@ const SELECTORS : FieldMap = {
     }
 }
 
+const OUTPUT_SELECTORS : OutputFieldMap = {
+    DO_NO_STORE: {
+        label: "Do not save",
+        tooltip: "Do not store the file on DISK. The file will still be available on WINGS."
+    },
+    DOWNLOAD_ONLY: {
+        label: "Save file - Provide download link.",
+        tooltip: "The file will be stored on the DISK server and make available for download to any DISK user."
+    },
+    IMAGE: {
+        label: "Save file - Store as image to be displayed",
+        tooltip: "The file will be stored on the DISK server and make available for visualization and download."
+    },
+    VISUALIZE: {
+        label: "Save file - Store as main visualization",
+        tooltip: "The file will be stored on the DISK server and make available for visualization and download." +
+            "The latest version of this file will be show in the hypothesis page.",
+    }
+}
+
 export const MethodVariableSelector = ({variable, options, value, onChange}:MethodVariableProps) => {
     const [selected, setSelected] = useState<string>("");
     const [selectedType, setSelectedType] = useState<string>("");
-    const [selectorKind, setSelectorKind] = useState<SelectorIds>("DEFAULT_VALUE");
+    const [selectorKind, setSelectorKind] = useState<InputSelectorIds>("DEFAULT_VALUE");
+    const [outputValue, setOutputValue] = useState<OutputSelectorIds>("DO_NO_STORE");
     const [userInput, setUserInput] = useState<string>("");
 
+    //const [lastValue, setLastValue] = useState<string>("-1");
     useEffect(() => {
-        if (value) {
-            let strValue : string = value.collection ? value.binding.substring(1, value.binding.length-1) : value.binding;
-            setSelected(strValue);
-            setSelectedType(value.type ? value.type : '');
-            if (strValue.startsWith('?') || strValue.length > 2 && strValue.startsWith('[') && strValue.charAt(1) === '?') {
-                setSelectorKind('VARIABLE_SELECTOR');
+        if (variable.input) {
+            if (value) {
+                if (value.binding !== selected) {
+                    let strValue : string = value.collection ? value.binding.substring(1, value.binding.length-1) : value.binding;
+                    setSelected(strValue);
+                    setSelectedType(value.type ? value.type : '');
+                    if (strValue.startsWith('?'))
+                        setSelectorKind('VARIABLE_SELECTOR');
+                    else if (strValue === "_CSV_")
+                        setSelectorKind('FULL_QUERY');
+                    else
+                        setSelectorKind('USER_INPUT');
+                }
+            } else {
+                setSelectorKind('DEFAULT_VALUE');
+            }
+        } else {
+            if (value) {
+                if (value.binding !== outputValue) {
+                    let strValue: string = value.collection ? value.binding.substring(1, value.binding.length - 1) : value.binding;
+                    setOutputValue(strValue as OutputSelectorIds);
+                }
+            } else {
+                setOutputValue('DO_NO_STORE');
             }
         }
     }, [value])
 
-    const onSelectorChange = (newSelector:SelectorIds) => {
+    const onSelectorChange = (newSelector:InputSelectorIds) => {
+        console.log("> " + newSelector)
         setSelectorKind(newSelector);
         if (onChange) {
             onChange({
@@ -112,6 +159,18 @@ export const MethodVariableSelector = ({variable, options, value, onChange}:Meth
         }
     }
 
+    const onOutputChange = (newValue:OutputSelectorIds) => {
+        setOutputValue(newValue);
+        if (onChange) {
+            onChange({
+                variable: variable.name,
+                collection: false,
+                type: null,
+                binding: newValue
+            });
+        }
+    }
+
     const renderBindingSelector = () => {
         switch (selectorKind) {
             case 'FULL_QUERY':
@@ -130,37 +189,55 @@ export const MethodVariableSelector = ({variable, options, value, onChange}:Meth
         }
     }
 
-    return <Grid container spacing={1} sx={{ alignItems: "center" }}>
-        <Grid item xs={2} md={2} sm={2} sx={{ textAlign: "right", color: "#444", fontSize: "0.85rem" }}>{variable.name}:</Grid>
-        <Grid item xs={4} md={4} sm={4}>
-            <Box style={{ display: "flex" }}>
-                <Select size="small" sx={{ display: 'inline-block', width: "100%"}} variant="standard" label="Type of binding"
-                    value={selectorKind} onChange={(e) => onSelectorChange(e.target.value as SelectorIds)}>
-                    {Object.keys(SELECTORS).map((id: string, i: number) => <MenuItem key={id} value={id}>{SELECTORS[id as SelectorIds].label}</MenuItem>)}
+    if (variable.input)
+        return <Grid container spacing={1} sx={{ alignItems: "center" }}>
+            <Grid item xs={2} md={2} sm={2} sx={{ textAlign: "right", color: "#444", fontSize: "0.85rem" }}>{variable.name}:</Grid>
+            <Grid item xs={4} md={4} sm={4}>
+                <Box style={{ display: "flex" }}>
+                    <Select size="small" sx={{ display: 'inline-block', width: "100%"}} variant="standard" label="Type of binding"
+                        value={selectorKind} onChange={(e) => onSelectorChange(e.target.value as InputSelectorIds)}>
+                        {Object.keys(INPUT_SELECTORS).map((id: string, i: number) => <MenuItem key={id} value={id}>{INPUT_SELECTORS[id as InputSelectorIds].label}</MenuItem>)}
+                    </Select>
+                    <Box style={{ zIndex: 10 }}>
+                        <Tooltip arrow title={INPUT_SELECTORS[selectorKind as InputSelectorIds].tooltip}>
+                            <HelpOutlineIcon/>
+                        </Tooltip>
+                    </Box>
+                </Box>
+            </Grid>
+            <Grid item xs={4} md={4} sm={4}>
+                {renderBindingSelector()}
+            </Grid>
+            <Grid item xs={2} md={2} sm={2}>
+                {variable.type.length <= 1 ?
+                    <Typography>{variable === null || variable.type.length === 0 ? "" : variable.type[0].replaceAll(/.*#/g, '')}</Typography>
+                    :
+                    <Box style={{display: "flex"}}>
+                        {variable.dimensionality > 0 && (<span style={{whiteSpace:"nowrap", marginRight: "5px"}}>A list of </span>)}
+                        <Select size="small" sx={{display: 'inline-block', width: "100%" }} variant="standard" label="Set datatype"
+                            value={selectedType || variable.type[0]} onChange={(e) => onTypeChange(e.target.value)}>
+                            <MenuItem value=""> None </MenuItem>
+                            {variable.type.map((url: string) => <MenuItem key={url} value={url}>{url.replaceAll(/.*#/g, '')}</MenuItem>)}
+                        </Select>
+                    </Box>
+                }
+            </Grid>
+        </Grid>
+    else
+        return <Grid container spacing={1} sx={{ alignItems: "center" }}>
+            <Grid item xs={2} md={2} sm={2} sx={{ textAlign: "right", color: "#444", fontSize: "0.85rem" }}>{variable.name}:</Grid>
+            <Grid item xs={7} md={7} sm={7}>
+                <Select size="small" sx={{ display: 'inline-block', width: "calc(100% - 10px)" }} variant="standard" label="Usage"
+                    value={outputValue} onChange={(e) => onOutputChange(e.target.value as OutputSelectorIds)}>
+                    {Object.keys(OUTPUT_SELECTORS).map((id: string, i: number) => <MenuItem key={id} value={id}>{OUTPUT_SELECTORS[id as OutputSelectorIds].label}</MenuItem>)}
                 </Select>
+            </Grid>
+            <Grid item xs={2} md={2} sm={2}>
                 <Box style={{ zIndex: 10 }}>
-                    <Tooltip arrow title={SELECTORS[selectorKind].tooltip}>
-                        <HelpOutlineIcon/>
+                    <Tooltip arrow title={OUTPUT_SELECTORS[outputValue as OutputSelectorIds].tooltip}>
+                        <HelpOutlineIcon />
                     </Tooltip>
                 </Box>
-            </Box>
+            </Grid>
         </Grid>
-        <Grid item xs={4} md={4} sm={4}>
-            {renderBindingSelector()}
-        </Grid>
-        <Grid item xs={2} md={2} sm={2}>
-            {variable.type.length <= 1 ?
-                <Typography>{variable === null || variable.type.length === 0 ? "" : variable.type[0].replaceAll(/.*#/g, '')}</Typography>
-                :
-                <Box style={{display: "flex"}}>
-                    {variable.dimensionality > 0 && (<span style={{whiteSpace:"nowrap", marginRight: "5px"}}>A list of </span>)}
-                    <Select size="small" sx={{display: 'inline-block', width: "100%" }} variant="standard" label="Set datatype"
-                        value={selectedType || variable.type[0]} onChange={(e) => onTypeChange(e.target.value)}>
-                        <MenuItem value=""> None </MenuItem>
-                        {variable.type.map((url: string) => <MenuItem key={url} value={url}>{url.replaceAll(/.*#/g, '')}</MenuItem>)}
-                    </Select>
-                </Box>
-            }
-        </Grid>
-    </Grid>
 }

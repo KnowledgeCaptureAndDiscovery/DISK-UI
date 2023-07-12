@@ -185,12 +185,13 @@ export interface TriggeredLineOfInquiry {
 }
 
 
-export interface MethodInput {
+export interface MethodVariables {
     name: string,
     type: string[],
     dimensionality: number,
     param: boolean,
-    input: boolean
+    input: boolean,
+    output: boolean
 }
 
 export interface Method {
@@ -198,7 +199,7 @@ export interface Method {
     name: string,
     link: string,
     source: string,
-    inputs?: MethodInput[]
+    inputs?: MethodVariables[]
 }
 
 export interface VocabularyEntity {

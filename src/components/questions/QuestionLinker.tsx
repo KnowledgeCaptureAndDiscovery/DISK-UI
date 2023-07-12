@@ -27,7 +27,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
         </Box>
 
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (selectedQuestion ? "block" : "none"), position: "relative", overflow:"visible"}}>
-            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
+            <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-12px 0 0 0'}}>
                 This line of inquiry can be used to investigate the following hypothesis or question:
             </FormHelperText>
             <QuestionTemplateView question={selectedQuestion}/>
