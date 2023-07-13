@@ -73,6 +73,33 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
         return <PrivateLink filename={filename} source={wf.source}  url={url}/>;
     }
 
+    const renderWorkflowVariableBinding = (value:string) => {
+        let color = "rgba(0, 0, 0, 0.87)";
+        let editedValue = '"' + value + '"';
+        let fontS = "normal"
+        if (value.startsWith("?")) {
+            color = "green";
+            editedValue = value;
+        } else if (value === "_CSV_") {
+            editedValue = "CSV with data query results"
+            fontS = "italic"
+        } else if (value === "DO_NO_STORE") {
+            editedValue = "This file will not be stored"
+            fontS = "italic"
+        } else if (value === "DOWNLOAD_ONLY") {
+            editedValue = "This file will be make available to download"
+            fontS = "italic"
+        } else if (value === "IMAGE") {
+            editedValue = "This file will be used on visualizations"
+            fontS = "italic"
+        } else if (value === "VISUALIZE") {
+            editedValue = "The latest version of this file will be show on TLOI preview"
+            fontS = "italic"
+        }
+
+        return <span style={{color:color, fontStyle:fontS}}>{editedValue}</span>
+    }
+
     return (
         <Card key={`wf_${wf.workflow}`} variant="outlined" sx={{mb: "5px"}}>
             <Box sx={{display: "flex", justifyContent: "space-between"}}>
@@ -100,7 +127,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                                 <b>{binding.variable}: </b>
                             </Grid>
                             <Grid item xs={9} md={10}>
-                                {binding.binding}
+                                {renderWorkflowVariableBinding(binding.binding)}
                             </Grid>
                         </Grid>
                     )}
