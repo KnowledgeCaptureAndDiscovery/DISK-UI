@@ -1,28 +1,29 @@
 import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, IconButton, Link as MuiLink, MenuItem, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
-import CodeMirror from '@uiw/react-codemirror';
-import { sparql } from "@codemirror/legacy-modes/mode/sparql";
-import { StreamLanguage } from '@codemirror/language';
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
-import { DataEndpoint, TriggeredLineOfInquiry, VariableBinding, Workflow, WorkflowRun } from "DISK/interfaces";
+import { useAppDispatch, useAuthenticated } from "redux/hooks";
+import { TriggeredLineOfInquiry, VariableBinding, Workflow } from "DISK/interfaces";
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
-import { getBindingAsArray } from "DISK/util";
+import { cleanTLOI, getBindingAsArray } from "DISK/util";
+import { openBackdrop, closeBackdrop } from "redux/slices/backdrop";
+import { openNotification } from "redux/slices/notifications";
+import { usePostTLOIMutation } from "redux/apis/tlois";
 
 interface FileListProps {
     tloi: TriggeredLineOfInquiry | null,
     label: string,
-    onSave?: (tloi:TriggeredLineOfInquiry) => void,
 }
 
-export const TLOIEdit = ({tloi, label: title, onSave} : FileListProps) => {
+export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
+    const dispatch = useAppDispatch();
+    const authenticated = useAuthenticated();
     const [open, setOpen] = useState(false);
     const [selectedBindings, setSelectedBindings] = useState<{[id:string]: boolean}>({});
     const [editableWfs, setEditableWfs] = useState<Workflow[]>([]);
     const [arraySizes, setArraySizes] = useState<number[]>([]);
     const [meta, setMeta] = useState<boolean>(false);
+    const [postTLOI, {}] = usePostTLOIMutation();
 
     const runAnalysis = () => {
         if (tloi) {
@@ -35,8 +36,25 @@ export const TLOIEdit = ({tloi, label: title, onSave} : FileListProps) => {
                 metaWorkflows: meta ? getEditedWorkflows() : cleanWorkflows(tloi.metaWorkflows),
             };
 
-            if (onSave)
-                onSave(newTLOI);
+            dispatch(openBackdrop());
+            dispatch(openNotification({
+                severity: 'info',
+                text: "Sending new execution..."
+            }));
+            postTLOI({ data: cleanTLOI(newTLOI) })
+                .then((data: { data: TriggeredLineOfInquiry } | { error: any }) => {
+                    let savedTLOI = (data as { data: TriggeredLineOfInquiry }).data;
+                    if (savedTLOI) {
+                        console.log("RETURNED:", savedTLOI);
+                        dispatch(openNotification({
+                            severity: 'success',
+                            text: "1 new execution found"
+                        }));
+                    }
+                })
+                .finally(() => {
+                    dispatch(closeBackdrop());
+                });
             setOpen(false);
         }
     }

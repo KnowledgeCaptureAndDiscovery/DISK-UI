@@ -1,14 +1,14 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link as MuiLink, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
-import { RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
+import { LineOfInquiry, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { PrivateLink } from "./PrivateLink";
-import { FilePreview } from "./FilePreview";
 
 interface FileListProps {
     type: 'input' | 'output',
     tloi: TriggeredLineOfInquiry | null,
+    loi?: LineOfInquiry,
     label: string,
     renderFiles?: boolean,
 }
@@ -17,15 +17,45 @@ interface RunStatus extends WorkflowRun {
     source: string,
 }
 
-export const FileList = ({type:displayType, tloi, label: title, renderFiles} : FileListProps) => {
+export const FileList = ({type:displayType, tloi, loi, label: title, renderFiles} : FileListProps) => {
     const [open, setOpen] = useState(false);
     const [total, setTotal] = useState(0);
     const [runs, setRuns] = useState<RunStatus[]>([]);
-
+    
     const getFileMap : (run:RunStatus|WorkflowRun) => {[name:string]: RunBinding} = (run) => {
-        return (displayType === 'input') ? (run.inputs ? run.inputs : {}) : (run.outputs ? run.outputs : {})
+        if (displayType === 'input') {
+            let newInputs : {[name:string]: RunBinding} = {};
+            Object.keys(run.inputs || {}).forEach((inName) => {
+                let data = run.inputs[inName];
+                if (data.datatype == null || !data.datatype.startsWith("http://www.w3.org/2001/XMLSchema#s")) {
+                    newInputs[inName] = run.inputs[inName];
+                }
+            });
+            return newInputs;
+        }
+
+        if (!loi)
+            return (run.outputs ? run.outputs : {})
+
+        let doNoStore : string[] = [];
+        [...loi.workflows, ...loi.metaWorkflows].forEach((wf) => {
+            wf.bindings.forEach((b) => {
+                if (b.binding === '_DO_NO_STORE_')
+                    doNoStore.push(b.variable);
+            })
+        });
+        let newOutputs : {[name:string]: RunBinding} = {};
+        Object.keys(run.outputs || {}).forEach((outName) => {
+            doNoStore.forEach((removeName) => {
+                if (!outName.startsWith(removeName)) {
+                    newOutputs[outName] = run.outputs[outName];
+                }
+            });
+        });
+        return newOutputs;
     }
 
+    // Adds source and all runs
     useEffect(() => {
         if (tloi) {
             let allWfs = [ ...(tloi.workflows ? tloi.workflows : []) , ...(tloi.metaWorkflows ? tloi.metaWorkflows : []) ];

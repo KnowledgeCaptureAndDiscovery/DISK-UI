@@ -14,12 +14,11 @@ interface MethodVariableProps {
 }
 
 type InputSelectorIds = 'VARIABLE_SELECTOR' | 'DEFAULT_VALUE' | 'FULL_QUERY' | 'USER_INPUT' ;
+export type OutputSelectorIds = '_DO_NO_STORE_' | '_DOWNLOAD_ONLY_' | '_IMAGE_' | '_VISUALIZE_' | '_CONFIDENCE_VALUE_';
 interface SelectorField {
     label:string,
     tooltip:string,
 }
-
-type OutputSelectorIds = 'DO_NO_STORE' | 'DOWNLOAD_ONLY' | 'IMAGE' | 'VISUALIZE';// | 'DEFAULT_VALUE';
 
 type InputFieldMap = {
     [key in InputSelectorIds]: SelectorField
@@ -49,22 +48,26 @@ const INPUT_SELECTORS : InputFieldMap = {
 }
 
 const OUTPUT_SELECTORS : OutputFieldMap = {
-    DO_NO_STORE: {
+    _DO_NO_STORE_: {
         label: "Do not save",
         tooltip: "Do not store the file on DISK. The file will still be available on WINGS."
     },
-    DOWNLOAD_ONLY: {
+    _DOWNLOAD_ONLY_: {
         label: "Save file - Provide download link.",
         tooltip: "The file will be stored on the DISK server and make available for download to any DISK user."
     },
-    IMAGE: {
+    _IMAGE_: {
         label: "Save file - Store as image to be displayed",
         tooltip: "The file will be stored on the DISK server and make available for visualization and download."
     },
-    VISUALIZE: {
+    _VISUALIZE_: {
         label: "Save file - Store as main visualization",
         tooltip: "The file will be stored on the DISK server and make available for visualization and download." +
             "The latest version of this file will be show in the hypothesis page.",
+    },
+    _CONFIDENCE_VALUE_: {
+        label: "Process file - Process as confidence value file",
+        tooltip: "The file will be read by DISK. The first line of the file should be a point floating number."
     }
 }
 
@@ -72,7 +75,7 @@ export const MethodVariableSelector = ({variable, options, value, onChange}:Meth
     const [selected, setSelected] = useState<string>("");
     const [selectedType, setSelectedType] = useState<string>("");
     const [selectorKind, setSelectorKind] = useState<InputSelectorIds>("DEFAULT_VALUE");
-    const [outputValue, setOutputValue] = useState<OutputSelectorIds>("DO_NO_STORE");
+    const [outputValue, setOutputValue] = useState<OutputSelectorIds>("_DO_NO_STORE_");
     const [userInput, setUserInput] = useState<string>("");
 
     //const [lastValue, setLastValue] = useState<string>("-1");
@@ -100,7 +103,7 @@ export const MethodVariableSelector = ({variable, options, value, onChange}:Meth
                     setOutputValue(strValue as OutputSelectorIds);
                 }
             } else {
-                setOutputValue('DO_NO_STORE');
+                setOutputValue('_DO_NO_STORE_');
             }
         }
     }, [value])
@@ -234,7 +237,7 @@ export const MethodVariableSelector = ({variable, options, value, onChange}:Meth
             </Grid>
             <Grid item xs={2} md={2} sm={2}>
                 <Box style={{ zIndex: 10 }}>
-                    <Tooltip arrow title={OUTPUT_SELECTORS[outputValue as OutputSelectorIds].tooltip}>
+                    <Tooltip arrow title={OUTPUT_SELECTORS[outputValue as OutputSelectorIds]?.tooltip || ""}>
                         <HelpOutlineIcon />
                     </Tooltip>
                 </Box>

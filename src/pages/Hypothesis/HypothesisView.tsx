@@ -3,9 +3,6 @@ import { TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { styled } from '@mui/material/styles';
 import { PATH_HYPOTHESES } from "constants/routes";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import { QuestionPreview } from "components/questions/QuestionPreview";
@@ -14,34 +11,9 @@ import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/tlois";
-import { TLOIList } from "components/tlois/TLOIList";
-import { ConfidencePlot } from "components/tlois/ConfidencePlot";
+import { TLOIBundle } from "components/tlois/TLOIBundle";
+import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } from "components/Styles";
 
-const TypographyLabel = styled(Typography)(({ theme }) => ({
-    color: 'gray',
-    display: "inline",
-    fontWeight: "bold",
-    fontSize: ".9em"
-}));
-
-const TypographyInline = styled(Typography)(({ theme }) => ({
-    display: "inline",
-}));
-
-const InfoInline = styled(Typography)(({ theme }) => ({
-    display: "inline",
-    color: "darkgray"
-}));
-
-const TypographySubtitle = styled(Typography)(({ theme }) => ({
-    fontWeight: "bold",
-    fontSize: "1.2em"
-}));
-
-type TLOIMap = {[id:string]: {
-    value: TriggeredLineOfInquiry[],
-    name: string,
-}};
 
 export const HypothesisView = () => {
     const dispatch = useAppDispatch();
@@ -51,22 +23,13 @@ export const HypothesisView = () => {
     const { data:hypothesis, isError:error, isLoading:loading} = useGetHypothesisByIdQuery(selectedId);
     const { data:TLOIs, isLoading:TLOIloading} = useGetTLOIsQuery();
     const [execHypothesis, {}] = useExecuteHypothesisByIdMutation();
-
-    const [myTLOIs, setMyTLOIs] = useState<TLOIMap>({});
+    const [LOIList, setLOIList] = useState<string[]>([]);
 
     useEffect(() => {
-        let map : TLOIMap = {};
-        (TLOIs||[]).filter((tloi) => tloi.parentHypothesisId === selectedId).forEach((tloi:TriggeredLineOfInquiry) => {
-            if (!map[tloi.parentLoiId]) {
-                map[tloi.parentLoiId] = {
-                    value: [],
-                    name: tloi.name.replace("Triggered: ",""),
-                }
-            }
-            let cur = map[tloi.parentLoiId].value;
-            cur.push(tloi);
-        });
-        setMyTLOIs(map);
+        let list : string[] = (TLOIs||[])
+                .filter((tloi) => tloi.parentHypothesisId === selectedId)
+                .map((tloi) => tloi.parentLoiId);
+        setLOIList(Array.from(new Set(list)));
     }, [TLOIs, selectedId]);
 
     const onTestHypothesisClicked = () => {
@@ -137,7 +100,6 @@ export const HypothesisView = () => {
                         )
                     }
             </Box>
-
             <TypographySubtitle>
                 Hypothesis or question:
             </TypographySubtitle>
@@ -155,28 +117,19 @@ export const HypothesisView = () => {
                     <CachedIcon sx={{mr:"5px"}}/> Update
                 </Button>
             </Box>
-            {TLOIloading ? 
+            {TLOIloading ? (
                 <Skeleton/>
-                : (Object.keys(myTLOIs).length === 0 ? <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
-                    No executions
-                </Card>
-                :   Object.keys(myTLOIs).map((loiId:string) => 
-                <Card variant="outlined" key={loiId} sx={{marginBottom: "5px", padding: "2px 10px"}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent:"space-between"}}>
-                        <Box sx={{display: 'flex', alignItems: 'center'}}>
-                            <SettingsIcon sx={{color: "darkgray", mr: "5px"}}/>
-                            <PlayArrowIcon sx={{color: "green", ml: "-23px", mb: "-10px"}}/>
-                            <span style={{marginRight: ".5em"}}> Triggered line of inquiry: </span> 
-                            <b> {myTLOIs[loiId].name}</b>
-                        </Box>
-                        <Box>{myTLOIs[loiId].value.length} runs</Box>
-                    </Box>
-                    <Divider/>
-                    <TypographyLabel>Overview of results:</TypographyLabel>
-                    <TLOIList hypothesis={hypothesis} loiId={loiId}/>
-                    <ConfidencePlot hypothesis={hypothesis} loiId={loiId}/>
-                </Card>))
-            }
+            ) : (
+                LOIList.length === 0 ? (
+                    <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
+                        No executions
+                    </Card>
+                ) : (
+                    hypothesis && (
+                        LOIList.map((loiId:string) => <TLOIBundle loiId={loiId} key={loiId} hypothesis={hypothesis} />)
+                    )
+                )
+            )}
         </Box>
     </Card>
 }

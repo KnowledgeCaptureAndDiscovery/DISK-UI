@@ -17,7 +17,7 @@ import {
     TooltipModel,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { findOutputInRuns, isInternalOutput } from "DISK/helpers";
+import { findOutputInRuns, isInternalOutput } from "DISK/util";
 import { DISK } from "redux/apis/DISK";
 import { useAuthenticated } from "redux/hooks";
 

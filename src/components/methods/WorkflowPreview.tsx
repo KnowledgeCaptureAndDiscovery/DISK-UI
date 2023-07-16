@@ -83,17 +83,23 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
         } else if (value === "_CSV_") {
             editedValue = "CSV with data query results"
             fontS = "italic"
-        } else if (value === "DO_NO_STORE") {
+        } else if (value === "_DO_NO_STORE_") {
             editedValue = "This file will not be stored"
             fontS = "italic"
-        } else if (value === "DOWNLOAD_ONLY") {
+        } else if (value === "_DOWNLOAD_ONLY_") {
             editedValue = "This file will be make available to download"
             fontS = "italic"
-        } else if (value === "IMAGE") {
+        } else if (value === "_IMAGE_") {
             editedValue = "This file will be used on visualizations"
             fontS = "italic"
-        } else if (value === "VISUALIZE") {
+        } else if (value === "_VISUALIZE_") {
             editedValue = "The latest version of this file will be show on TLOI preview"
+            fontS = "italic"
+        } else if (value === "_BRAIN_VISUALIZATION_") {
+            editedValue = "This file is a brain visualization configuration file"
+            fontS = "italic"
+        } else if (value === "_CONFIDENCE_VALUE_") {
+            editedValue = "This file contains the confidence value"
             fontS = "italic"
         }
 

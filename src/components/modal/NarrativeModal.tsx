@@ -4,14 +4,15 @@ import CloseIcon from '@mui/icons-material/Close';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Hypothesis, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { WorkflowList } from "../methods/WorkflowList";
+import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
 
 interface NarrativeModalProps {
-    hypothesis : Hypothesis,
     tloi: TriggeredLineOfInquiry,
 }
 
-export const NarrativeModal = ({hypothesis, tloi} : NarrativeModalProps) => {
+export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
     const [open, setOpen] = useState(false);
+    const {data:hypothesis, isLoading} = useGetHypothesisByIdQuery(tloi.parentHypothesisId);
 
     const onOpenDialog = () => {
         setOpen(true);
@@ -43,6 +44,7 @@ export const NarrativeModal = ({hypothesis, tloi} : NarrativeModalProps) => {
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
+                {hypothesis &&
                 <DialogContent dividers>
                     The Hypothesis "<span style={{fontWeight:"bold"}}>{hypothesis.name}</span>" was tested with the line of inquiry
                     "<span style={{fontWeight:"bold"}}>{tloi.name.replace("Triggered: ", "")}</span>".
@@ -55,7 +57,7 @@ export const NarrativeModal = ({hypothesis, tloi} : NarrativeModalProps) => {
                             is {tloi.confidenceValue < 0.0001 ?  tloi.confidenceValue.toExponential(3) : tloi.confidenceValue.toFixed(4)}
                         </span>
                     )}
-                </DialogContent>
+                </DialogContent>}
             </Dialog>
         </Fragment>
     );
