@@ -74,9 +74,7 @@ export const QueryTester = ({name="Open query tester", initQuery, initSource} : 
                         extensions={[StreamLanguage.define(sparql)]}
                         onChange={(value, viewUpdate) => {
                             setQuery(value);
-                            console.log('value:', value);
                         }}
-                        onBlur={console.log}
                     />
                     {queryToSend && dataSource && <ResultTable query={queryToSend} dataSource={dataSource} variables={'*'}/> }
                 </DialogContent>

@@ -109,17 +109,30 @@ export const MethodVariableSelector = ({variable, options, value, onChange}:Meth
     }, [value])
 
     const onSelectorChange = (newSelector:InputSelectorIds) => {
-        console.log("> " + newSelector)
         setSelectorKind(newSelector);
         if (onChange) {
+            let selectedValue = variable.dimensionality > 0 ? (
+                selected.startsWith("[") && selected.endsWith("]") ? ( //Is already a list
+                    selected
+                ) : (
+                    "[" + selected + "]"
+                )
+            ) : (
+                selected.startsWith("[") && selected.endsWith("]") ? ( //Is a list
+                    selected.substring(1,selected.length-1)
+                ) : (
+                    selected
+                )
+
+            );
+
             onChange({
                 variable: variable.name,
                 collection: variable.dimensionality>0,
                 type: selectedType ? selectedType : null,
                 binding: newSelector === 'DEFAULT_VALUE' ? "" : 
                         (newSelector === 'FULL_QUERY' ? "_CSV_" :
-                                (newSelector === "VARIABLE_SELECTOR" ? (variable.dimensionality > 0 ? "[" + selected + "]" : selected) :
-                                userInput)
+                                (newSelector === "VARIABLE_SELECTOR" ? selectedValue : userInput)
                         )
             });
         }

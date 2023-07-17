@@ -238,7 +238,6 @@ export class VTKParser {
 		}
 		
 		//return [indices, positions, normals, colors];
-		//console.log("HACK", indices, positions, normals, colors);
 		//var f32b = @org.diskproject.client.components.brain.VTKParser::createFloat32([FI);
 
 		//var geometry = new THREE.BufferGeometry();
@@ -260,7 +259,6 @@ export class VTKParser {
 			if ( colors.length === positions.length ) {
 
 				//geometry.addAttribute( 'color', VTKParser.f32b( colors, 3 ) );
-				console.log("A");
 				geometry.setAttribute( 'color', VTKParser.f32b( colors, 3 ) );
 
 			}
@@ -289,7 +287,6 @@ export class VTKParser {
 				}
 
 				//geometry.addAttribute( 'color', VTKParser.f32b( newColors, 3 ) );
-				console.log("B");
 				geometry.setAttribute( 'color', VTKParser.f32b( newColors, 3 ) );
 			}
 

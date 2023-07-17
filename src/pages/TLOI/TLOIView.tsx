@@ -85,7 +85,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                     if (run.outputs) {
                         Object.keys(run.outputs).forEach(((name:string) => {
                             if (name === SHINY_FILENAME) {
-                            console.log( run ? run.outputs[name] : "");
                                 setShinyData({
                                     source: wf.source,
                                     url: run ? (run.outputs[name].id || "") : ""
@@ -137,7 +136,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                         let savedTLOI = (data as {data:TriggeredLineOfInquiry}).data;
                         if (savedTLOI) {
                             //FIXME: UI does not update.
-                            console.log("SUCCESS:", savedTLOI.notes);
                             setNotes(savedTLOI.notes);
                             dispatch(openNotification({severity:'success', text:'Notes were updated successfully'}));
                         }

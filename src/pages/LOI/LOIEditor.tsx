@@ -162,12 +162,11 @@ export const LOIEditor = () => {
         };
 
         dispatch(openBackdrop());
-        console.log("SEND:", newLOI);
         (editing?putLOI:postLOI)({data:newLOI as LineOfInquiry})
             .then((data : {data:LineOfInquiry} | {error: any}) => {
                 let savedLOI = (data as {data:LineOfInquiry}).data;
                 if (savedLOI) {
-                    console.log("RETURNED:", savedLOI);
+                    console.log("LOI saved:", savedLOI);
                     navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
                     dispatch(openNotification({severity:'success', text:'Line of Inquiry successfully saved'}));
                 }
@@ -196,7 +195,7 @@ export const LOIEditor = () => {
             .then((data : {data:LineOfInquiry} | {error: any}) => {
                 let savedLOI = (data as {data:LineOfInquiry}).data;
                 if (savedLOI) {
-                    console.log("RETURNED:", savedLOI);
+                    console.log("LOI duplicated:", savedLOI);
                     navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
                     dispatch(openNotification({severity:'success', text:'Line of Inquiry successfully saved'}));
                 }
@@ -290,7 +289,6 @@ export const LOIEditor = () => {
                         onChange={(value, viewUpdate) => {
                             setDataQuery(value);
                             setErrorQuery(value.length === 0);
-                            console.log('value:', value);
                         }}
                     />
                 </Card>

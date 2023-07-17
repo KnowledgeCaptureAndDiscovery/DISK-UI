@@ -53,7 +53,7 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
             });
             Promise.all(allRequests)
                 .finally(() => {
-                    console.log("All models downloaded");
+                    console.log("All brain models downloaded");
                     dispatch(setFullyDone(true));
                 })
         }

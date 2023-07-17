@@ -42,8 +42,6 @@ export const PrivateLink = ({filename, url, source, preview}:PrivateLinkProp) =>
             })
     }
 
-    console.log(cType);
-
     return <div>
         <MuiLink color="inherit" onClick={downloadFile} sx={{cursor:"pointer"}}>
             {filename}

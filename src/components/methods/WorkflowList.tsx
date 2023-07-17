@@ -53,18 +53,23 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     }
 
     const onWorkflowSave = (wf:Workflow) => {
+        //FIXME: This is a hack, there are no way to send multiple strings as a list
+        // so we transform demographic_value into a list here.
         wf.bindings = wf.bindings.map((vb:VariableBinding) => {
             let curBinding = vb.binding;
-            //FIXME: this is a hack,
             if (vb.variable === 'demographic_value') {
-                curBinding = '[' + curBinding + "]";
+                if (!curBinding.startsWith("[")) curBinding = '[' + curBinding;
+                if (!curBinding.endsWith("]")) curBinding += "]";
             }
             return {
                 variable: vb.variable,
                 binding: curBinding,
+                collection: vb.collection,
                 type: vb.type,
             } as VariableBinding;
         });
+        //-----
+
         if (notifyChange) {
             let curWfs : Workflow[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
             if (selectedWorkflow) curWfs[editingIndex] = wf; //Editing

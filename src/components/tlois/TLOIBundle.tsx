@@ -54,7 +54,6 @@ export const TLOIBundle = ({loiId, hypothesis}:TLOIBundleProps) => {
         if (loi) {
              [...loi.workflows, ...loi.metaWorkflows ].map(wf => wf.bindings).flat().forEach((binding) => {
                 if (binding.binding.startsWith("_") && binding.binding.endsWith("_")) {
-                    console.log("processable output:" + binding.binding);
                     switch (binding.binding as OutputSelectorIds) {
                         case "_CONFIDENCE_VALUE_":
                             plots.add(binding.variable);
@@ -104,8 +103,6 @@ export const TLOIBundle = ({loiId, hypothesis}:TLOIBundleProps) => {
         console.warn("TLOI or LOI not found!")
         return <></>;
     }
-
-    console.log(">", showConfidencePlot)
 
     return <Card variant="outlined" key={loiId} sx={{ marginBottom: "5px", padding: "2px 10px" }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "space-between" }}>

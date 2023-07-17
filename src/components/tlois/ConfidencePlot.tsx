@@ -175,8 +175,6 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
             const titleLines = tooltip.title || [];
             const bodyLines = tooltip.body.map(b => b.lines);
 
-            console.log(titleLines, bodyLines);
-
             const tableHead = document.createElement('thead');
 
             titleLines.forEach(title => {

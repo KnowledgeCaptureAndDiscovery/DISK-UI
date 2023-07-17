@@ -1,5 +1,5 @@
 import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip, TableHead, Button, Table, TableBody, TableCell, TableContainer, TableRow,
-    styled, Link as MuiLink } from "@mui/material"
+    styled } from "@mui/material"
 import { Workflow, VariableBinding, WorkflowRun, RunBinding } from "DISK/interfaces"
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -7,7 +7,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Fragment, useEffect, useState } from "react";
 import { getBindingAsArray, getFileName } from "DISK/util";
 import { PrivateLink } from "components/PrivateLink";
-import { StrStrMap } from "redux/slices/forms";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -27,7 +26,7 @@ const MAX_PER_PAGE = 10;
 export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} : WorkflowPreviewProps) => {
     const [total, setTotal] = useState(0);
     const [curPage, setCurPage] = useState(0);
-    const [allRuns, setAllRuns] = useState<WorkflowRun[]>([]);
+    //const [allRuns, setAllRuns] = useState<WorkflowRun[]>([]);
     const [allInputs, setAllInputs] = useState<{[name:string]: RunBinding}>({});
     const [allOutputs, setAllOutputs] = useState<{[name:string]: RunBinding}>({});
 
@@ -49,8 +48,8 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                 newRuns.push(run);
                 if (run.inputs) newInputs = { ...newInputs, ...run.inputs };
                 if (run.outputs) newOutputs = { ...newOutputs, ...run.outputs };
-            })
-            setAllRuns(newRuns);
+            });
+            //setAllRuns(newRuns);
             setAllInputs(newInputs);
             setAllOutputs(newOutputs);
         }
@@ -73,7 +72,9 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
         return <PrivateLink filename={filename} source={wf.source}  url={url}/>;
     }
 
-    const renderWorkflowVariableBinding = (value:string) => {
+    const renderWorkflowVariableBinding = (rawValue:string) => {
+        let isList = rawValue.startsWith("[") && rawValue.endsWith("]");
+        let value = isList ? rawValue.substring(1, rawValue.length -1) : rawValue;
         let color = "rgba(0, 0, 0, 0.87)";
         let editedValue = '"' + value + '"';
         let fontS = "normal"
@@ -102,6 +103,11 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
             editedValue = "This file contains the confidence value"
             fontS = "italic"
         }
+
+        if (isList) return <Fragment>
+            <span style={{color:color, fontStyle:fontS}}>{editedValue}</span>
+            <span style={{marginLeft: '5px', color: 'darkgray', fontWeight: 'bold'}} >(List)</span>
+        </Fragment>
 
         return <span style={{color:color, fontStyle:fontS}}>{editedValue}</span>
     }

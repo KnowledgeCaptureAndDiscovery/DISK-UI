@@ -45,7 +45,7 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                 .then((data: { data: TriggeredLineOfInquiry } | { error: any }) => {
                     let savedTLOI = (data as { data: TriggeredLineOfInquiry }).data;
                     if (savedTLOI) {
-                        console.log("RETURNED:", savedTLOI);
+                        console.log("TLOI Created:", savedTLOI);
                         dispatch(openNotification({
                             severity: 'success',
                             text: "1 new execution found"

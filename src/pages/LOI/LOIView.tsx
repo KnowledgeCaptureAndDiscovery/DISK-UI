@@ -127,7 +127,6 @@ export const LOIView = () => {
                     <CodeMirror value={!!LOI? LOI.dataQuery : ""}
                         extensions={[StreamLanguage.define(sparql)]}
                         onChange={(value, viewUpdate) => {
-                        console.log('value:', value);
                         }}
                     />
                 </Box> 

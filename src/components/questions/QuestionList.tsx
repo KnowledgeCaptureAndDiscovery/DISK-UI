@@ -90,8 +90,6 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         let name = q.name.endsWith('?') ? q.name.substring(0, q.name.length-1) : q.name;
         let parts : string[] = name.split(varPattern);
 
-        console.log(parts);
-
         return (<Fragment>
             {parts.map((txt:string, i:number) => i%2===variableStep ?
                 <span key={i}>{txt}</span>
@@ -138,7 +136,6 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
             if (variable ) {
                 if (variable.representation != null) {
                     let explanationParts: string[] = variable.representation.split(/(\?[a-zA-Z0-9]*)/g);
-                    console.log(values, explanationParts);
                     let val: string = explanationParts.map((p: string) => p.startsWith('?') && values[p] ? Number(values[p]).toFixed(2) : p).join('');
                     values[variable.variableName] = val;
                 }
