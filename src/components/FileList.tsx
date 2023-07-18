@@ -46,7 +46,7 @@ export const FileList = ({type:displayType, tloi, loi, label: title, renderFiles
         });
         let newOutputs : {[name:string]: RunBinding} = {};
         Object.keys(run.outputs || {}).forEach((outName) => {
-            if (!doNoStore.some((name) => outName.startsWith(name))) {
+            if (!doNoStore.some(n => outName.startsWith(n))) {
                 newOutputs[outName] = run.outputs[outName];
             }
         });

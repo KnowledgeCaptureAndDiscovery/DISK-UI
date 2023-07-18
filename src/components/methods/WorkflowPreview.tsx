@@ -75,8 +75,14 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
     const renderWorkflowVariableBinding = (rawValue:string) => {
         let isList = rawValue.startsWith("[") && rawValue.endsWith("]");
         let value = isList ? rawValue.substring(1, rawValue.length -1) : rawValue;
+        //This is a hack, we should read the vocabulary and use the prefixes 
+        //e.g: http://localhost:8080/wings-portal/export/users/admin/Enigma/data/library.owl#SHA4fe5c4_
+        if (isList && value.includes(", ")) {
+            value = value.split(", ").map(v => v.replace(/http.*#SHA[a-zA-Z0-9]{6}_/,"")).join(", ");
+        }
+
         let color = "rgba(0, 0, 0, 0.87)";
-        let editedValue = '"' + value + '"';
+        let editedValue = isList ? value : '"' + value + '"';
         let fontS = "normal"
         if (value.startsWith("?")) {
             color = "green";

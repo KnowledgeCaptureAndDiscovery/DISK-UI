@@ -71,7 +71,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const [ putTLOI, { isLoading: isUpdating }] = usePutTLOIMutation();
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
 
-    // Viz
+    // Viz TODO: all of this needs to be reworked 
     const [shinyData, setShinyData] = React.useState<{url:string,source:string}>({url:'',source:''});
     const [brainData, setBrainData] = React.useState<{url:string,source:string}>({url:'',source:''});
     const [nViz, setNViz] = React.useState<number>(0);
@@ -281,10 +281,5 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
             {!!TLOI && <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaWorkflows} options={[]}/>}
         </Box>
-
-        {nViz > 0 && <Box>
-            <TypographySubtitle sx={{display: "inline-block"}}>Visualizations generated:</TypographySubtitle>
-            {shinyData.url && (<iframe style={{width: "100%", height: "100%", border: "0"}} src={shinyData.url}/>)}
-        </Box>}
     </Card>
 }
