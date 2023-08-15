@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, Di
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
-import { useGetPrivateFileQuery } from "redux/apis/server";
+import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface ShinyModalProps {
     source: string,
@@ -11,7 +11,7 @@ interface ShinyModalProps {
 
 export const ShinyModal = ({source, shinyUrl} : ShinyModalProps) => {
     const [open, setOpen] = useState(false);
-    const {data, isLoading:loading} = useGetPrivateFileQuery({dataSource: source, dataId: shinyUrl}, {skip:!open});
+    const {data, isLoading:loading} = useGetPrivateFileAsTextQuery({dataSource: source, dataId: shinyUrl}, {skip:!open});
     const [url, setUrl] = useState("");
 
     useEffect(() => {

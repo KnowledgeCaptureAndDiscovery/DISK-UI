@@ -46,10 +46,6 @@ export const getFileName = (text:string) => {
     return text.replace('FILE-','').replaceAll(/[-_]/g, ' ');
 }
 
-export const isInternalOutput : (name:string) => boolean = (name) => {
-    return name === "p_value" || name === "brain_visualization";
-}
-
 export const findOutputInRuns : (tloi:TriggeredLineOfInquiry|LineOfInquiry, name:string) => [string, RunBinding|null]= (tloi,name) => {
     let wfs = [...tloi.workflows, ...tloi.metaWorkflows];
     for (let i = 0; i < wfs.length; i++) {

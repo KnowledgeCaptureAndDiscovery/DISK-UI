@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import ThreeDRotationIcon from '@mui/icons-material/ThreeDRotation';
 import { BrainCfgItem, BrainVisualization } from "./BrainVisualization";
-import { useGetPrivateFileQuery } from "redux/apis/server";
+import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface BrainModalProps {
     source: string,
@@ -13,7 +13,7 @@ interface BrainModalProps {
 export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
     const [open, setOpen] = useState(false);
     const [brainCfg, setBrainCfg] = useState<BrainCfgItem[]|null>(null);
-    const {data, isLoading:loading} = useGetPrivateFileQuery({dataSource: source, dataId: brainUrl}, {skip:!open});
+    const {data, isLoading:loading} = useGetPrivateFileAsTextQuery({dataSource: source, dataId: brainUrl}, {skip:!open});
 
     useEffect(() => {
         if (brainUrl)

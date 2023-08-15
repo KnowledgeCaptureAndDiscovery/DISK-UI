@@ -62,8 +62,8 @@ export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
         'Extras': (tloi: TriggeredLineOfInquiry, i: number) =>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "end" }}>
                 <NarrativeModal tloi={tloi} />
-                <TLOIEditButton tloi={tloi} label={"Editing " + tloi.name} />
                 {renderOptionalButtons(tloi)}
+            <TLOIEditButton tloi={tloi} label={"Editing " + tloi.name} />
                 <TLOIDeleteButton tloi={tloi}/>
             </Box>
     }

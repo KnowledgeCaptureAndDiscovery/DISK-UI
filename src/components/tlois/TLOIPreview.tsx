@@ -38,7 +38,7 @@ export const TLOIPreview = ({tloi} : TLOIPreviewProps) => {
             <span><span style={{fontWeight: 'bold', color: '#333'}}>{tloi.name}</span> - <span style={{color:'#666'}}>{tloi.dateCreated}</span></span>
             <span>
                 {nViz > 0 && <span style={{marginRight: '10px'}}>This run has {nViz} visualization{nViz > 1 && 's'}</span>}
-                <span style={{width:"96px", display: "inline-block"}}>
+                <span style={{width:"120px", display: "inline-block"}}>
                     <b>P-value:</b> {displayConfidenceValue(tloi.confidenceValue)}
                 </span>
             </span>

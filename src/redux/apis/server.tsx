@@ -45,13 +45,13 @@ export const serverApi = createApi({
         responseHandler: (response) => response.text(),
       }),
     }),
-    getPrivateFile: builder.query<string, {dataSource:string, dataId:string}>({
+    getPrivateFileAsText: builder.query<string, {dataSource:string, dataId:string}>({
       query: ({ dataSource, dataId }) => ({
         url: `getData`,
         headers: DISK.headers,
         method: 'POST',
         body: {'source':dataSource, 'dataId': dataId.replace(/.*#/,"")},
-        //responseHandler: (response) => response.text(),
+        responseHandler: (response) => response.text(),
       }),
     }),
   }),
@@ -61,8 +61,8 @@ export const {
   useGetEndpointsQuery,
   useGetVocabulariesQuery,
   useQueryExternalSourceQuery,
-  useGetPrivateFileQuery,
-  useLazyGetPrivateFileQuery,
+  useGetPrivateFileAsTextQuery,
+  useLazyGetPrivateFileAsTextQuery,
   useGetPublicFileQuery,
   useLazyGetPublicFileQuery,
 } = serverApi;

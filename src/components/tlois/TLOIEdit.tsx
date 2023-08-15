@@ -137,10 +137,13 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
 
     return (
         <Fragment>
-            <Tooltip arrow placement="top" title="Create new run editing this one">
-                <IconButton onClick={() => setOpen(true)} sx={{p:0}} disabled={editableWfs.length === 0}>
-                    <EditIcon sx={{color: "gray"}}/>
-                </IconButton>
+            <Tooltip arrow placement="top" title={authenticated ?
+                "Create new run editing this one" : "You must be log in to edit this run"}>
+                <span>
+                    <IconButton onClick={() => setOpen(true)} sx={{ p: 0 }} disabled={editableWfs.length === 0 || !authenticated}>
+                        <EditIcon />
+                    </IconButton>
+                </span>
             </Tooltip>
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ m: 0, p: '8px 16px'}}>
@@ -159,7 +162,7 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell sx={{padding: "0 10px", textAlign: "end"}}>#</TableCell>
-                                        {wf.bindings.map((b:VariableBinding) => 
+                                        {wf.bindings.filter(b => !b.binding.startsWith("_")).map((b:VariableBinding) => 
                                         <TableCell sx={{padding: "0 10px"}} key={`title${b.variable}`}>
                                             {b.variable}
                                         </TableCell>)}
@@ -178,7 +181,7 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                                                     }/>
                                                 }/>
                                             </TableCell>
-                                            {wf.bindings.map((b:VariableBinding) =>
+                                            {wf.bindings.filter(b => !b.binding.startsWith("_")).map((b:VariableBinding) =>
                                             <TableCell sx={{padding: "0 10px"}} key={`cell_${b.variable}_${j}`}>
                                                 {renderName(b.collection ? getValueFromBinding(b.binding, j) : b.binding)}
                                             </TableCell>)}

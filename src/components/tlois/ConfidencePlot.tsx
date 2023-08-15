@@ -1,35 +1,15 @@
 import { Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Skeleton } from "@mui/material";
 import { Hypothesis, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import { useEffect, useState } from "react";
-import { useGetTLOIsQuery } from "redux/apis/tlois";
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    ChartData,
-    ChartOptions,
-    Chart,
-    TooltipModel,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
+    Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { findOutputInRuns, isInternalOutput } from "DISK/util";
+import { findOutputInRuns } from "DISK/util";
 import { DISK } from "redux/apis/DISK";
 import { useAuthenticated } from "redux/hooks";
+import { useFilteredTLOIs, useOutputs } from "redux/hooks/tloi";
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface ConfidencePlotProps {
     hypothesis?: Hypothesis,
@@ -37,28 +17,29 @@ interface ConfidencePlotProps {
 }
 
 export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
-    const { data: TLOIs, isLoading } = useGetTLOIsQuery();
-    const [visibleTLOIs, setVisibleTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
+    const { data: visibleTLOIs, isLoading: loadingTLOIs} = useFilteredTLOIs({
+        hypothesisId: hypothesis?.id,
+        loiId: loiId,
+        sort: (t1, t2) => t1.dateCreated.localeCompare(t2.dateCreated)
+    });
+
     const [files, setFiles] = useState<{ [key: string]: RunBinding }>({});
-    const [idToLabel, setIdToLabel] = useState<{[id:string]: string}>({});
     const [selectedFile, setSelectedFile] = useState<string>("");
+
+    const [idToLabel, setIdToLabel] = useState<{[id:string]: string}>({});
     const [contentType, setContentType] = useState<string>("");
     const [content, setContent] = useState<{[label:string]: any}>({});
-    const auth = useAuthenticated();
-
     const [data, setData] = useState<ChartData<"line", number[], unknown>>();
 
-    //Sets visible tlois 
+    const x = useOutputs({data:visibleTLOIs});
+
     useEffect(() => {
-        let cur: TriggeredLineOfInquiry[] = [];
-        if (TLOIs && TLOIs.length > 0 && hypothesis && loiId) {
-            cur = [...TLOIs];
-            if (hypothesis) cur = cur.filter((tloi) => tloi.parentHypothesisId === hypothesis.id);
-            if (loiId) cur = cur.filter((tloi) => tloi.parentLoiId === loiId);
-            cur = cur.filter((tloi) => tloi.confidenceValue > 0);
+        if (x.image && Object.keys(files).length > 0 && Object.keys(x.image).length > 0) {
+            let name = Object.keys(x.image)[0];
+            handleOutputChange(null, name);
+
         }
-        setVisibleTLOIs(cur);
-    }, [TLOIs, hypothesis, loiId]);
+    }, [x, files])
 
     //Sets output types, and create data for plot.
     useEffect(() => {
@@ -75,9 +56,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
                 [...tloi.workflows, ...tloi.metaWorkflows].forEach((wf: Workflow) => {
                     Object.values(wf.runs || {}).forEach((run: WorkflowRun) => {
                         Object.keys(run.outputs).forEach((outName) => {
-                            if (!isInternalOutput(outName)) {
                                 outputs[outName] = run.outputs[outName];
-                            }
                         })
                         nInputs += Object.keys(run.inputs).length;
                     });
@@ -106,7 +85,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
     }, [visibleTLOIs])
 
     useEffect(() => {
-        if (visibleTLOIs && visibleTLOIs.length > 0 && selectedFile && auth) {
+        if (visibleTLOIs && visibleTLOIs.length > 0 && selectedFile) {
             visibleTLOIs.forEach((tloi) => {
                 const [source, binding] = findOutputInRuns(tloi, selectedFile);
                 if (source && binding && binding.id && binding.type === "URI" && !content[idToLabel[tloi.id]]) {
@@ -136,7 +115,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
                 }
             });
         }
-    }, [visibleTLOIs, selectedFile, auth])
+    }, [visibleTLOIs, selectedFile])
 
     const getOrCreateTooltip = (chart: Chart) => {
         let tooltipEl: HTMLDivElement | undefined = chart.canvas.parentNode?.querySelector('#plot-tooltip') as HTMLDivElement;
@@ -287,7 +266,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
         },
     };
 
-    if (isLoading)
+    if (loadingTLOIs)
         return <Skeleton />;
 
     if (visibleTLOIs.length < 3)
@@ -303,7 +282,10 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
 
     return <Box>
         <Box>
-            {Object.keys(files).length > 0 &&
+            {x.image !== undefined && Object.keys(x.image || {}).length === 1 && <Box>
+                Showing {Object.keys(x.image)[0]} file.
+            </Box>}
+            {Object.keys(x.image || {}).length > 1 &&
                 <FormControl style={{display: "flex", flexDirection: "row", alignItems: "center" }}>
                     <FormLabel id="demo-row-radio-buttons-group-label" style={{marginRight: "10px"}} >Output file: </FormLabel>
                     <RadioGroup
@@ -313,7 +295,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
                         value={selectedFile}
                         onChange={handleOutputChange}
                     >
-                        {Object.keys(files).map((name) =>
+                        {Object.keys(x.image||{}).map((name) =>
                             <FormControlLabel value={name} key={name} control={<Radio />} label={name} />
                         )}
                     </RadioGroup>
