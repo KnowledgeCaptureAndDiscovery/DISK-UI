@@ -283,7 +283,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
     return <Box>
         <Box>
             {x.image !== undefined && Object.keys(x.image || {}).length === 1 && <Box>
-                Showing {Object.keys(x.image)[0]} file.
+                Showing {Object.keys(x.image)[0]} file on previews.
             </Box>}
             {Object.keys(x.image || {}).length > 1 &&
                 <FormControl style={{display: "flex", flexDirection: "row", alignItems: "center" }}>

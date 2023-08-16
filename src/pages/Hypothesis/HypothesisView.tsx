@@ -113,7 +113,7 @@ export const HypothesisView = () => {
                 <TypographySubtitle>
                     Lines of inquiry triggered to test this hypothesis and answer the question:
                 </TypographySubtitle>
-                <Button variant="outlined" onClick={onTestHypothesisClicked}>
+                <Button variant="outlined" onClick={onTestHypothesisClicked} disabled={!authenticated}>
                     <CachedIcon sx={{mr:"5px"}}/> Update
                 </Button>
             </Box>
