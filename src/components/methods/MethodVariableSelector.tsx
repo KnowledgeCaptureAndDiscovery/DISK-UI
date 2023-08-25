@@ -31,7 +31,7 @@ type OutputFieldMap = {
 const INPUT_SELECTORS : InputFieldMap = {
     VARIABLE_SELECTOR: {
         label: "Use a DISK variable",
-        tooltip: "Use a variable defined on the question template or data query. Values will be send after the query execution."
+        tooltip: "Use a variable defined on the question template or data query template. Values will be send after the query execution."
     },
     DEFAULT_VALUE: {
         label: "Use workflow default value",

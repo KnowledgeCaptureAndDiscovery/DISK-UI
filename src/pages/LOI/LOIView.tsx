@@ -90,7 +90,7 @@ export const LOIView = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data:</TypographySubtitle>
+            <TypographySubtitle>Data query:</TypographySubtitle>
             <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
                 <Box>
                     <TypographyLabel>Data query explanation:</TypographyLabel>
@@ -102,15 +102,15 @@ export const LOIView = () => {
                         )
                     }
                 </Box>
-                <Tooltip arrow title={(formalView? "Hide" : "Show") + " data query"}>
+                <Tooltip arrow title={(formalView? "Hide" : "Show") + " query template"}>
                     <Button sx={{p:0}} onClick={() => setFormalView(!formalView)}>
                         {formalView? <VisibilityIcon sx={{mr:'10px'}}/> : <VisibilityOffIcon sx={{mr:'10px'}}/>}
-                        Data query
+                        Data query template
                     </Button>
                 </Tooltip>
             </Box>
             {formalView && (<Fragment>
-                <TypographySection>Data query:</TypographySection>
+                <TypographySection>Data query template:</TypographySection>
                 <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
                     <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
                     {loadingEndpoints ? 
@@ -138,7 +138,7 @@ export const LOIView = () => {
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>
                 <Box>
-                    <TypographyLabel>Columns to show on table:</TypographyLabel>
+                    <TypographyLabel>Dataset information to be shown:</TypographyLabel>
                     {loading ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
                         (!!LOI && LOI.tableVariables ? 
@@ -148,7 +148,7 @@ export const LOIView = () => {
                     }
                 </Box>
                 <Box>
-                    <TypographyLabel>Description of the table:</TypographyLabel>
+                    <TypographyLabel>Description of the datasets:</TypographyLabel>
                     {loading?
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
                         (!!LOI && LOI.tableDescription ? 

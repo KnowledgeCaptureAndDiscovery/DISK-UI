@@ -252,11 +252,11 @@ export const LOIEditor = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data:</TypographySubtitle>
+            <TypographySubtitle>Data query:</TypographySubtitle>
             <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
 
             <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-                <TypographySection>Data query:</TypographySection>
+                <TypographySection>Data query template:</TypographySection>
                 <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
             <Box sx={{display: "flex", alignItems: "end"}}>
@@ -298,8 +298,8 @@ export const LOIEditor = () => {
                 <FormHelperText sx={{fontSize: ".9rem"}}>
                     When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
                 </FormHelperText>
-                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Columns to show on table:" placeholder="?var1 ?var2 ..." value={tableVariables} onChange={(e) => setTableVariables(e.target.value)}/>
-                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Brief description of the table:" value={tableExplanation} onChange={(e) => setTableDescription(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Dataset information to be shown:" placeholder="?var1 ?var2 ..." value={tableVariables} onChange={(e) => setTableVariables(e.target.value)}/>
+                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Description of the datasets:" value={tableExplanation} onChange={(e) => setTableDescription(e.target.value)}/>
             </Box>
         </Box>
         <Divider/>

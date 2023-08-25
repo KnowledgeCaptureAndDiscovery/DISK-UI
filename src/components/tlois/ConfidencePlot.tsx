@@ -2,14 +2,13 @@ import { Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Skele
 import { Hypothesis, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
-    Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, } from 'chart.js';
+    Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, LogarithmicScale } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { findOutputInRuns } from "DISK/util";
 import { DISK } from "redux/apis/DISK";
-import { useAuthenticated } from "redux/hooks";
 import { useFilteredTLOIs, useOutputs } from "redux/hooks/tloi";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LogarithmicScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface ConfidencePlotProps {
     hypothesis?: Hypothesis,
@@ -248,6 +247,11 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
     // Plot config
     const options: ChartOptions<"line"> = {
         responsive: true,
+        scales: {
+            y: {
+                type: "logarithmic",
+            }
+        },
         aspectRatio: 4,
         plugins: {
             legend: {
@@ -304,7 +308,7 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
         </Box>
         {data &&
             <Box style={{height:"250px"}}>
-                <Line options={options} data={data} />
+                <Line options={options} data={data}/>
             </Box>
         }
     </Box>
