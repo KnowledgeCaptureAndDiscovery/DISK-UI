@@ -3,6 +3,8 @@ formats: all
 mkdocs:
   fail_on_warning: false
 build:
+  tools:
+    python: "3.11"
   os: ubuntu-22.04
 python:
   install:
