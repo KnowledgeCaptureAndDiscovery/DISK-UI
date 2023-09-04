@@ -1,4 +1,8 @@
 site_name: DISK
+extra_css:
+  - assets/versions.css
+extra_javascript:
+  - assets/versions.js
 
 extra:
   version:
