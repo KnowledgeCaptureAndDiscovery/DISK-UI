@@ -1,43 +1,43 @@
 site_name: DISK
-extra_css:
-- assets/versions.css
-extra_javascript:
-- assets/versions.js
+
+extra:
+  version:
+    provider: mike
 
 repo_url: https://github.com/KnowledgeCaptureAndDiscovery/DISK-UI
 edit_uri: edit/main/docs/
 nav:
   - Overview: index.md
   - Concepts: concepts.md
- # - Getting Started: getting-started.md
-  - User Guide: 
-    - user-guide/index.md
-    - user-guide/write-hypothesis.md
-    - user-guide/test-hypothesis.md
-  - Advanced User Guide: 
-    - advanced-user-guide/index.md
-    - advanced-user-guide/steps/add-basic-info.md
-    - advanced-user-guide/steps/write-query.md
-    - advanced-user-guide/steps/specify-workflow.md
-    - Add questions:
-      - advanced-user-guide/questions/overview.md 
-      - advanced-user-guide/questions/disk-ontologies.md
-      - advanced-user-guide/questions/question-ontology.md
-      - advanced-user-guide/questions/extending-ontology.md
-    - Add workflows:
-      - advanced-user-guide/running-workflows.md
-      - Example: advanced-user-guide/workflows/bike-example.md
-  - Developer Guide: 
-    - developer-guide/index.md
-    - developer-guide/architecture.md
-    - developer-guide/data-adapter.md
-    - developer-guide/method-adapter.md
-    - developer-guide/contributing.md
+  # - Getting Started: getting-started.md
+  - User Guide:
+      - user-guide/index.md
+      - user-guide/write-hypothesis.md
+      - user-guide/test-hypothesis.md
+  - Advanced User Guide:
+      - advanced-user-guide/index.md
+      - advanced-user-guide/steps/add-basic-info.md
+      - advanced-user-guide/steps/write-query.md
+      - advanced-user-guide/steps/specify-workflow.md
+      - Add questions:
+          - advanced-user-guide/questions/overview.md
+          - advanced-user-guide/questions/disk-ontologies.md
+          - advanced-user-guide/questions/question-ontology.md
+          - advanced-user-guide/questions/extending-ontology.md
+      - Add workflows:
+          - advanced-user-guide/running-workflows.md
+          - Example: advanced-user-guide/workflows/bike-example.md
+  - Developer Guide:
+      - developer-guide/index.md
+      - developer-guide/architecture.md
+      - developer-guide/data-adapter.md
+      - developer-guide/method-adapter.md
+      - developer-guide/contributing.md
   - Software:
-    - admin-guide/index.md
-    - admin-guide/installation.md 
-    - admin-guide/configuration.md
-    - developer-guide/contributing.md
+      - admin-guide/index.md
+      - admin-guide/installation.md
+      - admin-guide/configuration.md
+      - developer-guide/contributing.md
 
 theme:
   name: material
@@ -46,10 +46,9 @@ theme:
   palette:
     primary: teal
 
-
 markdown_extensions:
-- codehilite
-- admonition
-- toc:
-    toc_depth : "1-1"
-    permalink: true
+  - codehilite
+  - admonition
+  - toc:
+      toc_depth: "1-1"
+      permalink: true
