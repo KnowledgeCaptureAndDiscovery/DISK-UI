@@ -9,10 +9,12 @@ interface QuestionVariableProps {
     options: string[],
     bindings: VariableBinding[],
     onChange?: (newBindings:VariableBinding[]) => void,
+    meta?: boolean,
+    storedOutputs?: string[]
 }
 
 //TODO: Continue adding bindings here!
-export const MethodVariableList = ({method, options, bindings, onChange}: QuestionVariableProps) => {
+export const MethodVariableList = ({method, options, bindings, onChange, meta=false, storedOutputs=[]}: QuestionVariableProps) => {
     const [bindingsMap, setBindingsMap] = useState<{[id:string]:VariableBinding}>({});
     const {data:methodVariables, isLoading } = useGetWorkflowVariablesQuery(
         {id:method.name, source:method.source},
@@ -82,6 +84,8 @@ export const MethodVariableList = ({method, options, bindings, onChange}: Questi
                         options={options}
                         key={`ip_${inp.name}`}
                         value={bindingsMap[inp.name]}
+                        meta={meta}
+                        params={true}
                         onChange={onBindingChange}
                     />) }
                 { inputData.map((inp:MethodVariables) => 
@@ -91,6 +95,8 @@ export const MethodVariableList = ({method, options, bindings, onChange}: Questi
                         key={`id_${inp.name}`}
                         value={bindingsMap[inp.name]}
                         onChange={onBindingChange}
+                        meta={meta}
+                        storedOutputs={storedOutputs}
                     />) }
             </Fragment>
         ) : (

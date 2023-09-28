@@ -1,7 +1,7 @@
 import { Box, TextField, IconButton, Skeleton, Tooltip, Checkbox, FormControlLabel, FormGroup } from "@mui/material"
 import { Link } from "react-router-dom"
 import CancelIcon from '@mui/icons-material/Cancel';
-import { TypographySubtitle } from "./Styles";
+import { TypographySection } from "./Styles";
 import { useEffect, useState } from "react";
 
 interface EditableHeaderProps {
@@ -97,8 +97,8 @@ export const TriggerConditionEditor = ({defaultValue, onChange}:TriggerCondition
         }
     }, [defaultValue]);
 
-    return <FormGroup row={true}>
-        <TypographySubtitle>Trigger condition:</TypographySubtitle>
+    return <FormGroup row={true} style={{display:"flex", alignItems: "center"}}>
+        <TypographySection style={{marginRight: '5px'}}>Trigger condition:</TypographySection>
         <Tooltip arrow title="This line of inquiry will not be triggered">
             <FormControlLabel control={<Checkbox size="small" checked={disabled} onChange={(e) => onCheckboxChange('DISABLED', e.target.checked)}/>} label="Disabled" />
         </Tooltip>

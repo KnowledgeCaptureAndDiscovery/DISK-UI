@@ -17,11 +17,14 @@ interface WorkflowListProps {
     onChange?: (workflows:Workflow[], metaWorkflows:Workflow[]) => void;
 }
 
+export const STORED_OUTPUTS = ['_DOWNLOAD_ONLY_', '_IMAGE_', '_VISUALIZE_', '_CONFIDENCE_VALUE_'];
+
 export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options, onEditStateChange:sendEditChange, onChange:notifyChange, minimal=false} : WorkflowListProps) => {
     const [addingWorkflow, setAddingWorkflow] = React.useState(false);
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
     const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow>();
+    const [storedOutputs, setStoredOutputs] = React.useState<string[]>([]);
 
     const [editingIndex, setEditingIndex] = React.useState<number>(-1);
     const [editingMeta, setEditingMeta] = React.useState<boolean>(false);
@@ -33,6 +36,18 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
     useEffect(() => {
         setMetaWorkflows(inputMetaworkflows);
     }, [inputMetaworkflows]);
+
+    useEffect(() => {
+        //Updates the possible outputs that meta-workflows can use.
+        let newBindings : string[] = [];
+        workflows.forEach(wf => {
+            wf.bindings.forEach(b => {
+                if (STORED_OUTPUTS.some(flag => flag === b.binding))
+                    newBindings.push(b.variable);
+            })
+        });
+        setStoredOutputs(newBindings);
+    }, [workflows]);
 
     const toggleEdition = (meta:boolean=false) => {
         if (addingWorkflow && selectedWorkflow) {
@@ -135,7 +150,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         </Box> 
         )}
 
-        {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow} options={options} onSave={onWorkflowSave}></WorkflowEditor> : ""}
+        {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow} options={options} onSave={onWorkflowSave} meta={editingMeta} storedOutputs={storedOutputs}/> : ""}
         {workflows.length > 0 ? 
             <Box>
                 {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 

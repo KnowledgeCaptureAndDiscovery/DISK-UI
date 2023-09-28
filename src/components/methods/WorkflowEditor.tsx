@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, Typography, Grid, Button } from "@mui/material"
 import { Method, VariableBinding, Workflow } from "DISK/interfaces";
-import React, { useEffect } from "react"
+import React, { Fragment, useEffect } from "react"
 import AddIcon from '@mui/icons-material/Add';
 import { MethodVariableList } from "./MethodVariableList";
 import { useGetWorkflowsQuery } from "redux/apis/workflows";
@@ -9,9 +9,11 @@ interface WorkflowEditorProps {
     options:    string[],
     workflow?:  Workflow,
     onSave?:    (workflow:Workflow) => void,
+    meta?:      boolean,
+    storedOutputs?: string[]
 }
 
-export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : WorkflowEditorProps) => {
+export const WorkflowEditor = ({options, workflow, onSave:notifyParent, meta=false, storedOutputs=[]} : WorkflowEditorProps) => {
     const [selected, setSelected] = React.useState<Method|null>(null);
     const [selectedLabel, setSelectedLabel] = React.useState("");
     const [description, setDescription] = React.useState("");
@@ -107,7 +109,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent} : Workfl
                 />
             </Grid>
         </Grid>
-        {!!selected && <MethodVariableList options={options} method={selected} bindings={variableBindings} onChange={onBindingsChange}/>}
+        {!!selected && <MethodVariableList options={options} method={selected} bindings={variableBindings} onChange={onBindingsChange} meta={meta} storedOutputs={storedOutputs}/>}
         <TextField label="Workflow description" placeholder="You can add a description of what this workflow does here" 
                 sx={{width:"100%", mb:"5px"}} size='small'
                 value={description} onChange={(e) => setDescription(e.target.value)} />
