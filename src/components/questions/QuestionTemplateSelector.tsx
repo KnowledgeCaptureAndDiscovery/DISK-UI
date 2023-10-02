@@ -15,6 +15,7 @@ export const QuestionTemplateSelector = ({title, required, questionId, onChange}
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [selectedQuestionLabel, setSelectedQuestionLabel] = React.useState<string>("");
     const [pristine, setPristine] = React.useState<boolean>(true);
+    const [categorySize, setCategorySize] = React.useState<number>(0);
 
     React.useEffect(() => {
         if (questions && questions.length > 0 && questionId) {
@@ -23,6 +24,17 @@ export const QuestionTemplateSelector = ({title, required, questionId, onChange}
                 onQuestionChange(question);
         }
     }, [questions, questionId]);
+
+    React.useEffect(() => {
+        let n : number = 0;
+        if (questions) {
+            questions.forEach(q => {
+                if (q.category && q.category.name)
+                    n += 1;
+            });
+        }
+        setCategorySize(n);
+    }, [questions]);
 
     const onQuestionChange = (newQuestion:Question|null) => {
         setSelectedQuestion(newQuestion);
@@ -34,7 +46,7 @@ export const QuestionTemplateSelector = ({title, required, questionId, onChange}
         <FormHelperText sx={{ margin: "2px" }}> {title} </FormHelperText>
         <Autocomplete id="select-question" size="small" fullWidth sx={{ marginTop: "5px" }}
             value={selectedQuestion}
-            groupBy={(option) => option.category ? option.category.name : 'No category'}
+            groupBy={categorySize > 0 ? (option) => option.category ? option.category.name : 'No category' : undefined}
             onChange={(_, newQ) => onQuestionChange(newQ)}
             inputValue={selectedQuestionLabel}
             onInputChange={(_, newIn) => setSelectedQuestionLabel(newIn)}

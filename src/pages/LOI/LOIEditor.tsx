@@ -259,23 +259,21 @@ export const LOIEditor = () => {
                 <TypographySection>Data query template:</TypographySection>
                 <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
-            <Box sx={{display: "flex", alignItems: "end"}}>
-                {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/> :
-                    <Box>
-                        <Box sx={{display: "inline", marginRight: "10px", fontWeight: 'bold', }}>Data source:</Box>
-                        <Select size="small" sx={{display: 'inline-block', minWidth: "150px", marginRight: '10px'}} variant="standard"  label={"Data source:"} required
-                                error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
-                            <MenuItem value="" disabled> None </MenuItem>
-                            {(endpoints||[]).map((endpoint:DataEndpoint) => 
-                                <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
-                                    {endpoint.name}
-                                </MenuItem>)
-                            }
-                        </Select>
-                        {renderDescription(dataSourceDescription)}
-                    </Box>
-                }
-            </Box>
+            {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/> :
+                <Box sx={{display: "flex", alignItems: "end"}}>
+                    <Box sx={{display: "inline", marginRight: "10px", fontWeight: 'bold', }}>Data source:</Box>
+                    <Select size="small" sx={{display: 'inline-block', minWidth: "150px", marginRight: '10px'}} variant="standard"  label={"Data source:"} required
+                            error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
+                        <MenuItem value="" disabled> None </MenuItem>
+                        {(endpoints||[]).map((endpoint:DataEndpoint) => 
+                            <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
+                                {endpoint.name}
+                            </MenuItem>)
+                        }
+                    </Select>
+                    {renderDescription(dataSourceDescription)}
+                </Box>
+            }
             <Box sx={{fontSize: "0.94rem"}} >
                 <Card variant="outlined" sx={{
                         ...{mt: "8px", p: "0px", position: "relative", overflow:"visible", pt:"10px"},
