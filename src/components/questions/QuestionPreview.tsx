@@ -7,7 +7,6 @@ import { normalizeTextValue } from "./QuestionList";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { FormalExpressionView } from "./FormalExpressionView";
 import { createTemplateFragments, addBindingsToQuestionGraph, TemplateFragment, bindingsToIdValueMap, getAllQuestionVariables } from "./QuestionHelpers";
-import { StrStrMap } from "redux/slices/forms";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -26,7 +25,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     const {data: questions} = useGetQuestionsQuery();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [formalView, setFormalView] = React.useState<boolean>(false);
-    const [idToRepresentation, setIdToRepresentation] = React.useState<StrStrMap>({});
+    const [idToRepresentation, setIdToRepresentation] = React.useState<{[id:string]:string}>({});
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
     const [templateFragments, setTemplateFragments] = React.useState<TemplateFragment[]>([]);
 
@@ -50,21 +49,23 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
             let nameToUri = allQuestionVariables.reduce((acc,cur) => {
                 acc[cur.variableName] = cur.id;
                 return acc;
-            }, {} as StrStrMap)
+            }, {} as {[id:string]:string});
+
+            let representations : {[id:string]:string}= {};
             allQuestionVariables.forEach((qv) => {
                 if (qv.representation) {
                     let rep = "";
                     qv.representation.split(varPattern).forEach((part) => {
                         rep += part.startsWith('?') ? (nameToUri[part] && idValueMap[nameToUri[part]] ? idValueMap[nameToUri[part]] : part) : part;
                     })
-                    idValueMap[qv.id] = rep;
+                    representations[qv.id] = rep;
+                } else {
+                    representations[qv.id] = idValueMap[qv.id].join(", ");
                 }
-
             })
 
-            setIdToRepresentation( selectedQuestion && bindings.length > 0 ? idValueMap : {});
+            setIdToRepresentation(selectedQuestion && bindings.length > 0 ? representations : {});
         }
-
     }, [bindings, selectedQuestion]);
 
     const  renderTemplateFragment = (frag:TemplateFragment, key:number) => {

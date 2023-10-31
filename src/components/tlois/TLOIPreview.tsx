@@ -1,6 +1,6 @@
 import { Card } from "@mui/material";
 import { TriggeredLineOfInquiry } from "DISK/interfaces";
-import { GREEN_BLUE, GREEN_YELLOW, LIGHT_GREEN, RED } from "constants/colors";
+import { CADET_BLUE, GREEN_YELLOW, LIGHT_GREEN, RED } from "constants/colors";
 import { BRAIN_FILENAME, SHINY_FILENAME, displayConfidenceValue } from "constants/general";
 import { PATH_TLOIS } from "constants/routes";
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ export const TLOIPreview = ({tloi} : TLOIPreviewProps) => {
     const color = tloi.status === "SUCCESSFUL" ?
         LIGHT_GREEN
         : (tloi.status === "RUNNING" ?
-            GREEN_BLUE
+            CADET_BLUE
             : (tloi.status === "FAILED") ? 
                 RED : GREEN_YELLOW);
 

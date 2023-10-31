@@ -103,7 +103,7 @@ export const HypothesisEditor = () => {
             questionBindings: Object.keys(formQuestionBindings).map((varId:string) => {
                 return {
                     variable: varId,
-                    binding: formQuestionBindings[varId],
+                    binding: formQuestionBindings[varId].length > 1 ? `[${formQuestionBindings[varId].join(',')}]`: formQuestionBindings[varId][0],
                     type: null
                 } as VariableBinding;
             }),

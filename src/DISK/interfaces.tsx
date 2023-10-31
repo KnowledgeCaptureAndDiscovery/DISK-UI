@@ -54,6 +54,7 @@ export type QuestionVariable = {
     variableName:       string,
     minCardinality:     number,
     maxCardinality:     number,
+    conjunction:        boolean,
     representation:     string | null,
     explanation:        string | null,
     patternFragment:    Triple[]
@@ -246,7 +247,7 @@ export interface DataEndpoint {
 
 export interface QuestionOptionsRequest {
     id:         string,
-    bindings:   {[name:string] : string};
+    bindings:   {[name:string] : string[]};
 }
 
 const _names = {}

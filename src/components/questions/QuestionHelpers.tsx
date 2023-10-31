@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Box } from "@mui/material";
 import { AnyQuestionVariable, Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
-import { StrStrMap } from "redux/slices/forms";
+import { VarBindingsMap } from "redux/slices/forms";
 
 export type TemplateFragment = {
     type: 'string',
@@ -41,19 +41,24 @@ export const createTemplateFragments : (question:Question)  => TemplateFragment[
     return fragments;
 }
 
-export const bindingsToIdValueMap : (bindings:VariableBinding[])  => StrStrMap = (bindings) => {
-    let r : StrStrMap = {};
-    (bindings||[]).forEach((vb: VariableBinding) => {
-        r[vb.variable] = vb.binding
+export const bindingsToIdValueMap : (bindings:VariableBinding[])  => VarBindingsMap = (bindings) => {
+    let r : VarBindingsMap = {};
+    (bindings||[]).filter(b => !!b.binding && b.binding !== "[]").forEach((vb: VariableBinding) => {
+        if (vb.binding.startsWith("[") && vb.binding.endsWith("]")) {
+            let strVal = vb.binding.slice(1,vb.binding.length-1);
+            r[vb.variable] = strVal.split(',');
+        } else {
+            r[vb.variable] = [vb.binding];
+        }
     });
     return r;
 }
 
-export const simpleMapToVariableBindings : (bindings:StrStrMap) => VariableBinding[] = (bindings) => {
+export const simpleMapToVariableBindings : (bindings:VarBindingsMap) => VariableBinding[] = (bindings) => {
     return Object.keys(bindings).map((varId: string) => {
         return {
             variable: varId,
-            binding: bindings[varId],
+            binding: bindings[varId].length > 1 ? `[${bindings[varId].join(',')}]` : bindings[0],
             type: null //FIXME?
         } as VariableBinding;
     });
@@ -74,27 +79,35 @@ export const validURL = (str:string) => {
         return false;  
     }
     return url.protocol === "http:" || url.protocol === "https:";
-  }
+}
 
+export const strBindingToTripleObject : (str:string) => Triple["object"] = (str:string) => {
+    return {
+        type: validURL(str) ? 'URI' : 'LITERAL',
+        value: str
+    }
+}
 
-export const addBindingsToQuestionGraph : (question:Question, bindings:StrStrMap)  => Triple[] = (question, bindings) => {
+export const addBindingsToQuestionGraph : (question:Question, bindings:VarBindingsMap)  => Triple[] = (question, bindings) => {
         let graph = getCompleteQuestionGraph(question);
         // Add binding values
         let updatedGraph : Triple[] = []
         graph.forEach((t:Triple) => {
-            let obj = t.object;
-            let objVal : string = bindings[t.object.value];
-            if (objVal) {
-                obj = {
-                    type: validURL(objVal) ? 'URI' : 'LITERAL',
-                    value: objVal,
-                }
-            }
+            let subBindings = bindings[t.subject];
+            let preBindings = bindings[t.predicate];
+            let objBindings = (bindings[t.object.value]||[]).map(strBindingToTripleObject);
 
-            updatedGraph.push({
-                subject: bindings[t.subject] || t.subject,
-                predicate: bindings[t.predicate] || t.predicate,
-                object: obj
+            //Use default value if not bind
+            if (!subBindings || subBindings.length === 0) subBindings = [t.subject];
+            if (!preBindings || preBindings.length === 0) preBindings = [t.predicate];
+            if (!objBindings || objBindings.length === 0) objBindings = [t.object];
+
+            subBindings.forEach(s => {
+                preBindings.forEach(p => {
+                    objBindings.forEach(o => {
+                        updatedGraph.push({subject: s, predicate: p, object: o});
+                    })
+                })
             });
         });
         return updatedGraph;
