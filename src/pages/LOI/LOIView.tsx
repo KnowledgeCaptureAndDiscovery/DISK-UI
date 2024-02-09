@@ -66,8 +66,8 @@ export const LOIView = () => {
             </Box>
         }
         <Divider/>
-        <Box sx={{padding:"10px"}}>
-            <Box>
+        <Box sx={{padding:"10px 10px 0 10px"}}>
+            <Box sx={{mb:"4px"}}>
                 <TypographyLabel>Description: </TypographyLabel>
                 <TypographyInline>
                     {!loading && !!LOI ? LOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}}/>}
@@ -90,27 +90,19 @@ export const LOIView = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data query:</TypographySubtitle>
-            <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
-                <Box>
-                    <TypographyLabel>Data query explanation:</TypographyLabel>
-                    {loading ? 
-                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!LOI && LOI.dataQueryExplanation ? 
-                            <TypographyInline> {LOI.dataQueryExplanation} </TypographyInline> :
-                            <InfoInline> None specified </InfoInline>
-                        )
-                    }
-                </Box>
-                <Tooltip arrow title={(formalView? "Hide" : "Show") + " query template"}>
-                    <Button sx={{p:0}} onClick={() => setFormalView(!formalView)}>
-                        {formalView? <VisibilityIcon sx={{mr:'10px'}}/> : <VisibilityOffIcon sx={{mr:'10px'}}/>}
-                        Data query template
-                    </Button>
-                </Tooltip>
+            <TypographySubtitle>Data query template:</TypographySubtitle>
+            <Box sx={{mb:"4px"}}>
+                <TypographyLabel>Data query explanation:</TypographyLabel>
+                {loading ? 
+                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
+                    (!!LOI && LOI.dataQueryExplanation ? 
+                        <TypographyInline> {LOI.dataQueryExplanation} </TypographyInline> :
+                        <InfoInline> None specified </InfoInline>
+                    )
+                }
             </Box>
-            {formalView && (<Fragment>
-                <TypographySection>Data query template:</TypographySection>
+
+            <Box sx={{mb:"4px"}}>
                 <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
                     <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
                     {loadingEndpoints ? 
@@ -123,14 +115,29 @@ export const LOIView = () => {
                         {renderDescription(dataSource.description)}
                     </Box>
                 )}
-                <Box sx={{fontSize: "0.94rem", mb:"10px"}} >
-                    <CodeMirror value={!!LOI? LOI.dataQuery : ""}
-                        extensions={[StreamLanguage.define(sparql)]}
-                        onChange={(value, viewUpdate) => {
-                        }}
-                    />
-                </Box> 
-            </Fragment>)}
+            </Box>
+
+            <Box>
+                <Box sx={{ display: "inline-flex", alignItems: "center", mb: "4px" }}>
+                    <TypographyLabel sx={{ whiteSpace: 'nowrap' }}>Query template:</TypographyLabel>
+                    <Tooltip arrow title={(formalView? "Hide" : "Show") + " query template"}>
+                        <Button sx={{p:0}} onClick={() => setFormalView(!formalView)} style={{margin: "0px 10px"}}>
+                            {formalView? <VisibilityIcon sx={{mr:'5px'}}/> : <VisibilityOffIcon sx={{mr:'5px'}}/>}
+                            {(formalView ? "Hide" : "Show")} query template
+                        </Button>
+                    </Tooltip>
+                </Box>
+                    
+                {formalView &&                     
+                    <Box sx={{fontSize: "0.94rem", mb:"10px"}} >
+                        <CodeMirror value={!!LOI? LOI.dataQuery : ""}
+                            extensions={[StreamLanguage.define(sparql)]}
+                            onChange={(value, viewUpdate) => {
+                            }}
+                        />
+                    </Box>}
+            </Box>
+
             <Card variant="outlined" sx={{p:'5px'}}>
                 <TypographySection>Data retrieved:</TypographySection>
                 <Divider/>

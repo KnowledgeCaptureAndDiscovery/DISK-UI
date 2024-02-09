@@ -31,5 +31,8 @@ export const QuestionTemplateView = ({ question }: QuestionTemplateViewProps) =>
                 return <TextPart key={`qPart${i}`}> {frag.value} </TextPart>;
             }
         })}
+        {templateFragments.length > 0 &&  templateFragments[templateFragments.length-1].value != '?' &&
+            <TextPart>?</TextPart>
+        }
     </Box>
 }
