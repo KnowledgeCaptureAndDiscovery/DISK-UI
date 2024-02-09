@@ -252,11 +252,11 @@ export const LOIEditor = () => {
         <Divider/>
 
         <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data query:</TypographySubtitle>
+            <TypographySubtitle>Data query template:</TypographySubtitle>
             <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
 
             <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-                <TypographySection>Data query template:</TypographySection>
+                <TypographySection>Template:</TypographySection>
                 <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
             </Box>
             {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/> :
