@@ -41,7 +41,7 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
         (bindings||[]).forEach((varBindings:VariableBinding) => {
             let curVar = allVariables.filter((v:AnyQuestionVariable) => (v.id === varBindings.variable))[0];
             if (curVar)
-                idToValue[curVar.id] = varBindings.binding;
+                idToValue[curVar.id] = varBindings.binding[0];
         });
         if (selectedQuestion) {
             dispatch(setQuestionBindings(idToValue));

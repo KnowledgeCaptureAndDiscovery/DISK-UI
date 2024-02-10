@@ -19,17 +19,18 @@ export const TLOIPreview = ({tloi} : TLOIPreviewProps) => {
                 RED : GREEN_YELLOW);
 
     let nViz = 0;
-    [ ...tloi.workflows, ...tloi.metaWorkflows ].forEach((wf) => {
-        Object.values(wf.runs||{}).forEach((run) => {
-            if (run.outputs) {
-                Object.keys(run.outputs).forEach(((name:string) => {
-                    if (name === SHINY_FILENAME || name === BRAIN_FILENAME) {
-                        nViz += 1;
-                    }
-                }));
-            }
-        });
-    });
+    // TODO:
+    //[ ...tloi.workflows, ...tloi.metaWorkflows ].forEach((wf) => {
+    //    Object.values(wf.runs||{}).forEach((run) => {
+    //        if (run.outputs) {
+    //            Object.keys(run.outputs).forEach(((name:string) => {
+    //                if (name === SHINY_FILENAME || name === BRAIN_FILENAME) {
+    //                    nViz += 1;
+    //                }
+    //            }));
+    //        }
+    //    });
+    //});
 
 
     return (
@@ -39,7 +40,7 @@ export const TLOIPreview = ({tloi} : TLOIPreviewProps) => {
             <span>
                 {nViz > 0 && <span style={{marginRight: '10px'}}>This run has {nViz} visualization{nViz > 1 && 's'}</span>}
                 <span style={{width:"120px", display: "inline-block"}}>
-                    <b>P-value:</b> {displayConfidenceValue(tloi.confidenceValue)}
+                    <b>P-value:</b> {/*displayConfidenceValue(tloi.confidenceValue)*/}
                 </span>
             </span>
         </Card>

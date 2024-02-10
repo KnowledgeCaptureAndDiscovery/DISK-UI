@@ -37,12 +37,12 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
             let collectionBindings : VariableBinding[] = [];
             let max : number = 0;
             wf.bindings.forEach((vb:VariableBinding) => {
-                if (vb.collection) {
-                    let l : number = vb.binding.split(", ").length;
+                if (vb.isArray) {
+                    let l : number = vb.binding.length;
                     if (l > max) max = l;
                     collectionBindings.push(vb);
                 } else {
-                    if (!(vb.binding.startsWith("_") && vb.binding.endsWith("_"))) {
+                    if (!(vb.binding[0].startsWith("_") && vb.binding[0].endsWith("_"))) {
                         simpleBindings.push(vb);
                     }
                 }
@@ -72,9 +72,9 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
     }, [wf]);
 
     const renderBinding = (binding:VariableBinding, index:number) => {
-        let value : string = binding.collection ?
-            getBindingAsArray(binding.binding)[index]
-            : binding.binding;
+        let value : string = binding.isArray ?
+            binding.binding[index]
+            : binding.binding[0];
 
         console.log(binding,allInputs);
         if (value.startsWith('SHA') && allInputs[value]) {
@@ -169,7 +169,7 @@ export const WorkflowPreview = ({workflow:wf, button:externalButton, onDelete} :
                                 <b>{binding.variable}: </b>
                             </Grid>
                             <Grid item xs={9} md={10}>
-                                {renderWorkflowVariableBinding(binding.binding)}
+                                {renderWorkflowVariableBinding(binding.binding[0])}
                             </Grid>
                         </Grid>
                     )}

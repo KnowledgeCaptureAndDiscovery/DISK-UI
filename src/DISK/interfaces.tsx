@@ -1,28 +1,45 @@
+import { extend } from "leaflet";
+
 export const idPattern = new RegExp(/.*\//); 
 export const varPattern = new RegExp(/(\?[a-zA-Z0-9]*)/g);
 
-export interface Hypothesis {
-    id:               string,
-    name:             string,
-    description:      string,
-    author:           string,
-    notes?:           string,
-    dateCreated?:     string,
-    dateModified?:    string,
-    questionId?:        string,
-    parentId?:        string, //Parent hypothesis ID
-    questionBindings: VariableBinding[],
-    graph?: {
-        triples: Triple[]
-    }
+export interface DISKResource {
+    id:             string;
+    name:           string;
+    description:    string;
+    dateCreated?:   string;
+    dateModified?:  string;
+    notes:          string;
+    author?:        Entity;
+}
+  
+export interface Entity {
+    name: string;
+    email: string;
+    id: string;
+}
+
+export interface Goal extends DISKResource {
+    question: Question | {id:string},
+    questionBindings: VariableBinding[];
+    graph: Graph;
+}
+
+export interface Graph {
+    triples: Triple[]
 }
 
 export interface VariableBinding { /// variable = binding
-    variable:   string,
-    binding:    string,
-    type:       string|null,
-    collection?: boolean,
+    variable:   string;
+    binding:    string[];
+    type:       BindingType;
+    isArray:    boolean;
+    datatype?:  string;
 }
+
+type InputType = 'DEFAULT' | 'FREEFORM' | 'DATA_QUERY' | 'QUERY_VARIABLE' | 'WORKFLOW_VARIABLE' | 'DISK_DATA';
+type OutputType = 'DROP' | 'SAVE' | 'PROCESS';
+type BindingType = InputType | OutputType;
 
 export interface Triple {
     subject:    string,
@@ -99,6 +116,83 @@ export interface VariableOption {
     commnet: string | null,
 }
 
+export interface LineOfInquiry extends DISKResource {
+    updateCondition:    number;
+    goalQuery:          string;
+    question:           Question;
+    dataQueryTemplate:  DataQueryTemplate;
+    workflowSeeds:      WorkflowSeed[];
+    metaWorkflowSeeds:  WorkflowSeed[];
+}
+
+export interface DataQueryTemplate {
+    endpoint:           Endpoint;
+    template:           string;
+    description:        string;
+    variablesToShow:    string;
+    footnote:           string;
+}
+
+export interface Endpoint {
+    name:   string;
+    url:    string;
+}
+
+export interface WorkflowSeed {
+    id:             string;
+    link:           string;
+    description:    string;
+    source:         Endpoint;
+    parameters:     VariableBinding[];
+    inputs:         VariableBinding[];
+}
+
+export interface TriggeredLineOfInquiry extends LineOfInquiry{
+    status:         Status;
+    parentLoi:      LineOfInquiry;
+    parentGoal:     Goal;
+    queryResults:   DataQueryResult;
+    workflows:      WorkflowInstantiation[];
+    metaWorkflows:  WorkflowInstantiation[];
+}
+
+export type Status = 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL' | 'PENDING';
+
+export interface DataQueryResult extends DataQueryTemplate {
+    query:      string;
+    results:    string;
+}
+
+export interface WorkflowInstantiation extends WorkflowSeed {
+    status:         Status;
+    dataBindings:   VariableBinding[] ;
+    executions:     Execution[];
+}
+
+export interface Execution extends ExecutionRecord {
+    externalId:     string ;
+    result:         GoalResult ;
+    steps:          ExecutionRecord ;
+    inputs:         VariableBinding;
+    outputs:        VariableBinding;
+
+}
+
+export interface GoalResult {
+    confidenceType:     string;
+    confidenceValue:    string;
+}
+
+export interface ExecutionRecord {
+    log:        string;
+    startDate:  string;
+    endDate:    string;
+    status:     Status;
+}
+
+// UNTESTED BELOW
+
+
 export interface ExecutionInfo {
     status:  'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL' | 'PENDING';
     startTime: string,
@@ -138,50 +232,6 @@ export interface Workflow {
         hypothesis: MetaInfo,
         revisedHypothesis: MetaInfo,
     }
-}
-
-export interface LineOfInquiry {
-    id: string,
-    name: string,
-    description: string,
-    hypothesisQuery: string,
-    dataQuery: string,
-    workflows: Workflow[],
-    metaWorkflows: Workflow[],
-    notes: string,
-    author: string,
-    dateCreated: string,
-    dateModified: string,
-    tableVariables: string,
-    tableDescription: string,
-    dataQueryExplanation: string,
-    dataSource: string,
-    questionId: string,
-    updateCondition: number,
-}
-
-export interface TriggeredLineOfInquiry {
-    id: string,
-    name: string,
-    description: string,
-    status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL',
-    parentLoiId: string,
-    parentHypothesisId: string,
-    workflows: Workflow[],
-    metaWorkflows: Workflow[],
-    dataQuery: string,
-    notes: string,
-    author: string,
-    dateCreated: string,
-    dateModified: string,
-    tableVariables: string,
-    tableDescription: string,
-    dataQueryExplanation: string,
-    dataSource: string,
-    queryResults: string,
-    // All of these are workflow-run related.
-    confidenceValue: number,
-    confidenceType: string,
 }
 
 

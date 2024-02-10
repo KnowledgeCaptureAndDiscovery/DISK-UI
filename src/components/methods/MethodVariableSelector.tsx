@@ -111,30 +111,32 @@ export const MethodVariableSelector = ({variable, options, value, onChange, meta
         console.log("X> ", value, selected);
         if (variable.input) {
             if (value) {
-                if (value.binding !== selected) {
-                    let strValue : string = value.collection ? value.binding.substring(1, value.binding.length-1) : value.binding;
-                    setSelected(strValue);
-                    setSelectedType(value.type ? value.type : '');
-                    if (strValue.startsWith('?'))
-                        setSelectorKind('VARIABLE_SELECTOR');
-                    if (strValue.startsWith('!'))
-                        setSelectorKind('WORKFLOW_OUTPUT');
-                    else if (strValue === "_CSV_")
-                        setSelectorKind('FULL_QUERY');
-                    else if (strValue === "_RUN_DATE_")
-                        setSelectorKind('WORKFLOW_DATE');
-                    else
-                        setSelectorKind('USER_INPUT');
-                }
+                // TODO:
+                //if (value.binding !== selected) {
+                //    let strValue : string = value.collection ? value.binding.substring(1, value.binding.length-1) : value.binding;
+                //    setSelected(strValue);
+                //    setSelectedType(value.type ? value.type : '');
+                //    if (strValue.startsWith('?'))
+                //        setSelectorKind('VARIABLE_SELECTOR');
+                //    if (strValue.startsWith('!'))
+                //        setSelectorKind('WORKFLOW_OUTPUT');
+                //    else if (strValue === "_CSV_")
+                //        setSelectorKind('FULL_QUERY');
+                //    else if (strValue === "_RUN_DATE_")
+                //        setSelectorKind('WORKFLOW_DATE');
+                //    else
+                //        setSelectorKind('USER_INPUT');
+                //}
             } else {
                 setSelectorKind('DEFAULT_VALUE');
             }
         } else {
             if (value) {
-                if (value.binding !== outputValue) {
-                    let strValue: string = value.collection ? value.binding.substring(1, value.binding.length - 1) : value.binding;
-                    setOutputValue(strValue as OutputSelectorIds);
-                }
+                //TODO:
+                //if (value.binding !== outputValue) {
+                //    let strValue: string = value.collection ? value.binding.substring(1, value.binding.length - 1) : value.binding;
+                //    setOutputValue(strValue as OutputSelectorIds);
+                //}
             } else {
                 setOutputValue('_DO_NO_STORE_');
             }
@@ -159,31 +161,32 @@ export const MethodVariableSelector = ({variable, options, value, onChange, meta
 
             );
 
-            onChange({
-                variable: variable.name,
-                collection: variable.dimensionality>0,
-                type: selectedType ? selectedType : null,
-                binding: 
-                    newSelector === 'DEFAULT_VALUE' ?
-                        ""
-                    :
-                        (newSelector === 'FULL_QUERY' ? 
-                            "_CSV_" 
-                        :
-                            (newSelector === 'WORKFLOW_DATE' ?
-                                "_RUN_DATE_"
-                            :
-                                (newSelector === "VARIABLE_SELECTOR" ?
-                                    selectedValue
-                                :
-                                    (newSelector === "WORKFLOW_OUTPUT" ?
-                                        "!" + selectedValue.substring(1,selectedValue.length-1)
-                                    :
-                                        userInput)
-                                )
-                            )
-                        )
-            });
+            // TODO:
+            //onChange({
+            //    variable: variable.name,
+            //    collection: variable.dimensionality>0,
+            //    type: selectedType ? selectedType : null,
+            //    binding: 
+            //        newSelector === 'DEFAULT_VALUE' ?
+            //            ""
+            //        :
+            //            (newSelector === 'FULL_QUERY' ? 
+            //                "_CSV_" 
+            //            :
+            //                (newSelector === 'WORKFLOW_DATE' ?
+            //                    "_RUN_DATE_"
+            //                :
+            //                    (newSelector === "VARIABLE_SELECTOR" ?
+            //                        selectedValue
+            //                    :
+            //                        (newSelector === "WORKFLOW_OUTPUT" ?
+            //                            "!" + selectedValue.substring(1,selectedValue.length-1)
+            //                        :
+            //                            userInput)
+            //                    )
+            //                )
+            //            )
+            //});
         }
     }
 
@@ -191,48 +194,48 @@ export const MethodVariableSelector = ({variable, options, value, onChange, meta
         setUserInput(newInput);
         if (onChange && selectorKind === 'USER_INPUT') {
             //TODO: check if the new input is a collection if dimensionality > 0
-            onChange({
-                variable: variable.name,
-                collection: variable.dimensionality>0,
-                type: selectedType ? selectedType : null,
-                binding: newInput
-            });
+            //onChange({
+            //    variable: variable.name,
+            //    collection: variable.dimensionality>0,
+            //    type: selectedType ? selectedType : null,
+            //    binding: newInput
+            //});
         }
     }
 
     const onValueChange = (newValue:string) => {
         setSelected(newValue);
         if (onChange) {
-            onChange({
-                variable: variable.name,
-                collection: variable.dimensionality>0,
-                type: selectedType ? selectedType : null,
-                binding: newValue && variable.dimensionality > 0 ? "[" + newValue + "]" : newValue
-            });
+            //onChange({
+            //    variable: variable.name,
+            //    collection: variable.dimensionality>0,
+            //    type: selectedType ? selectedType : null,
+            //    binding: newValue && variable.dimensionality > 0 ? "[" + newValue + "]" : newValue
+            //});
         }
     }
 
     const onTypeChange = (newType:string) => {
         setSelectedType(newType);
         if (onChange) {
-            onChange({
-                variable: variable.name,
-                collection: variable.dimensionality>0,
-                type: newType ? newType : null,
-                binding: selected && variable.dimensionality > 0 ? "[" + selected + "]" : selected
-            });
+            //onChange({
+            //    variable: variable.name,
+            //    collection: variable.dimensionality>0,
+            //    type: newType ? newType : null,
+            //    binding: selected && variable.dimensionality > 0 ? "[" + selected + "]" : selected
+            //});
         }
     }
 
     const onOutputChange = (newValue:OutputSelectorIds) => {
         setOutputValue(newValue);
         if (onChange) {
-            onChange({
-                variable: variable.name,
-                collection: false,
-                type: null,
-                binding: newValue
-            });
+            //onChange({
+            //    variable: variable.name,
+            //    collection: false,
+            //    type: null,
+            //    binding: newValue
+            //});
         }
     }
 

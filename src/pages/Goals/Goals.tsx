@@ -1,13 +1,13 @@
 import { Box, Button, Card, InputAdornment, MenuItem, Select, SelectChangeEvent, Skeleton, TextField, Tooltip } from "@mui/material";
-import { Hypothesis } from "DISK/interfaces";
+import { Goal } from "DISK/interfaces";
 import React from "react";
 import AddIcon from '@mui/icons-material/Add';
 import { useUser } from "redux/hooks";
 import SearchIcon from '@mui/icons-material/Search';
-import { PATH_HYPOTHESIS_NEW } from "constants/routes";
+import { PATH_GOAL_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
-import { HypothesisList } from "components/hypothesis/HypothesesList";
-import { useGetHypothesesQuery } from "redux/apis/hypotheses";
+import { HypothesisList } from "components/goals/GoalsList";
+import { useGetGoalsQuery } from "redux/apis/goals";
 
 type OrderType = 'date'|'author';
 
@@ -15,8 +15,8 @@ interface ViewProps {
     myPage?:boolean
 }
 
-export const Hypotheses = ({myPage=false} : ViewProps) => {
-    const { data, isLoading, isError } = useGetHypothesesQuery();
+export const Goals = ({myPage=false} : ViewProps) => {
+    const { data, isLoading, isError } = useGetGoalsQuery();
     const [order, setOrder] = React.useState<OrderType>('date');
     const [searchTerm, setSearchTerm] = React.useState<string>("");
     const [authenticated, username] = useUser();
@@ -26,10 +26,10 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
         if (order) setOrder(order);
     }
 
-    const applyFilters = (hypothesis:Hypothesis) => {
+    const applyFilters = (hypothesis:Goal) => {
         //User filter
         if (myPage)
-            return username && hypothesis.author === username;
+            return username && hypothesis.author && hypothesis.author.email === username;
         //Text Filter:
         let t : string = hypothesis.name + hypothesis.description + hypothesis.author;
         if (hypothesis.notes) t += hypothesis.notes;
@@ -52,7 +52,7 @@ export const Hypotheses = ({myPage=false} : ViewProps) => {
                 </Select>
                 <Tooltip arrow title={authenticated? "Create a new hypothesis" : "You need to log in to create a new hypothesis"}>
                     <Box sx={{display:"inline-flex"}}>
-                        <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_HYPOTHESIS_NEW} disabled={!authenticated}>
+                        <Button variant="outlined" sx={{marginLeft: "4px"}} component={Link} to={PATH_GOAL_NEW} disabled={!authenticated}>
                             <AddIcon/>
                         </Button>
                     </Box>

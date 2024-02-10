@@ -8,7 +8,7 @@ import { formsSlice } from './slices/forms';
 import { questionsAPI } from './apis/questions';
 import { serverApi } from './apis/server';
 import { workflowsApi } from './apis/workflows';
-import { hypothesesAPI } from './apis/hypotheses';
+import { goalAPI } from './apis/goals';
 import { loisAPI } from './apis/lois';
 import { tloisAPI } from './apis/tlois';
 
@@ -26,7 +26,7 @@ export const store = configureStore({
     [serverApi.reducerPath]: serverApi.reducer,
     [workflowsApi.reducerPath]: workflowsApi.reducer,
     [questionsAPI.reducerPath]: questionsAPI.reducer,
-    [hypothesesAPI.reducerPath]: hypothesesAPI.reducer,
+    [goalAPI.reducerPath]: goalAPI.reducer,
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware().concat(
@@ -35,7 +35,7 @@ export const store = configureStore({
       serverApi.middleware,
       workflowsApi.middleware,
       questionsAPI.middleware,
-      hypothesesAPI.middleware,
+      goalAPI.middleware,
     ),
 });
 

@@ -38,12 +38,13 @@ export const FileList = ({type:displayType, tloi, loi, label: title, renderFiles
             return (run.outputs ? run.outputs : {})
 
         let doNoStore : string[] = [];
-        [...loi.workflows, ...loi.metaWorkflows].forEach((wf) => {
-            wf.bindings.forEach((b) => {
-                if (b.binding === '_DO_NO_STORE_')
-                    doNoStore.push(b.variable);
-            })
-        });
+        //TODO:
+        //[...loi.workflows, ...loi.metaWorkflows].forEach((wf) => {
+        //    wf.bindings.forEach((b) => {
+        //        if (b.binding === '_DO_NO_STORE_')
+        //            doNoStore.push(b.variable);
+        //    })
+        //});
         let newOutputs : {[name:string]: RunBinding} = {};
         Object.keys(run.outputs || {}).forEach((outName) => {
             if (!doNoStore.some(n => outName.startsWith(n))) {
@@ -56,7 +57,7 @@ export const FileList = ({type:displayType, tloi, loi, label: title, renderFiles
     // Adds source and all runs
     useEffect(() => {
         if (tloi) {
-            let allWfs = [ ...(tloi.workflows ? tloi.workflows : []) , ...(tloi.metaWorkflows ? tloi.metaWorkflows : []) ];
+            let allWfs : Workflow[] = []; // TODO: [ ...(tloi.workflows ? tloi.workflows : []) , ...(tloi.metaWorkflows ? tloi.metaWorkflows : []) ];
             let allRuns : RunStatus[] = [];
             let i = 0;
             allWfs.forEach((wf:Workflow) => {

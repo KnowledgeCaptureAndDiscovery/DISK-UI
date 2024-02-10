@@ -1,15 +1,15 @@
 import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, ListItem, Tooltip, Typography } from "@mui/material";
-import { AnyQuestionVariable, Hypothesis, idPattern, LineOfInquiry, Question, VariableBinding, varPattern } from "DISK/interfaces";
+import { AnyQuestionVariable, Goal, idPattern, LineOfInquiry, Question, VariableBinding, varPattern } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import { useAuthenticated } from "redux/hooks";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from "react-router-dom";
-import { PATH_HYPOTHESES, PATH_HYPOTHESIS_NEW, PATH_LOIS, PATH_LOI_NEW } from "constants/routes";
+import { PATH_GOALS, PATH_GOAL_NEW, PATH_LOIS, PATH_LOI_NEW } from "constants/routes";
 
 import ScienceIcon from '@mui/icons-material/Science';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { useGetHypothesesQuery } from "redux/apis/hypotheses";
+import { useGetGoalsQuery } from "redux/apis/goals";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { useGetLOIsQuery } from "redux/apis/lois";
 import { TextPart } from "./QuestionHelpers";
@@ -49,20 +49,20 @@ export const normalizeTextValue = (text:string) => {
 export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     const { data: questions, isLoading, isError, refetch } = useGetQuestionsQuery();
     const authenticated = useAuthenticated();
-    const { data: hypotheses } = useGetHypothesesQuery();
+    const { data: hypotheses } = useGetGoalsQuery();
     const { data: lois } = useGetLOIsQuery();
 
     const [count, setCount] = useState<{[id:string] : number}>({});
     const [sortedQuestions, setSortedQuestions] = useState<Question[]>([]);
 
-    const countQuestions = (items: Hypothesis[] | LineOfInquiry[] | undefined) => {
+    const countQuestions = (items: Goal[] | LineOfInquiry[] | undefined) => {
         if (!items) return;
         let newCount : {[id:string] : number} = {};
-        items.forEach((item:Hypothesis|LineOfInquiry) => {
-            if (item.questionId) {
-                if (!newCount[item.questionId])
-                    newCount[item.questionId] = 0;
-                newCount[item.questionId] += 1;
+        items.forEach((item:Goal|LineOfInquiry) => {
+            if (item.question.id) {
+                if (!newCount[item.question.id])
+                    newCount[item.question.id] = 0;
+                newCount[item.question.id] += 1;
             }
         });
         setCount(newCount);
@@ -102,17 +102,17 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     const renderQuestionHypotheses = (q:Question) => {
-         let myHyp : Hypothesis[] = hypotheses ? hypotheses.filter((h:Hypothesis) => h.questionId === q.id) : [];
+         let myHyp : Goal[] = hypotheses ? hypotheses.filter((h:Goal) => h.question.id === q.id) : [];
          if (myHyp.length === 0)
             return null
          return <Fragment>
             <Divider/>
             <Typography>Hypotheses based on this question:</Typography>
             <List sx={{p:0}}>
-            {myHyp.map((h:Hypothesis) => 
+            {myHyp.map((h:Goal) => 
                 <ListItem sx={{p:"4px 16px"}} key={h.id}>
                     <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
-                        component={Link} to={PATH_HYPOTHESES + '/' + h.id} key={h.id}>
+                        component={Link} to={PATH_GOALS + '/' + h.id} key={h.id}>
                         {renderHypothesisQuestionText(q, h)}
                     </Card>
                 </ListItem>)}
@@ -120,7 +120,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
          </Fragment>
     }
 
-    const renderHypothesisQuestionText = (q:Question, h:Hypothesis) => {
+    const renderHypothesisQuestionText = (q:Question, h:Goal) => {
         let parts = q.template.split(/(\?[A-Za-z0-9_]*)/);
         let values : {[name:string]:string} = {};
         let tmp : {[url:string]:string} = {};
@@ -129,7 +129,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         });
         (h.questionBindings||[]).forEach((binding:VariableBinding) => {
             if (tmp[binding.variable]) {
-                values[tmp[binding.variable]] = binding.binding;
+                values[tmp[binding.variable]] = binding.binding[0];
             }
         });
         q.variables.forEach((variable:AnyQuestionVariable) => {
@@ -156,7 +156,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
     }
 
     const renderQuestionLOIs = (q:Question) => {
-         let myLOI : LineOfInquiry[] = (lois||[]).filter((l:LineOfInquiry) => l.questionId === q.id);
+         let myLOI : LineOfInquiry[] = (lois||[]).filter((l:LineOfInquiry) => l.question.id === q.id);
          if (myLOI.length === 0)
             return null
          return <Fragment>
@@ -199,7 +199,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                             </Box>
                             <Box>
                                 <Tooltip arrow title="Create a new Hypothesis based on this template" placement="top">
-                                    <Button component={Link} to={(kind === 'hypothesis' ? PATH_HYPOTHESIS_NEW : PATH_LOI_NEW)+"?q="+q.id} disabled={!authenticated}>
+                                    <Button component={Link} to={(kind === 'hypothesis' ? PATH_GOAL_NEW : PATH_LOI_NEW)+"?q="+q.id} disabled={!authenticated}>
                                         <AddIcon sx={{mr:'5px'}}/> New
                                     </Button>
                                 </Tooltip>

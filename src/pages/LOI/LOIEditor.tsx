@@ -102,13 +102,13 @@ export const LOIEditor = () => {
         setName(loi.name);
         setDescription(loi.description);
         setNotes(loi.notes ? loi.notes : "");
-        setSelectedDataSource(loi.dataSource);
-        setDataQuery(loi.dataQuery);
-        setTableDescription(loi.tableDescription? loi.tableDescription : "");
-        setTableVariables(loi.tableVariables? loi.tableVariables : "");
-        setDataQueryExplanation(loi.dataQueryExplanation ? loi.dataQueryExplanation : "");
-        setWorkflows(loi.workflows);
-        setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
+        //setSelectedDataSource(loi.dataSource);
+        //setDataQuery(loi.dataQuery);
+        //setTableDescription(loi.tableDescription? loi.tableDescription : "");
+        //setTableVariables(loi.tableVariables? loi.tableVariables : "");
+        //setDataQueryExplanation(loi.dataQueryExplanation ? loi.dataQueryExplanation : "");
+        //setWorkflows(loi.workflows);
+        //setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
         setUpdateCondition(loi.updateCondition ? loi.updateCondition : 1);
     };
 
@@ -247,7 +247,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.questionId : "")} onQuestionChange={onQuestionChange} error={errorQuestion}/>
+            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.question.id : "")} onQuestionChange={onQuestionChange} error={errorQuestion}/>
         </Box>
         <Divider/>
 

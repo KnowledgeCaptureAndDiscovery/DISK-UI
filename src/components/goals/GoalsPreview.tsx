@@ -1,6 +1,6 @@
-import { Hypothesis, TriggeredLineOfInquiry } from "DISK/interfaces"
+import { Goal, TriggeredLineOfInquiry } from "DISK/interfaces"
 import ScienceIcon from '@mui/icons-material/Science';
-import { PATH_HYPOTHESES } from "constants/routes";
+import { PATH_GOALS } from "constants/routes";
 import { Card, Box, Typography, Tooltip, IconButton, Divider, styled, Skeleton } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
@@ -9,10 +9,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { ConfirmDialog } from "../ConfirmDialog";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
-import { useDeleteHypothesisMutation } from "redux/apis/hypotheses";
+import { useDeleteGoalMutation } from "redux/apis/goals";
 import { useGetTLOIsQuery } from "redux/apis/tlois";
 import { useEffect, useState } from "react";
 import { TLOIPreview } from "components/tlois/TLOIPreview";
+import { RE_ID } from "DISK/util";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -26,7 +27,7 @@ const TwoLines = styled(Typography)(({ theme }) => ({
 }));
 
 interface HypothesisPreviewProps {
-    hypothesis : Hypothesis,
+    hypothesis : Goal,
     displayEditButton?: boolean, 
     displayDeleteButton?: boolean
 }
@@ -37,7 +38,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
     const [
         deleteHypothesis, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result
-      ] = useDeleteHypothesisMutation();
+      ] = useDeleteGoalMutation();
 
     const { data:TLOIs, isLoading} = useGetTLOIsQuery();
 
@@ -48,10 +49,10 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
         if (TLOIs) {
             let usedLOIs = new Set<string>();
             [...TLOIs].sort((t1, t2) => {
-                return new Date(t2.dateCreated).getTime() - new Date(t1.dateCreated).getTime();
+                return new Date(t2.dateCreated!).getTime() - new Date(t1.dateCreated!).getTime();
             }).forEach((t) => {
-                if (t.parentHypothesisId === hypothesis.id && !usedLOIs.has(t.parentLoiId)) {
-                    usedLOIs.add(t.parentLoiId);
+                if (t.parentGoal.id === hypothesis.id && t.parentLoi.id && !usedLOIs.has(t.parentLoi.id)) {
+                    usedLOIs.add(t.parentLoi.id);
                     latest.push(t);
                 }
             });
@@ -85,7 +86,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
     return (
     <Card variant="outlined" sx={{margin: "10px", minHeight: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-            <Box component={Link} to={PATH_HYPOTHESES + "/" + hypothesis.id}
+            <Box component={Link} to={PATH_GOALS + "/" + hypothesis.id.replaceAll(RE_ID, "")}
                  sx={{display:"inline-flex", alignItems:"center", textDecoration: "none"}}>
                 <ScienceIcon sx={{color: "orange"}}/>
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{hypothesis.name}</Typography>
@@ -94,7 +95,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
                 {displayEditButton && (
                 <Tooltip arrow title={authenticated? "Edit" : "You need to log in to edit"}>
                     <Box sx={{display:"inline-block"}}>
-                        <IconButton component={Link} to={PATH_HYPOTHESES + "/" + hypothesis.id + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
+                        <IconButton component={Link} to={PATH_GOALS + "/" + hypothesis.id.replaceAll(RE_ID, "") + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
                             <EditIcon/>
                         </IconButton>
                     </Box>
@@ -133,7 +134,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
             </Box>
             <Box>
                 <b>Author: </b>
-                {hypothesis.author}
+                {hypothesis.author?.email}
             </Box>
         </Box>
     </Card>

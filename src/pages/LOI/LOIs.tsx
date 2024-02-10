@@ -29,7 +29,7 @@ export const LinesOfInquiry = ({myPage=false} : ViewProps) => {
     const applyFilters = (loi:LineOfInquiry) => {
         //User filter
         if (myPage)
-            return username && loi.author === username;
+            return username && loi.author?.email === username;
         //TextFilter
         let t : string = loi.name + loi.description + loi.author;
         if (loi.notes) t += loi.notes;

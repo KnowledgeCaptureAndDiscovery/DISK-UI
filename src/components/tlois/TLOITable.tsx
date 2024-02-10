@@ -54,11 +54,11 @@ export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
             <Fragment>{
                 (tloi.status === 'SUCCESSFUL' && <FileList type="output" tloi={tloi} loi={loi} label="Output files" renderFiles/>)
             }</Fragment>,
-        'Confidence Value': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Fragment>
-                {tloi.status === 'SUCCESSFUL' && displayConfidenceValue(tloi.confidenceValue)}
-                {tloi.confidenceType ? ` (${tloi.confidenceType})` : " (P-value)"}
-            </Fragment>,
+        //'Confidence Value': (tloi: TriggeredLineOfInquiry, i: number) =>
+        //    <Fragment>
+        //        {tloi.status === 'SUCCESSFUL' && displayConfidenceValue(tloi.confidenceValue)}
+        //        {tloi.confidenceType ? ` (${tloi.confidenceType})` : " (P-value)"}
+        //    </Fragment>,
         'Extras': (tloi: TriggeredLineOfInquiry, i: number) =>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "end" }}>
                 <NarrativeModal tloi={tloi} />
@@ -81,21 +81,22 @@ export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
         let shinySource : string = "";
         let brainUrl : string = "";
         let brainSource : string = "";
-        [ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:Workflow) => {
-            Object.values(wf.runs||{}).forEach((run) => {
-                if (run.outputs) {
-                    Object.keys(run.outputs).forEach(((name:string) => {
-                        if (name === SHINY_FILENAME) {
-                            shinyUrl = run ? run.outputs[name].id || "" : "";
-                            shinySource = wf.source;
-                        } else if (name === BRAIN_FILENAME) {
-                            brainUrl = run ? run.outputs[name].id || "" : "";
-                            brainSource = wf.source;
-                        }
-                    }));
-                }
-            })
-        });
+        // TODO:
+        //[ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:Workflow) => {
+        //    Object.values(wf.runs||{}).forEach((run) => {
+        //        if (run.outputs) {
+        //            Object.keys(run.outputs).forEach(((name:string) => {
+        //                if (name === SHINY_FILENAME) {
+        //                    shinyUrl = run ? run.outputs[name].id || "" : "";
+        //                    shinySource = wf.source;
+        //                } else if (name === BRAIN_FILENAME) {
+        //                    brainUrl = run ? run.outputs[name].id || "" : "";
+        //                    brainSource = wf.source;
+        //                }
+        //            }));
+        //        }
+        //    })
+        //});
 
         return (<Fragment>
             {!!shinyUrl && (<ShinyModal shinyUrl={shinyUrl} source={shinySource}/>)}
