@@ -5,7 +5,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useGetTLOIsQuery } from "redux/apis/tlois";
 import { useEffect, useState } from "react";
-import { Hypothesis, TriggeredLineOfInquiry } from "DISK/interfaces";
+import { Goal, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { TLOITable } from "./TLOITable";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
 import { OutputSelectorIds } from "components/methods/MethodVariableSelector";
@@ -13,10 +13,10 @@ import { ImagePreview } from "components/files/ImagePreview";
 
 interface TLOIBundleProps {
     loiId: string,
-    hypothesis: Hypothesis
+    goal: Goal
 }
 
-export const TLOIBundle = ({loiId, hypothesis}:TLOIBundleProps) => {
+export const TLOIBundle = ({loiId, goal}:TLOIBundleProps) => {
     const { data:TLOIs, isLoading:TLOILoading} = useGetTLOIsQuery();
     const { data:loi, isLoading:LOILoading} = useGetLOIByIdQuery(loiId);
     const [list, setList] = useState<TriggeredLineOfInquiry[]>([]);
@@ -29,13 +29,13 @@ export const TLOIBundle = ({loiId, hypothesis}:TLOIBundleProps) => {
         //Create list for this hypothesis and line of inquiry
         if (!TLOILoading && !!TLOIs && TLOIs.length > 0) {
             let curList = [ ...TLOIs ];
-            if (loiId) curList = curList.filter((tloi) => tloi.parentLoiId === loiId);
-            if (hypothesis && hypothesis.id) curList = curList.filter((tloi) => tloi.parentHypothesisId === hypothesis.id);
+            if (loiId) curList = curList.filter((tloi) => tloi.parentLoi.id === loiId);
+            if (goal && goal.id) curList = curList.filter((tloi) => tloi.parentGoal.id === goal.id);
             setList(curList);
         } else {
             setList([]);
         }
-    }, [TLOIs, loiId, hypothesis, TLOILoading])
+    }, [TLOIs, loiId, goal, TLOILoading])
 
     useEffect(() => {
         // Sets name for this bundle
@@ -51,45 +51,47 @@ export const TLOIBundle = ({loiId, hypothesis}:TLOIBundleProps) => {
         let viz = new Set<string>();
         let ignore = new Set<string>();
         let vizMap : {[name:string] : [string, string]} = {};
-        if (loi) {
-             [...loi.workflows, ...loi.metaWorkflows ].map(wf => wf.bindings).flat().forEach((binding) => {
-                if (binding.binding.startsWith("_") && binding.binding.endsWith("_")) {
-                    switch (binding.binding as OutputSelectorIds) {
-                        case "_CONFIDENCE_VALUE_":
-                            plots.add(binding.variable);
-                            break;
-                        case "_VISUALIZE_":
-                            viz.add(binding.variable);
-                            break;
-                        case "_DO_NO_STORE_":
-                            ignore.add(binding.variable);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
-        }
+        //TODO:
+        //if (loi) {
+        //     [...loi.workflows, ...loi.metaWorkflows ].map(wf => wf.bindings).flat().forEach((binding) => {
+        //        if (binding.binding.startsWith("_") && binding.binding.endsWith("_")) {
+        //            switch (binding.binding as OutputSelectorIds) {
+        //                case "_CONFIDENCE_VALUE_":
+        //                    plots.add(binding.variable);
+        //                    break;
+        //                case "_VISUALIZE_":
+        //                    viz.add(binding.variable);
+        //                    break;
+        //                case "_DO_NO_STORE_":
+        //                    ignore.add(binding.variable);
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //        }
+        //    });
+        //}
         if (list.length > 0) {
             let last = list[list.length - 1];
             let vizArr = Array.from(viz);
             let ignoreArr = Array.from(ignore);
-            [...last.workflows, ...last.metaWorkflows].forEach((wf) => {
-                if (wf.runs) {
-                    Object.values(wf.runs)
-                        .flat().map(run =>
-                            Object.keys(run.outputs)
-                                .filter(key => vizArr.some(v => key.startsWith(v)) && !ignoreArr.some(i => key.startsWith(i)))
-                                .map(key => {
-                                    let vizName = vizArr.filter(v => key.startsWith(v))[0];
-                                    let url = run.outputs[key].id;
-                                    if (url != null) {
-                                        vizMap[vizName] = [wf.source, url];
-                                    }
-                                })
-                        )
-                }
-            })
+            //TODO:
+            //[...last.workflows, ...last.metaWorkflows].forEach((wf) => {
+            //    if (wf.runs) {
+            //        Object.values(wf.runs)
+            //            .flat().map(run =>
+            //                Object.keys(run.outputs)
+            //                    .filter(key => vizArr.some(v => key.startsWith(v)) && !ignoreArr.some(i => key.startsWith(i)))
+            //                    .map(key => {
+            //                        let vizName = vizArr.filter(v => key.startsWith(v))[0];
+            //                        let url = run.outputs[key].id;
+            //                        if (url != null) {
+            //                            vizMap[vizName] = [wf.source, url];
+            //                        }
+            //                    })
+            //            )
+            //    }
+            //})
         }
 
         setMainVisualizations(vizMap);
@@ -121,7 +123,7 @@ export const TLOIBundle = ({loiId, hypothesis}:TLOIBundleProps) => {
             {Object.keys(mainVisualizations).map((name) =>
                 <ImagePreview key={name} name={name} source={mainVisualizations[name][0]} url={mainVisualizations[name][1]}/>)}
         </Box>
-        {showConfidencePlot && list.length > 2 && <ConfidencePlot hypothesis={hypothesis} loiId={loiId} />}
+        {showConfidencePlot && list.length > 2 && <ConfidencePlot goal={goal} loiId={loiId} />}
     </Card>
 
 }

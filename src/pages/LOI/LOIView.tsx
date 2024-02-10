@@ -33,7 +33,7 @@ export const LOIView = () => {
 
     useEffect(() => {
         if (LOI) {
-            setSelectedDataSource(LOI.dataSource)
+            //setSelectedDataSource(LOI.dataSource) TODO
         }
     }, [LOI]);
 
@@ -85,7 +85,7 @@ export const LOIView = () => {
         </Box>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={LOI? LOI.questionId : ""} disabled={true}/>
+            <QuestionLinker selected={LOI? "" : ""} disabled={true}/>
         </Box>
         <Divider/>
 
@@ -95,8 +95,8 @@ export const LOIView = () => {
                 <TypographyLabel>Data query explanation:</TypographyLabel>
                 {loading ? 
                     <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    (!!LOI && LOI.dataQueryExplanation ? 
-                        <TypographyInline> {LOI.dataQueryExplanation} </TypographyInline> :
+                    (//!!LOI && LOI.dataQueryExplanation ? 
+                      //  <TypographyInline> {LOI.dataQueryExplanation} </TypographyInline> :
                         <InfoInline> None specified </InfoInline>
                     )
                 }
@@ -130,7 +130,7 @@ export const LOIView = () => {
                     
                 {formalView &&                     
                     <Box sx={{fontSize: "0.94rem", mb:"10px"}} >
-                        <CodeMirror value={!!LOI? LOI.dataQuery : ""}
+                        <CodeMirror value={ ""}
                             extensions={[StreamLanguage.define(sparql)]}
                             onChange={(value, viewUpdate) => {
                             }}
@@ -148,8 +148,8 @@ export const LOIView = () => {
                     <TypographyLabel>Dataset information to be shown:</TypographyLabel>
                     {loading ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!LOI && LOI.tableVariables ? 
-                            <TypographyInline> {LOI.tableVariables} </TypographyInline> :
+                        (//!!LOI && LOI.tableVariables ? 
+                         //   <TypographyInline> {LOI.tableVariables} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }
@@ -158,8 +158,8 @@ export const LOIView = () => {
                     <TypographyLabel>Description of the datasets:</TypographyLabel>
                     {loading?
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!LOI && LOI.tableDescription ? 
-                            <TypographyInline> {LOI.tableDescription} </TypographyInline> :
+                        (//!!LOI && LOI.tableDescription ? 
+                         //   <TypographyInline> {LOI.tableDescription} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }
@@ -173,7 +173,7 @@ export const LOIView = () => {
             {loading?
                 <Skeleton/> 
             : 
-                !!LOI && <WorkflowList editable={false} workflows={LOI.workflows} metaworkflows={LOI.metaWorkflows} options={[]}/>
+                !!LOI && <WorkflowList editable={false} workflows={[]} metaworkflows={[]} options={[]}/>
             }
         </Box>
     </Card>

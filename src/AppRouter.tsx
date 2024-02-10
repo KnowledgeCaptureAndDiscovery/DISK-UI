@@ -1,10 +1,10 @@
 import { Backdrop, Box, CircularProgress } from "@mui/material";
 import RightMenu from "components/RightMenu";
-import { PATH_DATA, PATH_HOME, PATH_HYPOTHESES, PATH_HYPOTHESIS_ID, PATH_HYPOTHESIS_ID_EDIT, PATH_HYPOTHESIS_NEW, PATH_HYP_QUESTIONS, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_LOI_QUESTIONS, PATH_MY_HYPOTHESES, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOI_ID } from "constants/routes";
+import { PATH_DATA, PATH_HOME, PATH_GOALS, PATH_GOAL_ID, PATH_GOAL_ID_EDIT, PATH_GOAL_NEW, PATH_HYP_QUESTIONS, PATH_LOIS, PATH_LOI_ID, PATH_LOI_ID_EDIT, PATH_LOI_NEW, PATH_LOI_QUESTIONS, PATH_MY_GOALS, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOI_ID } from "constants/routes";
 import { Home } from "pages/Home";
-import { Hypotheses } from "pages/Hypothesis/Hypotheses";
-import { HypothesisEditor } from "pages/Hypothesis/HypothesisEditor";
-import { HypothesisView } from "pages/Hypothesis/HypothesisView";
+import { Goals } from "pages/Goals/Goals";
+import { HypothesisEditor } from "pages/Goals/GoalEditor";
+import { HypothesisView } from "pages/Goals/GoalView";
 import { LOIEditor } from "pages/LOI/LOIEditor";
 import { LinesOfInquiry } from "pages/LOI/LOIs";
 import { LOIView } from "pages/LOI/LOIView";
@@ -36,18 +36,18 @@ export const AppRouter = () => {
       <RightMenu>
         <Routes>
           <Route path={PATH_HOME} element={<Home/>}></Route>
-          <Route path={PATH_HYPOTHESES} element={<Hypotheses/>}></Route>
+          <Route path={PATH_GOALS} element={<Goals/>}></Route>
           <Route path={PATH_LOIS} element={<LinesOfInquiry/>}></Route>
 
           <Route path={PATH_HYP_QUESTIONS} element={<HypothesisQuestion/>}></Route>
           <Route path={PATH_LOI_QUESTIONS} element={<LOIQuestion/>}></Route>
 
-          <Route path={PATH_MY_HYPOTHESES} element={<Hypotheses myPage={true}/>}></Route>
+          <Route path={PATH_MY_GOALS} element={<Goals myPage={true}/>}></Route>
           <Route path={PATH_MY_LOIS} element={<LinesOfInquiry myPage={true}/>}></Route>
 
-          <Route path={PATH_HYPOTHESIS_NEW} element={authenticated ? <HypothesisEditor/> : notAuthMsg() }></Route>
-          <Route path={PATH_HYPOTHESIS_ID} element={<HypothesisView/>}></Route>
-          <Route path={PATH_HYPOTHESIS_ID_EDIT} element={authenticated ? <HypothesisEditor/> : notAuthMsg()}></Route>
+          <Route path={PATH_GOAL_NEW} element={authenticated ? <HypothesisEditor/> : notAuthMsg() }></Route>
+          <Route path={PATH_GOAL_ID} element={<HypothesisView/>}></Route>
+          <Route path={PATH_GOAL_ID_EDIT} element={authenticated ? <HypothesisEditor/> : notAuthMsg()}></Route>
 
           <Route path={PATH_LOI_NEW} element={authenticated ? <LOIEditor/> : notAuthMsg() }></Route>
           <Route path={PATH_LOI_ID} element={<LOIView/>}></Route>

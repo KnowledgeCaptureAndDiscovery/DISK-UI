@@ -1,6 +1,7 @@
 import { LineOfInquiry, TriggeredLineOfInquiry, Workflow, RunBinding, WorkflowRun } from "./interfaces";
 
 const RE_LINKS = /\[(.*?)\]\((.*?)\)/g;
+export const RE_ID = /^.*\//g;
 
 export const renderDescription = (text:string) => {
     if (text !== null) {
@@ -14,16 +15,16 @@ export const renderDescription = (text:string) => {
 export const cleanLOI : (loi:LineOfInquiry) => LineOfInquiry = (loi:LineOfInquiry) => {
     return { 
         ...loi,
-        workflows: loi.workflows.map(cleanWorkflow),
-        metaWorkflows: loi.metaWorkflows.map(cleanWorkflow)
+        //workflows: loi.workflows.map(cleanWorkflow),
+        //metaWorkflows: loi.metaWorkflows.map(cleanWorkflow)
     };
 }
 
 export const cleanTLOI : (tloi:TriggeredLineOfInquiry) => TriggeredLineOfInquiry = (tloi) => {
     return { 
         ...tloi,
-        workflows: tloi.workflows.map(cleanWorkflow),
-        metaWorkflows: tloi.metaWorkflows.map(cleanWorkflow)
+        //workflows: tloi.workflows.map(cleanWorkflow),
+        //metaWorkflows: tloi.metaWorkflows.map(cleanWorkflow)
     };
 }
 
@@ -47,15 +48,15 @@ export const getFileName = (text:string) => {
 }
 
 export const findOutputInRuns : (tloi:TriggeredLineOfInquiry|LineOfInquiry, name:string) => [string, RunBinding|null]= (tloi,name) => {
-    let wfs = [...tloi.workflows, ...tloi.metaWorkflows];
-    for (let i = 0; i < wfs.length; i++) {
-        let runs = Object.values(wfs[i].runs || {});
-        for (let j = 0; j < runs.length; j++) {
-            let run = runs[j];
-            if (run.outputs[name])
-                return [wfs[i].source, run.outputs[name]];
-        }
-    }
+    //let wfs = [...tloi.workflows, ...tloi.metaWorkflows];
+    //for (let i = 0; i < wfs.length; i++) {
+    //    let runs = Object.values(wfs[i].runs || {});
+    //    for (let j = 0; j < runs.length; j++) {
+    //        let run = runs[j];
+    //        if (run.outputs[name])
+    //            return [wfs[i].source, run.outputs[name]];
+    //    }
+    //}
 
     return ["", null];
 };

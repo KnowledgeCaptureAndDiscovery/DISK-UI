@@ -3,13 +3,13 @@ import { TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import { PATH_HYPOTHESES } from "constants/routes";
+import { PATH_GOALS } from "constants/routes";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import CachedIcon from '@mui/icons-material/Cached';
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
-import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { useGetGoalByIdQuery } from "redux/apis/goals";
 import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/tlois";
 import { TLOIBundle } from "components/tlois/TLOIBundle";
 import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } from "components/Styles";
@@ -17,18 +17,20 @@ import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } fro
 
 export const HypothesisView = () => {
     const dispatch = useAppDispatch();
-    const {hypothesisId} = useParams();
-    const selectedId = hypothesisId as string; // Could be undefined?
+    const {goalId} = useParams();
+    console.log(useParams());
+    const selectedId = goalId as string; // Could be undefined?
     const authenticated = useAuthenticated();
-    const { data:hypothesis, isError:error, isLoading:loading} = useGetHypothesisByIdQuery(selectedId);
+    const { data:hypothesis, isError:error, isLoading:loading} = useGetGoalByIdQuery(selectedId);
+    console.log(hypothesis, error, loading);
     const { data:TLOIs, isLoading:TLOIloading} = useGetTLOIsQuery();
     const [execHypothesis, {}] = useExecuteHypothesisByIdMutation();
     const [LOIList, setLOIList] = useState<string[]>([]);
 
     useEffect(() => {
         let list : string[] = (TLOIs||[])
-                .filter((tloi) => tloi.parentHypothesisId === selectedId)
-                .map((tloi) => tloi.parentLoiId);
+                .filter((tloi) => tloi.parentGoal.id === selectedId)
+                .map((tloi) => tloi.parentLoi.id);
         setLOIList(Array.from(new Set(list)));
     }, [TLOIs, selectedId]);
 
@@ -76,7 +78,7 @@ export const HypothesisView = () => {
                 </Typography>
                 {authenticated ? 
                 <Tooltip arrow title="Edit">
-                    <IconButton component={Link} to={PATH_HYPOTHESES + "/" + hypothesis?.id + "/edit"}>
+                    <IconButton component={Link} to={PATH_GOALS + "/" + hypothesis?.id + "/edit"}>
                         <EditIcon />
                     </IconButton>
                 </Tooltip>
@@ -104,7 +106,7 @@ export const HypothesisView = () => {
                 Hypothesis or question:
             </TypographySubtitle>
             {!loading && !!hypothesis ? 
-                <QuestionPreview selected={hypothesis.questionId as string} bindings={hypothesis.questionBindings}/>
+                <QuestionPreview selected={hypothesis.question.id} bindings={hypothesis.questionBindings}/>
                 : <Skeleton/>}
         </Box>
 
@@ -126,7 +128,7 @@ export const HypothesisView = () => {
                     </Card>
                 ) : (
                     hypothesis && (
-                        LOIList.map((loiId:string) => <TLOIBundle loiId={loiId} key={loiId} hypothesis={hypothesis} />)
+                        LOIList.map((loiId:string) => <TLOIBundle loiId={loiId} key={loiId} goal={hypothesis} />)
                     )
                 )
             )}

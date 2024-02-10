@@ -1,5 +1,5 @@
 import { Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Skeleton } from "@mui/material";
-import { Hypothesis, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
+import { Goal, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
     Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, LogarithmicScale } from 'chart.js';
@@ -11,15 +11,15 @@ import { useFilteredTLOIs, useOutputs } from "redux/hooks/tloi";
 ChartJS.register(CategoryScale, LogarithmicScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface ConfidencePlotProps {
-    hypothesis?: Hypothesis,
+    goal?: Goal,
     loiId?: string,
 }
 
-export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
+export const ConfidencePlot = ({ goal: hypothesis, loiId }: ConfidencePlotProps) => {
     const { data: visibleTLOIs, isLoading: loadingTLOIs} = useFilteredTLOIs({
         hypothesisId: hypothesis?.id,
         loiId: loiId,
-        sort: (t1, t2) => t1.dateCreated.localeCompare(t2.dateCreated)
+        sort: (t1, t2) => t1.dateCreated!.localeCompare(t2.dateCreated!)
     });
 
     const [files, setFiles] = useState<{ [key: string]: RunBinding }>({});
@@ -47,24 +47,25 @@ export const ConfidencePlot = ({ hypothesis, loiId }: ConfidencePlotProps) => {
         let labelDic: { [uri: string]: string } = {};
         let labels: string[] = [];
 
-        visibleTLOIs
-            .sort((t1, t2) => {
-                return t1.dateCreated.localeCompare(t2.dateCreated);
-            }).forEach((tloi: TriggeredLineOfInquiry) => {
-                let nInputs = 0;
-                [...tloi.workflows, ...tloi.metaWorkflows].forEach((wf: Workflow) => {
-                    Object.values(wf.runs || {}).forEach((run: WorkflowRun) => {
-                        Object.keys(run.outputs).forEach((outName) => {
-                                outputs[outName] = run.outputs[outName];
-                        })
-                        nInputs += Object.keys(run.inputs).length;
-                    });
-                });
-                let label = "N = " + String(nInputs);
-                labels.push(label);
-                labelDic[tloi.id] = label;
-                pValues[label] = tloi.confidenceValue;
-            });
+        //  TODO:
+        //visibleTLOIs
+        //    .sort((t1, t2) => {
+        //        return t1.dateCreated.localeCompare(t2.dateCreated);
+        //    }).forEach((tloi: TriggeredLineOfInquiry) => {
+        //        let nInputs = 0;
+        //        [...tloi.workflows, ...tloi.metaWorkflows].forEach((wf: Workflow) => {
+        //            Object.values(wf.runs || {}).forEach((run: WorkflowRun) => {
+        //                Object.keys(run.outputs).forEach((outName) => {
+        //                        outputs[outName] = run.outputs[outName];
+        //                })
+        //                nInputs += Object.keys(run.inputs).length;
+        //            });
+        //        });
+        //        let label = "N = " + String(nInputs);
+        //        labels.push(label);
+        //        labelDic[tloi.id] = label;
+        //        pValues[label] = tloi.confidenceValue;
+        //    });
 
         setData({
             labels: labels,

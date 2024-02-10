@@ -44,7 +44,7 @@ export const createTemplateFragments : (question:Question)  => TemplateFragment[
 export const bindingsToIdValueMap : (bindings:VariableBinding[])  => StrStrMap = (bindings) => {
     let r : StrStrMap = {};
     (bindings||[]).forEach((vb: VariableBinding) => {
-        r[vb.variable] = vb.binding
+        r[vb.variable] = vb.binding[0]
     });
     return r;
 }
@@ -53,8 +53,9 @@ export const simpleMapToVariableBindings : (bindings:StrStrMap) => VariableBindi
     return Object.keys(bindings).map((varId: string) => {
         return {
             variable: varId,
-            binding: bindings[varId],
-            type: null //FIXME?
+            binding: [bindings[varId]],
+            isArray: false,
+            type: "DEFAULT"
         } as VariableBinding;
     });
 }
@@ -119,6 +120,7 @@ export const  alignVariableBinding : (binding:VariableBinding) => VariableBindin
         variable:   binding.variable,
         binding:    binding.binding,
         type:       binding.type,
+        isArray:    false
     };
 }
 

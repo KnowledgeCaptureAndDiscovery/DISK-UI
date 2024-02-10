@@ -1,16 +1,16 @@
 import { Box, Button, Card, Divider, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { Hypothesis, idPattern, Question, Triple, VariableBinding } from "DISK/interfaces";
+import { Goal, idPattern, Question, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
-import { PATH_HYPOTHESES } from "constants/routes";
+import { PATH_GOALS } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
 import { useAppDispatch, useQuestionBindings, useSelectedQuestion } from "redux/hooks";
 import React from "react";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
-import { usePostHypothesisMutation, usePutHypothesisMutation, useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { usePostGoalMutation, usePutGoalMutation, useGetGoalByIdQuery } from "redux/apis/goals";
 import { openNotification } from "redux/slices/notifications";
 import { addBindingsToQuestionGraph } from "components/questions/QuestionHelpers";
 import { EditableHeader } from "components/Fields";
@@ -19,15 +19,15 @@ import { TextFieldBlock, TypographySubtitle } from "components/Styles";
 export const HypothesisEditor = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { hypothesisId } = useParams();
-    const selectedId = hypothesisId as string;
+    const { goalId } = useParams();
+    const selectedId = goalId as string;
     const [searchParams, _]= useSearchParams();
     let initialQuestionId = searchParams.get("q");
 
     // Redux data
-    const {data :hypothesis, isLoading:loading } = useGetHypothesisByIdQuery(selectedId, {skip:!selectedId});
-    const [postHypothesis] = usePostHypothesisMutation();
-    const [putHypothesis] = usePutHypothesisMutation();
+    const {data :hypothesis, isLoading:loading } = useGetGoalByIdQuery(selectedId, {skip:!selectedId});
+    const [postHypothesis] = usePostGoalMutation();
+    const [putHypothesis] = usePutGoalMutation();
 
     // Form values:
     const [name, setName] = React.useState("");
@@ -63,11 +63,11 @@ export const HypothesisEditor = () => {
         }
     }, [hypothesis])
 
-    const loadForm = (hypothesis:Hypothesis) => {
+    const loadForm = (hypothesis:Goal) => {
         setName(hypothesis.name);
         setDescription(hypothesis.description);
         setNotes(hypothesis.notes ? hypothesis.notes : "");
-        setQuestionId(hypothesis.questionId ? hypothesis.questionId : "");
+        setQuestionId(hypothesis.question.id ? hypothesis.question.id : "");
         setQuestionBindings(hypothesis.questionBindings);
     }
 
@@ -87,36 +87,40 @@ export const HypothesisEditor = () => {
             return;
         }
 
-        let previous : any = {};
+        let previous : Partial<Goal> = {};
         let editing : boolean = false;
         if (hypothesis) {
             previous = {...hypothesis};
             editing = true;
         }
         // Add form data
-        let newHypothesis : Hypothesis = {
+        let newHypothesis : Goal = {
             ...previous,
+            id: '',
             name: name,
             description: description,
             notes: notes,
-            questionId: editedQuestionId,
-            questionBindings: Object.keys(formQuestionBindings).map((varId:string) => {
-                return {
-                    variable: varId,
-                    binding: formQuestionBindings[varId],
-                    type: null
-                } as VariableBinding;
-            }),
+            question: {
+                id: editedQuestionId,
+            },
+            questionBindings: previous.questionBindings || [],
+            //questionBindings: Object.keys(formQuestionBindings).map((varId:string) => {
+            //    return {
+            //        variable: varId,
+            //        binding: formQuestionBindings[varId],
+            //        type: null
+            //    } as VariableBinding;
+            //}),
             graph: { triples: addBindingsToQuestionGraph(formSelectedQuestion, formQuestionBindings)}
         };
 
         dispatch(openBackdrop());
         (editing?putHypothesis:postHypothesis)({data:newHypothesis})
-            .then((data : {data:Hypothesis} | {error: any}) => {
-                let savedHypothesis = (data as {data:Hypothesis}).data;
-                if (savedHypothesis) {
+            .then((data : {data:Goal} | {error: any}) => {
+                let savedHypothesis = (data as {data:Goal}).data;
+                if (savedHypothesis && savedHypothesis.id) {
                     dispatch(openNotification({severity:'success', text:'Successfully saved'}))
-                    navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                    navigate(PATH_GOALS + "/" + savedHypothesis.id.replace(idPattern, "")); 
                 }
             })
             .catch((e) => {
@@ -132,7 +136,7 @@ export const HypothesisEditor = () => {
         if (!hypothesis) {
             return;
         }
-        let newHypothesis : Hypothesis = { 
+        let newHypothesis : Goal = { 
             ...hypothesis,
             id: '',
             name: hypothesis.name + " (copy)",
@@ -145,11 +149,11 @@ export const HypothesisEditor = () => {
 
         dispatch(openBackdrop());
         postHypothesis({data:newHypothesis})
-            .then((data : {data:Hypothesis} | {error: any}) => {
-                let savedHypothesis = (data as {data:Hypothesis}).data;
-                if (savedHypothesis) {
+            .then((data : {data:Goal} | {error: any}) => {
+                let savedHypothesis = (data as {data:Goal}).data;
+                if (savedHypothesis && savedHypothesis.id) {
                     dispatch(openNotification({severity:'success', text:'Successfully saved'}))
-                    navigate(PATH_HYPOTHESES + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                    navigate(PATH_GOALS + "/" + savedHypothesis.id.replace(idPattern, "")); 
                 }
             })
             .catch((e) => {
@@ -166,7 +170,7 @@ export const HypothesisEditor = () => {
     };
 
     return <Card variant="outlined">
-        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_HYPOTHESES + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}/>
+        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_GOALS + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}/>
         <Divider/>
 
         <Box sx={{padding:"10px"}}>
@@ -197,7 +201,7 @@ export const HypothesisEditor = () => {
                 </Button> : <Box/>
             }
             <Box>
-                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_HYPOTHESES + (hypothesis ? "/" + hypothesis.id : "")}>
+                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_GOALS + (hypothesis ? "/" + hypothesis.id : "")}>
                     <CancelIcon/> Cancel
                 </Button>
                 <Button variant="contained" color="success" onClick={onSaveButtonClicked}>

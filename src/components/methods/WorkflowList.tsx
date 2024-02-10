@@ -42,7 +42,7 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         let newBindings : string[] = [];
         workflows.forEach(wf => {
             wf.bindings.forEach(b => {
-                if (STORED_OUTPUTS.some(flag => flag === b.binding))
+                if (STORED_OUTPUTS.some(flag => flag === b.binding[0]))
                     newBindings.push(b.variable);
             })
         });
@@ -72,14 +72,15 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         // so we transform demographic_value into a list here.
         wf.bindings = wf.bindings.map((vb:VariableBinding) => {
             let curBinding = vb.binding;
-            if (vb.variable === 'demographic_value') {
-                if (!curBinding.startsWith("[")) curBinding = '[' + curBinding;
-                if (!curBinding.endsWith("]")) curBinding += "]";
-            }
+            //TODO:
+            //if (vb.variable === 'demographic_value') {
+            //    if (!curBinding.startsWith("[")) curBinding = '[' + curBinding;
+            //    if (!curBinding.endsWith("]")) curBinding += "]";
+            //}
             return {
                 variable: vb.variable,
                 binding: curBinding,
-                collection: vb.collection,
+                isArray: vb.isArray,
                 type: vb.type,
             } as VariableBinding;
         });

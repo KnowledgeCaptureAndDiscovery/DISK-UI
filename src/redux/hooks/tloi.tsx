@@ -21,9 +21,9 @@ export const useFilteredTLOIs : ({hypothesisId, loiId, sort}:FilterProps) => Dat
         let cur: TriggeredLineOfInquiry[] = [];
         if (TLOIs && TLOIs.length > 0 && hypothesisId && loiId) {
             cur = [...TLOIs];
-            if (hypothesisId) cur = cur.filter((tloi) => tloi.parentHypothesisId === hypothesisId);
-            if (loiId) cur = cur.filter((tloi) => tloi.parentLoiId === loiId);
-            cur = cur.filter((tloi) => tloi.confidenceValue > 0);
+            if (hypothesisId) cur = cur.filter((tloi) => tloi.parentGoal.id === hypothesisId);
+            if (loiId) cur = cur.filter((tloi) => tloi.parentLoi.id === loiId);
+            //cur = cur.filter((tloi) => tloi.confidenceValue > 0);
         }
         if (sort) cur = cur.sort(sort);
         setFilteredTLOIs(cur);
@@ -63,6 +63,7 @@ export const useOutputs : ({data}: UseOutputProps) => OutputFiles = ({data}) => 
             "_OTHER_": {},
         };
 
+        /*TODO:
         (data || []).forEach((tloi: TriggeredLineOfInquiry) => {
             [...tloi.workflows, ...tloi.metaWorkflows].forEach((wf: Workflow) => {
                 (wf.bindings || []).forEach((binding:VariableBinding) => {
@@ -94,7 +95,7 @@ export const useOutputs : ({data}: UseOutputProps) => OutputFiles = ({data}) => 
                     });
                 });
             });
-        });
+        });*/
 
         setOutputFiles(outputFiles);
     }, [data]);

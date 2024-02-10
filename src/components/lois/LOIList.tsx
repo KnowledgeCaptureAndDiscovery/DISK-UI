@@ -12,9 +12,9 @@ interface LOIListProps {
 export const LOIList = ({list=[], enableDeletion=true, enableEdition=true} : LOIListProps) => {
     if (list.length === 0)
         return (
-            <Box sx={{p:"5px"}}>
-                <Typography variant="h6">
-                    You do not have any hypotheses. You can create a new one based on one of the following questions:
+            <Box sx={{p:"10px"}}>
+                <Typography variant="subtitle1">
+                    You do not have any Line of inquiry. You can create a new one based on one of the following questions:
                 </Typography>
                 <QuestionList kind="hypothesis"/>
             </Box>

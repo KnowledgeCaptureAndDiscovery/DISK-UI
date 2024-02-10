@@ -2,9 +2,9 @@ import { Dialog, DialogContent, DialogTitle, IconButton, Link, Tooltip} from "@m
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
-import { Hypothesis, TriggeredLineOfInquiry } from "DISK/interfaces";
+import { Goal, Status, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { WorkflowList } from "../methods/WorkflowList";
-import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { useGetGoalByIdQuery } from "redux/apis/goals";
 
 interface NarrativeModalProps {
     tloi: TriggeredLineOfInquiry,
@@ -12,7 +12,7 @@ interface NarrativeModalProps {
 
 export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
     const [open, setOpen] = useState(false);
-    const {data:hypothesis, isLoading} = useGetHypothesisByIdQuery(tloi.parentHypothesisId);
+    const {data:hypothesis, isLoading} = useGetGoalByIdQuery(tloi.parentGoal.id);
 
     const onOpenDialog = () => {
         setOpen(true);
@@ -22,7 +22,7 @@ export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
         setOpen(false);
     }
 
-    const getColor = (status: 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL') => {
+    const getColor = (status: Status) => {
         if (status === 'SUCCESSFUL') return "green";
         if (status === 'FAILED') return "red";
         if (status === 'QUEUED') return "yellow";
@@ -50,11 +50,12 @@ export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
                     "<span style={{fontWeight:"bold"}}>{tloi.name.replace("Triggered: ", "")}</span>".
 
                     The analysis was <span style={{color: getColor(tloi.status) }}>{tloi.status}</span>run on {tloi.dateCreated} with the following datasets:
-                    <WorkflowList editable={false} workflows={tloi.workflows} metaworkflows={tloi.metaWorkflows} options={[]} minimal/>
-                    {tloi.status === 'SUCCESSFUL' && tloi.confidenceValue > 0 && (
+                    <WorkflowList editable={false} workflows={[]} metaworkflows={[]} options={[]} minimal/>
+                    {tloi.status === 'SUCCESSFUL' && false && (
                         <span>
                             The resulting p-value
-                            is {tloi.confidenceValue < 0.0001 ?  tloi.confidenceValue.toExponential(3) : tloi.confidenceValue.toFixed(4)}
+                            is {//tloi.confidenceValue < 0.0001 ?  tloi.confidenceValue.toExponential(3) : tloi.confidenceValue.toFixed(4)
+                            }
                         </span>
                     )}
                 </DialogContent>}

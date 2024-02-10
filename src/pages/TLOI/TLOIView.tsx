@@ -18,7 +18,7 @@ import { ResultTable } from "components/ResultTable";
 import { WorkflowList } from "components/methods/WorkflowList";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { renderDescription } from "DISK/util";
-import { useGetHypothesisByIdQuery } from "redux/apis/hypotheses";
+import { useGetGoalByIdQuery } from "redux/apis/goals";
 import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetTLOIByIdQuery, usePutTLOIMutation } from "redux/apis/tlois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
@@ -66,7 +66,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
     const [notes, setNotes] = React.useState<string>("");
 
     const { data:TLOI, isError:error, isLoading:loading} = useGetTLOIByIdQuery(selectedId);
-    const { data:selectedHypothesis, isLoading:loadingHyp } = useGetHypothesisByIdQuery(TLOI? TLOI.parentHypothesisId : "invalid", {skip: (!TLOI || !TLOI.parentHypothesisId) });
+    const { data:selectedHypothesis, isLoading:loadingHyp } = useGetGoalByIdQuery(TLOI? TLOI.parentGoal.id : "invalid", {skip: (!TLOI || !TLOI.parentGoal.id) });
     const { data:endpoints, isLoading:loadingEndpoints } = useGetEndpointsQuery();
     const [ putTLOI, { isLoading: isUpdating }] = usePutTLOIMutation();
     const [dataSource, setDataSource] = React.useState<DataEndpoint|null>(null);
@@ -81,26 +81,25 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             let n = 0;
             // I saw this code in other place
             [ ...TLOI.workflows, ...TLOI.metaWorkflows ].forEach((wf) => {
-                Object.values(wf.runs||{}).forEach((run) => {
-                    if (run.outputs) {
-                        Object.keys(run.outputs).forEach(((name:string) => {
-                            if (name === SHINY_FILENAME) {
-                                setShinyData({
-                                    source: wf.source,
-                                    url: run ? (run.outputs[name].id || "") : ""
-                                });
-                                n += 1;
-                            } else if (name === BRAIN_FILENAME) {
-                                setBrainData({
-                                    source: wf.source,
-                                    url: run ? (run.outputs[name].id || "") : ""
-                                });
-                                n += 1;
-                            }
-                        }));
-                    }
-
-                })
+                //Object.values(wf.runs||{}).forEach((run) => {
+                //    if (run.outputs) {
+                //        Object.keys(run.outputs).forEach(((name:string) => {
+                //            if (name === SHINY_FILENAME) {
+                //                setShinyData({
+                //                    source: wf.source,
+                //                    url: run ? (run.outputs[name].id || "") : ""
+                //                });
+                //                n += 1;
+                //            } else if (name === BRAIN_FILENAME) {
+                //                setBrainData({
+                //                    source: wf.source,
+                //                    url: run ? (run.outputs[name].id || "") : ""
+                //                });
+                //                n += 1;
+                //            }
+                //        }));
+                //    }
+                //})
             });
             setNViz(n);
         }
@@ -110,15 +109,15 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
 
 
     useEffect(() => {
-        if (!!TLOI && TLOI.dataSource && !!endpoints && endpoints.length > 0) {
-            for (let i = 0; i < endpoints.length; i++) {
-                let endpoint : DataEndpoint = endpoints[i];
-                if (endpoint.url === TLOI.dataSource) {
-                    setDataSource(endpoint);
-                    break;
-                }
-            }
-        }
+        //if (!!TLOI && TLOI.dataSource && !!endpoints && endpoints.length > 0) {
+        //    for (let i = 0; i < endpoints.length; i++) {
+        //        let endpoint : DataEndpoint = endpoints[i];
+        //        if (endpoint.url === TLOI.dataSource) {
+        //            setDataSource(endpoint);
+        //            break;
+        //        }
+        //    }
+        //}
     }, [TLOI, endpoints]);
 
     useEffect(() => {
@@ -173,11 +172,11 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         <Divider/>
         <Box sx={{padding:"10px"}}>
             {!loadingHyp && !!selectedHypothesis ? 
-                <QuestionPreview selected={selectedHypothesis.questionId as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis or question tested"/>
+                <QuestionPreview selected={selectedHypothesis.question.id as string} bindings={selectedHypothesis.questionBindings} label="Hypothesis or question tested"/>
                 : <Skeleton/>}
             <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 0px;", position:"relative", overflow:"visible", mb: "5px"}}>
                 <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Line of inquiry: </FormHelperText>
-                <Box component={Link} to={PATH_LOIS + "/" + (!!TLOI ? TLOI.parentLoiId : "")} sx={{textDecoration: "none", display:"inline-flex", alignItems:"center", padding: "0 5px", ml: "10px", mt: "12px"}}>
+                <Box component={Link} to={PATH_LOIS + "/" + (!!TLOI ? TLOI.parentLoi.id : "")} sx={{textDecoration: "none", display:"inline-flex", alignItems:"center", padding: "0 5px", ml: "10px", mt: "12px"}}>
                     <SettingsIcon sx={{color: "green", mr:"5px"}}/>
                     <span style={{color:"black"}}>
                         {!!TLOI ? TLOI.name.replace("Triggered: ", "") : null}
@@ -234,8 +233,8 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                     <TypographyLabel>Data query explanation:</TypographyLabel>
                     {loading ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!TLOI && TLOI.dataQueryExplanation ? 
-                            <TypographyInline> {TLOI.dataQueryExplanation} </TypographyInline> :
+                        (!!TLOI && false ? 
+                            <TypographyInline> {TLOI?.description} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }
@@ -250,7 +249,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
             {formalView && <Fragment>
                 <TypographySection>Data query:</TypographySection>
                 <Box sx={{fontSize: "0.94rem"}} >
-                    <CodeMirror readOnly value={!!TLOI? TLOI.dataQuery : ""}
+                    <CodeMirror readOnly value={''}
                         extensions={[StreamLanguage.define(sparql)]}
                         onChange={(value, viewUpdate) => {
                         }}
@@ -260,26 +259,26 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
 
             <Box> 
                 <Divider/>
-                {loading ? 
-                    <Skeleton/> :
-                    <Box>
-                        {!!TLOI && (TLOI.tableDescription || (TLOI.dataQuery && TLOI.tableVariables && dataSource)) &&
-                            <TypographySection>Input data retrieved:</TypographySection>}
-                        {!!TLOI && TLOI.tableDescription && 
-                        <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                            <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
-                            <TypographyInline> {TLOI.tableDescription} </TypographyInline>
-                        </Box>}
-                        {!!TLOI && dataSource && TLOI.tableVariables && TLOI.dataQuery &&
-                            <ResultTable query={TLOI.dataQuery} variables={TLOI.tableVariables} dataSource={dataSource}/> }
-                    </Box>
+                {//loading ? 
+                 //   <Skeleton/> :
+                 //   <Box>
+                 //       {!!TLOI && (TLOI.tableDescription || (TLOI.dataQuery && TLOI.tableVariables && dataSource)) &&
+                 //           <TypographySection>Input data retrieved:</TypographySection>}
+                 //       {!!TLOI && TLOI.tableDescription && 
+                 //       <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                 //           <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
+                 //           <TypographyInline> {TLOI.tableDescription} </TypographyInline>
+                 //       </Box>}
+                 //       {!!TLOI && dataSource && TLOI.tableVariables && TLOI.dataQuery &&
+                 //           <ResultTable query={TLOI.dataQuery} variables={[]} dataSource={dataSource}/> }
+                 //   </Box>
                 }
             </Box>
         </Box>
         <Divider/>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
-            {!!TLOI && <WorkflowList editable={false} workflows={TLOI.workflows} metaworkflows={TLOI.metaWorkflows} options={[]}/>}
+            {!!TLOI && <WorkflowList editable={false} workflows={[]} metaworkflows={[]} options={[]}/>}
         </Box>
     </Card>
 }
