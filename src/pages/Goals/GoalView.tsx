@@ -3,7 +3,7 @@ import { TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import { PATH_GOALS } from "constants/routes";
+import { PATH_GOALS, UI_PARAMS } from "constants/routes";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import CachedIcon from '@mui/icons-material/Cached';
@@ -13,34 +13,34 @@ import { useGetGoalByIdQuery } from "redux/apis/goals";
 import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/tlois";
 import { TLOIBundle } from "components/tlois/TLOIBundle";
 import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } from "components/Styles";
+import { RE_ID } from "DISK/util";
 
 
 export const HypothesisView = () => {
     const dispatch = useAppDispatch();
-    const {goalId} = useParams();
-    console.log(useParams());
-    const selectedId = goalId as string; // Could be undefined?
     const authenticated = useAuthenticated();
-    const { data:hypothesis, isError:error, isLoading:loading} = useGetGoalByIdQuery(selectedId);
-    console.log(hypothesis, error, loading);
-    const { data:TLOIs, isLoading:TLOIloading} = useGetTLOIsQuery();
+    const {goalId} = useParams<UI_PARAMS>();
+    const { data:hypothesis, isError:error, isLoading:loading } = useGetGoalByIdQuery(goalId as string, {skip:goalId==undefined});
+    const { data:TLOIs, isLoading:TLOIloading } = useGetTLOIsQuery();
     const [execHypothesis, {}] = useExecuteHypothesisByIdMutation();
     const [LOIList, setLOIList] = useState<string[]>([]);
 
     useEffect(() => {
         let list : string[] = (TLOIs||[])
-                .filter((tloi) => tloi.parentGoal.id === selectedId)
+                .filter((tloi) => tloi.parentGoal.id === goalId)
                 .map((tloi) => tloi.parentLoi.id);
         setLOIList(Array.from(new Set(list)));
-    }, [TLOIs, selectedId]);
+    }, [TLOIs, goalId]);
 
     const onTestHypothesisClicked = () => {
+        if (goalId == undefined) 
+            return;
         dispatch(openBackdrop());
         dispatch(openNotification({
             severity: 'info',
             text: "Looking for new executions..."
         }));
-        execHypothesis(selectedId)
+        execHypothesis(goalId)
                 .then((value: {data:TriggeredLineOfInquiry[]} | {error:any}) => {
                     let curTLOIs = (value as {data:TriggeredLineOfInquiry[]}).data;
                     if (curTLOIs) {
@@ -76,9 +76,9 @@ export const HypothesisView = () => {
                 <Typography variant="h5">
                     {error ? "Error loading hypothesis" : hypothesis?.name}
                 </Typography>
-                {authenticated ? 
+                {authenticated && hypothesis ? 
                 <Tooltip arrow title="Edit">
-                    <IconButton component={Link} to={PATH_GOALS + "/" + hypothesis?.id + "/edit"}>
+                    <IconButton component={Link} to={PATH_GOALS + "/" + hypothesis.id.replaceAll(RE_ID,"") + "/edit"}>
                         <EditIcon />
                     </IconButton>
                 </Tooltip>

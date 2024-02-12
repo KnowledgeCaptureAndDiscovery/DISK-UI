@@ -25,3 +25,7 @@ export const PATH_TLOI_ID_RE = new RegExp(/\/tlois\/([\w-]{8,36})$/);
 
 export const PATH_TERMINOLOGY = '/terminology';
 export const PATH_DATA = '/data';
+
+export type UI_PARAMS = {
+    goalId: string;
+}

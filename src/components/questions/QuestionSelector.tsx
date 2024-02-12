@@ -1,10 +1,10 @@
 import { Box, Card, FormHelperText, IconButton, Tooltip } from "@mui/material"
-import { Question, VariableBinding, QuestionVariable, Triple, AnyQuestionVariable } from "DISK/interfaces"
+import { Question, VariableBinding, QuestionVariable, Triple, AnyQuestionVariable, MultiValueAssignation } from "DISK/interfaces"
 import React from "react";
 import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { setQuestionBindings, StrStrMap, setSelectedQuestion as setQuestion } from "redux/slices/forms";
+import { setQuestionBindings, setSelectedQuestion as setQuestion } from "redux/slices/forms";
 import { FormalExpressionView } from "./FormalExpressionView";
 import { QuestionTemplateSelector } from "./QuestionTemplateSelector";
 import { QuestionTemplateFiller } from "./QuestionTemplateFiller";
@@ -36,12 +36,12 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     React.useEffect(() => {
         if (!selectedQuestion)
             return;
-        let idToValue : StrStrMap = {};
+        let idToValue : MultiValueAssignation = {};
         let allVariables = getAllQuestionVariables(selectedQuestion);
         (bindings||[]).forEach((varBindings:VariableBinding) => {
             let curVar = allVariables.filter((v:AnyQuestionVariable) => (v.id === varBindings.variable))[0];
             if (curVar)
-                idToValue[curVar.id] = varBindings.binding[0];
+                idToValue[curVar.id] = [varBindings.binding[0]];
         });
         if (selectedQuestion) {
             dispatch(setQuestionBindings(idToValue));

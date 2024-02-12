@@ -296,7 +296,11 @@ export interface DataEndpoint {
 
 export interface QuestionOptionsRequest {
     id:         string,
-    bindings:   {[name:string] : string};
+    bindings:   MultiValueAssignation,
+}
+
+export type MultiValueAssignation = {
+    [name:string] : string[]
 }
 
 const _names = {}

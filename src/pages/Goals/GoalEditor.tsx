@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
-import { PATH_GOALS } from "constants/routes";
+import { PATH_GOALS, UI_PARAMS } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
 import { useAppDispatch, useQuestionBindings, useSelectedQuestion } from "redux/hooks";
 import React from "react";
@@ -19,13 +19,11 @@ import { TextFieldBlock, TypographySubtitle } from "components/Styles";
 export const HypothesisEditor = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { goalId } = useParams();
-    const selectedId = goalId as string;
+    const { goalId } = useParams<UI_PARAMS>();
     const [searchParams, _]= useSearchParams();
     let initialQuestionId = searchParams.get("q");
 
-    // Redux data
-    const {data :hypothesis, isLoading:loading } = useGetGoalByIdQuery(selectedId, {skip:!selectedId});
+    const {data :hypothesis, isLoading:loading } = useGetGoalByIdQuery(goalId as string, {skip:!goalId});
     const [postHypothesis] = usePostGoalMutation();
     const [putHypothesis] = usePutGoalMutation();
 
@@ -79,6 +77,16 @@ export const HypothesisEditor = () => {
         setQuestionId("");
     }
 
+    const getQuestionBindings : () => VariableBinding[] = () => {
+        return Object.keys(formQuestionBindings).map<VariableBinding>((varId: string) => (
+            {
+                variable: varId,
+                binding: formQuestionBindings[varId],
+                type: "DEFAULT",
+                isArray: false,
+            }));
+    }
+
     const onSaveButtonClicked = () => {
         if (!name || !description || !editedQuestionId || !formSelectedQuestion) {
             if (!name) setErrorName(true);
@@ -96,31 +104,28 @@ export const HypothesisEditor = () => {
         // Add form data
         let newHypothesis : Goal = {
             ...previous,
-            id: '',
+            author: undefined,
+            id: editing && previous.id ? previous.id : '',
             name: name,
             description: description,
             notes: notes,
             question: {
                 id: editedQuestionId,
             },
-            questionBindings: previous.questionBindings || [],
-            //questionBindings: Object.keys(formQuestionBindings).map((varId:string) => {
-            //    return {
-            //        variable: varId,
-            //        binding: formQuestionBindings[varId],
-            //        type: null
-            //    } as VariableBinding;
-            //}),
+            questionBindings: getQuestionBindings(),
             graph: { triples: addBindingsToQuestionGraph(formSelectedQuestion, formQuestionBindings)}
         };
 
         dispatch(openBackdrop());
         (editing?putHypothesis:postHypothesis)({data:newHypothesis})
-            .then((data : {data:Goal} | {error: any}) => {
-                let savedHypothesis = (data as {data:Goal}).data;
+            .then((response : {data?:Goal, error?:any}   ) => {
+                let savedHypothesis = response.data;
                 if (savedHypothesis && savedHypothesis.id) {
                     dispatch(openNotification({severity:'success', text:'Successfully saved'}))
                     navigate(PATH_GOALS + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                } else if (response.error) {
+                    dispatch(openNotification({severity:'error', text:'Error saving hypothesis. Please try again'}))
+                    console.warn(response.error);
                 }
             })
             .catch((e) => {
@@ -140,11 +145,6 @@ export const HypothesisEditor = () => {
             ...hypothesis,
             id: '',
             name: hypothesis.name + " (copy)",
-            questionBindings: hypothesis.questionBindings.map((qv) => {return {
-                ...qv,
-                collection: undefined,
-                bindingAsArray: undefined,
-            }})
         };
 
         dispatch(openBackdrop());

@@ -1,11 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Question } from "DISK/interfaces";
-
-export type StrStrMap = {[id:string]: string};
+import { MultiValueAssignation, Question } from "DISK/interfaces";
 
 export interface FormsState {
   selectedQuestion: Question | null,
-  questionBindings: StrStrMap,
+  questionBindings: MultiValueAssignation,
 }
 
 export const formsSlice = createSlice({
@@ -22,7 +20,7 @@ export const formsSlice = createSlice({
         selectedQuestion: action.payload
       };
     },
-    setQuestionBindings: (state:FormsState, action: PayloadAction<StrStrMap>) => {
+    setQuestionBindings: (state:FormsState, action: PayloadAction<MultiValueAssignation>) => {
       // Pattern is optional 
       return { 
         ...state,
