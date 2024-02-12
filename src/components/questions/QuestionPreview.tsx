@@ -1,5 +1,5 @@
 import { Box, Card, FormHelperText, IconButton, styled, Tooltip } from "@mui/material"
-import { idPattern, Question, VariableBinding, varPattern, Triple, AnyQuestionVariable } from "DISK/interfaces"
+import { idPattern, Question, VariableBinding, varPattern, Triple, AnyQuestionVariable, MultiValueAssignation } from "DISK/interfaces"
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -7,7 +7,6 @@ import { normalizeTextValue } from "./QuestionList";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { FormalExpressionView } from "./FormalExpressionView";
 import { createTemplateFragments, addBindingsToQuestionGraph, TemplateFragment, bindingsToIdValueMap, getAllQuestionVariables } from "./QuestionHelpers";
-import { StrStrMap } from "redux/slices/forms";
 
 interface QuestionPreviewProps {
     selected: string,
@@ -26,7 +25,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
     const {data: questions} = useGetQuestionsQuery();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [formalView, setFormalView] = React.useState<boolean>(false);
-    const [idToRepresentation, setIdToRepresentation] = React.useState<StrStrMap>({});
+    const [idToRepresentation, setIdToRepresentation] = React.useState<MultiValueAssignation>({});
     const [triplePattern, setTriplePattern] = React.useState<Triple[]>([]);
     const [templateFragments, setTemplateFragments] = React.useState<TemplateFragment[]>([]);
 
@@ -48,16 +47,16 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
         if (selectedQuestion) {
             let allQuestionVariables = getAllQuestionVariables(selectedQuestion);
             let nameToUri = allQuestionVariables.reduce((acc,cur) => {
-                acc[cur.variableName] = cur.id;
+                acc[cur.variableName] = [cur.id];
                 return acc;
-            }, {} as StrStrMap)
+            }, {} as MultiValueAssignation)
             allQuestionVariables.forEach((qv) => {
                 if (qv.representation) {
                     let rep = "";
                     qv.representation.split(varPattern).forEach((part) => {
-                        rep += part.startsWith('?') ? (nameToUri[part] && idValueMap[nameToUri[part]] ? idValueMap[nameToUri[part]] : part) : part;
+                        rep += part.startsWith('?') ? (nameToUri[part] && idValueMap[nameToUri[part][0]] ? idValueMap[nameToUri[part][0]] : part) : part;
                     })
-                    idValueMap[qv.id] = rep;
+                    idValueMap[qv.id] = [rep];
                 }
 
             })
@@ -73,7 +72,7 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                 return <TextPart key={`p_${key}`}> {frag.value}</TextPart>
             case "variable":
                 return <TextPart key={`p_${key}`} sx={{fontWeight: "500", color: 'darkgreen'}}>
-                        {idToRepresentation[frag.value.id] ? normalizeTextValue(idToRepresentation[frag.value.id]) : "any"}
+                        {idToRepresentation[frag.value.id] ? normalizeTextValue(idToRepresentation[frag.value.id][0]) : "any"}
                     </TextPart>
         }
     }

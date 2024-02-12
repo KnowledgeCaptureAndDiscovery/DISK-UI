@@ -30,12 +30,17 @@ export const QuestionVariableSelector = ({questionId, variable}: QuestionVariabl
 
     useEffect(() => {
         if (options && bindings) {
-            let curValue : string = bindings[variable.id];
-            if (options.length === 0 || !curValue || !options.some(o => o.value === curValue)) {
+            let curValues : string[] = bindings[variable.id];
+            if (options.length === 0 || !curValues || curValues.length === 0) {
                 setSelectedOption(null);
                 setSelectedOptionLabel("");
+            } else if (!options.some(opt => curValues.some(val => val === opt.value)) ) { 
+                //TODO: cuValues exists but its value is not on the available options.
+                setSelectedOption(null); 
+                setSelectedOptionLabel(curValues.join(','));
             } else {
-                let selectedOption : VariableOption = options.filter(o => o.value === curValue)[0];
+                //TODO: All of the multiple option stuff is WIP, lets assume we only have one value.
+                let selectedOption : VariableOption = options.filter(o => o.value === curValues[0])[0];
                 setSelectedOption(selectedOption);
                 setSelectedOptionLabel(selectedOption.label);
             }
@@ -45,7 +50,7 @@ export const QuestionVariableSelector = ({questionId, variable}: QuestionVariabl
     function onOptionChange(value: VariableOption|null): void {
         let newBindings = { ...bindings };
         if (value) {
-            newBindings[variable.id] = value.value;
+            newBindings[variable.id] = [value.value];
         } else if (bindings[variable.id]) {
             delete newBindings[variable.id];
         }

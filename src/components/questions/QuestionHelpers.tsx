@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import { Box } from "@mui/material";
-import { AnyQuestionVariable, Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
-import { StrStrMap } from "redux/slices/forms";
+import { AnyQuestionVariable, MultiValueAssignation, Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
 
 export type TemplateFragment = {
     type: 'string',
@@ -41,19 +40,21 @@ export const createTemplateFragments : (question:Question)  => TemplateFragment[
     return fragments;
 }
 
-export const bindingsToIdValueMap : (bindings:VariableBinding[])  => StrStrMap = (bindings) => {
-    let r : StrStrMap = {};
+export const bindingsToIdValueMap : (bindings:VariableBinding[])  => MultiValueAssignation = (bindings) => {
+    let r : MultiValueAssignation = {};
     (bindings||[]).forEach((vb: VariableBinding) => {
-        r[vb.variable] = vb.binding[0]
+        console.log(vb);
+        if (vb.variable)
+            r[vb.variable] = [vb.binding[0]]
     });
     return r;
 }
 
-export const simpleMapToVariableBindings : (bindings:StrStrMap) => VariableBinding[] = (bindings) => {
+export const simpleMapToVariableBindings : (bindings:MultiValueAssignation) => VariableBinding[] = (bindings) => {
     return Object.keys(bindings).map((varId: string) => {
         return {
             variable: varId,
-            binding: [bindings[varId]],
+            binding: [bindings[varId]][0],
             isArray: false,
             type: "DEFAULT"
         } as VariableBinding;
@@ -78,24 +79,27 @@ export const validURL = (str:string) => {
   }
 
 
-export const addBindingsToQuestionGraph : (question:Question, bindings:StrStrMap)  => Triple[] = (question, bindings) => {
+export const addBindingsToQuestionGraph : (question:Question, bindings:MultiValueAssignation)  => Triple[] = (question, bindings) => {
         let graph = getCompleteQuestionGraph(question);
         // Add binding values
+        // TODO: This assumes we only have one
         let updatedGraph : Triple[] = []
         graph.forEach((t:Triple) => {
             let obj = t.object;
-            let objVal : string = bindings[t.object.value];
-            if (objVal) {
+            let objVal : string[] = bindings[t.object.value];
+            if (objVal && objVal.length > 0) {
                 obj = {
-                    type: validURL(objVal) ? 'URI' : 'LITERAL',
-                    value: objVal,
+                    type: validURL(objVal[0]) ? 'URI' : 'LITERAL',
+                    value: objVal[0],
                 }
             }
+            let sub = bindings[t.subject] && bindings[t.subject].length > 0 ? bindings[t.subject][0] : null;
+            let pre = bindings[t.predicate] && bindings[t.predicate].length > 0 ? bindings[t.predicate][0] : null;
 
             updatedGraph.push({
-                subject: bindings[t.subject] || t.subject,
-                predicate: bindings[t.predicate] || t.predicate,
-                object: obj
+                subject:    sub || t.subject,
+                predicate:  pre || t.predicate,
+                object:     obj
             });
         });
         return updatedGraph;
