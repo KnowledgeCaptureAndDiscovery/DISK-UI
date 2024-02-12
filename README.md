@@ -1,5 +1,5 @@
 
-# DISK User Interface (UI)
+# DISK User Interface (UI) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10651269.svg)](https://doi.org/10.5281/zenodo.10651269)
 
 The [DISK](https://disk.isi.edu) system automates the execution of scientific workflows triggered 
 on data changes. To do this [DISK](https://disk.isi.edu) collects data from different data repositories
