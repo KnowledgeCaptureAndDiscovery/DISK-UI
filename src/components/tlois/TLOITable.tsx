@@ -13,6 +13,7 @@ import { BrainModal } from "components/modal/BrainModal";
 import { ShinyModal } from "components/modal/ShinyModal";
 import { BRAIN_FILENAME, SHINY_FILENAME, displayConfidenceValue } from "constants/general";
 import { TLOIDeleteButton } from "./TLOIDeleteButton";
+import { getId } from "DISK/util";
 
 const getIconStatus = (status: TriggeredLineOfInquiry["status"]) => {
     if (status === 'FAILED')
@@ -34,15 +35,15 @@ interface TLOITableProps {
 export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
     const COLUMNS: { [name: string]: TLOICell } = {
         '#': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{ textDecoration: "none", color: "black" }}>
+            <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black" }}>
                 {i + 1}
             </Box>,
         'Date': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{ textDecoration: "none", color: "black" }}>
+            <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black" }}>
                 {tloi.dateCreated}
             </Box>,
         'Run Status': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box component={Link} to={PATH_TLOIS + "/" + tloi.id} sx={{ textDecoration: "none", color: "black", display: 'flex', alignItems: 'center' }}>
+            <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black", display: 'flex', alignItems: 'center' }}>
                 {getIconStatus(tloi.status)}
                 <Box sx={{ marginLeft: '6px' }}>
                     {tloi.status === 'SUCCESSFUL' ? 'DONE' : tloi.status}

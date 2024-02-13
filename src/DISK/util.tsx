@@ -1,7 +1,11 @@
 import { LineOfInquiry, TriggeredLineOfInquiry, Workflow, RunBinding, WorkflowRun } from "./interfaces";
 
-const RE_LINKS = /\[(.*?)\]\((.*?)\)/g;
-export const RE_ID = /^.*\//g;
+const RE_LINKS = new RegExp(/\[(.*?)\]\((.*?)\)/g);
+const RE_ID = new RegExp(/^.*\//g);
+
+export const getId = (obj:{id:string}) => {
+    return obj.id.replaceAll(RE_ID, "");
+}
 
 export const renderDescription = (text:string) => {
     if (text !== null) {

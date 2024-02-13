@@ -13,7 +13,7 @@ import { useDeleteGoalMutation } from "redux/apis/goals";
 import { useGetTLOIsQuery } from "redux/apis/tlois";
 import { useEffect, useState } from "react";
 import { TLOIPreview } from "components/tlois/TLOIPreview";
-import { RE_ID } from "DISK/util";
+import { getId } from "DISK/util";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -36,7 +36,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
     const dispatch = useAppDispatch();
     const authenticated = useAuthenticated();
     const [
-        deleteHypothesis, // This is the mutation trigger
+        deleteGoal, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result
       ] = useDeleteGoalMutation();
 
@@ -64,7 +64,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
         console.log("DELETING: ", hypothesis.id);
         dispatch(openBackdrop());
         const name = hypothesis.name;
-        deleteHypothesis({id: hypothesis.id})
+        deleteGoal({id: hypothesis.id})
             .then(() => {
                 dispatch(openNotification({
                     severity: 'info',
@@ -86,7 +86,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
     return (
     <Card variant="outlined" sx={{margin: "10px", minHeight: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-            <Box component={Link} to={PATH_GOALS + "/" + hypothesis.id.replaceAll(RE_ID, "")}
+            <Box component={Link} to={PATH_GOALS + "/" + getId(hypothesis)}
                  sx={{display:"inline-flex", alignItems:"center", textDecoration: "none"}}>
                 <ScienceIcon sx={{color: "orange"}}/>
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{hypothesis.name}</Typography>
@@ -95,7 +95,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
                 {displayEditButton && (
                 <Tooltip arrow title={authenticated? "Edit" : "You need to log in to edit"}>
                     <Box sx={{display:"inline-block"}}>
-                        <IconButton component={Link} to={PATH_GOALS + "/" + hypothesis.id.replaceAll(RE_ID, "") + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
+                        <IconButton component={Link} to={PATH_GOALS + "/" + getId(hypothesis) + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
                             <EditIcon/>
                         </IconButton>
                     </Box>

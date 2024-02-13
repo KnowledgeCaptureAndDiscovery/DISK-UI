@@ -43,7 +43,6 @@ export const createTemplateFragments : (question:Question)  => TemplateFragment[
 export const bindingsToIdValueMap : (bindings:VariableBinding[])  => MultiValueAssignation = (bindings) => {
     let r : MultiValueAssignation = {};
     (bindings||[]).forEach((vb: VariableBinding) => {
-        console.log(vb);
         if (vb.variable)
             r[vb.variable] = [vb.binding[0]]
     });

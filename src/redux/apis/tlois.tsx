@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_DISK_API } from "config";
 import { TriggeredLineOfInquiry } from 'DISK/interfaces';
 import { DISK } from "./DISK";
+import { getId } from 'DISK/util';
 
 export const tloisAPI = createApi({
   reducerPath: 'tlois',
@@ -15,11 +16,11 @@ export const tloisAPI = createApi({
       providesTags: ['TLOIs']
     }),
     getTLOIById: builder.query<TriggeredLineOfInquiry, string>({
-      query: (id: string) => `tlois/${id}`,
+      query: (id: string) => `tlois/${getId({id})}`,
       providesTags: ['TLOI']
     }),
     executeHypothesisById: builder.mutation<TriggeredLineOfInquiry[], string>({
-      query: (id: string) => `hypotheses/${id}/query`,
+      query: (id: string) => `hypotheses/${getId({id})}/query`,
       invalidatesTags: ['TLOIs'],
     }),
     putTLOI: builder.mutation<TriggeredLineOfInquiry, { data: Partial<TriggeredLineOfInquiry> }>({
@@ -42,7 +43,7 @@ export const tloisAPI = createApi({
     }),
     deleteTLOI: builder.mutation<TriggeredLineOfInquiry, {id:string}>({
       query: ({ id }) => ({
-        url: `tlois/${id}`,
+        url: `tlois/${getId({id})}`,
         headers: DISK.headers,
         method: 'DELETE'
       }),

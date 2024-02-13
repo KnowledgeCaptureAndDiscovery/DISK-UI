@@ -1,7 +1,7 @@
-import { extend } from "leaflet";
-
-export const idPattern = new RegExp(/.*\//); 
+//export const idPattern = new RegExp(/.*\//); 
 export const varPattern = new RegExp(/(\?[a-zA-Z0-9]*)/g);
+
+type ObjectWithId = { id:string };
 
 export interface DISKResource {
     id:             string;
@@ -20,7 +20,7 @@ export interface Entity {
 }
 
 export interface Goal extends DISKResource {
-    question: Question | {id:string},
+    question: Question | ObjectWithId;
     questionBindings: VariableBinding[];
     graph: Graph;
 }
@@ -119,8 +119,8 @@ export interface VariableOption {
 export interface LineOfInquiry extends DISKResource {
     updateCondition:    number;
     goalQuery:          string;
-    question:           Question;
-    dataQueryTemplate:  DataQueryTemplate;
+    question:           Question | ObjectWithId;
+    dataQueryTemplate?: DataQueryTemplate;
     workflowSeeds:      WorkflowSeed[];
     metaWorkflowSeeds:  WorkflowSeed[];
 }

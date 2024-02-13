@@ -1,5 +1,5 @@
 import { Box, Button, Card, Divider, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { Goal, idPattern, Question, Triple, VariableBinding } from "DISK/interfaces";
+import { Goal, Question, Triple, VariableBinding } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -15,6 +15,7 @@ import { openNotification } from "redux/slices/notifications";
 import { addBindingsToQuestionGraph } from "components/questions/QuestionHelpers";
 import { EditableHeader } from "components/Fields";
 import { TextFieldBlock, TypographySubtitle } from "components/Styles";
+import { getId } from "DISK/util";
 
 export const HypothesisEditor = () => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ export const HypothesisEditor = () => {
     const [searchParams, _]= useSearchParams();
     let initialQuestionId = searchParams.get("q");
 
-    const {data :hypothesis, isLoading:loading } = useGetGoalByIdQuery(goalId as string, {skip:!goalId});
+    const {data :goal, isLoading:loading } = useGetGoalByIdQuery(goalId as string, {skip:!goalId});
     const [postHypothesis] = usePostGoalMutation();
     const [putHypothesis] = usePutGoalMutation();
 
@@ -53,13 +54,13 @@ export const HypothesisEditor = () => {
     }, [initialQuestionId])
 
     useEffect(() => {
-        if (hypothesis) {
-            loadForm(hypothesis);
+        if (goal) {
+            loadForm(goal);
         } else {
             clearForm();
             if (initialQuestionId) setQuestionId(initialQuestionId);
         }
-    }, [hypothesis])
+    }, [goal])
 
     const loadForm = (hypothesis:Goal) => {
         setName(hypothesis.name);
@@ -97,8 +98,8 @@ export const HypothesisEditor = () => {
 
         let previous : Partial<Goal> = {};
         let editing : boolean = false;
-        if (hypothesis) {
-            previous = {...hypothesis};
+        if (goal) {
+            previous = {...goal};
             editing = true;
         }
         // Add form data
@@ -122,7 +123,7 @@ export const HypothesisEditor = () => {
                 let savedHypothesis = response.data;
                 if (savedHypothesis && savedHypothesis.id) {
                     dispatch(openNotification({severity:'success', text:'Successfully saved'}))
-                    navigate(PATH_GOALS + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                    navigate(PATH_GOALS + "/" + getId(savedHypothesis)); 
                 } else if (response.error) {
                     dispatch(openNotification({severity:'error', text:'Error saving hypothesis. Please try again'}))
                     console.warn(response.error);
@@ -138,13 +139,13 @@ export const HypothesisEditor = () => {
     }
 
     const onDuplicateClicked = () => {
-        if (!hypothesis) {
+        if (!goal) {
             return;
         }
         let newHypothesis : Goal = { 
-            ...hypothesis,
+            ...goal,
             id: '',
-            name: hypothesis.name + " (copy)",
+            name: goal.name + " (copy)",
         };
 
         dispatch(openBackdrop());
@@ -153,7 +154,7 @@ export const HypothesisEditor = () => {
                 let savedHypothesis = (data as {data:Goal}).data;
                 if (savedHypothesis && savedHypothesis.id) {
                     dispatch(openNotification({severity:'success', text:'Successfully saved'}))
-                    navigate(PATH_GOALS + "/" + savedHypothesis.id.replace(idPattern, "")); 
+                    navigate(PATH_GOALS + "/" + getId(savedHypothesis));
                 }
             })
             .catch((e) => {
@@ -170,7 +171,7 @@ export const HypothesisEditor = () => {
     };
 
     return <Card variant="outlined">
-        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_GOALS + (hypothesis && hypothesis.id ? "/" + hypothesis.id : "")}/>
+        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_GOALS + (goal && goal.id ? "/" + getId(goal) : "")}/>
         <Divider/>
 
         <Box sx={{padding:"10px"}}>
@@ -195,13 +196,13 @@ export const HypothesisEditor = () => {
         </Box>
 
         <Box sx={{display: 'flex', justifyContent: 'space-between', padding: "10px"}}>
-            {hypothesis?
+            {goal?
                 <Button color="info" sx={{mr:"10px"}} onClick={onDuplicateClicked}>
                     <CopyIcon/> Duplicate
                 </Button> : <Box/>
             }
             <Box>
-                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_GOALS + (hypothesis ? "/" + hypothesis.id : "")}>
+                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_GOALS + (goal ? "/" + getId(goal) : "")}>
                     <CancelIcon/> Cancel
                 </Button>
                 <Button variant="contained" color="success" onClick={onSaveButtonClicked}>

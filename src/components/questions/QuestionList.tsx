@@ -1,5 +1,5 @@
 import { Box, Button, Card, CircularProgress, Divider, Link as MuiLink, List, ListItem, Tooltip, Typography } from "@mui/material";
-import { AnyQuestionVariable, Goal, idPattern, LineOfInquiry, Question, VariableBinding, varPattern } from "DISK/interfaces";
+import { AnyQuestionVariable, Goal, LineOfInquiry, Question, VariableBinding, varPattern } from "DISK/interfaces";
 import { Fragment, useEffect, useState } from "react";
 import { useAuthenticated } from "redux/hooks";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
@@ -13,6 +13,7 @@ import { useGetGoalsQuery } from "redux/apis/goals";
 import { useGetQuestionsQuery } from "redux/apis/questions";
 import { useGetLOIsQuery } from "redux/apis/lois";
 import { TextPart } from "./QuestionHelpers";
+import { getId } from "DISK/util";
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -21,7 +22,7 @@ interface QuestionListProps {
 
 export const normalizeURI = (uri:string) => {
     if (uri.startsWith("http") || uri.startsWith("www"))
-        uri = uri.replace(idPattern, "");
+        uri = getId({id:uri});
 
     //WIKI Specific 
     if (uri.startsWith("Property-3A"))
@@ -37,7 +38,7 @@ export const normalizeTextValue = (text:string) => {
     if (text === "TH") return "Thickness";
     //If is an url use the last part of the path
     if (text.startsWith("http") || text.startsWith("www"))
-        text = text.replace(idPattern, "");
+        text = getId({id:text});
     text = text.replaceAll("Pages2k2_1_2#", "").replaceAll(".Location", "");
     text = text.replaceAll('-28', '(').replaceAll('-29', ')').replaceAll('-3A', ':');
     text = text.replaceAll("_(E)", "").replaceAll("Property:", "");
@@ -112,7 +113,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
             {myHyp.map((h:Goal) => 
                 <ListItem sx={{p:"4px 16px"}} key={h.id}>
                     <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
-                        component={Link} to={PATH_GOALS + '/' + h.id} key={h.id}>
+                        component={Link} to={PATH_GOALS + '/' + getId(h)} key={h.id}>
                         {renderHypothesisQuestionText(q, h)}
                     </Card>
                 </ListItem>)}
@@ -166,7 +167,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
             {myLOI.map((l:LineOfInquiry) =>
                 <ListItem sx={{p:"4px 16px"}} key={l.id}>
                     <Card variant="elevation" sx={{display:'flex', alignItems:'center', textDecoration: 'none', width:"100%", backgroundColor: "rgba(126,126,126,0.05)", ':hover': {backgroundColor:'#ddd'}}}
-                        component={Link} to={PATH_LOIS + '/' + l.id} key={l.id}>
+                        component={Link} to={PATH_LOIS + '/' + getId(l)} key={l.id}>
                         <SettingsIcon sx={{mx: "5px", color:'darkgreen'}}/> {l.name}
                     </Card>
                 </ListItem>)}
@@ -199,7 +200,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
                             </Box>
                             <Box>
                                 <Tooltip arrow title="Create a new Hypothesis based on this template" placement="top">
-                                    <Button component={Link} to={(kind === 'hypothesis' ? PATH_GOAL_NEW : PATH_LOI_NEW)+"?q="+q.id} disabled={!authenticated}>
+                                    <Button component={Link} to={(kind === 'hypothesis' ? PATH_GOAL_NEW : PATH_LOI_NEW)+"?q="+getId(q)} disabled={!authenticated}>
                                         <AddIcon sx={{mr:'5px'}}/> New
                                     </Button>
                                 </Tooltip>

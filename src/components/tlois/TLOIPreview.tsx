@@ -1,5 +1,6 @@
 import { Card } from "@mui/material";
 import { TriggeredLineOfInquiry } from "DISK/interfaces";
+import { getId } from "DISK/util";
 import { GREEN_BLUE, GREEN_YELLOW, LIGHT_GREEN, RED } from "constants/colors";
 import { BRAIN_FILENAME, SHINY_FILENAME, displayConfidenceValue } from "constants/general";
 import { PATH_TLOIS } from "constants/routes";
@@ -34,7 +35,7 @@ export const TLOIPreview = ({tloi} : TLOIPreviewProps) => {
 
 
     return (
-        <Card key={`k_${tloi.id}`} component={Link} to={PATH_TLOIS + "/" + tloi.id}
+        <Card key={`k_${tloi.id}`} component={Link} to={PATH_TLOIS + "/" + getId(tloi)}
                 style={{padding: "0px 10px", marginBottom: '5px', display:"flex", justifyContent:"space-between", fontSize:".8em", backgroundColor: color, textDecoration: 'none'}}>
             <span><span style={{fontWeight: 'bold', color: '#333'}}>{tloi.name}</span> - <span style={{color:'#666'}}>{tloi.dateCreated}</span></span>
             <span>

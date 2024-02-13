@@ -25,12 +25,12 @@ import { Link } from 'react-router-dom';
 import { Link as MuiLink, ListItem, Menu, MenuItem } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 import { PATH_DATA, PATH_HOME, PATH_GOALS, PATH_GOAL_ID_EDIT_RE, PATH_GOAL_ID_RE, PATH_GOAL_NEW, PATH_HYP_QUESTIONS, PATH_LOIS, PATH_LOI_ID_EDIT_RE, PATH_LOI_ID_RE, PATH_LOI_NEW, PATH_LOI_QUESTIONS, PATH_MY_GOALS, PATH_MY_LOIS, PATH_TERMINOLOGY, PATH_TLOIS, PATH_TLOI_ID_RE } from 'constants/routes';
-import { AccountCircle, People } from '@mui/icons-material';
+import { AccountCircle } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StorageIcon from '@mui/icons-material/Storage';
 import NewTabIcon from '@mui/icons-material/OpenInNew';
 import { useUsername } from "redux/hooks";
-import { Goal, idPattern, LineOfInquiry } from 'DISK/interfaces';
+import { Goal, LineOfInquiry } from 'DISK/interfaces';
 import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
 import { VERSION } from 'constants/config';
@@ -38,6 +38,7 @@ import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRig
 import { useGetGoalByIdQuery } from 'redux/apis/goals';
 import { useGetLOIByIdQuery } from 'redux/apis/lois';
 import { useGetTLOIByIdQuery } from 'redux/apis/tlois';
+import { getId } from 'DISK/util';
 
 const drawerWidth = 240;
 
@@ -183,9 +184,9 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const theme = useTheme();
   const location = useLocation();
 
-  const {data:selectedGoal} = useGetGoalByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_GOALS+ "/")});
-  const {data:selectedLOI} = useGetLOIByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_LOIS+ "/")});
-  const {data:selectedTLOI} = useGetTLOIByIdQuery(location.pathname.replace(idPattern, ''), {skip: !location.pathname.startsWith(PATH_TLOIS+ "/")});
+  const {data:selectedGoal} = useGetGoalByIdQuery(getId({id: location.pathname}), {skip: !location.pathname.startsWith(PATH_GOALS+ "/")});
+  const {data:selectedLOI} = useGetLOIByIdQuery(getId({id: location.pathname}), {skip: !location.pathname.startsWith(PATH_LOIS+ "/")});
+  const {data:selectedTLOI} = useGetTLOIByIdQuery(getId({id: location.pathname}), {skip: !location.pathname.startsWith(PATH_TLOIS+ "/")});
 
   const { keycloak, initialized } = useKeycloak();
   const username = useUsername();
@@ -260,7 +261,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             </ListItemButton>
 
             {selectedGoal && selectedGoal.author?.email === username && (inLocation(PATH_TLOIS) || (location.pathname != PATH_GOALS && inLocation(PATH_GOALS))) && !inLocation(PATH_HYP_QUESTIONS) &&
-              <ListItemButton  key={PATH_GOALS + selectedGoal.id} component={Link} to={PATH_GOALS + "/" + selectedGoal.id}
+              <ListItemButton  key={PATH_GOALS + selectedGoal.id} component={Link} to={PATH_GOALS + "/" + getId(selectedGoal)}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px', py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                   <SubdirectoryArrowRightIcon/>
@@ -273,7 +274,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
               </ListItemButton>
             }
             {selectedTLOI && selectedGoal && selectedGoal.author?.email === username && inLocation(PATH_TLOIS) && (
-              <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + selectedTLOI.id}
+              <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + getId(selectedTLOI)}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px', py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                   <SubdirectoryArrowRightIcon/>
@@ -296,7 +297,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             </ListItemButton>
 
             {selectedLOI && selectedLOI.author?.email === username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && !inLocation(PATH_LOI_QUESTIONS) &&
-              <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + selectedLOI.id}
+              <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + getId(selectedLOI)}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "25px", py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
                   <SubdirectoryArrowRightIcon/>
@@ -324,7 +325,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           </ListItemButton>
 
           {selectedGoal && selectedGoal.author?.email !== username && (inLocation(PATH_TLOIS) || (inLocation(PATH_GOALS) && location.pathname !== PATH_GOALS)) &&
-            <ListItemButton  key={PATH_GOALS + selectedGoal.id} component={Link} to={PATH_GOALS + "/" + selectedGoal.id}
+            <ListItemButton  key={PATH_GOALS + selectedGoal.id} component={Link} to={PATH_GOALS + "/" + getId(selectedGoal)}
                 sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px', py: 0}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                 <SubdirectoryArrowRightIcon/>
@@ -337,7 +338,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             </ListItemButton>
           }
           {selectedTLOI && selectedGoal && selectedGoal.author?.email !== username && inLocation(PATH_TLOIS) && (
-            <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + selectedTLOI.id}
+            <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + getId(selectedTLOI)}
                 sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px', py: 0}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                 <SubdirectoryArrowRightIcon/>
@@ -360,7 +361,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           </ListItemButton>
 
           {selectedLOI && selectedLOI.author?.email !== username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS &&
-            <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + selectedLOI.id}
+            <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + getId(selectedLOI)}
                 sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "50px", py: 0}}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
                 <SubdirectoryArrowRightIcon/>

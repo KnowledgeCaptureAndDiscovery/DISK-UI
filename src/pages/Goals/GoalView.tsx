@@ -13,7 +13,7 @@ import { useGetGoalByIdQuery } from "redux/apis/goals";
 import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/tlois";
 import { TLOIBundle } from "components/tlois/TLOIBundle";
 import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } from "components/Styles";
-import { RE_ID } from "DISK/util";
+import { getId } from "DISK/util";
 
 
 export const HypothesisView = () => {
@@ -78,7 +78,7 @@ export const HypothesisView = () => {
                 </Typography>
                 {authenticated && hypothesis ? 
                 <Tooltip arrow title="Edit">
-                    <IconButton component={Link} to={PATH_GOALS + "/" + hypothesis.id.replaceAll(RE_ID,"") + "/edit"}>
+                    <IconButton component={Link} to={PATH_GOALS + "/" + getId(hypothesis) + "/edit"}>
                         <EditIcon />
                     </IconButton>
                 </Tooltip>
