@@ -54,7 +54,6 @@ export const LOIEditor = () => {
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);
     const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
-    const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
     const [showErrors, setShowErrors] = React.useState<boolean>(false);
 
     const onNameChange = (name:string) => { setName(name); setErrorName(name.length === 0); }
@@ -102,7 +101,6 @@ export const LOIEditor = () => {
         if (!name || !description || !questionId || !dataQueryTemplate.endpoint || !dataQueryTemplate.template) {
             if (!name) setErrorName(true);
             if (!description) setErrorDesc(true);
-            if (!questionId) setErrorQuestion(true);
             setShowErrors(true);
             return;
         }
@@ -198,7 +196,6 @@ export const LOIEditor = () => {
     const onQuestionChange = (q:Question|null, vars:string[]) => {
         setSparqlVariableNames(vars);
         setQuestionId(q ? q.id : "");
-        setErrorQuestion(q === null || q.id.length ===0);
         if (q!=null) {
             let allVars = getAllQuestionVariables(q).reduce((acc, cur) => {
                 acc[cur.id] = cur;
@@ -236,7 +233,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.question.id : "")} onQuestionChange={onQuestionChange} error={errorQuestion}/>
+            <QuestionLinker selected={initQuestion ? initQuestion : (LOI? LOI.question.id : "")} onQuestionChange={onQuestionChange} showErrors={showErrors}/>
         </Box>
         <Divider/>
 

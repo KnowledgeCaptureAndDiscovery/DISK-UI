@@ -32,8 +32,8 @@ export const LOIView = () => {
     const [formalView, setFormalView] = React.useState<boolean>(false);
 
     useEffect(() => {
-        if (LOI) {
-            //setSelectedDataSource(LOI.dataSource) TODO
+        if (LOI?.dataQueryTemplate?.endpoint?.url) {
+            setSelectedDataSource(LOI.dataQueryTemplate.endpoint.url);
         }
     }, [LOI]);
 
@@ -85,7 +85,7 @@ export const LOIView = () => {
         </Box>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={LOI? "" : ""} disabled={true}/>
+            <QuestionLinker selected={LOI? "" : ""} disabled={true} showErrors={false}/>
         </Box>
         <Divider/>
 
@@ -95,8 +95,8 @@ export const LOIView = () => {
                 <TypographyLabel>Data query explanation:</TypographyLabel>
                 {loading ? 
                     <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    (//!!LOI && LOI.dataQueryExplanation ? 
-                      //  <TypographyInline> {LOI.dataQueryExplanation} </TypographyInline> :
+                    (LOI?.dataQueryTemplate?.description ? 
+                        <TypographyInline> {LOI.dataQueryTemplate.description} </TypographyInline> :
                         <InfoInline> None specified </InfoInline>
                     )
                 }
@@ -130,7 +130,7 @@ export const LOIView = () => {
                     
                 {formalView &&                     
                     <Box sx={{fontSize: "0.94rem", mb:"10px"}} >
-                        <CodeMirror value={ ""}
+                        <CodeMirror value={LOI?.dataQueryTemplate?.template || ""}
                             extensions={[StreamLanguage.define(sparql)]}
                             onChange={(value, viewUpdate) => {
                             }}
@@ -148,8 +148,8 @@ export const LOIView = () => {
                     <TypographyLabel>Dataset information to be shown:</TypographyLabel>
                     {loading ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (//!!LOI && LOI.tableVariables ? 
-                         //   <TypographyInline> {LOI.tableVariables} </TypographyInline> :
+                        (LOI?.dataQueryTemplate?.variablesToShow ? 
+                            <TypographyInline> {LOI.dataQueryTemplate.variablesToShow} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }
@@ -158,8 +158,8 @@ export const LOIView = () => {
                     <TypographyLabel>Description of the datasets:</TypographyLabel>
                     {loading?
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (//!!LOI && LOI.tableDescription ? 
-                         //   <TypographyInline> {LOI.tableDescription} </TypographyInline> :
+                        (LOI?.dataQueryTemplate?.footnote ? 
+                            <TypographyInline> {LOI.dataQueryTemplate.footnote} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }
