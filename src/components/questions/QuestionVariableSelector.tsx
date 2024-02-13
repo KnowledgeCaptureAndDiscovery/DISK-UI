@@ -8,9 +8,10 @@ import { useGetDynamicOptionsQuery } from "redux/apis/questions";
 interface QuestionVariableProps {
     questionId: string,
     variable: QuestionVariable,
+    showErrors: boolean;
 }
 
-export const QuestionVariableSelector = ({questionId, variable}: QuestionVariableProps) => {
+export const QuestionVariableSelector = ({questionId, variable, showErrors}: QuestionVariableProps) => {
     const dispatch = useAppDispatch();
     const bindings = useQuestionBindings();
     const { data, isLoading, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:bindings}});
@@ -75,11 +76,13 @@ export const QuestionVariableSelector = ({questionId, variable}: QuestionVariabl
             getOptionLabel={fixOptionLabel}
             loading={isLoading}
             renderInput={(params) => (
-                <TextField {...params} label={variable.variableName} variant="standard" InputProps={{
+                <TextField {...params} label={variable.variableName} variant="standard" 
+                    error={showErrors && !selectedOption}
+                    InputProps={{
                     ...params.InputProps,
                     endAdornment: (
                         <React.Fragment>
-                            {isLoading && (<CircularProgress color="inherit" size={20} />)}
+                            {isLoading && (<CircularProgress color="inherit" size={20} style={{marginRight: "30px"}} />)}
                             {params.InputProps.endAdornment}
                         </React.Fragment>
                     ),

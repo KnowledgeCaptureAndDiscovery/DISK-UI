@@ -99,7 +99,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent, meta=fal
                                 ...params.InputProps,
                                 endAdornment: (
                                     <React.Fragment>
-                                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                        {loading ? <CircularProgress color="inherit" size={20} style={{marginRight: "30px"}} /> : null}
                                         {params.InputProps.endAdornment}
                                     </React.Fragment>
                                 ),

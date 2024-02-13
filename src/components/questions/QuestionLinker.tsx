@@ -8,10 +8,10 @@ interface QuestionLinkerProps {
     selected: string,
     disabled?: boolean,
     onQuestionChange?: (question:Question|null, variables:string[]) => void,
-    error?: boolean
+    showErrors: boolean
 }
 
-export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:notifyChange, error:exError=false} : QuestionLinkerProps) => {
+export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:notifyChange, showErrors} : QuestionLinkerProps) => {
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
 
     const onQuestionChange = (value: Question | null) => {
@@ -23,7 +23,7 @@ export const QuestionLinker = ({selected:selectedId, disabled, onQuestionChange:
 
     return <Box>
         <Box style={{display: disabled ? 'none' : 'initial'}}>
-            <QuestionTemplateSelector required title="Select a pattern that this line of inquiry will investigate:" onChange={onQuestionChange} questionId={selectedId}/>
+            <QuestionTemplateSelector required title="Select a pattern that this line of inquiry will investigate:" onChange={onQuestionChange} questionId={selectedId} showErrors={showErrors}/>
         </Box>
 
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", display: (selectedQuestion ? "block" : "none"), position: "relative", overflow:"visible"}}>

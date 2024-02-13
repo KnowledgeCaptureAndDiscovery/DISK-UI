@@ -10,9 +10,10 @@ import { useQuestionBindings } from "redux/hooks"
 
 interface QuestionTemplateSelectorProps {
     question: Question|null,
+    showErrors: boolean;
 }
 
-export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorProps) => {
+export const QuestionTemplateFiller = ({ question, showErrors }: QuestionTemplateSelectorProps) => {
     const [templateFragments, setTemplateFragments] = React.useState<TemplateFragment[]>([]);
 
     const bindings = useQuestionBindings();
@@ -44,7 +45,7 @@ export const QuestionTemplateFiller = ({ question }: QuestionTemplateSelectorPro
                 } else if (curVariable.subType === 'TIME_INTERVAL') {
                     return <TimeIntervalVariable key={`qVars${i}`} variable={curVariable} />
                 } else {
-                    return <QuestionVariableSelector key={`qVars${i}`} questionId={question.id} variable={curVariable}/>
+                    return <QuestionVariableSelector key={`qVars${i}`} questionId={question.id} variable={curVariable} showErrors={showErrors}/>
                 }
             } else {
                 return <TextPart key={`qPart${i}`}> {frag.value} </TextPart>;

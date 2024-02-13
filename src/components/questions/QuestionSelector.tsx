@@ -14,15 +14,17 @@ interface QuestionProps {
     questionId: string,
     bindings: VariableBinding[],
     onChange?: (question:Question|null, bindings:VariableBinding[], graph:Triple[]) => void,
-    required?: boolean
+    required?: boolean,
+    showErrors: boolean,
 }
 
-export const QuestionSelector = ({questionId, bindings, onChange, required=false} : QuestionProps) => {
+export const QuestionSelector = ({questionId, bindings, onChange, required=false, showErrors} : QuestionProps) => {
     const dispatch = useAppDispatch();
     const [selectedQuestion, setSelectedQuestion] = React.useState<Question|null>(null);
     const [showGraph, setShowGraph] = React.useState<boolean>(false);
     const [graph, setGraph] = React.useState<Triple[]>([]);
     const questionBindings = useQuestionBindings();
+
 
     React.useEffect(() => {
         if (onChange) {
@@ -56,13 +58,13 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     }
 
     return <Box>
-        <QuestionTemplateSelector questionId={questionId} onChange={onQuestionChange} required={required} title={"Select a template that can express your hypothesis or question:"}/>
+        <QuestionTemplateSelector questionId={questionId} onChange={onQuestionChange} showErrors={showErrors} required={required} title={"Select a template that can express your hypothesis or question:"}/>
         <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", position:"relative", overflow:"visible", display: selectedQuestion ? 'block' : 'none' }}>
             <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}>
                 Fill in the template:
             </FormHelperText>
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <QuestionTemplateFiller question={selectedQuestion}/>
+                <QuestionTemplateFiller question={selectedQuestion} showErrors={showErrors}/>
                 <Tooltip arrow title={(showGraph? "Hide" : "Show") + " formal expression"}>
                     <IconButton onClick={() => setShowGraph(!showGraph)}>
                         {showGraph? <VisibilityIcon/> : <VisibilityOffIcon/>}

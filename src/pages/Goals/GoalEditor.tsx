@@ -43,7 +43,7 @@ export const HypothesisEditor = () => {
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);
     const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
-    //const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
+    const [showErrors, setShowErrors] = React.useState<boolean>(false);
 
     const onNameChange = (name:string) => { setName(name); setErrorName(name.length === 0); }
     const onDescChange = (desc:string) => { setDescription(desc); setErrorDesc(desc.length === 0); }
@@ -92,7 +92,7 @@ export const HypothesisEditor = () => {
         if (!name || !description || !editedQuestionId || !formSelectedQuestion) {
             if (!name) setErrorName(true);
             if (!description) setErrorDesc(true);
-            //if (!editedQuestionId) setErrorQuestion(true); this should be solved by required.
+            setShowErrors(true);
             return;
         }
 
@@ -191,7 +191,7 @@ export const HypothesisEditor = () => {
                 Hypothesis or question:
             </TypographySubtitle>
             {!loading ?
-                <QuestionSelector questionId={questionId} bindings={questionBindings} onChange={onQuestionChange} required/>
+                <QuestionSelector questionId={questionId} bindings={questionBindings} onChange={onQuestionChange} showErrors={showErrors} required/>
             : <Skeleton/>}
         </Box>
 
