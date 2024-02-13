@@ -1,6 +1,6 @@
-import React, { Fragment } from "react";
-import { Box, Button, Card, Checkbox, Divider, FormControlLabel, FormGroup, FormHelperText, IconButton, MenuItem, Select, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { DataEndpoint, idPattern, LineOfInquiry, Question, QuestionVariable, Workflow } from "DISK/interfaces";
+import React from "react";
+import { Box, Button, Card, Divider, Skeleton } from "@mui/material";
+import { DataQueryTemplate, LineOfInquiry, Question, QuestionVariable, Workflow } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import SaveIcon from '@mui/icons-material/Save';
@@ -8,20 +8,16 @@ import CopyIcon from '@mui/icons-material/ContentCopy';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
-import CodeMirror from '@uiw/react-codemirror';
-import { sparql } from "@codemirror/legacy-modes/mode/sparql";
-import { StreamLanguage } from '@codemirror/language';
 import { WorkflowList } from "components/methods/WorkflowList";
-import { QueryTester } from "components/QueryTester";
-import { renderDescription } from "DISK/util";
-import { useGetEndpointsQuery } from "redux/apis/server";
+import { getId } from "DISK/util";
 import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux/apis/lois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
-import { alignWorkflow, createQueryForGraph, getAllQuestionVariables, getCompleteQuestionGraph } from "components/questions/QuestionHelpers";
-import { TypographySubtitle, TypographySection, TextFieldBlock, FieldBox } from "components/Styles";
+import { createQueryForGraph, getAllQuestionVariables, getCompleteQuestionGraph } from "components/questions/QuestionHelpers";
+import { TypographySubtitle, TextFieldBlock, FieldBox } from "components/Styles";
 import CancelIcon from '@mui/icons-material/Cancel';
 import { EditableHeader, TriggerConditionEditor } from "components/Fields";
+import { DataQueryTemplateForm } from "components/DataQuery/DataQueryTemplateForm";
 
 export const LOIEditor = () => {
     let navigate = useNavigate();
@@ -33,7 +29,7 @@ export const LOIEditor = () => {
     const selectedId = loiId as string;
 
     const {data:LOI, isLoading:loading, isError:error} = useGetLOIByIdQuery(selectedId, {skip:!selectedId});
-    const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
+    //const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
 
     const [postLOI, { isLoading: isCreating }] = usePostLOIMutation();
     const [putLOI, { isLoading: isUpdating }] = usePutLOIMutation();
@@ -43,52 +39,36 @@ export const LOIEditor = () => {
     const [editingWorkflows, setEditingWorkflows] = React.useState<boolean>(false);
 
     //FORM
-    const [selectedDataSource, setSelectedDataSource] = React.useState("");
-    const [dataSourceDescription, setDataSourceDescription] = React.useState("");
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [notes, setNotes] = React.useState("");
-    const [dataQuery, setDataQuery] = React.useState("");
-    const [tableExplanation, setTableDescription] = React.useState("");
-    const [tableVariables, setTableVariables] = React.useState("");
-    const [dataQueryExplanation, setDataQueryExplanation] = React.useState("");
+    const [dataQueryTemplate, setDataQueryTemplate] = React.useState<Partial<DataQueryTemplate>>({})
+
     const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
     const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
+
     const [questionId, setQuestionId] = React.useState<string>("");
-    const [hypothesisQuery, setHypothesisQuery] = React.useState<string>("");
+    const [goalQuery, setHypothesisQuery] = React.useState<string>("");
     const [updateCondition, setUpdateCondition] = React.useState<number>(1);
 
     // State errors...
     const [errorName, setErrorName] = React.useState<boolean>(false);
     const [errorDesc, setErrorDesc] = React.useState<boolean>(false);
-    const [errorDataSource, setErrorDataSource] = React.useState<boolean>(false);
-    const [errorQuery, setErrorQuery] = React.useState<boolean>(false);
     const [errorQuestion, setErrorQuestion] = React.useState<boolean>(false);
+    const [showErrors, setShowErrors] = React.useState<boolean>(false);
 
     const onNameChange = (name:string) => { setName(name); setErrorName(name.length === 0); }
     const onDescChange = (desc:string) => { setDescription(desc); setErrorDesc(desc.length === 0); }
-    const onDataSourceChange = (ds:string) => { setSelectedDataSource(ds); setErrorDataSource(ds.length === 0); }
 
     useEffect(() => {
         let candidates : Set<string> = new Set<string>();
         sparqlVariableNames.forEach((varName:string) => candidates.add(varName));
-        let dataVars : RegExpMatchArray | null = dataQuery.match(/\?[\w\d]+/g);
+        let dataVars : RegExpMatchArray | null = (dataQueryTemplate.template || "").match(/\?[\w\d]+/g);
         if (dataVars) {
             dataVars.forEach((varName:string) => candidates.add(varName));
         }
         setSparqlVariableOptions(Array.from(candidates));
-    }, [sparqlVariableNames, dataQuery]);
-
-    useEffect(() => {
-        if (selectedDataSource && !!endpoints) {
-            for (let i = 0; i < endpoints.length; i++) {
-                let ds : DataEndpoint = endpoints[i];
-                if (selectedDataSource === ds.url) {
-                    setDataSourceDescription(ds.description);
-                }
-            }
-        }
-    }, [selectedDataSource, endpoints])
+    }, [sparqlVariableNames, dataQueryTemplate]);
     
     useEffect(() => {
         if (LOI) {
@@ -101,14 +81,10 @@ export const LOIEditor = () => {
     const loadForm = (loi:LineOfInquiry) => {
         setName(loi.name);
         setDescription(loi.description);
-        setNotes(loi.notes ? loi.notes : "");
-        //setSelectedDataSource(loi.dataSource);
-        //setDataQuery(loi.dataQuery);
-        //setTableDescription(loi.tableDescription? loi.tableDescription : "");
-        //setTableVariables(loi.tableVariables? loi.tableVariables : "");
-        //setDataQueryExplanation(loi.dataQueryExplanation ? loi.dataQueryExplanation : "");
+        setNotes(loi.notes || "");
         //setWorkflows(loi.workflows);
         //setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
+        setDataQueryTemplate(loi.dataQueryTemplate || {});
         setUpdateCondition(loi.updateCondition ? loi.updateCondition : 1);
     };
 
@@ -116,59 +92,61 @@ export const LOIEditor = () => {
         setName("");
         setDescription("");
         setNotes("");
-        setSelectedDataSource("");
-        setDataQuery("");
-        setTableDescription("");
-        setTableVariables("");
-        setDataQueryExplanation("");
+        setDataQueryTemplate({});
         setWorkflows([]);
         setMetaWorkflows([]);
         setUpdateCondition(1);
     };
 
     const onSaveButtonClicked = () => {
-        if (!name || !description || !selectedDataSource || !dataQuery || !questionId) {
+        if (!name || !description || !questionId || !dataQueryTemplate.endpoint || !dataQueryTemplate.template) {
             if (!name) setErrorName(true);
             if (!description) setErrorDesc(true);
-            if (!selectedDataSource) setErrorDataSource(true);
-            if (!dataQuery) setErrorQuery(true);
             if (!questionId) setErrorQuestion(true);
+            setShowErrors(true);
             return;
         }
 
         let newLOI : LineOfInquiry;
-        let previous : any = {};
+        let previous : Partial<LineOfInquiry> = {};
         let editing : boolean = false;
         if (LOI) {
             // Edit existing hypothesis:
             previous  = { ...LOI };
             editing = true;
         }
+        if (dataQueryTemplate.endpoint === undefined) {
+            return null;
+        }
+
         newLOI = {
             ...previous,
+            id: editing && previous.id || "",
             name: name,
             description: description,
             notes: notes,
-            questionId: questionId,
-            dataQuery: dataQuery,
-            hypothesisQuery: hypothesisQuery,
-            dataSource: selectedDataSource,
-            workflows: workflows.map(alignWorkflow),
-            metaWorkflows: metaWorkflows.map(alignWorkflow),
-            tableDescription: tableExplanation,
-            tableVariables: tableVariables,
-            dataQueryExplanation: dataQueryExplanation,
+            question: { id: questionId },
+            goalQuery: goalQuery,
+            author: undefined,
+            dataQueryTemplate: dataQueryTemplate as DataQueryTemplate,  //For some reason typescript does not get that endpoint cannot be undefined here... Line 108
+            workflowSeeds: [],
+            metaWorkflowSeeds: [],
+            //workflows: workflows.map(alignWorkflow),
+            //metaWorkflows: metaWorkflows.map(alignWorkflow),
             updateCondition: updateCondition
         };
 
         dispatch(openBackdrop());
-        (editing?putLOI:postLOI)({data:newLOI as LineOfInquiry})
-            .then((data : {data:LineOfInquiry} | {error: any}) => {
-                let savedLOI = (data as {data:LineOfInquiry}).data;
+        (editing?putLOI:postLOI)({data:newLOI})
+            .then((response : {data?:LineOfInquiry, error?: any}) => {
+                let savedLOI = (response as {data:LineOfInquiry}).data;
                 if (savedLOI) {
                     console.log("LOI saved:", savedLOI);
-                    navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+                    navigate(PATH_LOIS + "/" + getId(savedLOI)); 
                     dispatch(openNotification({severity:'success', text:'Line of Inquiry successfully saved'}));
+                } else if (error) {
+                    dispatch(openNotification({severity:'error', text:'Error saving Line of Inquiry'}));
+                    console.warn(error);
                 }
             })
             .catch((e:any) => {
@@ -192,12 +170,15 @@ export const LOIEditor = () => {
 
         dispatch(openBackdrop())
         postLOI({data:newLOI})
-            .then((data : {data:LineOfInquiry} | {error: any}) => {
-                let savedLOI = (data as {data:LineOfInquiry}).data;
+            .then((response : {data?:LineOfInquiry, error?: any}) => {
+                let savedLOI = response.data;
                 if (savedLOI) {
                     console.log("LOI duplicated:", savedLOI);
-                    navigate(PATH_LOIS + "/" + savedLOI.id.replace(idPattern, "")); 
+                    navigate(PATH_LOIS + "/" + getId(savedLOI)); 
                     dispatch(openNotification({severity:'success', text:'Line of Inquiry successfully saved'}));
+                } else if (error) {
+                    dispatch(openNotification({severity:'error', text:'Error saving Line of Inquiry'}));
+                    console.warn(error);
                 }
             })
             .catch((e) => {
@@ -229,8 +210,16 @@ export const LOIEditor = () => {
         }
     }
 
+    const onDataQueryTemplateChange = (newValue: DataQueryTemplate) => {
+        let prev : string = JSON.stringify(dataQueryTemplate);
+        let next : string = JSON.stringify(newValue);
+        if (prev !== next) {
+            setDataQueryTemplate(newValue);
+        }
+    }
+
     return <Card variant="outlined">
-        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_LOIS + (LOI ? "/" + LOI.id : "")}/>
+        <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_LOIS + (LOI ? "/" + getId(LOI) : "")}/>
         <Divider/>
 
         <FieldBox>
@@ -253,52 +242,7 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle>Data query template:</TypographySubtitle>
-            <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:" value={dataQueryExplanation} onChange={(e) => setDataQueryExplanation(e.target.value)}/>
-
-            <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-                <TypographySection>Template:</TypographySection>
-                <QueryTester initSource={selectedDataSource} initQuery={dataQuery}/>
-            </Box>
-            {loadingEndpoints ?  <Skeleton sx={{display:"inline-block"}}/> :
-                <Box sx={{display: "flex", alignItems: "end"}}>
-                    <Box sx={{display: "inline", marginRight: "10px", fontWeight: 'bold', }}>Data source:</Box>
-                    <Select size="small" sx={{display: 'inline-block', minWidth: "150px", marginRight: '10px'}} variant="standard"  label={"Data source:"} required
-                            error={errorDataSource} value={selectedDataSource} onChange={(e) => onDataSourceChange(e.target.value)}>
-                        <MenuItem value="" disabled> None </MenuItem>
-                        {(endpoints||[]).map((endpoint:DataEndpoint) => 
-                            <MenuItem key={`endpoint_${endpoint.name}`} value={endpoint.url}>
-                                {endpoint.name}
-                            </MenuItem>)
-                        }
-                    </Select>
-                    {renderDescription(dataSourceDescription)}
-                </Box>
-            }
-            <Box sx={{fontSize: "0.94rem"}} >
-                <Card variant="outlined" sx={{
-                        ...{mt: "8px", p: "0px", position: "relative", overflow:"visible", pt:"10px"},
-                        ...(errorQuery ? {borderColor:"#d32f2f", } : {})
-                    }}>
-                    <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-19px 0 0 10px', color:(errorQuery?"#d32f2f":'rgba(0, 0, 0, 0.6);')}}>
-                        Data query *
-                    </FormHelperText>
-                    <CodeMirror value={dataQuery}
-                        extensions={[StreamLanguage.define(sparql)]}
-                        onChange={(value, viewUpdate) => {
-                            setDataQuery(value);
-                            setErrorQuery(value.length === 0);
-                        }}
-                    />
-                </Card>
-            </Box>
-            <Box>
-                <TypographySection>Input data retrieved:</TypographySection>
-                <FormHelperText sx={{fontSize: ".9rem"}}>
-                    When the data source is accessed, a table will be generated that will show the following information about the datasets retrieved:
-                </FormHelperText>
-                <TextFieldBlock fullWidth size="small" id="LOITableVars" label="Dataset information to be shown:" placeholder="?var1 ?var2 ..." value={tableVariables} onChange={(e) => setTableVariables(e.target.value)}/>
-                <TextFieldBlock fullWidth size="small" id="LOITableDesc" label="Description of the datasets:" value={tableExplanation} onChange={(e) => setTableDescription(e.target.value)}/>
-            </Box>
+            <DataQueryTemplateForm value={dataQueryTemplate} onChange={onDataQueryTemplateChange} showErrors={showErrors}/>
         </Box>
         <Divider/>
 
@@ -314,7 +258,7 @@ export const LOIEditor = () => {
                 </Button> : <Box/>
             }
             <Box>
-                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + LOI.id : "")}>
+                <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + getId(LOI) : "")}>
                     <CancelIcon/> Cancel
                 </Button>
                 <Button variant="contained" color="success" onClick={onSaveButtonClicked} disabled={editingWorkflows}>

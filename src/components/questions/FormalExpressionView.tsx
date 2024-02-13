@@ -1,9 +1,10 @@
 import { Card, FormHelperText, TableContainer, Table, TableBody, TableRow, TableCell } from "@mui/material"
-import { idPattern, Triple } from "DISK/interfaces"
+import { Triple } from "DISK/interfaces"
+import { getId } from "DISK/util";
 
 const displayURI = (uri: string) => {
     if (uri.startsWith("http") || uri.startsWith("www"))
-        uri = uri.replace(idPattern, "");
+        uri = getId({id:uri})
 
     //WIKI Specific 
     if (uri.startsWith("Property-3A"))

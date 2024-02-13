@@ -1,5 +1,5 @@
 import { Box, Card, FormHelperText, IconButton, styled, Tooltip } from "@mui/material"
-import { idPattern, Question, VariableBinding, varPattern, Triple, AnyQuestionVariable, MultiValueAssignation } from "DISK/interfaces"
+import { Question, VariableBinding, varPattern, Triple, MultiValueAssignation } from "DISK/interfaces"
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';

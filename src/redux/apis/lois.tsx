@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_DISK_API } from "config";
 import { LineOfInquiry } from 'DISK/interfaces';
 import { DISK } from "./DISK";
+import { getId } from 'DISK/util';
 
 export const loisAPI = createApi({
   reducerPath: 'lois',
@@ -15,12 +16,12 @@ export const loisAPI = createApi({
       providesTags: ['LOIs']
     }),
     getLOIById: builder.query<LineOfInquiry, string>({
-      query: (id: string) => `lois/${id}`,
+      query: (id: string) => `lois/${getId({id})}`,
       providesTags: ['LOI']
     }),
-    putLOI: builder.mutation<LineOfInquiry, { data: Partial<LineOfInquiry> }>({
+    putLOI: builder.mutation<LineOfInquiry, { data: Partial<LineOfInquiry> & {id:string} }>({
       query: ({ data }) => ({
-        url: `lois/${data.id}`,
+        url: `lois/${getId(data)}`,
         headers: DISK.headers,
         method: 'PUT',
         body: data,
@@ -38,7 +39,7 @@ export const loisAPI = createApi({
     }),
     deleteLOI: builder.mutation<LineOfInquiry, {id:string}>({
       query: ({ id }) => ({
-        url: `lois/${id}`,
+        url: `lois/${getId({id})}`,
         headers: DISK.headers,
         method: 'DELETE'
       }),

@@ -10,6 +10,7 @@ import { ConfirmDialog } from "../ConfirmDialog";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 import { useDeleteLOIMutation } from "redux/apis/lois";
+import { getId } from "DISK/util";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -64,7 +65,7 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
     return (
     <Card variant="outlined" sx={{margin: "10px", minHeight: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-            <Box component={Link} to={PATH_LOIS + "/" + loi.id}
+            <Box component={Link} to={PATH_LOIS + "/" + getId(loi)}
                  sx={{display:"inline-flex", alignItems:"center", textDecoration: "none"}}>
                 <SettingsIcon sx={{color: "green"}}/>
                 <Typography variant="h6" sx={{marginLeft: "6px", display: "inline-block", color:"black"}}>{loi.name}</Typography>
@@ -73,7 +74,7 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
                 {displayEditButton && (
                 <Tooltip arrow title={authenticated? "Edit" : "You need to log in to edit"}>
                     <Box sx={{display:"inline-block"}}>
-                        <IconButton component={Link} to={PATH_LOIS + "/" + loi.id + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
+                        <IconButton component={Link} to={PATH_LOIS + "/" + getId(loi) + "/edit"} sx={{padding: "4px"}} disabled={!authenticated}>
                             <EditIcon/>
                         </IconButton>
                     </Box>
@@ -102,7 +103,7 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
             </Box>
             <Box>
                 <b>Author: </b>
-                {loi.author}
+                {loi.author?.email}
             </Box>
         </Box>
     </Card>

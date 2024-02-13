@@ -13,7 +13,7 @@ import { StreamLanguage } from '@codemirror/language';
 import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { renderDescription } from "DISK/util";
+import { getId, renderDescription } from "DISK/util";
 import { WorkflowList } from "components/methods/WorkflowList";
 import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
@@ -56,9 +56,9 @@ export const LOIView = () => {
                 <Typography variant="h5">
                     {error ? "Error loading LOI" : LOI?.name}
                 </Typography>
-                {authenticated ? 
+                {authenticated && LOI ? 
                 <Tooltip arrow title="Edit">
-                    <IconButton component={Link} to={PATH_LOIS + "/" + LOI?.id + "/edit"}>
+                    <IconButton component={Link} to={PATH_LOIS + "/" + getId(LOI) + "/edit"}>
                         <EditIcon />
                     </IconButton>
                 </Tooltip>
