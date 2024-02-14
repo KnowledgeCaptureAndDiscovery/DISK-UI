@@ -1,6 +1,6 @@
 import { sparql } from "@codemirror/legacy-modes/mode/sparql";
 import { Box, Select, MenuItem, Card, FormHelperText, Skeleton } from "@mui/material";
-import { DataEndpoint, DataQueryTemplate } from "DISK/interfaces"
+import { DataEndpoint, DataQueryTemplate, Endpoint } from "DISK/interfaces"
 import { renderDescription } from "DISK/util";
 import { QueryTester } from "components/QueryTester";
 import { TextFieldBlock, TypographySection } from "components/Styles";
@@ -19,7 +19,7 @@ interface DataQueryTemplateFormProps {
 export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemplateFormProps) => {
     const [dataQueryExplanation, setDataQueryExplanation] = useState<string>("");
     const [sourceUrl, setSourceUrl] = useState<string>("");
-    const [sourceName, setSourceName] = useState<string>("");
+    const [sourceID, setSourceID] = useState<string>("");
     const [dataSourceDescription, setDataSourceDescription] = useState<string>("");
     const [template, setTemplate] = useState("");
     const [tableFootnote, setTableFootnote] = useState("");
@@ -37,7 +37,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
         if (value.footnote !== tableFootnote) setTableFootnote(value.footnote || "");
         if (value.template !== template) setTemplate(value.template || "");
         if (value.variablesToShow !== tableVariables) setTableVariables(value.variablesToShow || "");
-        if (value.endpoint && value.endpoint.url !== sourceUrl) setSourceUrl(value.endpoint.url);
+        if (value.endpoint && value.endpoint.url && value.endpoint.url !== sourceUrl) setSourceUrl(value.endpoint.url);
         if (showErrors) {
             if (!value.endpoint || !value.endpoint.url) setErrorDataSource(true);
             if (!value.template) setErrorQuery(true);
@@ -50,7 +50,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
                 let ds : DataEndpoint = endpoints[i];
                 if (sourceUrl === ds.url) {
                     setDataSourceDescription(ds.description);
-                    setSourceName(ds.name);
+                    setSourceID(ds.id);
                 }
             }
         }
@@ -62,7 +62,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
             template: template,
             footnote: tableFootnote,
             variablesToShow: tableVariables,
-            endpoint: {url: sourceUrl, name:sourceName},
+            endpoint: {url: sourceUrl, id:sourceID},
         })
     }, [dataQueryExplanation, template, tableFootnote, tableVariables, sourceUrl]);
 

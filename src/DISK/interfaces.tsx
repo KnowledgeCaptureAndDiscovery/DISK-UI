@@ -126,7 +126,7 @@ export interface LineOfInquiry extends DISKResource {
 }
 
 export interface DataQueryTemplate {
-    endpoint:           Endpoint;
+    endpoint:           Endpoint | (Partial<Endpoint> & Pick<Endpoint, 'id'>);
     template:           string;
     description:        string;
     variablesToShow:    string;
@@ -136,6 +136,7 @@ export interface DataQueryTemplate {
 export interface Endpoint {
     name:   string;
     url:    string;
+    id:     string;
 }
 
 export interface WorkflowSeed {
@@ -286,12 +287,13 @@ export interface Vocabulary {
 export type Vocabularies = {[url:string]: Vocabulary};
 
 export interface DataEndpoint {
-    url:    string,
-    name:   string,
-    prefix: string,
-    namespace: string,
-    prefixResolution: string,
-    description: string;
+    url:                string,
+    name:               string,
+    prefix:             string,
+    namespace:          string,
+    prefixResolution:   string,
+    description:        string;
+    id:                 string;
 }
 
 export interface QuestionOptionsRequest {
