@@ -46,7 +46,7 @@ export const LinesOfInquiry = ({myPage=false} : ViewProps) => {
                     sx={{width:'100%', paddingRight:'5px'}} InputProps={{
                     startAdornment: <InputAdornment position="start"> <SearchIcon/> </InputAdornment>
                 }}/>
-                <Select id="select-order" value={order} label="Order" onChange={handleChangeOrder} size="small">
+                <Select id="select-order" value={order} label="Order" onChange={handleChangeOrder} size="small" style={{width: "110px"}}>
                     <MenuItem value={'date'}>Date</MenuItem>
                     <MenuItem value={'author'}>Author</MenuItem>
                 </Select>
