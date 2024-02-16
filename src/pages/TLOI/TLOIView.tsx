@@ -15,7 +15,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { ResultTable } from "components/ResultTable";
-import { WorkflowList } from "components/methods/WorkflowList";
+import { WorkflowSeedList } from "components/methods/WorkflowList";
 import { QuestionPreview } from "components/questions/QuestionPreview";
 import { getId, renderDescription } from "DISK/util";
 import { useGetGoalByIdQuery } from "redux/apis/goals";
@@ -278,7 +278,7 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         <Divider/>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
-            {!!TLOI && <WorkflowList editable={false} workflows={[]} metaworkflows={[]} options={[]}/>}
+            {!!TLOI && <WorkflowSeedList editable={false} workflows={[]} metaworkflows={[]} options={[]}/>}
         </Box>
     </Card>
 }

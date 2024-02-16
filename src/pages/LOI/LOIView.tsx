@@ -14,7 +14,7 @@ import React from "react";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { getId, renderDescription } from "DISK/util";
-import { WorkflowList } from "components/methods/WorkflowList";
+import { WorkflowSeedList } from "components/methods/WorkflowList";
 import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
 import { InfoInline, TypographyInline, TypographyLabel, TypographySection, TypographySubtitle } from "components/Styles";
@@ -173,7 +173,7 @@ export const LOIView = () => {
             {loading?
                 <Skeleton/> 
             : 
-                !!LOI && <WorkflowList editable={false} workflows={[]} metaworkflows={[]} options={[]}/>
+                !!LOI && <WorkflowSeedList editable={false} workflows={LOI.workflowSeeds} metaworkflows={LOI.metaWorkflowSeeds} options={[]}/>
             }
         </Box>
     </Card>

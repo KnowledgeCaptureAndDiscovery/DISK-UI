@@ -37,9 +37,12 @@ export interface VariableBinding { /// variable = binding
     datatype?:  string;
 }
 
-type InputType = 'DEFAULT' | 'FREEFORM' | 'DATA_QUERY' | 'QUERY_VARIABLE' | 'WORKFLOW_VARIABLE' | 'DISK_DATA';
-type OutputType = 'DROP' | 'SAVE' | 'PROCESS';
-type BindingType = InputType | OutputType;
+export type ParameterType = 'DEFAULT' | 'FREEFORM' | 'QUERY_VARIABLE';
+export type ParameterMetaType = ParameterType | 'DISK_DATA';
+export type InputType = 'FREEFORM' | 'QUERY_VARIABLE' | 'DATA_QUERY';
+export type InputMetaType = InputType | 'WORKFLOW_VARIABLE';
+export type OutputType = 'DROP' | 'SAVE' | 'PROCESS';
+export type BindingType = ParameterMetaType | InputMetaType | OutputType;
 
 export interface Triple {
     subject:    string,
@@ -140,13 +143,17 @@ export interface Endpoint {
 }
 
 export interface WorkflowSeed {
-    id:             string;
+    id?:            string;
+    name:           string;
     link:           string;
     description:    string;
     source:         Endpoint;
     parameters:     VariableBinding[];
     inputs:         VariableBinding[];
+    outputs:        VariableBinding[];
 }
+
+export type SeedBindings = Pick<WorkflowSeed, 'parameters' | 'inputs' | 'outputs'>;
 
 export interface TriggeredLineOfInquiry extends LineOfInquiry{
     status:         Status;
@@ -249,7 +256,7 @@ export interface Method {
     id?: string,
     name: string,
     link: string,
-    source: string,
+    source: Endpoint,
     inputs?: MethodVariables[]
 }
 

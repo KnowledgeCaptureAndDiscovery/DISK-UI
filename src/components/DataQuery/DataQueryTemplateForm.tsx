@@ -62,9 +62,9 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
             template: template,
             footnote: tableFootnote,
             variablesToShow: tableVariables,
-            endpoint: {url: sourceUrl, id:sourceID},
+            endpoint: {id:sourceID},
         })
-    }, [dataQueryExplanation, template, tableFootnote, tableVariables, sourceUrl]);
+    }, [dataQueryExplanation, template, tableFootnote, tableVariables, sourceID]);
 
     return <>
         <TextFieldBlock fullWidth size="small" id="LOIQueryExplanation" label="Write an explanation for your data query:"

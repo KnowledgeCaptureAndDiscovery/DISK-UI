@@ -1,5 +1,5 @@
 import { Autocomplete, TextField, CircularProgress, Box, Card, FormHelperText, Typography, Grid, Button } from "@mui/material"
-import { Method, VariableBinding, Workflow } from "DISK/interfaces";
+import { Method, SeedBindings, VariableBinding, WorkflowSeed } from "DISK/interfaces";
 import React, { Fragment, useEffect } from "react"
 import AddIcon from '@mui/icons-material/Add';
 import { MethodVariableList } from "./MethodVariableList";
@@ -7,39 +7,43 @@ import { useGetWorkflowsQuery } from "redux/apis/workflows";
 
 interface WorkflowEditorProps {
     options:    string[],
-    workflow?:  Workflow,
-    onSave?:    (workflow:Workflow) => void,
+    workflow?:  WorkflowSeed,
+    onSave?:    (workflow:WorkflowSeed) => void,
     meta?:      boolean,
     storedOutputs?: string[]
 }
 
-export const WorkflowEditor = ({options, workflow, onSave:notifyParent, meta=false, storedOutputs=[]} : WorkflowEditorProps) => {
+export const WorkflowSeedEditor = ({options, workflow, onSave:notifyParent, meta=false, storedOutputs=[]} : WorkflowEditorProps) => {
     const [selected, setSelected] = React.useState<Method|null>(null);
     const [selectedLabel, setSelectedLabel] = React.useState("");
     const [description, setDescription] = React.useState("");
-    const [variableBindings, setVariableBindings] = React.useState<VariableBinding[]>([]);
-
     const {data:methods, isLoading:loading} = useGetWorkflowsQuery();
+    const [variableBindings, setVariableBindings] = React.useState<SeedBindings>({inputs:[],outputs:[],parameters:[]});
 
     useEffect(() => {
+        console.log("Workflow has changed!", workflow);
         if (methods && workflow) {
-            let selectedMethod: Method = methods.filter(m => m.name === workflow.workflow)![0];
+            let selectedMethod: Method = methods.filter(m => m.link === workflow.link)![0];
             if (selectedMethod) {
                 onWorkflowChange(selectedMethod);
             }
         }
-    }, [methods]);
+    }, [methods, workflow]);
 
     const onWorkflowChange = (method:Method|null) => {
         setSelected(method);
     }
 
-    const loadForm = (wf:Workflow) => {
+    const loadForm = (wf:WorkflowSeed) => {
         if (!loading && methods && methods.length > 0) {
-            let m = methods.filter(m => m.name === wf.workflow)![0];
+            let m = methods.filter(m => m.name === wf.link)![0];
             if (m) onWorkflowChange(m);
         }
-        setVariableBindings(wf.bindings);
+        setVariableBindings({
+            inputs: wf.inputs,
+            outputs: wf.outputs,
+            parameters: wf.parameters
+        });
         if (wf.description) {
             setDescription(wf.description);
         }
@@ -47,24 +51,26 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent, meta=fal
 
     const clearForm = () => {
         onWorkflowChange(null);
+        setVariableBindings({inputs:[],outputs:[],parameters:[]});
+        setDescription("");
     }
 
-    const onBindingsChange = (newBindings:VariableBinding[]) => {
+    const onBindingsChange = (newBindings:SeedBindings) => {
         setVariableBindings(newBindings);
     }
 
     const onWorkflowSave = () => {
-        //SAVE
         if (selected) {
-            let newWorkflow : Workflow = {
-                source: selected.source,
+            let newWorkflow : WorkflowSeed = {
+                source: selected.source, //FIXME: this should be only the id I think
                 description: description,
-                workflow: selected.name,
-                workflowLink: selected.link,
-                bindings: variableBindings
+                name: selected.name,
+                link: selected.link,
+                ...variableBindings
             };
 
             loadForm(newWorkflow);
+            console.log("NEW: ", newWorkflow);
             if (notifyParent) notifyParent(newWorkflow);
         }
     }
@@ -92,7 +98,7 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent, meta=fal
                     getOptionLabel={(option) => option.name}
                     options={methods ? methods : []}
                     loading={loading}
-                    groupBy={(option) => option.source.replace("_", " ")}
+                    groupBy={(option) => option.source.name.replace("_", " ")}
                     renderInput={(params) => (
                         <TextField {...params} label="Selected workflow"
                             InputProps={{
@@ -109,12 +115,17 @@ export const WorkflowEditor = ({options, workflow, onSave:notifyParent, meta=fal
                 />
             </Grid>
         </Grid>
-        {!!selected && <MethodVariableList options={options} method={selected} bindings={variableBindings} onChange={onBindingsChange} meta={meta} storedOutputs={storedOutputs}/>}
-        <TextField label="Workflow description" placeholder="You can add a description of what this workflow does here" 
-                sx={{width:"100%", mb:"5px"}} size='small'
-                value={description} onChange={(e) => setDescription(e.target.value)} />
+        {!!selected && <div>
+            <TextField label="Add a workflow description" placeholder="Add a description of what this workflows does and what generates" 
+                    sx={{width:"100%", mb:"5px"}} size='small'
+                    value={description} onChange={(e) => setDescription(e.target.value)} />
+            <FormHelperText sx={{ fontSize: ".9rem", padding: "0px 5px"}}>
+                You must set <b>input</b> data and <b>parameters </b>for this workflow. You can also choose what to do with the <b>outputs </b>of next executions.
+            </FormHelperText>
+            <MethodVariableList options={options} method={selected} bindings={variableBindings} onChange={onBindingsChange} meta={meta} storedOutputs={storedOutputs}/>
+        </div>}
         <Box sx={{display:"flex", justifyContent:"end", alignItems: "center"}}>
-            <Button variant="contained" color="success" onClick={onWorkflowSave} disabled={!selected}>
+            <Button variant="contained" color="success" onClick={onWorkflowSave} disabled={!selected || loading}>
                 <AddIcon sx={{mr: "5px"}}/> Save workflow
             </Button>
         </Box>

@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { Goal, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { TLOITable } from "./TLOITable";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
-import { OutputSelectorIds } from "components/methods/MethodVariableSelector";
 import { ImagePreview } from "components/files/ImagePreview";
 
 interface TLOIBundleProps {

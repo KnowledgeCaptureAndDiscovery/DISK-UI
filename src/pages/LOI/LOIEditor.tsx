@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Button, Card, Divider, Skeleton } from "@mui/material";
-import { DataQueryTemplate, LineOfInquiry, Question, QuestionVariable, Workflow } from "DISK/interfaces";
+import { DataQueryTemplate, LineOfInquiry, Question, QuestionVariable, Workflow, WorkflowSeed } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import SaveIcon from '@mui/icons-material/Save';
@@ -8,7 +8,7 @@ import CopyIcon from '@mui/icons-material/ContentCopy';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
-import { WorkflowList } from "components/methods/WorkflowList";
+import { WorkflowSeedList } from "components/methods/WorkflowList";
 import { getId } from "DISK/util";
 import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux/apis/lois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
@@ -44,8 +44,8 @@ export const LOIEditor = () => {
     const [notes, setNotes] = React.useState("");
     const [dataQueryTemplate, setDataQueryTemplate] = React.useState<Partial<DataQueryTemplate>>({})
 
-    const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
-    const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
+    const [workflows, setWorkflows] = React.useState<WorkflowSeed[]>([]);
+    const [metaWorkflows, setMetaWorkflows] = React.useState<WorkflowSeed[]>([]);
 
     const [questionId, setQuestionId] = React.useState<string>("");
     const [goalQuery, setHypothesisQuery] = React.useState<string>("");
@@ -81,8 +81,8 @@ export const LOIEditor = () => {
         setName(loi.name);
         setDescription(loi.description);
         setNotes(loi.notes || "");
-        //setWorkflows(loi.workflows);
-        //setMetaWorkflows(loi.metaWorkflows ? loi.metaWorkflows : []);
+        setWorkflows(loi.workflowSeeds);
+        setMetaWorkflows(loi.metaWorkflowSeeds ? loi.metaWorkflowSeeds : []);
         setDataQueryTemplate(loi.dataQueryTemplate || {});
         setUpdateCondition(loi.updateCondition ? loi.updateCondition : 1);
     };
@@ -113,9 +113,6 @@ export const LOIEditor = () => {
             previous  = { ...LOI };
             editing = true;
         }
-        if (dataQueryTemplate.endpoint === undefined) {
-            return null;
-        }
 
         newLOI = {
             ...previous,
@@ -127,10 +124,8 @@ export const LOIEditor = () => {
             goalQuery: goalQuery,
             author: undefined,
             dataQueryTemplate: dataQueryTemplate as DataQueryTemplate,  //For some reason typescript does not get that endpoint cannot be undefined here... Line 108
-            workflowSeeds: [],
-            metaWorkflowSeeds: [],
-            //workflows: workflows.map(alignWorkflow),
-            //metaWorkflows: metaWorkflows.map(alignWorkflow),
+            workflowSeeds: workflows,
+            metaWorkflowSeeds: metaWorkflows,
             updateCondition: updateCondition
         };
 
@@ -188,7 +183,7 @@ export const LOIEditor = () => {
             });
     };
 
-    const onWorkflowListChange = (wfs:Workflow[], metaWfs:Workflow[]) => {
+    const onWorkflowListChange = (wfs:WorkflowSeed[], metaWfs:WorkflowSeed[]) => {
         setWorkflows(wfs);
         setMetaWorkflows(metaWfs);
     };
@@ -245,8 +240,8 @@ export const LOIEditor = () => {
 
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
-            <WorkflowList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions}
-                    onEditStateChange={setEditingWorkflows} onChange={onWorkflowListChange}></WorkflowList>
+            <WorkflowSeedList editable={true} workflows={workflows} metaworkflows={metaWorkflows} options={sparqlVariableOptions}
+                    onEditStateChange={setEditingWorkflows} onChange={onWorkflowListChange}></WorkflowSeedList>
         </Box>
         <Box sx={{display: 'flex', justifyContent: 'space-between', padding: "10px"}}>
             {LOI?

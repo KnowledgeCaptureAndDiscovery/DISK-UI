@@ -1,23 +1,35 @@
-import { Box, Grid, Skeleton } from "@mui/material";
-import { Method, MethodVariables, VariableBinding } from "DISK/interfaces";
-import { Fragment, useEffect, useState } from "react";
+import { Box, Grid, Skeleton, styled } from "@mui/material";
+import { Method, MethodVariables, SeedBindings, VariableBinding } from "DISK/interfaces";
+import { useEffect, useState } from "react";
 import { useGetWorkflowVariablesQuery } from "redux/apis/workflows";
-import { MethodVariableSelector } from "./MethodVariableSelector";
+import { MethodParameterSelector } from "./MethodParameterSelector";
+import { MethodInputSelector } from "./MethodInputSelector";
+import { MethodOutputSelector } from "./MethodOutputSelector";
 
 interface QuestionVariableProps {
     method: Method,
     options: string[],
-    bindings: VariableBinding[],
-    onChange?: (newBindings:VariableBinding[]) => void,
+    bindings: SeedBindings,
+    onChange?: (newBindings:SeedBindings) => void,
     meta?: boolean,
     storedOutputs?: string[]
 }
 
-//TODO: Continue adding bindings here!
+const TableContainer = styled(Box)(({ theme }) => ({
+    border: "1px solid #eee",
+    padding: "5px 0px",
+    marginTop: "5px"
+}));
+
+const byVariableName = (acc:Record<string, VariableBinding>, cur:VariableBinding) => {
+    acc[cur.variable] = cur;
+    return acc;
+}
+
 export const MethodVariableList = ({method, options, bindings, onChange, meta=false, storedOutputs=[]}: QuestionVariableProps) => {
-    const [bindingsMap, setBindingsMap] = useState<{[id:string]:VariableBinding}>({});
+    const [bindingsMap, setBindingsMap] = useState<Record<keyof SeedBindings, Record<string, VariableBinding>>>({inputs:{},outputs:{},parameters:{}});
     const {data:methodVariables, isLoading } = useGetWorkflowVariablesQuery(
-        {id:method.name, source:method.source},
+        {id:method.name, source:method.source.name},
         {skip:!method}
     );
     const [inputData, setInputData] = useState<MethodVariables[]>([]);
@@ -37,36 +49,37 @@ export const MethodVariableList = ({method, options, bindings, onChange, meta=fa
         setInputData(inputD);
         setInputParameters(inputP);
         setOutputData(outputD);
-    }, [methodVariables])
+    }, [methodVariables]);
 
     useEffect(() => {
-        if (bindings && methodVariables) {
-            let bindingMap : {[id:string]:VariableBinding} = {}
-            methodVariables.forEach((mv:MethodVariables) => {
-                let value : VariableBinding = bindings.filter(b => b.variable === mv.name)[0];
-                if (value) {
-                    bindingMap[mv.name] = value;
-                }
-            });
-            setBindingsMap(bindingMap);
-        }
-    }, [bindings, methodVariables]);
+        setBindingsMap({
+            parameters: bindings.parameters.reduce<Record<string, VariableBinding>>(byVariableName, {}),
+            inputs: bindings.inputs.reduce<Record<string, VariableBinding>>(byVariableName, {}),
+            outputs: bindings.outputs.reduce<Record<string, VariableBinding>>(byVariableName, {}),
+        })
+    }, [bindings]);
 
-    const onBindingChange = (newBinding:VariableBinding) => {
-        let newBindings = {...bindingsMap};
-        newBindings[newBinding.variable] = newBinding;
-        setBindingsMap(newBindings);
-        if (onChange) onChange(Object.values(newBindings));
+    const onBindingChange = (kind: keyof SeedBindings) => (newBinding:VariableBinding) => {
+        if (newBinding) {
+            if (onChange) {
+                onChange({
+                    ...bindings,
+                    [kind]: Object.values({...bindingsMap[kind], [newBinding.variable]: newBinding})
+                })
+            } else {
+                // If is not bind to anything, manage state here.TODO
+            }
+        }
     }
 
     if (isLoading)
         return <Skeleton height={"60px"}/>
     return <Box> 
-        {inputParameters.length > 0 || inputData.length > 0 ? (
-            <Fragment>
-                <Grid container spacing={1}  sx={{alignItems: "center"}}>
+        {inputParameters.length > 0 ? (
+            <TableContainer>
+                <Grid container spacing={1}  sx={{alignItems: "center", padding: "1px 0px", borderBottom: "1px solid #eee"}}>
                     <Grid item xs={2} md={2} sm={2} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
-                        Workflow input
+                        Parameters
                     </Grid>
                     <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
                         Binding type
@@ -79,55 +92,77 @@ export const MethodVariableList = ({method, options, bindings, onChange, meta=fa
                     </Grid>
                 </Grid>
                 { inputParameters.map((inp:MethodVariables) => 
-                    <MethodVariableSelector 
+                    <MethodParameterSelector 
                         variable={inp} 
                         options={options}
                         key={`ip_${inp.name}`}
-                        value={bindingsMap[inp.name]}
+                        value={bindingsMap.parameters[inp.name]}
                         meta={meta}
-                        params={true}
-                        onChange={onBindingChange}
+                        onChange={onBindingChange('parameters')}
                     />) }
+            </TableContainer>
+        ) : (
+            <Grid container spacing={1} sx={{alignItems: "center"}}>
+                <Grid item xs={12} md={12} sx={{textAlign: "center", color: "#444"}}> No parameters to choose </Grid>
+            </Grid>
+        )}
+        {inputData.length > 0 ? (
+            <TableContainer>
+                <Grid container spacing={1}  sx={{alignItems: "center", padding: "1px 0px", borderBottom: "1px solid #eee"}}>
+                    <Grid item xs={2} md={2} sm={2} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
+                        Input data
+                    </Grid>
+                    <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        Binding type
+                    </Grid>
+                    <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        Binding value
+                    </Grid>
+                    <Grid item xs={2} md={2} sm={2} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        Filetype
+                    </Grid>
+                </Grid>
                 { inputData.map((inp:MethodVariables) => 
-                    <MethodVariableSelector 
+                    <MethodInputSelector 
                         variable={inp} 
                         options={options}
                         key={`id_${inp.name}`}
-                        value={bindingsMap[inp.name]}
-                        onChange={onBindingChange}
+                        value={bindingsMap.inputs[inp.name]}
+                        onChange={onBindingChange('inputs')}
                         meta={meta}
-                        storedOutputs={storedOutputs}
                     />) }
-            </Fragment>
+            </TableContainer>
         ) : (
             <Grid container spacing={1} sx={{alignItems: "center"}}>
-                <Grid item xs={12} md={12} sx={{textAlign: "center", color: "#444"}}> No data inputs </Grid>
+                <Grid item xs={12} md={12} sx={{textAlign: "center", color: "#444"}}> No data inputs required </Grid>
             </Grid>
         )}
 
         {outputData.length > 0 ? (
-            <Fragment>
-                <Grid container spacing={1}  sx={{alignItems: "center"}}>
+            <TableContainer>
+                <Grid container spacing={1}  sx={{alignItems: "center", padding: "1px 0px", borderBottom: "1px solid #eee"}}>
                     <Grid item xs={2} md={2} sm={2} sx={{textAlign: "right", fontSize: "0.9rem", fontWeight: 500}}>
-                        Workflow output
+                        Generated outputs
                     </Grid>
-                    <Grid item xs={7} md={7} sm={7} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                    <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
                         Usage
+                    </Grid>
+                    <Grid item xs={4} md={4} sm={4} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
+                        Binding value
                     </Grid>
                     <Grid item xs={2} md={2} sm={2} sx={{fontWeight: 500, fontSize: "0.9rem"}}>
                         Help
                     </Grid>
                 </Grid>
                 { outputData.map((out:MethodVariables) => 
-                    <MethodVariableSelector 
+                    <MethodOutputSelector 
                         variable={out} 
-                        options={options}
                         key={`od_${out.name}`}
-                        value={bindingsMap[out.name]}
-                        onChange={onBindingChange}
+                        value={bindingsMap.outputs[out.name]}
+                        onChange={onBindingChange('outputs')}
                     />) }
 
-            </Fragment>
+            </TableContainer>
         ) : (
             <Grid container spacing={1} sx={{alignItems: "center"}}>
                 <Grid item xs={12} md={12} sx={{textAlign: "center", color: "#444"}}> This method does not generate any output </Grid>

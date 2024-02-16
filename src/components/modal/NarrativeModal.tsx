@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Goal, Status, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { WorkflowList } from "../methods/WorkflowList";
+import { WorkflowSeedList } from "../methods/WorkflowList";
 import { useGetGoalByIdQuery } from "redux/apis/goals";
 
 interface NarrativeModalProps {
@@ -50,7 +50,7 @@ export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
                     "<span style={{fontWeight:"bold"}}>{tloi.name.replace("Triggered: ", "")}</span>".
 
                     The analysis was <span style={{color: getColor(tloi.status) }}>{tloi.status}</span>run on {tloi.dateCreated} with the following datasets:
-                    <WorkflowList editable={false} workflows={[]} metaworkflows={[]} options={[]} minimal/>
+                    <WorkflowSeedList editable={false} workflows={[]} metaworkflows={[]} options={[]} minimal/>
                     {tloi.status === 'SUCCESSFUL' && false && (
                         <span>
                             The resulting p-value

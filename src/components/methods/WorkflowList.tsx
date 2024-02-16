@@ -1,29 +1,29 @@
 import { Box, Button, FormHelperText, Card, Typography, IconButton, Tooltip } from "@mui/material"
-import { VariableBinding, Workflow } from "DISK/interfaces"
-import { WorkflowEditor } from "./WorkflowEditor"
+import { VariableBinding, WorkflowSeed } from "DISK/interfaces"
+import { WorkflowSeedEditor } from "./WorkflowSeedEditor"
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import React, { useEffect } from "react";
-import { WorkflowPreview } from "./WorkflowPreview";
+import { WorkflowSeedPreview } from "./WorkflowSeedPreview";
 
 interface WorkflowListProps {
     editable: boolean,
     minimal?: boolean,
-    workflows: Workflow[],
-    metaworkflows: Workflow[],
+    workflows: WorkflowSeed[],
+    metaworkflows: WorkflowSeed[],
     options: string[],
     onEditStateChange?: (state:boolean) => void;
-    onChange?: (workflows:Workflow[], metaWorkflows:Workflow[]) => void;
+    onChange?: (workflows:WorkflowSeed[], metaWorkflows:WorkflowSeed[]) => void;
 }
 
 export const STORED_OUTPUTS = ['_DOWNLOAD_ONLY_', '_IMAGE_', '_VISUALIZE_', '_CONFIDENCE_VALUE_'];
 
-export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options, onEditStateChange:sendEditChange, onChange:notifyChange, minimal=false} : WorkflowListProps) => {
+export const WorkflowSeedList = ({editable, workflows: inputWorkflows, metaworkflows: inputMetaworkflows, options, onEditStateChange:sendEditChange, onChange:notifyChange, minimal=false} : WorkflowListProps) => {
     const [addingWorkflow, setAddingWorkflow] = React.useState(false);
-    const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
-    const [metaWorkflows, setMetaWorkflows] = React.useState<Workflow[]>([]);
-    const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow>();
+    const [workflows, setWorkflows] = React.useState<WorkflowSeed[]>([]);
+    const [metaWorkflows, setMetaWorkflows] = React.useState<WorkflowSeed[]>([]);
+    const [selectedWorkflow, setSelectedWorkflow] = React.useState<WorkflowSeed>();
     const [storedOutputs, setStoredOutputs] = React.useState<string[]>([]);
 
     const [editingIndex, setEditingIndex] = React.useState<number>(-1);
@@ -37,17 +37,17 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         setMetaWorkflows(inputMetaworkflows);
     }, [inputMetaworkflows]);
 
-    useEffect(() => {
-        //Updates the possible outputs that meta-workflows can use.
-        let newBindings : string[] = [];
-        workflows.forEach(wf => {
-            wf.bindings.forEach(b => {
-                if (STORED_OUTPUTS.some(flag => flag === b.binding[0]))
-                    newBindings.push(b.variable);
-            })
-        });
-        setStoredOutputs(newBindings);
-    }, [workflows]);
+    //useEffect(() => {
+    //    //Updates the possible outputs that meta-workflows can use.
+    //    let newBindings : string[] = [];
+    //    workflows.forEach(wf => {
+    //        wf.bindings.forEach(b => {
+    //            if (STORED_OUTPUTS.some(flag => flag === b.binding[0]))
+    //                newBindings.push(b.variable);
+    //        })
+    //    });
+    //    setStoredOutputs(newBindings);
+    //}, [workflows]);
 
     const toggleEdition = (meta:boolean=false) => {
         if (addingWorkflow && selectedWorkflow) {
@@ -60,34 +60,33 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         setEditingMeta(meta);
     };
 
-    const onEditButtonClicked = (wf:Workflow, index:number, isMeta:boolean=false) => {
+    const onEditButtonClicked = (wf:WorkflowSeed, index:number, isMeta:boolean=false) => {
         setSelectedWorkflow(wf);
         setAddingWorkflow(true);
         setEditingIndex(index);
         setEditingMeta(isMeta);
     }
 
-    const onWorkflowSave = (wf:Workflow) => {
+    const onWorkflowSave = (wf:WorkflowSeed) => {
         //FIXME: This is a hack, there are no way to send multiple strings as a list
         // so we transform demographic_value into a list here.
-        wf.bindings = wf.bindings.map((vb:VariableBinding) => {
-            let curBinding = vb.binding;
-            //TODO:
-            //if (vb.variable === 'demographic_value') {
-            //    if (!curBinding.startsWith("[")) curBinding = '[' + curBinding;
-            //    if (!curBinding.endsWith("]")) curBinding += "]";
-            //}
-            return {
-                variable: vb.variable,
-                binding: curBinding,
-                isArray: vb.isArray,
-                type: vb.type,
-            } as VariableBinding;
-        });
+        //wf.bindings = wf.bindings.map((vb:VariableBinding) => {
+        //    let curBinding = vb.binding;
+        //    //TODO:
+        //    //if (vb.variable === 'demographic_value') {
+        //    //    if (!curBinding.startsWith("[")) curBinding = '[' + curBinding;
+        //    //    if (!curBinding.endsWith("]")) curBinding += "]";
+        //    //}
+        //    return {
+        //        variable: vb.variable,
+        //        binding: curBinding,
+        //        isArray: vb.isArray,
+        //        type: vb.type,
+        //    } as VariableBinding;
+        //});
         //-----
-
         if (notifyChange) {
-            let curWfs : Workflow[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
+            let curWfs : WorkflowSeed[] = [ ...(editingMeta ? metaWorkflows : workflows) ];
             if (selectedWorkflow) curWfs[editingIndex] = wf; //Editing
             else curWfs.push(wf); //NEW
             notifyChange(editingMeta ? workflows : curWfs, editingMeta ? curWfs : metaWorkflows);
@@ -102,11 +101,11 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         toggleEdition();
     }
 
-    const onRemoveWorkflow = (wf:Workflow, meta:boolean=false) => {
+    const onRemoveWorkflow = (wf:WorkflowSeed, meta:boolean=false) => {
         let index : number = (meta?metaWorkflows:workflows).indexOf(wf);
         //TODO: Add an alert here to confirm. ?
         if (notifyChange) {
-            let curWfs : Workflow[] = [ ...(meta ? metaWorkflows : workflows) ];
+            let curWfs : WorkflowSeed[] = [ ...(meta ? metaWorkflows : workflows) ];
             curWfs.splice(index, 1);
             notifyChange(meta ? workflows : curWfs, meta ? curWfs : metaWorkflows);
         } else {
@@ -151,11 +150,11 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         </Box> 
         )}
 
-        {addingWorkflow ?  <WorkflowEditor workflow={selectedWorkflow} options={options} onSave={onWorkflowSave} meta={editingMeta} storedOutputs={storedOutputs}/> : ""}
+        {addingWorkflow ?  <WorkflowSeedEditor workflow={selectedWorkflow} options={options} onSave={onWorkflowSave} meta={editingMeta} storedOutputs={storedOutputs}/> : ""}
         {workflows.length > 0 ? 
             <Box>
-                {workflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
-                    <WorkflowPreview key={`wf_${wf.workflow}-${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? onRemoveWorkflow : undefined}
+                {workflows.filter((wf) => wf.link!==selectedWorkflow?.link).map((wf:WorkflowSeed, i) => 
+                    <WorkflowSeedPreview key={`wf_${wf.link}-${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? onRemoveWorkflow : undefined}
                          button={editable && !addingWorkflow? 
                         <Tooltip arrow title="Edit">
                             <IconButton sx={{padding: "0 3px"}} onClick={() => {onEditButtonClicked(wf,i)}}>
@@ -184,8 +183,8 @@ export const WorkflowList = ({editable, workflows: inputWorkflows, metaworkflows
         )}
 
         {metaWorkflows.length > 0 ? <Box>
-            {metaWorkflows.filter((wf) => wf.workflow!==selectedWorkflow?.workflow).map((wf:Workflow, i) => 
-                <WorkflowPreview key={`mwf_${wf.workflow}${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? (wf) => onRemoveWorkflow(wf,true) : undefined}
+            {metaWorkflows.filter((wf) => wf.link!==selectedWorkflow?.link).map((wf:WorkflowSeed, i) => 
+                <WorkflowSeedPreview meta key={`mwf_${wf.link}${i}`} workflow={wf} onDelete={editable && !addingWorkflow ? (wf) => onRemoveWorkflow(wf,true) : undefined}
                     button={editable && !addingWorkflow ? 
                     <Tooltip arrow title="Edit">
                         <IconButton sx={{padding: '0 3px'}} onClick={() => {onEditButtonClicked(wf,i,true)}}>
