@@ -48,6 +48,10 @@ export const LOIView = () => {
 
     useEffect(updateDataSourceLabel, [endpoints, selectedDataSource]);
 
+    const getSparqlQuery : () => string = () => {
+        return (LOI?.dataQueryTemplate) ? "SELECT * WHERE {\n" + LOI.dataQueryTemplate.template + "\n}": "";
+    }
+
     return <Card variant="outlined">
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
@@ -66,8 +70,8 @@ export const LOIView = () => {
             </Box>
         }
         <Divider/>
-        <Box sx={{padding:"10px 10px 0 10px"}}>
-            <Box sx={{mb:"4px"}}>
+        <Box sx={{padding:"8px 12px"}}>
+            <Box>
                 <TypographyLabel>Description: </TypographyLabel>
                 <TypographyInline>
                     {!loading && !!LOI ? LOI.description : <Skeleton sx={{display:"inline-block", width: "200px"}}/>}
@@ -82,14 +86,12 @@ export const LOIView = () => {
                         <InfoInline> None specified </InfoInline>
                     )}
             </Box>
-        </Box>
-        <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Hypothesis or question template:</TypographySubtitle>
-            <QuestionLinker selected={LOI? "" : ""} disabled={true} showErrors={false}/>
+            <TypographySubtitle style={{marginBottom: "10px"}} >Hypothesis or question template:</TypographySubtitle>
+            <QuestionLinker selected={LOI? LOI.question.id : ""} disabled={true} showErrors={false}/>
         </Box>
         <Divider/>
 
-        <Box sx={{padding:"5px 10px"}}>
+        <Box sx={{padding:"8px 12px"}}>
             <TypographySubtitle>Data query template:</TypographySubtitle>
             <Box sx={{mb:"4px"}}>
                 <TypographyLabel>Data query explanation:</TypographyLabel>
@@ -118,7 +120,7 @@ export const LOIView = () => {
             </Box>
 
             <Box>
-                <Box sx={{ display: "inline-flex", alignItems: "center", mb: "4px" }}>
+                <Box sx={{ display: "inline-flex", alignItems: "center", mb: "4px", width: "100%", justifyContent: "space-between" }}>
                     <TypographyLabel sx={{ whiteSpace: 'nowrap' }}>Query template:</TypographyLabel>
                     <Tooltip arrow title={(formalView? "Hide" : "Show") + " query template"}>
                         <Button sx={{p:0}} onClick={() => setFormalView(!formalView)} style={{margin: "0px 10px"}}>
@@ -129,11 +131,11 @@ export const LOIView = () => {
                 </Box>
                     
                 {formalView &&                     
-                    <Box sx={{fontSize: "0.94rem", mb:"10px"}} >
-                        <CodeMirror value={LOI?.dataQueryTemplate?.template || ""}
+                    <Box sx={{fontSize: "0.94rem", mb:"10px"}}>
+                        <CodeMirror value={getSparqlQuery()}
+                        className="cm-readonly"
                             extensions={[StreamLanguage.define(sparql)]}
-                            onChange={(value, viewUpdate) => {
-                            }}
+                            readOnly
                         />
                     </Box>}
             </Box>
@@ -168,7 +170,7 @@ export const LOIView = () => {
         </Box>
         <Divider/>
 
-        <Box sx={{padding:"5px 10px"}}>
+        <Box sx={{padding:"8px 12px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
             {loading?
                 <Skeleton/> 

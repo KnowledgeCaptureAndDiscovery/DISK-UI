@@ -18,6 +18,7 @@ export const InfoInline = styled(Typography)(({ theme }) => ({
 
 export const TypographyInline = styled(Typography)(({ theme }) => ({
     display: "inline",
+    lineHeight: "1.2em",
 }));
 
 export const TypographySubtitle = styled(Typography)(({ theme }) => ({
