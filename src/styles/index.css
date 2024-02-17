@@ -15,3 +15,15 @@ code {
 .MuiSelect-select {
   padding-right: 0 !important;
 }
+
+.cm-readonly * .cm-activeLine {
+  background: transparent !important;
+}
+
+.cm-readonly * .cm-activeLineGutter {
+  background: transparent !important;
+}
+
+.cm-readonly * .cm-gutters {
+  padding-left: 7px !important;
+}

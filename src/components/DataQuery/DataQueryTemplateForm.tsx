@@ -6,7 +6,7 @@ import { QueryTester } from "components/QueryTester";
 import { TextFieldBlock, TypographySection } from "components/Styles";
 import { useEffect, useState } from "react";
 import { useGetEndpointsQuery } from "redux/apis/server";
-import CodeMirror from '@uiw/react-codemirror';
+import CodeMirror, { EditorState, ViewUpdate, lineNumbers } from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 
 
@@ -24,11 +24,15 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
     const [template, setTemplate] = useState("");
     const [tableFootnote, setTableFootnote] = useState("");
     const [tableVariables, setTableVariables] = useState("");
+    const [lastLine, setLastLine] = useState(0);
 
     const [errorDataSource, setErrorDataSource] = useState<boolean>(false);
     const [errorQuery, setErrorQuery] = useState<boolean>(false);
 
     const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
+
+    const QUERY_HEADER = "SELECT * WHERE {";
+    const QUERY_FOOTER = "}";
 
     const onDataSourceChange = (ds:string) => { setSourceUrl(ds); setErrorDataSource(ds.length === 0); }
 
@@ -43,6 +47,15 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
             if (!value.template) setErrorQuery(true);
         }
     }, [value, showErrors]);
+
+    useEffect(() => {
+        setLastLine(template.split("\n").length + 2);
+    }, [template]);
+
+    const onTemplateChange = (newValue:string, update:ViewUpdate) => {
+        setTemplate(newValue);
+        setErrorQuery(newValue.length === 0); //FIXME check sparql 
+    }
 
     useEffect(() => {
         if (sourceUrl && !!endpoints) {
@@ -97,12 +110,25 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
                 <FormHelperText sx={{ position: 'absolute', background: 'white', padding: '0 4px', margin: '-19px 0 0 10px', color: (errorQuery ? "#d32f2f" : 'rgba(0, 0, 0, 0.6);') }}>
                     Data query *
                 </FormHelperText>
-                <CodeMirror value={template}
+                <CodeMirror value={QUERY_HEADER}
                     extensions={[StreamLanguage.define(sparql)]}
-                    onChange={(value, viewUpdate) => {
-                        setTemplate(value);
-                        setErrorQuery(value.length === 0);
-                    }}
+                    readOnly
+                    className="cm-readonly"
+                />
+                <CodeMirror value={template}
+                    extensions={[
+                        StreamLanguage.define(sparql),
+                        lineNumbers({formatNumber: (lineNo:number, state: EditorState) => `${lineNo+1}`})
+                    ]}
+                    onChange={onTemplateChange}
+                />
+                <CodeMirror value={QUERY_FOOTER}
+                    extensions={[
+                        StreamLanguage.define(sparql),
+                        lineNumbers({formatNumber: (lineNo:number, state: EditorState) => `${lastLine}`})
+                    ]}
+                    readOnly
+                    className="cm-readonly"
                 />
             </Card>
         </Box>
