@@ -24,6 +24,14 @@ code {
   background: transparent !important;
 }
 
-.cm-readonly * .cm-gutters {
+.cm-readonly.header * .cm-gutters {
   padding-left: 7px !important;
+}
+
+.cm-readonly.header.bigger * .cm-gutters {
+  padding-left: 16px !important;
+}
+
+.cm-readonly.footer.bigger * .cm-gutters {
+  padding-left: 9px !important;
 }

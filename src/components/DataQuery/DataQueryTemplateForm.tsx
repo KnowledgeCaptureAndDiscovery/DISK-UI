@@ -113,7 +113,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
                 <CodeMirror value={QUERY_HEADER}
                     extensions={[StreamLanguage.define(sparql)]}
                     readOnly
-                    className="cm-readonly"
+                    className={"cm-readonly header" + (lastLine>11 ? " bigger" : "")}
                 />
                 <CodeMirror value={template}
                     extensions={[
@@ -128,7 +128,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
                         lineNumbers({formatNumber: (lineNo:number, state: EditorState) => `${lastLine}`})
                     ]}
                     readOnly
-                    className="cm-readonly"
+                    className={"cm-readonly footer " + (lastLine>11 ? "bigger" : "")}
                 />
             </Card>
         </Box>
