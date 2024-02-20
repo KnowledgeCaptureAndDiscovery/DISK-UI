@@ -20,7 +20,7 @@ export const tloisAPI = createApi({
       providesTags: ['TLOI']
     }),
     executeHypothesisById: builder.mutation<TriggeredLineOfInquiry[], string>({
-      query: (id: string) => `hypotheses/${getId({id})}/query`,
+      query: (id: string) => `goals/${getId({id})}/query`,
       invalidatesTags: ['TLOIs'],
     }),
     putTLOI: builder.mutation<TriggeredLineOfInquiry, { data: Partial<TriggeredLineOfInquiry> }>({

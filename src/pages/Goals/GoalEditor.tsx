@@ -1,5 +1,5 @@
 import { Box, Button, Card, Divider, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { Goal, Question, Triple, VariableBinding } from "DISK/interfaces";
+import { Goal, Question, Triple, VariableBinding, toMultiValueAssignation } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -79,12 +79,14 @@ export const HypothesisEditor = () => {
     }
 
     const getQuestionBindings : () => VariableBinding[] = () => {
+        console.log(formQuestionBindings);
         return Object.keys(formQuestionBindings).map<VariableBinding>((varId: string) => (
             {
                 variable: varId,
-                binding: formQuestionBindings[varId],
+                binding: formQuestionBindings[varId].values,
                 type: "DEFAULT",
                 isArray: false,
+                datatype: formQuestionBindings[varId].type
             }));
     }
 
@@ -114,7 +116,7 @@ export const HypothesisEditor = () => {
                 id: editedQuestionId,
             },
             questionBindings: getQuestionBindings(),
-            graph: { triples: addBindingsToQuestionGraph(formSelectedQuestion, formQuestionBindings)}
+            graph: { triples: addBindingsToQuestionGraph(formSelectedQuestion, toMultiValueAssignation(formQuestionBindings) )}
         };
 
         dispatch(openBackdrop());

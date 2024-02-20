@@ -1,5 +1,5 @@
 import { Box, Card, FormHelperText, IconButton, Tooltip } from "@mui/material"
-import { Question, VariableBinding, QuestionVariable, Triple, AnyQuestionVariable, MultiValueAssignation } from "DISK/interfaces"
+import { Question, VariableBinding, QuestionVariable, Triple, AnyQuestionVariable, MultiValueAssignation, toMultiValueAssignation, QuestionVariableAssignation } from "DISK/interfaces"
 import React from "react";
 import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -29,7 +29,7 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     React.useEffect(() => {
         if (onChange) {
             let varBindings : VariableBinding[] = simpleMapToVariableBindings(questionBindings);
-            let newGraph : Triple[] = selectedQuestion && varBindings ? addBindingsToQuestionGraph(selectedQuestion, questionBindings) : [];
+            let newGraph : Triple[] = selectedQuestion && varBindings ? addBindingsToQuestionGraph(selectedQuestion, toMultiValueAssignation(questionBindings)) : [];
             setGraph(newGraph);
             onChange(selectedQuestion, varBindings, newGraph);
         }
@@ -38,12 +38,14 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
     React.useEffect(() => {
         if (!selectedQuestion)
             return;
-        let idToValue : MultiValueAssignation = {};
+        let idToValue : QuestionVariableAssignation = {};
         let allVariables = getAllQuestionVariables(selectedQuestion);
         (bindings||[]).forEach((varBindings:VariableBinding) => {
             let curVar = allVariables.filter((v:AnyQuestionVariable) => (v.id === varBindings.variable))[0];
             if (curVar)
-                idToValue[curVar.id] = [varBindings.binding[0]];
+                idToValue[curVar.id] = {
+                    values: [varBindings.binding[0]]
+                }
         });
         if (selectedQuestion) {
             dispatch(setQuestionBindings(idToValue));

@@ -1,5 +1,5 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { QuestionVariable, VariableOption } from "DISK/interfaces";
+import { QuestionVariable, VariableOption, toMultiValueAssignation } from "DISK/interfaces";
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import { setQuestionBindings } from "redux/slices/forms";
@@ -14,7 +14,7 @@ interface QuestionVariableProps {
 export const QuestionVariableSelector = ({questionId, variable, showErrors}: QuestionVariableProps) => {
     const dispatch = useAppDispatch();
     const bindings = useQuestionBindings();
-    const { data, isLoading, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:bindings}});
+    const { data, isLoading, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:toMultiValueAssignation(bindings)}});
     const [options, setOptions] = useState<VariableOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<VariableOption|null>(null);
     const [selectedOptionLabel, setSelectedOptionLabel] = useState<string>("");
@@ -31,7 +31,7 @@ export const QuestionVariableSelector = ({questionId, variable, showErrors}: Que
 
     useEffect(() => {
         if (options && bindings) {
-            let curValues : string[] = bindings[variable.id];
+            let curValues : string[] = bindings[variable.id]?.values || [];
             if (options.length === 0 || !curValues || curValues.length === 0) {
                 setSelectedOption(null);
                 setSelectedOptionLabel("");
@@ -51,7 +51,10 @@ export const QuestionVariableSelector = ({questionId, variable, showErrors}: Que
     function onOptionChange(value: VariableOption|null): void {
         let newBindings = { ...bindings };
         if (value) {
-            newBindings[variable.id] = [value.value];
+            newBindings[variable.id] = {
+                values: [value.value],
+                type: value.value === value.label || ["TH","SA"].some(s=>s===value.value) ? "http://www.w3.org/2001/XMLSchema#string" : "http://www.w3.org/2001/XMLSchema#anyURI"
+            }
         } else if (bindings[variable.id]) {
             delete newBindings[variable.id];
         }

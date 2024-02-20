@@ -78,7 +78,7 @@ export const MethodOutputSelector = ({variable, value, onChange}:MethodInputSele
     const createCurrentBinding = () => {
         let newBinding: VariableBinding = {
             variable: variable.name,
-            isArray: variable.dimensionality > 1,
+            isArray: variable.dimensionality > 0,
             type: paramType,
             binding: [bindValue]
         }
