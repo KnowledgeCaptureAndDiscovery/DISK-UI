@@ -26,8 +26,8 @@ export const TimeIntervalVariable = ({variable}: TimeIntervalVariableProps) => {
     const changeTimeBinding = (timeUri:string, time:number|null) => {
         let newBindings = { ...bindings };
         if (time) {
-            newBindings[timeUri] = [time.toString()];
-            newBindings[TimeTypeURI] = [CETime ? CETimeURI : BPTimeURI];
+            newBindings[timeUri] = {values: [time.toString()]};
+            newBindings[TimeTypeURI] = {values:[CETime ? CETimeURI : BPTimeURI]};
         } else {
             delete newBindings[timeUri];
             delete newBindings[TimeTypeURI];
@@ -73,7 +73,7 @@ export const TimeIntervalVariable = ({variable}: TimeIntervalVariableProps) => {
 
     const onTimeToggle = () => {
         let newBindings = { ...bindings };
-        newBindings[TimeTypeURI] = [!CETime ? CETimeURI : BPTimeURI];
+        newBindings[TimeTypeURI] = { values: [!CETime ? CETimeURI : BPTimeURI] };
         setCETime(!CETime);
         dispatch(setQuestionBindings(newBindings));
     }

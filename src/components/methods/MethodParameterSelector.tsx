@@ -58,9 +58,11 @@ export const MethodParameterSelector = ({variable, options, value, onChange, met
     }, [variable, value]);
 
     const createCurrentBinding = () => {
+        //FIXME: This is a hack, there are no way to send multiple parameters as a list for the moment
+        // so we transform demographic_value into a list here.
         let newBinding: VariableBinding = {
             variable: variable.name,
-            isArray: variable.dimensionality > 1,
+            isArray: variable.dimensionality > 0 || variable.name === 'demographic_value',
             type: paramType,
             binding: [bindValue]
         }

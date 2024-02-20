@@ -1,5 +1,5 @@
 import { Box } from "@mui/material"
-import { AnyQuestionVariable, Question, QuestionVariable } from "DISK/interfaces"
+import { AnyQuestionVariable, Question, QuestionVariable, toMultiValueAssignation } from "DISK/interfaces"
 import React from "react"
 import { BoundingBoxMap } from "./BoundingBoxMap"
 import { createTemplateFragments, TemplateFragment, TextPart } from "./QuestionHelpers"
@@ -17,7 +17,7 @@ export const QuestionTemplateFiller = ({ question, showErrors }: QuestionTemplat
     const [templateFragments, setTemplateFragments] = React.useState<TemplateFragment[]>([]);
 
     const bindings = useQuestionBindings();
-    const { refetch } = useGetDynamicOptionsQuery({cfg: {id: (question ? question.id : ''), bindings:bindings}}, {skip:!question});
+    const { refetch } = useGetDynamicOptionsQuery({cfg: {id: (question ? question.id : ''), bindings:toMultiValueAssignation(bindings)}}, {skip:!question});
 
     React.useEffect(()=>{
         if (!question)

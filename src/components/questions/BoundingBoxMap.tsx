@@ -58,10 +58,10 @@ export const BoundingBoxMap = ({variable}: BoundingBoxMapProps) => {
     const onSelect = () => {
         let newBindings = { ...bindings };
         if (boundingBox && variable) {
-            newBindings[variable.minLat.id] = [boundingBox[0].toFixed(6)];
-            newBindings[variable.minLng.id] = [boundingBox[1].toFixed(6)];
-            newBindings[variable.maxLat.id] = [boundingBox[2].toFixed(6)];
-            newBindings[variable.maxLng.id] = [boundingBox[3].toFixed(6)];
+            newBindings[variable.minLat.id] = {values: [boundingBox[0].toFixed(6)]};
+            newBindings[variable.minLng.id] = {values: [boundingBox[1].toFixed(6)]};
+            newBindings[variable.maxLat.id] = {values: [boundingBox[2].toFixed(6)]};
+            newBindings[variable.maxLng.id] = {values: [boundingBox[3].toFixed(6)]};
             onCloseDialog();
         } else {
             delete newBindings[variable.minLat.id];

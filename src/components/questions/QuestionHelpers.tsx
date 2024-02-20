@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Box } from "@mui/material";
-import { AnyQuestionVariable, MultiValueAssignation, Question, QuestionVariable, Triple, VariableBinding, Workflow } from "DISK/interfaces";
+import { AnyQuestionVariable, MultiValueAssignation, Question, QuestionVariable, QuestionVariableAssignation, Triple, VariableBinding, Workflow } from "DISK/interfaces";
 
 export type TemplateFragment = {
     type: 'string',
@@ -49,13 +49,14 @@ export const bindingsToIdValueMap : (bindings:VariableBinding[])  => MultiValueA
     return r;
 }
 
-export const simpleMapToVariableBindings : (bindings:MultiValueAssignation) => VariableBinding[] = (bindings) => {
+export const simpleMapToVariableBindings : (bindings:QuestionVariableAssignation) => VariableBinding[] = (bindings) => {
     return Object.keys(bindings).map((varId: string) => {
         return {
             variable: varId,
-            binding: [bindings[varId]][0],
-            isArray: false,
-            type: "DEFAULT"
+            binding: bindings[varId].values,
+            isArray: bindings[varId].values.length > 1,
+            type: "DEFAULT",
+            datatype: bindings[varId].type || undefined
         } as VariableBinding;
     });
 }

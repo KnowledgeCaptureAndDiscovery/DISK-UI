@@ -60,7 +60,7 @@ export const MethodInputSelector = ({variable, options, value, onChange, meta=fa
     const createCurrentBinding = () => {
         let newBinding: VariableBinding = {
             variable: variable.name,
-            isArray: variable.dimensionality > 1,
+            isArray: variable.dimensionality > 0,
             type: paramType,
             binding: [bindValue]
         }

@@ -312,6 +312,21 @@ export type MultiValueAssignation = {
     [name:string] : string[]
 }
 
+export type QuestionVariableAssignation = {
+    [questionURI:string] : {
+        values:     string[],
+        type?:      'http://www.w3.org/2001/XMLSchema#anyURI' | 'http://www.w3.org/2001/XMLSchema#float' | 'http://www.w3.org/2001/XMLSchema#string'
+    }
+}
+
+//TODO: this is temporal
+export const toMultiValueAssignation = (src:QuestionVariableAssignation) => {
+    return Object.keys(src).reduce<MultiValueAssignation>((acc, key) => {
+        acc[key] = src[key].values;
+        return acc;
+    }, {});
+}
+
 const _names = {}
 
 export default _names;
