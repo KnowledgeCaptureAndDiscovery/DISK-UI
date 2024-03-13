@@ -4,27 +4,14 @@ import { PATH_TLOIS } from "constants/routes";
 import { Link } from "react-router-dom";
 import { TLOIEditButton } from "./TLOIEdit";
 import { Fragment, useState, useEffect } from "react";
-import { LineOfInquiry, TriggeredLineOfInquiry, Workflow } from "DISK/interfaces";
-import ErrorIcon from '@mui/icons-material/ErrorOutline';
-import WaitIcon from '@mui/icons-material/HourglassBottom';
-import CheckIcon from '@mui/icons-material/Check';
+import { GoalResult, LineOfInquiry, TriggeredLineOfInquiry, Workflow, WorkflowInstantiation } from "DISK/interfaces";
 import { FileList } from "components/FileList";
 import { BrainModal } from "components/modal/BrainModal";
 import { ShinyModal } from "components/modal/ShinyModal";
 import { BRAIN_FILENAME, SHINY_FILENAME, displayConfidenceValue } from "constants/general";
 import { TLOIDeleteButton } from "./TLOIDeleteButton";
 import { getId } from "DISK/util";
-
-const getIconStatus = (status: TriggeredLineOfInquiry["status"]) => {
-    if (status === 'FAILED')
-        return <ErrorIcon />;
-    if (status === 'SUCCESSFUL')
-        return <CheckIcon />;
-    if (status === 'QUEUED' || status === 'RUNNING')
-        return <WaitIcon />;
-}
-
-type TLOICell = (tloi: TriggeredLineOfInquiry, i: number) => JSX.Element;
+import { ALL_COLUMNS, ColumnName } from "components/outputs/table";
 
 interface TLOITableProps {
     list: TriggeredLineOfInquiry[]
@@ -33,42 +20,7 @@ interface TLOITableProps {
 }
 
 export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
-    const COLUMNS: { [name: string]: TLOICell } = {
-        '#': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black" }}>
-                {i + 1}
-            </Box>,
-        'Date': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black" }}>
-                {tloi.dateCreated}
-            </Box>,
-        'Run Status': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black", display: 'flex', alignItems: 'center' }}>
-                {getIconStatus(tloi.status)}
-                <Box sx={{ marginLeft: '6px' }}>
-                    {tloi.status === 'SUCCESSFUL' ? 'DONE' : tloi.status}
-                </Box>
-            </Box>,
-        'Input Files': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <FileList type="input" tloi={tloi} loi={loi}  label="Input files" />,
-        'Output Files': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Fragment>{
-                (tloi.status === 'SUCCESSFUL' && <FileList type="output" tloi={tloi} loi={loi} label="Output files" renderFiles/>)
-            }</Fragment>,
-        //'Confidence Value': (tloi: TriggeredLineOfInquiry, i: number) =>
-        //    <Fragment>
-        //        {tloi.status === 'SUCCESSFUL' && displayConfidenceValue(tloi.confidenceValue)}
-        //        {tloi.confidenceType ? ` (${tloi.confidenceType})` : " (P-value)"}
-        //    </Fragment>,
-        'Extras': (tloi: TriggeredLineOfInquiry, i: number) =>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "end" }}>
-                <NarrativeModal tloi={tloi} />
-                {renderOptionalButtons(tloi)}
-            <TLOIEditButton tloi={tloi} label={"Editing " + tloi.name} />
-                <TLOIDeleteButton tloi={tloi}/>
-            </Box>
-    }
-    const [visibleColumns, setVisibleColumns] = useState(['#', "Date", "Run Status", "Input Files", "Output Files", "Confidence Value", "Extras"]);
+    const [visibleColumns, setVisibleColumns] = useState<ColumnName[]>(['#', "Date", "Run Status", "Input Files", "Output Files", "Confidence Value", "Extras"]);
 
     useEffect(() => {
         if (!showConfidence) 
@@ -76,34 +28,6 @@ export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
         else 
             setVisibleColumns(['#', "Date", "Run Status", "Input Files", "Output Files", "Confidence Value", "Extras"]);
     }, [showConfidence])
-
-    const renderOptionalButtons = (cur:TriggeredLineOfInquiry) => {
-        let shinyUrl : string = "";
-        let shinySource : string = "";
-        let brainUrl : string = "";
-        let brainSource : string = "";
-        // TODO:
-        //[ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:Workflow) => {
-        //    Object.values(wf.runs||{}).forEach((run) => {
-        //        if (run.outputs) {
-        //            Object.keys(run.outputs).forEach(((name:string) => {
-        //                if (name === SHINY_FILENAME) {
-        //                    shinyUrl = run ? run.outputs[name].id || "" : "";
-        //                    shinySource = wf.source;
-        //                } else if (name === BRAIN_FILENAME) {
-        //                    brainUrl = run ? run.outputs[name].id || "" : "";
-        //                    brainSource = wf.source;
-        //                }
-        //            }));
-        //        }
-        //    })
-        //});
-
-        return (<Fragment>
-            {!!shinyUrl && (<ShinyModal shinyUrl={shinyUrl} source={shinySource}/>)}
-            {!!brainUrl && (<BrainModal brainUrl={brainUrl} source={brainSource}/>)}
-        </Fragment>);
-    }
 
     return <TableContainer sx={{ display: "flex", justifyContent: "center" }}>
         <Table sx={{ width: "unset" }}>
@@ -115,9 +39,9 @@ export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
             <TableBody>
                 {list.map((tloi:TriggeredLineOfInquiry, i:number) => 
                     <TableRow key={tloi.id}>{
-                        visibleColumns.map((name:string, j:number) => 
+                        visibleColumns.map((name:ColumnName, j:number) => 
                             <TableCell sx={{ padding: "0 10px"}} key={`cell_${i}_${j}`}>
-                                { COLUMNS[name](tloi, i) }
+                                { ALL_COLUMNS[name](tloi, i) }
                             </TableCell>
                         )
                     }</TableRow>

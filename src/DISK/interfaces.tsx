@@ -119,10 +119,13 @@ export interface VariableOption {
     commnet: string | null,
 }
 
-export interface LineOfInquiry extends DISKResource {
+export interface LOICommon extends DISKResource {
     updateCondition:    number;
     goalQuery:          string;
     question:           Question | ObjectWithId;
+}
+
+export interface LineOfInquiry extends LOICommon {
     dataQueryTemplate?: DataQueryTemplate;
     workflowSeeds:      WorkflowSeed[];
     metaWorkflowSeeds:  WorkflowSeed[];
@@ -132,7 +135,7 @@ export interface DataQueryTemplate {
     endpoint:           Endpoint | (Partial<Endpoint> & Pick<Endpoint, 'id'>);
     template:           string;
     description:        string;
-    variablesToShow:    string;
+    variablesToShow:    string[];
     footnote:           string;
 }
 
@@ -155,7 +158,7 @@ export interface WorkflowSeed {
 
 export type SeedBindings = Pick<WorkflowSeed, 'parameters' | 'inputs' | 'outputs'>;
 
-export interface TriggeredLineOfInquiry extends LineOfInquiry{
+export interface TriggeredLineOfInquiry extends LOICommon{
     status:         Status;
     parentLoi:      LineOfInquiry;
     parentGoal:     Goal;
@@ -180,15 +183,16 @@ export interface WorkflowInstantiation extends WorkflowSeed {
 export interface Execution extends ExecutionRecord {
     externalId:     string ;
     result:         GoalResult ;
-    steps:          ExecutionRecord ;
-    inputs:         VariableBinding;
-    outputs:        VariableBinding;
+    steps:          ExecutionRecord[];
+    inputs:         VariableBinding[];
+    outputs:        VariableBinding[];
 
 }
 
 export interface GoalResult {
     confidenceType:     string;
-    confidenceValue:    string;
+    confidenceValue:    number;
+    extras:             VariableBinding[];
 }
 
 export interface ExecutionRecord {
@@ -315,7 +319,9 @@ export type MultiValueAssignation = {
 export type QuestionVariableAssignation = {
     [questionURI:string] : {
         values:     string[],
-        type?:      'http://www.w3.org/2001/XMLSchema#anyURI' | 'http://www.w3.org/2001/XMLSchema#float' | 'http://www.w3.org/2001/XMLSchema#string'
+        type?:      'http://www.w3.org/2001/XMLSchema#anyURI'
+            | 'http://www.w3.org/2001/XMLSchema#float'
+            | 'http://www.w3.org/2001/XMLSchema#string'
     }
 }
 

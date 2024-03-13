@@ -9,6 +9,7 @@ import { Goal, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { TLOITable } from "./TLOITable";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
 import { ImagePreview } from "components/files/ImagePreview";
+import { OutputBindingValue } from "components/outputs";
 
 interface TLOIBundleProps {
     loiId: string,
@@ -37,60 +38,49 @@ export const TLOIBundle = ({loiId, goal}:TLOIBundleProps) => {
     }, [TLOIs, loiId, goal, TLOILoading])
 
     useEffect(() => {
-        // Sets name for this bundle
-        if (list.length > 0) {
-            setName(list[0].name.replace("Triggered: ",""));
-        } else {
-            setName("");
-        }
-    }, [list])
+        setName(loi && loi.name ? loi.name : "");
+    }, [loi])
 
     useEffect(() => {
         let plots = new Set<string>();
         let viz = new Set<string>();
         let ignore = new Set<string>();
         let vizMap : {[name:string] : [string, string]} = {};
-        //TODO:
-        //if (loi) {
-        //     [...loi.workflows, ...loi.metaWorkflows ].map(wf => wf.bindings).flat().forEach((binding) => {
-        //        if (binding.binding.startsWith("_") && binding.binding.endsWith("_")) {
-        //            switch (binding.binding as OutputSelectorIds) {
-        //                case "_CONFIDENCE_VALUE_":
-        //                    plots.add(binding.variable);
-        //                    break;
-        //                case "_VISUALIZE_":
-        //                    viz.add(binding.variable);
-        //                    break;
-        //                case "_DO_NO_STORE_":
-        //                    ignore.add(binding.variable);
-        //                    break;
-        //                default:
-        //                    break;
-        //            }
-        //        }
-        //    });
-        //}
+        if (loi) {
+             [...loi.workflowSeeds, ...loi.metaWorkflowSeeds ].map(wf => wf.outputs).flat().forEach((binding) => {
+                if (binding.type === 'DROP') {
+                    ignore.add(binding.variable);
+                } else if (!binding.isArray && binding.binding && binding.binding.length > 0)  {
+                    let value = binding.binding[0] as OutputBindingValue;
+                    if (value.startsWith("_") && value.endsWith("_")) {
+                        switch (value) {
+                            case "_CONFIDENCE_VALUE_":
+                                plots.add(binding.variable);
+                                break;
+                            case "_VISUALIZE_":
+                                viz.add(binding.variable);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            });
+        }
         if (list.length > 0) {
             let last = list[list.length - 1];
             let vizArr = Array.from(viz);
             let ignoreArr = Array.from(ignore);
-            //TODO:
-            //[...last.workflows, ...last.metaWorkflows].forEach((wf) => {
-            //    if (wf.runs) {
-            //        Object.values(wf.runs)
-            //            .flat().map(run =>
-            //                Object.keys(run.outputs)
-            //                    .filter(key => vizArr.some(v => key.startsWith(v)) && !ignoreArr.some(i => key.startsWith(i)))
-            //                    .map(key => {
-            //                        let vizName = vizArr.filter(v => key.startsWith(v))[0];
-            //                        let url = run.outputs[key].id;
-            //                        if (url != null) {
-            //                            vizMap[vizName] = [wf.source, url];
-            //                        }
-            //                    })
-            //            )
-            //    }
-            //})
+            [...last.workflows, ...last.metaWorkflows].forEach((wf) => {
+                (wf.executions || []).map(run => run.result.extras).flat().forEach(output => {
+                    if (vizArr.some(v => output.variable === v) && !ignoreArr.some(i => output.variable === i) && output.binding.length > 0) {
+                        let url = output.binding[output.binding.length-1]; //If is a list, maybe is better to show them all.
+                        if (url != null) {
+                            vizMap[output.variable] = [wf.source.url, url]; //FIXME: not sure if is url
+                        }
+                    }
+                })
+            })
         }
 
         setMainVisualizations(vizMap);

@@ -27,7 +27,7 @@ export const HypothesisView = () => {
 
     useEffect(() => {
         let list : string[] = (TLOIs||[])
-                .filter((tloi) => tloi.parentGoal.id === goalId)
+                .filter((tloi) => getId(tloi.parentGoal) === goalId && tloi.parentLoi != null)
                 .map((tloi) => tloi.parentLoi.id);
         setLOIList(Array.from(new Set(list)));
     }, [TLOIs, goalId]);
