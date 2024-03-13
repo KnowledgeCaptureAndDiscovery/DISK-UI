@@ -1,59 +1,13 @@
-import { Grid, Select, MenuItem, Typography, Box, Tooltip, TextField } from "@mui/material";
+import { Grid, Select, MenuItem, Box, Tooltip } from "@mui/material";
 import { MethodVariables, OutputType, VariableBinding } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { SECOND_SELECTORS, OUTPUT_SELECTORS, OutputBindingValue } from "components/outputs";
 
 interface MethodInputSelectorProps {
     variable: MethodVariables,  // This variable represents a parameter
     value?: VariableBinding,    // Initial value
     onChange?: (newBinding:VariableBinding) => void,
-}
-
-interface SelectorField {
-    label:string,
-    tooltip:string,
-}
-
-interface SelectorExtraValue extends SelectorField {
-    value: string,
-}
-
-const OUTPUT_SELECTORS : Record<OutputType, SelectorField> = {
-    DROP: {
-        label: "Ignore output",
-        tooltip: "Do not store the file on DISK. The file will still be available on WINGS."
-    },
-    SAVE: {
-        label: "Save file",
-        tooltip: "The file will be stored on the DISK server."
-    },
-    PROCESS: {
-        label: "Process file",
-        tooltip: "The file will be read by DISK."
-    }
-}
-
-const SECOND_SELECTORS : Record<OutputType, Record<string, SelectorField>> = {
-    DROP: {},
-    PROCESS: {
-        _CONFIDENCE_VALUE_: {
-            label: "Process as confidence value file",
-            tooltip: "The first line of the file should be a point floating number.",
-        }
-    },
-    SAVE: {
-        _DOWNLOAD_ONLY_: {
-            label: "Provide download link",
-            tooltip: "The file will be available for download to any DISK user.",
-        }, _IMAGE_: {
-            label: "Store as image to be displayed",
-            tooltip: "The file will be available for visualization and download.",
-        }, _VISUALIZE_: {
-            label: "Store as main visualization",
-            tooltip: "The file will be available for visualization and download." +
-                "The latest version of this file will be show in the hypothesis page.",
-        }
-    }
 }
 
 export const MethodOutputSelector = ({variable, value, onChange}:MethodInputSelectorProps) => {
@@ -118,7 +72,7 @@ export const MethodOutputSelector = ({variable, value, onChange}:MethodInputSele
                 return <Select size="small" sx={{ display: 'inline-block', width: "100%"}} variant="standard" label="Set binding"
                     value={bindValue} onChange={(e) => onBindValueChange(e.target.value)} required>
                     {Object.keys(SECOND_SELECTORS[paramType]).map((value: string, i: number) => 
-                        <MenuItem key={`varopt_${i}`} value={value}>{SECOND_SELECTORS[paramType][value].label}</MenuItem>)}
+                        <MenuItem key={`varopt_${i}`} value={value}>{SECOND_SELECTORS[paramType][value as OutputBindingValue]!.label}</MenuItem>)}
                 </Select>
             case 'DROP':
             default:
@@ -145,9 +99,9 @@ export const MethodOutputSelector = ({variable, value, onChange}:MethodInputSele
             {renderBindingSelector()}
         </Grid>
         <Grid item xs={2} md={2} sm={2}>
-            {SECOND_SELECTORS[paramType] && SECOND_SELECTORS[paramType][bindValue] && (
+            {SECOND_SELECTORS[paramType] && SECOND_SELECTORS[paramType][bindValue as OutputBindingValue] && (
                 <Box style={{ zIndex: 10 }}>
-                    <Tooltip arrow title={SECOND_SELECTORS[paramType][bindValue].tooltip}>
+                    <Tooltip arrow title={SECOND_SELECTORS[paramType][bindValue as OutputBindingValue]!.tooltip}>
                         <HelpOutlineIcon />
                     </Tooltip>
                 </Box>

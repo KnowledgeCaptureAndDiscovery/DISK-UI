@@ -51,7 +51,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
             [...TLOIs].sort((t1, t2) => {
                 return new Date(t2.dateCreated!).getTime() - new Date(t1.dateCreated!).getTime();
             }).forEach((t) => {
-                if (t.parentGoal.id === hypothesis.id && t.parentLoi.id && !usedLOIs.has(t.parentLoi.id)) {
+                if (t.parentLoi && t.parentGoal.id === hypothesis.id && t.parentLoi.id && !usedLOIs.has(t.parentLoi.id)) {
                     usedLOIs.add(t.parentLoi.id);
                     latest.push(t);
                 }

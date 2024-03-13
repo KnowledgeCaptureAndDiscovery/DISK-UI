@@ -5,31 +5,26 @@ import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface ShinyModalProps {
-    source: string,
-    shinyUrl: string,
+    shinyLog: string,
 }
 
-export const ShinyModal = ({source, shinyUrl} : ShinyModalProps) => {
+export const ShinyModal = ({shinyLog} : ShinyModalProps) => {
     const [open, setOpen] = useState(false);
-    const {data, isLoading:loading} = useGetPrivateFileAsTextQuery({dataSource: source, dataId: shinyUrl}, {skip:!open});
     const [url, setUrl] = useState("");
 
     useEffect(() => {
-        if (shinyUrl)
-            setUrl("");
-    }, [shinyUrl]);
-
-    useEffect(() => {
-        if (data) {
-            let m = data.match("Application successfully deployed to (.*)");
+        if (shinyLog) {
+            let m = shinyLog.match("Application successfully deployed to (.*)");
             if (m && m.length === 2) {
                 setUrl(m[1]);
             } else {
-                console.warn("Could not decode:", data);
+                console.warn("Could not decode:", shinyLog);
                 setUrl("");
             }
+        } else {
+            setUrl("");
         }
-    }, [data]);
+    }, [shinyLog]);
 
     const onOpenDialog = () => {
         setOpen(true);
@@ -54,7 +49,7 @@ export const ShinyModal = ({source, shinyUrl} : ShinyModalProps) => {
                 </DialogTitle>
                 <DialogContent dividers sx={{p:0}}>
                     <Box sx={{height: "80vh", p: 0}}>
-                        {loading ? <Box sx={{display:'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
+                        {false ? <Box sx={{display:'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
                             <CircularProgress/> 
                         </Box>
                         : (url && 

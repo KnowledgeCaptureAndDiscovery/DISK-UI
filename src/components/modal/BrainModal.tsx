@@ -6,33 +6,26 @@ import { BrainCfgItem, BrainVisualization } from "./BrainVisualization";
 import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface BrainModalProps {
-    source: string,
-    brainUrl: string,
+    brainCfg: string,
 }
 
-export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
+export const BrainModal = ({brainCfg: brainCfgTxt} : BrainModalProps) => {
     const [open, setOpen] = useState(false);
     const [brainCfg, setBrainCfg] = useState<BrainCfgItem[]|null>(null);
-    const {data, isLoading:loading} = useGetPrivateFileAsTextQuery({dataSource: source, dataId: brainUrl}, {skip:!open});
 
     useEffect(() => {
-        if (brainUrl)
-            setBrainCfg(null);
-    }, [brainUrl]);
-
-    useEffect(() => {
-        if (data && open) {
-            if (data.startsWith('[')) {
-                let cfg: BrainCfgItem[] = JSON.parse(data.replaceAll('\n', ' ').replaceAll('\t', ''));
+        if (brainCfgTxt && open) {
+            if (brainCfgTxt.startsWith('[')) {
+                let cfg: BrainCfgItem[] = JSON.parse(brainCfgTxt.replaceAll('\n', ' ').replaceAll('\t', ''));
                 setBrainCfg(cfg);
             } else {
-                console.warn("Could not decode:", data);
+                console.warn("Could not decode:", brainCfgTxt);
                 setBrainCfg(null);
             }
         } else {
             setBrainCfg(null);
         }
-    }, [data, open]);
+    }, [brainCfgTxt, open]);
 
     const onOpenDialog = () => {
         setOpen(true);
@@ -56,8 +49,8 @@ export const BrainModal = ({source, brainUrl} : BrainModalProps) => {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={{p:0}}>
-                    <Box sx={{p: 0, display: 'flex', minWidth: '600px', minHeight: '400px', justifyContent: (loading? 'space-around' : 'unset')}}>
-                        {loading ?
+                    <Box sx={{p: 0, display: 'flex', minWidth: '600px', minHeight: '400px', justifyContent: (false? 'space-around' : 'unset')}}>
+                        {false ?
                             <CircularProgress sx={{alignSelf:'center'}}/> : 
                             (brainCfg != null ? 
                                 <Fragment>

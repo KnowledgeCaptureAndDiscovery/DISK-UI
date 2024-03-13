@@ -114,13 +114,16 @@ export const WorkflowSeedPreview = ({workflow:wf, button:externalButton, onDelet
             editedValue = "This file will be make available to download"
             fontS = "italic"
         } else if (value === "_IMAGE_") {
-            editedValue = "This file will be used on visualizations"
+            editedValue = "This file will be used to generate visualizations";
             fontS = "italic"
         } else if (value === "_VISUALIZE_") {
             editedValue = "The latest version of this file will be show on TLOI preview"
             fontS = "italic"
         } else if (value === "_BRAIN_VISUALIZATION_") {
-            editedValue = "This file is a brain visualization configuration file"
+            editedValue = "This file will be used to generate a brain visualization"
+            fontS = "italic"
+        } else if (value === "_SHINY_LOG_") {
+            editedValue = "This file will be used to generate Shiny visualizations"
             fontS = "italic"
         } else if (value === "_CONFIDENCE_VALUE_") {
             editedValue = "This file contains the confidence value"

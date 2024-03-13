@@ -40,7 +40,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
         if (value.description !== dataQueryExplanation) setDataQueryExplanation(value.description || "");
         if (value.footnote !== tableFootnote) setTableFootnote(value.footnote || "");
         if (value.template !== template) setTemplate(value.template || "");
-        if (value.variablesToShow !== tableVariables) setTableVariables(value.variablesToShow || "");
+        if (value.variablesToShow && value.variablesToShow.join(", ") !== tableVariables) setTableVariables(value.variablesToShow.join(", ") || "");
         if (value.endpoint && value.endpoint.url && value.endpoint.url !== sourceUrl) setSourceUrl(value.endpoint.url);
         if (showErrors) {
             if (!value.endpoint || !value.endpoint.url) setErrorDataSource(true);
@@ -74,7 +74,7 @@ export const DataQueryTemplateForm = ({value,onChange, showErrors}:DataQueryTemp
             description: dataQueryExplanation,
             template: template,
             footnote: tableFootnote,
-            variablesToShow: tableVariables,
+            variablesToShow: tableVariables.split(/, */g),
             endpoint: {id:sourceID},
         })
     }, [dataQueryExplanation, template, tableFootnote, tableVariables, sourceID]);
