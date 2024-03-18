@@ -79,7 +79,6 @@ export const HypothesisEditor = () => {
     }
 
     const getQuestionBindings : () => VariableBinding[] = () => {
-        console.log(formQuestionBindings);
         return Object.keys(formQuestionBindings).map<VariableBinding>((varId: string) => (
             {
                 variable: varId,

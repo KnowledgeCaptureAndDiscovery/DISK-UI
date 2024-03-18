@@ -1,4 +1,4 @@
-import { Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Skeleton } from "@mui/material";
+import { Box, FormControl, FormControlLabel, FormLabel, MenuItem, Radio, RadioGroup, Select, Skeleton } from "@mui/material";
 import { Goal, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
@@ -11,13 +11,13 @@ import { useFilteredTLOIs, useOutputs } from "redux/hooks/tloi";
 ChartJS.register(CategoryScale, LogarithmicScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface ConfidencePlotProps {
-    goal?: Goal,
-    loiId?: string,
+    goalId: string,
+    loiId: string,
 }
 
-export const ConfidencePlot = ({ goal: hypothesis, loiId }: ConfidencePlotProps) => {
+export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
     const { data: visibleTLOIs, isLoading: loadingTLOIs} = useFilteredTLOIs({
-        hypothesisId: hypothesis?.id,
+        goalId: goalId,
         loiId: loiId,
         sort: (t1, t2) => t1.dateCreated!.localeCompare(t2.dateCreated!)
     });
@@ -47,25 +47,26 @@ export const ConfidencePlot = ({ goal: hypothesis, loiId }: ConfidencePlotProps)
         let labelDic: { [uri: string]: string } = {};
         let labels: string[] = [];
 
-        //  TODO:
-        //visibleTLOIs
-        //    .sort((t1, t2) => {
-        //        return t1.dateCreated.localeCompare(t2.dateCreated);
-        //    }).forEach((tloi: TriggeredLineOfInquiry) => {
-        //        let nInputs = 0;
-        //        [...tloi.workflows, ...tloi.metaWorkflows].forEach((wf: Workflow) => {
-        //            Object.values(wf.runs || {}).forEach((run: WorkflowRun) => {
-        //                Object.keys(run.outputs).forEach((outName) => {
-        //                        outputs[outName] = run.outputs[outName];
-        //                })
-        //                nInputs += Object.keys(run.inputs).length;
-        //            });
-        //        });
-        //        let label = "N = " + String(nInputs);
-        //        labels.push(label);
-        //        labelDic[tloi.id] = label;
-        //        pValues[label] = tloi.confidenceValue;
-        //    });
+        visibleTLOIs
+            .forEach((tloi: TriggeredLineOfInquiry) => {
+                // We analyse only the first execution of the first wf
+                for (const wf of [...tloi.workflows, ...tloi.metaWorkflows]) {
+                    for (const exec of wf.executions) {
+                        if (exec.result && exec.result.confidenceValue > 0) {
+                            let nInputs = 0;
+                            wf.dataBindings.forEach(db => {
+                                if (nInputs < db.binding.length)
+                                    nInputs = db.binding.length;
+                            });
+                            let label = "N = " + String(nInputs);
+                            labels.push(label);
+                            labelDic[tloi.id] = label;
+                            pValues[label] = exec.result.confidenceValue;
+                            break;
+                        }
+                    }
+                }
+            });
 
         setData({
             labels: labels,
@@ -81,6 +82,7 @@ export const ConfidencePlot = ({ goal: hypothesis, loiId }: ConfidencePlotProps)
 
         setFiles(outputs);
         setIdToLabel(labelDic);
+        //TODO: add a image selector for tooltip and a date option for labels.
         setSelectedFile(Object.keys(outputs).length > 0 ? Object.keys(outputs)[0] : "");
     }, [visibleTLOIs])
 
@@ -307,9 +309,12 @@ export const ConfidencePlot = ({ goal: hypothesis, loiId }: ConfidencePlotProps)
                 </FormControl>
             }
         </Box>
+
         {data &&
-            <Box style={{height:"250px"}}>
-                <Line options={options} data={data}/>
+            <Box>
+                <Box style={{height:"250px"}}>
+                    <Line options={options} data={data}/>
+                </Box>
             </Box>
         }
     </Box>

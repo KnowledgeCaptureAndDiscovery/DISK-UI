@@ -1,4 +1,4 @@
-import { Box, Card, Divider, Skeleton, breadcrumbsClasses } from "@mui/material"
+import { Box, Card, Divider, Skeleton } from "@mui/material"
 import { TypographyLabel } from "components/Styles"
 import { ConfidencePlot } from "./ConfidencePlot"
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -9,7 +9,6 @@ import { Goal, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { TLOITable } from "./TLOITable";
 import { useGetLOIByIdQuery } from "redux/apis/lois";
 import { ImagePreview } from "components/files/ImagePreview";
-import { OutputBindingValue } from "components/outputs";
 
 interface TLOIBundleProps {
     loiId: string,
@@ -21,9 +20,7 @@ export const TLOIBundle = ({loiId, goal}:TLOIBundleProps) => {
     const { data:loi, isLoading:LOILoading} = useGetLOIByIdQuery(loiId);
     const [list, setList] = useState<TriggeredLineOfInquiry[]>([]);
     const [name, setName] = useState<string>("");
-
-    const [showConfidencePlot, setShowConfidencePlot] = useState<boolean>(false);
-    const [mainVisualizations, setMainVisualizations] = useState<{[name:string]: [string, string]}>({});
+    const [mainVisualizations, setMainVisualizations] = useState<{[name:string]: string}>({}); //only the last one of these are shown.
 
     useEffect(() => {
         //Create list for this hypothesis and line of inquiry
@@ -42,49 +39,34 @@ export const TLOIBundle = ({loiId, goal}:TLOIBundleProps) => {
     }, [loi])
 
     useEffect(() => {
-        let plots = new Set<string>();
-        let viz = new Set<string>();
-        let ignore = new Set<string>();
-        let vizMap : {[name:string] : [string, string]} = {};
-        if (loi) {
-             [...loi.workflowSeeds, ...loi.metaWorkflowSeeds ].map(wf => wf.outputs).flat().forEach((binding) => {
-                if (binding.type === 'DROP') {
-                    ignore.add(binding.variable);
-                } else if (!binding.isArray && binding.binding && binding.binding.length > 0)  {
-                    let value = binding.binding[0] as OutputBindingValue;
-                    if (value.startsWith("_") && value.endsWith("_")) {
-                        switch (value) {
-                            case "_CONFIDENCE_VALUE_":
-                                plots.add(binding.variable);
-                                break;
-                            case "_VISUALIZE_":
-                                viz.add(binding.variable);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+        let vizMap : {[name:string] : string} = {};
+        if (loi && list.length > 0) {
+            let allSeeds = [...loi.workflowSeeds, ...loi.metaWorkflowSeeds ];
+            let varSet = new Set<string>();
+             allSeeds.map(wf => wf.outputs).flat().forEach((binding) => {
+                if (binding.binding.length === 1 && binding.binding[0] === "_VISUALIZE_" ) {
+                    varSet.add(binding.variable);
                 }
             });
-        }
-        if (list.length > 0) {
-            let last = list[list.length - 1];
-            let vizArr = Array.from(viz);
-            let ignoreArr = Array.from(ignore);
-            [...last.workflows, ...last.metaWorkflows].forEach((wf) => {
-                (wf.executions || []).map(run => run.result.extras).flat().forEach(output => {
-                    if (vizArr.some(v => output.variable === v) && !ignoreArr.some(i => output.variable === i) && output.binding.length > 0) {
-                        let url = output.binding[output.binding.length-1]; //If is a list, maybe is better to show them all.
-                        if (url != null) {
-                            vizMap[output.variable] = [wf.source.url, url]; //FIXME: not sure if is url
-                        }
-                    }
-                })
-            })
-        }
+            let visualizations = Array.from(varSet);
 
+            let filtered = (list||[])
+                .filter(tloi => [...tloi.workflows, ...tloi.metaWorkflows].every(wf => wf.executions.length > 0));
+
+            let last = filtered[filtered.length-1];
+            [...last.workflows, ...last.metaWorkflows]
+                .filter(wf => wf.executions.length > 0 && wf.executions[0].result)
+                .forEach((wf) => {
+                    (wf.executions[0].result.extras || []).forEach(binding => {
+                        visualizations.forEach(varName => {
+                            if (binding.variable === varName && binding.binding.length > 0) {
+                                vizMap[varName] = binding.binding[binding.binding.length-1];
+                            }
+                        });
+                    });
+                });
+        }
         setMainVisualizations(vizMap);
-        setShowConfidencePlot(plots.size > 0);
     }, [loi, list])
 
     if (TLOILoading || LOILoading)
@@ -107,12 +89,12 @@ export const TLOIBundle = ({loiId, goal}:TLOIBundleProps) => {
         </Box>
         <Divider />
         <TypographyLabel>Overview of results:</TypographyLabel>
-        <TLOITable list={list} loi={loi} showConfidence={showConfidencePlot}/>
+        <TLOITable list={list}/>
         <Box style={{display:"flex", alignItems:"center", width: "100%", flexDirection: "column"}}>
             {Object.keys(mainVisualizations).map((name) =>
                 <ImagePreview key={name} name={name} source={mainVisualizations[name][0]} url={mainVisualizations[name][1]}/>)}
         </Box>
-        {showConfidencePlot && list.length > 2 && <ConfidencePlot goal={goal} loiId={loiId} />}
+        <ConfidencePlot goalId={goal.id} loiId={loiId} />
     </Card>
 
 }

@@ -6,15 +6,16 @@ import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface ShinyModalProps {
     shinyLog: string,
+    iconOnly?: boolean
 }
 
-export const ShinyModal = ({shinyLog} : ShinyModalProps) => {
+export const ShinyModal = ({shinyLog, iconOnly=true} : ShinyModalProps) => {
     const [open, setOpen] = useState(false);
     const [url, setUrl] = useState("");
 
     useEffect(() => {
         if (shinyLog) {
-            let m = shinyLog.match("Application successfully deployed to (.*)");
+            let m = shinyLog.match("\\[1\\] \"(.*)\"");
             if (m && m.length === 2) {
                 setUrl(m[1]);
             } else {
@@ -36,9 +37,15 @@ export const ShinyModal = ({shinyLog} : ShinyModalProps) => {
 
     return (
         <Fragment>
-            <IconButton onClick={onOpenDialog} sx={{p:0}}>
-                <QueryStatsIcon sx={{color: "gray", ml: "4px"}}/>
-            </IconButton>
+            { iconOnly ? 
+                <IconButton onClick={onOpenDialog} sx={{p:0}}>
+                    <QueryStatsIcon sx={{color: "gray", ml: "4px"}}/>
+                </IconButton>
+                : <Button onClick={onOpenDialog} variant="outlined">
+                    <QueryStatsIcon sx={{color: "gray", ml: "5px", mr: "5px"}}/>
+                    Open shiny visualization
+                </Button>
+            }
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xl" fullWidth>
                 <DialogTitle sx={{ m: 0, p: '8px 16px'}}>
                     Shiny Visualization

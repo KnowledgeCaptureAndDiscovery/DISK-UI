@@ -1,29 +1,24 @@
 import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { Fragment, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
-import { sparql } from "@codemirror/legacy-modes/mode/sparql";
-import CodeMirror from '@uiw/react-codemirror';
-import { StreamLanguage } from '@codemirror/language';
 import React from "react";
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { ResultTable } from "components/ResultTable";
-import { WorkflowSeedList } from "components/methods/WorkflowList";
+import { WorkflowSeedList } from "components/methods/WorkflowSeedList";
 import { QuestionPreview } from "components/questions/QuestionPreview";
-import { getId, renderDescription } from "DISK/util";
+import { getId } from "DISK/util";
 import { useGetGoalByIdQuery } from "redux/apis/goals";
 import { useGetEndpointsQuery } from "redux/apis/server";
 import { useGetTLOIByIdQuery, usePutTLOIMutation } from "redux/apis/tlois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
-import { SHINY_FILENAME, BRAIN_FILENAME } from "constants/general";
+import { DataQueryResultView } from "components/DataQuery/DataQueryResultView";
+import { WorkflowInstantiationList } from "components/methods/WorkflowInstantiationList";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -151,7 +146,6 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
         return;
     }
 
-
     return <Card variant="outlined">
         {loading ? 
             <Skeleton sx={{height:"40px", margin: "8px 12px", minWidth: "250px"}}/>
@@ -212,73 +206,15 @@ export const TLOIView = ({edit} : TLOIViewProps) => {
                 </Box>
             }
         </Box>
-        <Divider/>
+        {TLOI && TLOI.queryResults && <>
+            <Divider/>
+            <DataQueryResultView result={TLOI?.queryResults} />
+        </>}
 
-        <Box sx={{padding:"5px 10px"}}>
-            <TypographySubtitle>Data:</TypographySubtitle>
-            <Box sx={{display: "inline-flex", alignItems: "baseline"}}>
-                <TypographyLabel sx={{whiteSpace: 'nowrap'}}>Data source: </TypographyLabel>
-                {loadingEndpoints ? 
-                    <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                    (dataSource && (<Fragment>
-                        <TypographyInline sx={{ml:"5px", whiteSpace: 'nowrap'}}> {dataSource.name} </TypographyInline>
-                        <Box sx={{display:"inline-block", ml:"5px", fontSize:".85em"}}>
-                            {renderDescription(dataSource.description)}
-                        </Box>
-                    </Fragment>))
-                }
-            </Box>
-            <Box sx={{display:"flex", justifyContent:"space-between", alignItems: "center"}}>
-                <Box>
-                    <TypographyLabel>Data query explanation:</TypographyLabel>
-                    {loading ? 
-                        <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
-                        (!!TLOI && false ? 
-                            <TypographyInline> {TLOI?.description} </TypographyInline> :
-                            <InfoInline> None specified </InfoInline>
-                        )
-                    }
-                </Box>
-                <Tooltip arrow title={(formalView? "Hide" : "Show") + " data query"}>
-                    <IconButton onClick={() => setFormalView(!formalView)}>
-                        {formalView? <VisibilityIcon/> : <VisibilityOffIcon/>}
-                    </IconButton>
-                </Tooltip>
-            </Box>
-
-            {formalView && <Fragment>
-                <TypographySection>Data query:</TypographySection>
-                <Box sx={{fontSize: "0.94rem"}} >
-                    <CodeMirror readOnly value={''}
-                        extensions={[StreamLanguage.define(sparql)]}
-                        onChange={(value, viewUpdate) => {
-                        }}
-                    />
-                </Box>
-            </Fragment>}
-
-            <Box> 
-                <Divider/>
-                {//loading ? 
-                 //   <Skeleton/> :
-                 //   <Box>
-                 //       {!!TLOI && (TLOI.tableDescription || (TLOI.dataQuery && TLOI.tableVariables && dataSource)) &&
-                 //           <TypographySection>Input data retrieved:</TypographySection>}
-                 //       {!!TLOI && TLOI.tableDescription && 
-                 //       <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                 //           <TypographyLabel sx={{mr:"5px"}}>Table: </TypographyLabel>
-                 //           <TypographyInline> {TLOI.tableDescription} </TypographyInline>
-                 //       </Box>}
-                 //       {!!TLOI && dataSource && TLOI.tableVariables && TLOI.dataQuery &&
-                 //           <ResultTable query={TLOI.dataQuery} variables={[]} dataSource={dataSource}/> }
-                 //   </Box>
-                }
-            </Box>
-        </Box>
         <Divider/>
         <Box sx={{padding:"5px 10px"}}>
             <TypographySubtitle sx={{display: "inline-block"}}>Methods:</TypographySubtitle>
-            {!!TLOI && <WorkflowSeedList editable={false} workflows={[]} metaworkflows={[]} options={[]}/>}
+            {!!TLOI && <WorkflowInstantiationList workflows={TLOI.workflows} metaWorkflows={TLOI.metaWorkflows} />}
         </Box>
     </Card>
 }

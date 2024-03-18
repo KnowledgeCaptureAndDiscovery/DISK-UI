@@ -7,12 +7,11 @@ import { TLOIEditButton } from "components/tlois/TLOIEdit";
 import { PATH_TLOIS } from "constants/routes";
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { FileList } from "components/FileList";
+import { FileList } from "components/files/FileList";
 import ErrorIcon from '@mui/icons-material/ErrorOutline';
 import WaitIcon from '@mui/icons-material/HourglassBottom';
 import CheckIcon from '@mui/icons-material/Check';
 import { displayConfidenceValue } from "constants/general";
-import { OutputBindingValue } from ".";
 import { BrainModal } from "components/modal/BrainModal";
 import { ShinyModal } from "components/modal/ShinyModal";
 
@@ -49,33 +48,30 @@ const renderConfidenceValue = (tloi: TriggeredLineOfInquiry, i: number) => {
             </Fragment>
 }
 
+type RenderableOutput = '_SHINY_LOG_' | '_BRAIN_VISUALIZATION_';
 const renderOptionalButtons = (cur: TriggeredLineOfInquiry) => {
-    let shinyLog: string = "";
-    let brainCfg: string = "";
-
-
+    const renderable : RenderableOutput[] = ['_SHINY_LOG_', '_BRAIN_VISUALIZATION_'];
+    let variables : Partial<Record<string, RenderableOutput>> = {};
+    let values : Partial<Record<RenderableOutput,string>> = {};
+    
     [ ...cur.workflows, ...cur.metaWorkflows ].forEach((wf:WorkflowInstantiation) => {
-        (wf.executions || []).forEach((run) => {
-            let mappedOutputs = (run.result.extras||[]).reduce<Record<string, VariableBinding>>((acc, binding) => {
-                acc[binding.variable] = binding;
-                return acc;
-            }, {});
-            (run.outputs || []).forEach((binding => {
-                if ((binding.binding || []).length > 0) {
-                    let value = binding.binding[0] as OutputBindingValue;
-                    if (value === '_SHINY_LOG_' && mappedOutputs[binding.variable]) {
-                        shinyLog = mappedOutputs[binding.variable].binding[0];
-                    } else if (value === '_BRAIN_VISUALIZATION_') {
-                        brainCfg = mappedOutputs[binding.variable].binding[0];
-                    }
+        (wf.outputs||[])
+            .filter(b => b.binding && b.binding.length > 0 && renderable.some(r=>r===b.binding[0]))
+            .forEach(b => variables[b.variable] = b.binding[0] as RenderableOutput);
+        (wf.executions || [])
+            .filter(e => e.result && e.result.extras)
+            .map(e => e.result.extras).flat()
+            .forEach(b => {
+                let key = variables[b.variable];
+                if (key && b.binding && b.binding.length >0) {
+                    values[key] = b.binding[0];
                 }
-            }));
-        })
+            });
     });
 
     return (<Fragment>
-        {!!shinyLog && (<ShinyModal shinyLog={shinyLog}/>)}
-        {!!brainCfg && (<BrainModal brainCfg={brainCfg}/>)}
+        {!!values['_SHINY_LOG_'] && (<ShinyModal shinyLog={values['_SHINY_LOG_']}/>)}
+        {!!values['_BRAIN_VISUALIZATION_'] && (<BrainModal brainCfg={values['_BRAIN_VISUALIZATION_']}/>)}
     </Fragment>);
 }
 

@@ -8,7 +8,7 @@ import CopyIcon from '@mui/icons-material/ContentCopy';
 import { PATH_LOIS } from "constants/routes";
 import { useAppDispatch } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
-import { WorkflowSeedList } from "components/methods/WorkflowList";
+import { WorkflowSeedList } from "components/methods/WorkflowSeedList";
 import { getId } from "DISK/util";
 import { useGetLOIByIdQuery, usePostLOIMutation, usePutLOIMutation } from "redux/apis/lois";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
