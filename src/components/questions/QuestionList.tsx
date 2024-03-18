@@ -34,6 +34,7 @@ export const normalizeURI = (uri:string) => {
 
 export const normalizeTextValue = (text:string) => {
     if (!text) return "";
+    if (text === "Precentral") return "Precentral cortex";
     if (text === "SA") return "Surface Area";
     if (text === "TH") return "Thickness";
     //If is an url use the last part of the path
