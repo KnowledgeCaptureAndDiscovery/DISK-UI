@@ -4,6 +4,7 @@ import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useEffect, useState } from "react";
 import { ExecutionOutput } from "components/files/ExecutionOutputs";
+import { WorkflowInstantiationModal } from "components/modal/WorkflowInstantiationModal";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -130,9 +131,7 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false} : Workflo
             </Box>}
             {hasArray && 
                 <Box style={{display:"flex", width:"100%", justifyContent: "center", marginBottom:"5px"}}>
-                    <Button>
-                        See all parameters and inputs //TODO: this should open a modal
-                    </Button>
+                    <WorkflowInstantiationModal workflow={wf} />
                 </Box>
             }
 

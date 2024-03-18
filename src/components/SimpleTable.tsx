@@ -5,8 +5,8 @@ interface SimpleTableProps {
     data: {[varName: string]: string[]},
     showIndex?: boolean,
     perPage?: number,
-
 }
+
 export const SimpleTable = ({data,showIndex=true,perPage=10}:SimpleTableProps) => {
     const [total, setTotal] = useState(0);
     const [nCols, setNCols] = useState(0);
@@ -68,25 +68,27 @@ export const SimpleTable = ({data,showIndex=true,perPage=10}:SimpleTableProps) =
                                 ))}
                         </TableRow>
                     ))}
-                <TableRow>
-                    <TableCell sx={{ padding: "0 10px" }} colSpan={nCols + (showIndex ? 1 : 0)}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
-                            <Button sx={{ padding: "0" }} disabled={curPage === 0} onClick={() => setCurPage(curPage - 1)}>
-                                Previous
-                            </Button>
-                            <Box sx={{ fontWeight: "bold", color: "darkgray", padding: "0 10px" }}>
-                                Showing {curPage * perPage} -{" "}
-                                {(curPage + 1) * perPage < total
-                                    ? (curPage + 1) * perPage
-                                    : total}{" "}
-                                of {total} results
+                {total > perPage &&
+                    <TableRow>
+                        <TableCell sx={{ padding: "0 10px" }} colSpan={nCols + (showIndex ? 1 : 0)}>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", }}>
+                                <Button sx={{ padding: "0" }} disabled={curPage === 0} onClick={() => setCurPage(curPage - 1)}>
+                                    Previous
+                                </Button>
+                                <Box sx={{ fontWeight: "bold", color: "darkgray", padding: "0 10px" }}>
+                                    Showing {(curPage * perPage)+1} -{" "}
+                                    {(curPage + 1) * perPage < total
+                                        ? (curPage + 1) * perPage
+                                        : total}{" "}
+                                    of {total} results
+                                </Box>
+                                <Button sx={{ padding: "0" }} disabled={(1 + curPage) * perPage >= total} onClick={() => setCurPage(curPage + 1)}>
+                                    Next
+                                </Button>
                             </Box>
-                            <Button sx={{ padding: "0" }} disabled={(1 + curPage) * perPage >= total} onClick={() => setCurPage(curPage + 1)}>
-                                Next
-                            </Button>
-                        </Box>
-                    </TableCell>
-                </TableRow>
+                        </TableCell>
+                    </TableRow>
+                }
             </TableBody>
         </Table>
     </TableContainer>
