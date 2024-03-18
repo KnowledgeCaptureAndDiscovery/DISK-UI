@@ -1,33 +1,34 @@
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Box } from "@mui/material";
-import { NarrativeModal } from "components/modal/NarrativeModal";
-import { PATH_TLOIS } from "constants/routes";
-import { Link } from "react-router-dom";
-import { TLOIEditButton } from "./TLOIEdit";
-import { Fragment, useState, useEffect } from "react";
-import { GoalResult, LineOfInquiry, TriggeredLineOfInquiry, Workflow, WorkflowInstantiation } from "DISK/interfaces";
-import { FileList } from "components/FileList";
-import { BrainModal } from "components/modal/BrainModal";
-import { ShinyModal } from "components/modal/ShinyModal";
-import { BRAIN_FILENAME, SHINY_FILENAME, displayConfidenceValue } from "constants/general";
-import { TLOIDeleteButton } from "./TLOIDeleteButton";
-import { getId } from "DISK/util";
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { useState, useEffect } from "react";
+import { LineOfInquiry, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { ALL_COLUMNS, ColumnName } from "components/outputs/table";
 
 interface TLOITableProps {
     list: TriggeredLineOfInquiry[]
-    loi: LineOfInquiry,
-    showConfidence: boolean
 }
 
-export const TLOITable = ({list, loi, showConfidence} : TLOITableProps) => {
+export const TLOITable = ({list} : TLOITableProps) => {
     const [visibleColumns, setVisibleColumns] = useState<ColumnName[]>(['#', "Date", "Run Status", "Input Files", "Output Files", "Confidence Value", "Extras"]);
 
     useEffect(() => {
+        // If theres at least one confidence value, show that column
+        let showConfidence = false;
+        for (const tloi of list) {
+            for (const wf of [...tloi.workflows, ...tloi.metaWorkflows]) {
+                for (const exec of wf.executions) {
+                    if (exec.result && exec.result.confidenceValue > 0) {
+                        showConfidence = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!showConfidence) 
             setVisibleColumns(['#', "Date", "Run Status", "Input Files", "Output Files", "Extras"]);
         else 
             setVisibleColumns(['#', "Date", "Run Status", "Input Files", "Output Files", "Confidence Value", "Extras"]);
-    }, [showConfidence])
+    }, [list])
 
     return <TableContainer sx={{ display: "flex", justifyContent: "center" }}>
         <Table sx={{ width: "unset" }}>

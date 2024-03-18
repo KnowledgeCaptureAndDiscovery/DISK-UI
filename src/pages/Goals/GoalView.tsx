@@ -11,9 +11,9 @@ import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 import { useGetGoalByIdQuery } from "redux/apis/goals";
 import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/tlois";
-import { TLOIBundle } from "components/tlois/TLOIBundle";
 import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } from "components/Styles";
 import { getId } from "DISK/util";
+import { TLOIBundle } from "components/tlois/TLOIBundle";
 
 
 export const HypothesisView = () => {

@@ -8,20 +8,20 @@ interface DataPackage {
 }
 
 interface FilterProps {
-    hypothesisId?: string,
+    goalId?: string,
     loiId?: string,
     sort?: (t1:TriggeredLineOfInquiry, t2:TriggeredLineOfInquiry) => number,
 }
 
-export const useFilteredTLOIs : ({hypothesisId, loiId, sort}:FilterProps) => DataPackage = ({hypothesisId, loiId, sort}) => {
+export const useFilteredTLOIs : ({goalId, loiId, sort}:FilterProps) => DataPackage = ({goalId, loiId, sort}) => {
     const { data: TLOIs, isLoading } = useGetTLOIsQuery();
     const [filteredTLOIs, setFilteredTLOIs] = useState<TriggeredLineOfInquiry[]>([]);
 
     useEffect(() => {
         let cur: TriggeredLineOfInquiry[] = [];
-        if (TLOIs && TLOIs.length > 0 && hypothesisId && loiId) {
+        if (TLOIs && TLOIs.length > 0 && goalId && loiId) {
             cur = [...TLOIs];
-            if (hypothesisId) cur = cur.filter((tloi) => tloi.parentGoal.id === hypothesisId);
+            if (goalId) cur = cur.filter((tloi) => tloi.parentGoal.id === goalId);
             if (loiId) cur = cur.filter((tloi) => tloi.parentLoi.id === loiId);
             //cur = cur.filter((tloi) => tloi.confidenceValue > 0);
         }

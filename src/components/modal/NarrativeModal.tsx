@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Goal, Status, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { WorkflowSeedList } from "../methods/WorkflowList";
+import { WorkflowSeedList } from "../methods/WorkflowSeedList";
 import { useGetGoalByIdQuery } from "redux/apis/goals";
 
 interface NarrativeModalProps {

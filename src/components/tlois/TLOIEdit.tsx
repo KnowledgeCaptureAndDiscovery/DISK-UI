@@ -2,7 +2,7 @@ import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitl
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
-import { TriggeredLineOfInquiry, VariableBinding, Workflow } from "DISK/interfaces";
+import { TriggeredLineOfInquiry, VariableBinding, WorkflowInstantiation } from "DISK/interfaces";
 import EditIcon from '@mui/icons-material/Edit';
 import PlayIcon from '@mui/icons-material/PlayArrow';
 import { cleanTLOI, getBindingAsArray } from "DISK/util";
@@ -20,7 +20,7 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
     const authenticated = useAuthenticated();
     const [open, setOpen] = useState(false);
     const [selectedBindings, setSelectedBindings] = useState<{[id:string]: boolean}>({});
-    const [editableWfs, setEditableWfs] = useState<Workflow[]>([]);
+    const [editableWfs, setEditableWfs] = useState<WorkflowInstantiation[]>([]);
     const [arraySizes, setArraySizes] = useState<number[]>([]);
     const [meta, setMeta] = useState<boolean>(false);
     const [postTLOI, {}] = usePostTLOIMutation();
@@ -30,10 +30,12 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
             let newTLOI : TriggeredLineOfInquiry = { 
                 ...tloi,
                 id: "",
-                //confidenceValue: 0,
                 dateCreated: "",
-                //workflows: meta ? cleanWorkflows(tloi.workflows) : getEditedWorkflows(),
-                //metaWorkflows: meta ? getEditedWorkflows() : cleanWorkflows(tloi.metaWorkflows),
+                dateModified: "",
+                status: "PENDING",
+                result: null,
+                workflows: meta ? cleanWorkflows(tloi.workflows) : getEditedWorkflows(),
+                metaWorkflows: meta ? getEditedWorkflows() : cleanWorkflows(tloi.metaWorkflows),
             };
 
             dispatch(openBackdrop());
@@ -60,36 +62,33 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
     }
 
     const getEditedWorkflows = () => {
-        let wfs : Workflow[] = [];
-        editableWfs.forEach((wf:Workflow) => {
+        let wfs : WorkflowInstantiation[] = [];
+        editableWfs.forEach((wf:WorkflowInstantiation) => {
             wfs.push({
                 ...wf,
-                //bindings: wf.bindings
-                //    .map((vb:VariableBinding) => {
-                //        return !vb.collection ? vb : {
-                //            ...vb,
-                //            binding: getSelectedBindings(vb.binding, wf.source),
-                //        }
-                //    }),
-                //meta: undefined,
-                //runs: undefined,
+                status: 'PENDING',
+                executions: [],
+                dataBindings: wf.dataBindings
+                    .map((vb:VariableBinding) => {
+                        return vb.isArray ?
+                            { ...vb, binding: getSelectedBindings(vb.binding, wf.source.url)}
+                            : vb;
+                    }),
             });
         });
         return wfs;
     }
 
-    const cleanWorkflows : (wfs:Workflow[]) => Workflow[] = (wfs:Workflow[]) => {
-        return wfs.map((wf:Workflow) => {
-            let newWf : Workflow = { ...wf };
-            newWf.meta = undefined;
-            newWf.runs = undefined;
-            return newWf;
-        })
+    const cleanWorkflows : (wfs:WorkflowInstantiation[]) => WorkflowInstantiation[] = (wfs:WorkflowInstantiation[]) => {
+        return wfs.map((wf:WorkflowInstantiation) => ({
+            ...wf,
+            status: 'PENDING',
+            executions: []
+        }));
     }
 
-    const getSelectedBindings = (bindings:string, source:string) => {
-        let arr : string [] = getBindingAsArray(bindings);
-        return "[" + arr.filter((_,i) => selectedBindings[source + "+" + i]).join(", ") + "]";
+    const getSelectedBindings = (bindings:string[], source:string) => {
+        return bindings.filter((_,i) => selectedBindings[source + "+" + i]);
     }
 
     useEffect(() => {
@@ -102,22 +101,22 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
             let wfs = meta ? tloi.metaWorkflows : tloi.workflows;
             let newSizes : number[] = [];
             setMeta(meta);
-            //setEditableWfs(wfs);
+            setEditableWfs(wfs);
 
-            //wfs.forEach((wf:Workflow) => {
-            //    let size : number = 0;
-            //    wf.bindings.forEach((vb:VariableBinding) => {
-            //        let c : number = vb.collection ? vb.binding.split(', ').length : 1;
-            //        if (size < c) size = c;
-            //    });
-            //    newSizes.push(size);
+            wfs.forEach((wf) => {
+                let size : number = 0;
+                wf.dataBindings.forEach((vb:VariableBinding) => {
+                    let c : number = vb.binding.length;
+                    if (size < c) size = c;
+                });
+                newSizes.push(size);
 
-            //    setSelectedBindings((curBindings:{[id:string]: boolean}) => {
-            //        for (let i = 0; i < size; i++)
-            //            curBindings[wf.source+"+"+i] = true;
-            //        return { ...curBindings};
-            //    });
-            //});
+                setSelectedBindings((curBindings:{[id:string]: boolean}) => {
+                    for (let i = 0; i < size; i++)
+                        curBindings[wf.source.url+"+"+i] = true;
+                    return { ...curBindings};
+                });
+            });
             setArraySizes(newSizes);
         }
     }, [tloi])
@@ -154,15 +153,15 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                    {editableWfs.map((wf:Workflow, i:number) =>
+                    {editableWfs.map((wf:WorkflowInstantiation, i:number) =>
                     <Box key={`table_${i}`} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                        <Box sx={{p: '0 10px'}}> <b>Editing workflow:</b> {renderRunTitle(wf.runs && Object.keys(wf.runs)[0] ? Object.keys(wf.runs)[0] : wf.workflow)}</Box>
+                        <Box sx={{p: '0 10px'}}> <b>Editing workflow:</b> {renderRunTitle(wf.executions && wf.executions.length > 0 ? wf.executions[0].externalId : wf.link)}</Box>
                         <TableContainer sx={{display: "flex", justifyContent: "center"}}>
                             <Table sx={{width:"unset", border: "1px solid rgb(223 223 223)", borderRadius: "5px", mt:"4px"}}>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell sx={{padding: "0 10px", textAlign: "end"}}>#</TableCell>
-                                        {wf.bindings.filter(b => !b.binding[0].startsWith("_")).map((b:VariableBinding) => 
+                                        {wf.dataBindings.filter(b => !b.variable.startsWith("_") && !b.binding[0].startsWith("_")).map((b:VariableBinding) => 
                                         <TableCell sx={{padding: "0 10px"}} key={`title${b.variable}`}>
                                             {b.variable}
                                         </TableCell>)}
@@ -173,15 +172,15 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                                         <TableRow key={`row_${j}`}>
                                             <TableCell sx={{padding: "0 10px", textAlign:"end"}}>
                                                 <FormControlLabel label={j+1} labelPlacement="start" control={
-                                                    <Checkbox size="small" sx={{p:0, pr: '5px'}} checked={selectedBindings[wf.source + "+" + j]} onChange={(ev) =>  
+                                                    <Checkbox size="small" sx={{p:0, pr: '5px'}} checked={selectedBindings[wf.source.url + "+" + j]} onChange={(ev) =>  
                                                         setSelectedBindings((curBinding:{[id:string]: boolean}) => {
-                                                            curBinding[wf.source + "+" + j] = ev.target.checked;
+                                                            curBinding[wf.source.url + "+" + j] = ev.target.checked;
                                                             return { ...curBinding };
                                                         })
                                                     }/>
                                                 }/>
                                             </TableCell>
-                                            {wf.bindings.filter(b => !b.binding[0].startsWith("_")).map((b:VariableBinding) =>
+                                            {wf.dataBindings.filter(b => !b.variable.startsWith("_") && !b.binding[0].startsWith("_")).map((b:VariableBinding) =>
                                             <TableCell sx={{padding: "0 10px"}} key={`cell_${b.variable}_${j}`}>
                                                 {renderName(b.isArray ? b.binding[j]: b.binding[0])}
                                             </TableCell>)}

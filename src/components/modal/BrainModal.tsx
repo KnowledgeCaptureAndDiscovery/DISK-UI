@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material"
+import { Box, Button, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import ThreeDRotationIcon from '@mui/icons-material/ThreeDRotation';
@@ -7,9 +7,10 @@ import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface BrainModalProps {
     brainCfg: string,
+    iconOnly?: boolean
 }
 
-export const BrainModal = ({brainCfg: brainCfgTxt} : BrainModalProps) => {
+export const BrainModal = ({brainCfg: brainCfgTxt, iconOnly=true} : BrainModalProps) => {
     const [open, setOpen] = useState(false);
     const [brainCfg, setBrainCfg] = useState<BrainCfgItem[]|null>(null);
 
@@ -37,9 +38,15 @@ export const BrainModal = ({brainCfg: brainCfgTxt} : BrainModalProps) => {
 
     return (
         <Fragment>
-            <IconButton onClick={onOpenDialog} sx={{p:0}}>
-                <ThreeDRotationIcon sx={{color: "gray", ml: "4px"}}/>
-            </IconButton>
+            {iconOnly ? 
+                <IconButton onClick={onOpenDialog} sx={{p:0}}>
+                    <ThreeDRotationIcon sx={{color: "gray", ml: "4px"}}/>
+                </IconButton>
+                : <Button onClick={onOpenDialog} variant="outlined">
+                    <ThreeDRotationIcon sx={{color: "gray", ml: "5px", mr: "5px"}}/>
+                    Open brain visualization
+                </Button>
+            }
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ m: 0, p: '8px 16px'}}>
                     Brain Visualization
