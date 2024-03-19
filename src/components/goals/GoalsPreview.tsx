@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useAppDispatch, useAuthenticated } from "redux/hooks";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
 import { ConfirmDialog } from "../ConfirmDialog";
 import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
@@ -83,6 +84,17 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
             });
     }
 
+    const download = () => {
+        let str = JSON.stringify(hypothesis);
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(str);
+        var downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", getId(hypothesis) + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
     return (
     <Card variant="outlined" sx={{margin: "10px", minHeight: "96px"}}>
         <Box sx={{padding: "0 10px", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
@@ -111,6 +123,9 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
                         </ConfirmDialog>
                     </Box>
                 </Tooltip>)}
+                <IconButton sx={{ padding: "4px" }} onClick={download}>
+                    <DownloadIcon />
+                </IconButton>
             </Box>
         </Box>
         <Divider/>
