@@ -1,4 +1,5 @@
 import { LineOfInquiry } from "DISK/interfaces"
+import DownloadIcon from '@mui/icons-material/Download';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { PATH_LOIS } from "constants/routes";
 import { Card, Box, Typography, Tooltip, IconButton, Divider, styled } from "@mui/material";
@@ -29,7 +30,6 @@ interface LOIPreviewProps {
     displayDeleteButton?: boolean
 }
 
-                    
 
 export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=true} : LOIPreviewProps) => {
     const dispatch = useAppDispatch();
@@ -38,6 +38,18 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
         deleteLOI, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result
       ] = useDeleteLOIMutation();
+
+    //DUPLICATED
+    const download = () => {
+        let str = JSON.stringify(loi);
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(str);
+        var downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", getId(loi) + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
 
     const onDeleteLOI = () => {
         console.log("DELETING: ", loi.id);
@@ -90,6 +102,9 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
                         </ConfirmDialog>
                     </Box>
                 </Tooltip>)}
+                <IconButton sx={{ padding: "4px" }} onClick={download}>
+                    <DownloadIcon />
+                </IconButton>
             </Box>
         </Box>
         <Divider/>
