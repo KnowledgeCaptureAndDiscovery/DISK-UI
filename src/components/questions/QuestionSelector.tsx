@@ -1,5 +1,5 @@
 import { Box, Card, FormHelperText, IconButton, Tooltip } from "@mui/material"
-import { Question, VariableBinding, QuestionVariable, Triple, AnyQuestionVariable, MultiValueAssignation, toMultiValueAssignation, QuestionVariableAssignation } from "DISK/interfaces"
+import { Question, VariableBinding, Triple, AnyQuestionVariable, toMultiValueAssignation, QuestionVariableAssignation } from "DISK/interfaces"
 import React from "react";
 import { useAppDispatch, useQuestionBindings } from "redux/hooks";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';

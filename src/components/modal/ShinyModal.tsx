@@ -1,8 +1,7 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton} from "@mui/material"
+import { Box, Button, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material"
 import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
-import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface ShinyModalProps {
     shinyLog: string,

@@ -41,7 +41,6 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
       ] = useDeleteLOIMutation();
 
     const onDeleteLOI = () => {
-        console.log("DELETING: ", loi.id);
         dispatch(openBackdrop());
         const name = loi.name;
         deleteLOI({id: loi.id})

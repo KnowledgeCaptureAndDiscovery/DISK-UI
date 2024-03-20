@@ -6,7 +6,7 @@ import { VTKParser } from "VTKParser";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Box } from "@mui/material";
 import { useAppDispatch, useBrainVisualization } from "redux/hooks";
-import { addMesh, setFilelist, setFullyDone } from "redux/brain";
+import { addMesh, setFileList, setFullyDone } from "redux/brain";
 import { useGetPublicFileQuery, useLazyGetPublicFileQuery } from "redux/apis/server";
 
 export interface BrainCfgItem {
@@ -35,7 +35,7 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
     //Download data and prepare meshes
     useEffect(() => {
         if (jsonString && !done) {
-            dispatch(setFilelist(JSON.parse(jsonString)));
+            dispatch(setFileList(JSON.parse(jsonString)));
         }
     }, [jsonString, done])
 
@@ -73,7 +73,7 @@ export const BrainVisualization = ({configuration}: BrainVisualizationProps) => 
                 mesh.material.opacity = 0.1;
                 mesh.rotation.y = (Math.PI * 1.01);
                 mesh.rotation.x = (Math.PI * 0.5);
-                mesh.rotation.z = (Math.PI * 1.5 * (name.indexOf("rh_") == -1 ? 1 : -1));
+                mesh.rotation.z = (Math.PI * 1.5 * (name.indexOf("rh_") === -1 ? 1 : -1));
                 mesh.name = name;
                 return mesh
             });

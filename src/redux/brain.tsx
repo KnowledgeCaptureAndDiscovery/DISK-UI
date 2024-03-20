@@ -8,7 +8,7 @@ export interface BrainFiles {
 
 interface BrainState {
   loaded: boolean,
-  filelist: BrainFiles | null,
+  fileList: BrainFiles | null,
   meshes: {[id:string]: string}
 }
 
@@ -16,14 +16,14 @@ export const brainSlice = createSlice({
   name: 'brain',
   initialState: {
     loaded: false,
-    filelist: null,
+    fileList: null,
     meshes: {},
   } as BrainState,
   reducers: {
-    setFilelist: (state:BrainState, action: PayloadAction<BrainFiles>) => {
+    setFileList: (state:BrainState, action: PayloadAction<BrainFiles>) => {
       let cfg : BrainFiles = action.payload;
       let newState = { ...state };
-      newState.filelist = cfg;
+      newState.fileList = cfg;
       return newState;
     },
     addMesh: (state:BrainState, action: PayloadAction<string[]>) => {
@@ -49,4 +49,4 @@ export const brainSlice = createSlice({
   },
 });
 
-export const { setFilelist, addMesh, setFullyDone } = brainSlice.actions;
+export const { setFileList: setFileList, addMesh, setFullyDone } = brainSlice.actions;
