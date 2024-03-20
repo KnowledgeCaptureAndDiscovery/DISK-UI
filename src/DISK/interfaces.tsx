@@ -165,7 +165,6 @@ export interface TriggeredLineOfInquiry extends LOICommon{
     queryResults:   DataQueryResult;
     workflows:      WorkflowInstantiation[];
     metaWorkflows:  WorkflowInstantiation[];
-    result:         GoalResult | null;
 }
 
 export type Status = 'QUEUED' | 'RUNNING' | 'FAILED' | 'SUCCESSFUL' | 'PENDING';

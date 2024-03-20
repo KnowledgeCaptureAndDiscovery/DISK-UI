@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { Endpoint, Execution, TriggeredLineOfInquiry, VariableBinding, WorkflowInstantiation } from "DISK/interfaces";
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { PrivateLink } from "../PrivateLink";
+import { PrivateLink } from "./PrivateLink";
 
 interface FileListProps {
     type: 'input' | 'output',

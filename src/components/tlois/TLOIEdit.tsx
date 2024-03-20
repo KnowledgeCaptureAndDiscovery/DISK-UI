@@ -33,7 +33,6 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                 dateCreated: "",
                 dateModified: "",
                 status: "PENDING",
-                result: null,
                 workflows: meta ? cleanWorkflows(tloi.workflows) : getEditedWorkflows(),
                 metaWorkflows: meta ? getEditedWorkflows() : cleanWorkflows(tloi.metaWorkflows),
             };

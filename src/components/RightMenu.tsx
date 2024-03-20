@@ -267,7 +267,8 @@ export default function MiniDrawer(props: { children: string | number | boolean 
                   <SubdirectoryArrowRightIcon/>
                 </ListItemIcon>
                 <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                  <Typography sx={{fontWeight: location.pathname != PATH_GOALS  && inLocation(PATH_GOALS) ? 700 : 400, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>
+                  <Typography sx={{fontWeight: location.pathname != PATH_GOALS && inLocation(PATH_GOALS) || location.pathname != PATH_TLOIS && inLocation(PATH_TLOIS) ? 700 : 400,
+                      textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>
                     {selectedGoal.name}
                   </Typography>
                 }/>

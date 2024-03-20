@@ -6,7 +6,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Fragment, useEffect, useState } from "react";
 import { getBindingAsArray, getFileName } from "DISK/util";
-import { PrivateLink } from "components/PrivateLink";
+import { PrivateLink } from "components/files/PrivateLink";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',

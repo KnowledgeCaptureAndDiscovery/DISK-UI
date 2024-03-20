@@ -15,6 +15,7 @@ import { useGetTLOIsQuery } from "redux/apis/tlois";
 import { useEffect, useState } from "react";
 import { TLOIPreview } from "components/tlois/TLOIPreview";
 import { getId } from "DISK/util";
+import { downloadJSON } from "components/files/download";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -123,7 +124,7 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
                         </ConfirmDialog>
                     </Box>
                 </Tooltip>)}
-                <IconButton sx={{ padding: "4px" }} onClick={download}>
+                <IconButton sx={{ padding: "4px" }} onClick={() => downloadJSON(JSON.stringify(hypothesis), getId(hypothesis))}>
                     <DownloadIcon />
                 </IconButton>
             </Box>

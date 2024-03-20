@@ -1,7 +1,7 @@
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
 import { useState, useEffect } from "react";
 import { LineOfInquiry, TriggeredLineOfInquiry } from "DISK/interfaces";
-import { ALL_COLUMNS, ColumnName } from "components/outputs/table";
+import { ALL_COLUMNS, ColumnName } from "components/files/outputs/table";
 
 interface TLOITableProps {
     list: TriggeredLineOfInquiry[]

@@ -3,6 +3,7 @@ import { Box, Button, Card, Divider, Skeleton } from "@mui/material";
 import { DataQueryTemplate, LineOfInquiry, Question, QuestionVariable, Workflow, WorkflowSeed } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
 import { PATH_LOIS } from "constants/routes";
@@ -16,7 +17,7 @@ import { openNotification } from "redux/slices/notifications";
 import { createQueryForGraph, getAllQuestionVariables, getCompleteQuestionGraph } from "components/questions/QuestionHelpers";
 import { TypographySubtitle, TextFieldBlock, FieldBox } from "components/Styles";
 import CancelIcon from '@mui/icons-material/Cancel';
-import { EditableHeader, TriggerConditionEditor } from "components/Fields";
+import { EditableHeader, TriggerConditionEditor, VisuallyHiddenInput } from "components/Fields";
 import { DataQueryTemplateForm } from "components/DataQuery/DataQueryTemplateForm";
 
 export const LOIEditor = () => {
@@ -210,6 +211,35 @@ export const LOIEditor = () => {
         }
     }
 
+    const upload : React.ChangeEventHandler<HTMLInputElement> = (ev) => {
+        if (ev && ev.target && ev.target.files && ev.target.files.length === 1) {
+            let file = ev.target.files[0];
+            if (file.type === 'application/json') {
+                const reader = new FileReader();
+                reader.onload = (ev2) => {
+                    if (ev2.target && ev2.target.result && typeof ev2.target.result === 'string') {
+                        try {
+                            let newGoal : LineOfInquiry = {
+                                ...JSON.parse(ev2.target.result) as LineOfInquiry,
+                                id: "",
+                                dateCreated: "",
+                                dateModified: "",
+                            }
+                            loadForm(newGoal);
+                            dispatch(openNotification({ severity: 'success', text: 'Line of Inquiry successfully loaded' }));
+                            return;
+                        } catch (e) {}
+                    }
+                    dispatch(openNotification({ severity: 'error', text: 'Could not read Line of Inquiry from file' }));
+                }
+
+                reader.readAsText(file);
+            }
+        } else {
+            dispatch(openNotification({ severity: 'error', text: 'Could not read Goal from file' }));
+        }
+    }
+
     return <Card variant="outlined">
         <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_LOIS + (LOI ? "/" + getId(LOI) : "")}/>
         <Divider/>
@@ -247,7 +277,18 @@ export const LOIEditor = () => {
             {LOI?
                 <Button color="info" sx={{mr:"10px"}} onClick={onDuplicateClicked}>
                     <CopyIcon/> Duplicate
-                </Button> : <Box/>
+                </Button> : <Box>
+                    <Button
+                        component="label"
+                        role={undefined}
+                        variant="outlined"
+                        tabIndex={-1}
+                        startIcon={<CloudUploadIcon />}
+                    >
+                        Upload
+                        <VisuallyHiddenInput type="file" accept="json" onChange={upload}/>
+                    </Button>
+                </Box>
             }
             <Box>
                 <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_LOIS + (LOI ? "/" + getId(LOI) : "")}>

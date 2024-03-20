@@ -1,10 +1,11 @@
-import { Box, Button, Card, Divider, IconButton, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, IconButton, Input, Skeleton, TextField, Tooltip, Typography, styled } from "@mui/material";
 import { Goal, Question, Triple, VariableBinding, toMultiValueAssignation } from "DISK/interfaces";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import CopyIcon from '@mui/icons-material/ContentCopy';
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { PATH_GOALS, UI_PARAMS } from "constants/routes";
 import { QuestionSelector } from "components/questions/QuestionSelector";
 import { useAppDispatch, useQuestionBindings, useSelectedQuestion } from "redux/hooks";
@@ -13,7 +14,7 @@ import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { usePostGoalMutation, usePutGoalMutation, useGetGoalByIdQuery } from "redux/apis/goals";
 import { openNotification } from "redux/slices/notifications";
 import { addBindingsToQuestionGraph } from "components/questions/QuestionHelpers";
-import { EditableHeader } from "components/Fields";
+import { EditableHeader, VisuallyHiddenInput } from "components/Fields";
 import { TextFieldBlock, TypographySubtitle } from "components/Styles";
 import { getId } from "DISK/util";
 
@@ -171,6 +172,35 @@ export const HypothesisEditor = () => {
         setEditedQuestionId(selectedQuestion? selectedQuestion.id : '');
     };
 
+    const upload : React.ChangeEventHandler<HTMLInputElement> = (ev) => {
+        if (ev && ev.target && ev.target.files && ev.target.files.length === 1) {
+            let file = ev.target.files[0];
+            if (file.type === 'application/json') {
+                const reader = new FileReader();
+                reader.onload = (ev2) => {
+                    if (ev2.target && ev2.target.result && typeof ev2.target.result === 'string') {
+                        try {
+                            let newGoal : Goal = {
+                                ...JSON.parse(ev2.target.result) as Goal,
+                                id: "",
+                                dateCreated: "",
+                                dateModified: "",
+                            }
+                            loadForm(newGoal);
+                            dispatch(openNotification({ severity: 'success', text: 'Goal successfully loaded'}));
+                            return;
+                        } catch (e) {}
+                    }
+                    dispatch(openNotification({ severity: 'error', text: 'Could not read Goal from file' }));
+                }
+
+                reader.readAsText(file);
+            }
+        } else {
+            dispatch(openNotification({ severity: 'error', text: 'Could not read Goal from file' }));
+        }
+    }
+
     return <Card variant="outlined">
         <EditableHeader loading={loading} value={name} error={errorName} onChange={onNameChange} redirect={PATH_GOALS + (goal && goal.id ? "/" + getId(goal) : "")}/>
         <Divider/>
@@ -200,7 +230,18 @@ export const HypothesisEditor = () => {
             {goal?
                 <Button color="info" sx={{mr:"10px"}} onClick={onDuplicateClicked}>
                     <CopyIcon/> Duplicate
-                </Button> : <Box/>
+                </Button> : <Box>
+                    <Button
+                        component="label"
+                        role={undefined}
+                        variant="outlined"
+                        tabIndex={-1}
+                        startIcon={<CloudUploadIcon />}
+                    >
+                        Upload
+                        <VisuallyHiddenInput type="file" accept="json" onChange={upload}/>
+                    </Button>
+                </Box>
             }
             <Box>
                 <Button color="error" sx={{mr:"10px"}} component={Link} to={PATH_GOALS + (goal ? "/" + getId(goal) : "")}>
