@@ -9,32 +9,28 @@ The data adapter must be able to perform at least the following operations:
  - Obtain `SPARQL` results to use as options.
  - Get information about files in the repository (hashes, dates, etc).
 
+
+ A simple overview of the abstract class is provided below, you can check code examples on [our repository](https://github.com/KnowledgeCaptureAndDiscovery/DISK-API/blob/main/server/src/main/java/org/diskproject/server/adapters/GraphDBAdapter.java).
+
 ```java
 public abstract class DataAdapter {
+    // Basic endpoint information, getters and setters omitted for simplicity
     private String endpointUrl, name, username, password, prefix, namespace;
 
+    public DataAdapter (String URI, String name);
     public DataAdapter (String URI, String name, String username, String password);
-    
-    public String getEndpointUrl ();
-    public String getName ();
-    protected String getUsername ();
-    protected String getPassword ();
 
-    public void setPrefix (String prefix, String namespace);
-    public String getPrefix ();
-    public String getNamespace ();
-    
-    public abstract List<DataResult> query (String queryString);
+    // Query data to endpoint, return as DataResult or as a csv file as byte[]
+    public abstract List<DataResult> query (String queryString) throws Exception;
+    public abstract byte[] queryCSV(String queryString) throws Exception;
 
-    //This data query must return two variable names:
+    // Query for available options for variable varName, this queries URI and (opt) label.
     static public String VARURI = "uri";
     static public String VARLABEL = "label";
-    public abstract List<DataResult> queryOptions (String varname, String constraintQuery);
+    public abstract List<DataResult> queryOptions (String varName, String constraintQuery) throws Exception;
 
-    // file -> hash
-    public abstract Map<String, String> getFileHashes (List<String> dsurls);
-
-    // Check that a LOI is correctly configured for this adapter
-    public abstract boolean validateLOI (LineOfInquiry loi, Map<String, String> values);
+    // Get the hash (or e-tag) of a list of files to check if they have change
+    public abstract Map<String, String> getFileHashes (List<String> dsUrls) throws Exception;
+    public abstract Map<String, String> getFileHashesByETag(List<String> dsUrls) throws Exception;
 }
 ```

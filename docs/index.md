@@ -41,7 +41,7 @@ User-defined hypotheses are re-run when new data or methods become available.
 
 ### Overview of DISK Architecture
 
-![Disk API interactions](figures/DISK-adapters.png "DISK API interactions")
+![Disk API interactions](figures/DISK-arq.png "DISK API interactions")
 
 For more information about the [DISK](https://disk.isi.edu) architecture, please check the [architecture](developer-guide/architecture/) page.
 
