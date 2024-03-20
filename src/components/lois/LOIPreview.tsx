@@ -12,6 +12,7 @@ import { closeBackdrop, openBackdrop } from "redux/slices/backdrop";
 import { openNotification } from "redux/slices/notifications";
 import { useDeleteLOIMutation } from "redux/apis/lois";
 import { getId } from "DISK/util";
+import { downloadJSON } from "components/files/download";
 
 const TwoLines = styled(Typography)(({ theme }) => ({
     display: "-webkit-box",
@@ -38,18 +39,6 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
         deleteLOI, // This is the mutation trigger
         { isLoading: isDeleting }, // This is the destructured mutation result
       ] = useDeleteLOIMutation();
-
-    //DUPLICATED
-    const download = () => {
-        let str = JSON.stringify(loi);
-        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(str);
-        var downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href",     dataStr);
-        downloadAnchorNode.setAttribute("download", getId(loi) + ".json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-    }
 
     const onDeleteLOI = () => {
         console.log("DELETING: ", loi.id);
@@ -102,7 +91,7 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
                         </ConfirmDialog>
                     </Box>
                 </Tooltip>)}
-                <IconButton sx={{ padding: "4px" }} onClick={download}>
+                <IconButton sx={{ padding: "4px" }} onClick={() => downloadJSON(JSON.stringify(loi), getId(loi))}>
                     <DownloadIcon />
                 </IconButton>
             </Box>

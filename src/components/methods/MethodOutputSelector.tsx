@@ -2,7 +2,7 @@ import { Grid, Select, MenuItem, Box, Tooltip } from "@mui/material";
 import { MethodVariables, OutputType, VariableBinding } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { SECOND_SELECTORS, OUTPUT_SELECTORS, OutputBindingValue } from "components/outputs";
+import { SECOND_SELECTORS, OUTPUT_SELECTORS, OutputBindingValue } from "components/files/outputs";
 
 interface MethodInputSelectorProps {
     variable: MethodVariables,  // This variable represents a parameter

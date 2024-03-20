@@ -1,4 +1,4 @@
-import { Box, TextField, IconButton, Skeleton, Tooltip, Checkbox, FormControlLabel, FormGroup } from "@mui/material"
+import { Box, TextField, IconButton, Skeleton, Tooltip, Checkbox, FormControlLabel, FormGroup, styled } from "@mui/material"
 import { Link } from "react-router-dom"
 import CancelIcon from '@mui/icons-material/Cancel';
 import { TypographySection } from "./Styles";
@@ -40,6 +40,7 @@ var TriggerConditionEnum = {
     METHOD: 2,
     MANUAL: 4,
 }
+
 export const TriggerConditionEditor = ({defaultValue, onChange}:TriggerConditionEditorProps) => {
     const [disabled, setDisabled] = useState<boolean>(false);
     const [data, setData] = useState<boolean>(false);
@@ -113,3 +114,15 @@ export const TriggerConditionEditor = ({defaultValue, onChange}:TriggerCondition
         </Tooltip>
     </FormGroup>
 }
+
+export const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+});
