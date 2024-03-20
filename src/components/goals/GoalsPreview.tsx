@@ -63,7 +63,6 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
     }, [TLOIs])
 
     const onDeleteHypothesis = () => {
-        console.log("DELETING: ", hypothesis.id);
         dispatch(openBackdrop());
         const name = hypothesis.name;
         deleteGoal({id: hypothesis.id})

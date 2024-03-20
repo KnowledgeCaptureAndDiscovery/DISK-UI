@@ -1,11 +1,9 @@
-import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip, TableHead, Button, Table, TableBody, TableCell, TableContainer, TableRow,
-    styled } from "@mui/material"
-import { WorkflowSeed, VariableBinding, WorkflowRun, RunBinding } from "DISK/interfaces"
+import { Box, Card, Typography, Divider, Grid, IconButton, Tooltip, styled } from "@mui/material"
+import { WorkflowSeed, VariableBinding } from "DISK/interfaces"
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Fragment, useEffect, useState } from "react";
-import { getBindingAsArray, getFileName } from "DISK/util";
+import { Fragment, useState } from "react";
 import { PrivateLink } from "components/files/PrivateLink";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
@@ -22,74 +20,8 @@ interface WorkflowPreviewProps {
     meta?: boolean
 }
 
-const MAX_PER_PAGE = 10;
 
 export const WorkflowSeedPreview = ({workflow:wf, button:externalButton, onDelete, meta=false} : WorkflowPreviewProps) => {
-    const [total, setTotal] = useState(0);
-    const [curPage, setCurPage] = useState(0);
-    //const [allRuns, setAllRuns] = useState<WorkflowRun[]>([]);
-    //const [allInputs, setAllInputs] = useState<{[name:string]: RunBinding}>({});
-    //const [allOutputs, setAllOutputs] = useState<{[name:string]: RunBinding}>({});
-    //const [visibleBindings, setVisibleBindings] = useState<VariableBinding[]>([]);
-
-    //useEffect(() => {
-    //    if (!!wf) {
-    //        let simpleBindings : VariableBinding[] = [];
-    //        let collectionBindings : VariableBinding[] = [];
-    //        let max : number = 0;
-    //        //wf.bindings.forEach((vb:VariableBinding) => {
-    //        //    if (vb.isArray) {
-    //        //        let l : number = vb.binding.length;
-    //        //        if (l > max) max = l;
-    //        //        collectionBindings.push(vb);
-    //        //    } else {
-    //        //        if (!(vb.binding[0].startsWith("_") && vb.binding[0].endsWith("_"))) {
-    //        //            simpleBindings.push(vb);
-    //        //        }
-    //        //    }
-    //        //})
-    //        setTotal(max);
-    //        // Get all runs
-    //        let newRuns : WorkflowRun[] = [];
-    //        let newInputs : {[name:string]: RunBinding} = {};
-    //        let newOutputs : {[name:string]: RunBinding} = {};
-    //        //Object.values(wf.runs||{}).forEach(run => {
-    //        //    newRuns.push(run);
-    //        //    //if (run.inputs) newInputs = { ...newInputs, ...run.inputs };
-    //        //    if (run.inputs) {
-    //        //        Object.values(run.inputs).forEach(input => {
-    //        //            if (input.type === 'URI' && input.id) {
-    //        //                newInputs[ input.id.replaceAll(/.*#/g,'') ] = input;
-    //        //            }
-    //        //        });
-    //        //    }
-    //        //    if (run.outputs) newOutputs = { ...newOutputs, ...run.outputs };
-    //        //});
-    //        //setAllRuns(newRuns);
-    //        setAllInputs(newInputs);
-    //        setAllOutputs(newOutputs);
-    //        setVisibleBindings([...simpleBindings, ...collectionBindings]);
-    //    }
-    //}, [wf]);
-
-    //const renderBinding = (binding:VariableBinding, index:number) => {
-    //    let value : string = binding.isArray ?
-    //        binding.binding[index]
-    //        : binding.binding[0];
-
-    //    console.log(binding,allInputs);
-    //    if (value.startsWith('SHA') && allInputs[value]) {
-    //        return renderDownloadLink(allInputs[value].id || "");
-    //    }
-
-    //    return (<span>{value}</span>);
-    //}
-
-    const renderDownloadLink = (url:string) => {
-        let filename : string = url.replaceAll(/.*#/g,'').replace(/SHA[\d\w]{6}_/,'');
-        return <PrivateLink filename={filename} source={wf.source.url}  url={url}/>;
-    }
-
     const renderWorkflowVariableBinding = (binding:VariableBinding) => {
         //This is a hack, we should read the vocabulary and use the prefixes 
         //e.g: http://localhost:8080/wings-portal/export/users/admin/Enigma/data/library.owl#SHA4fe5c4_

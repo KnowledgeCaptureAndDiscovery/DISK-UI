@@ -7,7 +7,6 @@ interface DataQueryResultTableProps {
 }
 
 export const DataQueryResultTable = ({result}:DataQueryResultTableProps) => {
-    console.log(result.variablesToShow);
     const [csv, setCSV] = useState<{[varName: string]: string[]}>({});
 
     useEffect(() => {
@@ -34,9 +33,7 @@ export const DataQueryResultTable = ({result}:DataQueryResultTableProps) => {
                     }
                 }
             }
-            console.log(csvMap);
             setCSV(csvMap);
-            //FIXME:  we are missing some variables of the query here, we need to fix it server side.
         } else {
             setCSV({});
         }

@@ -21,7 +21,6 @@ export const WorkflowSeedEditor = ({options, workflow, onSave:notifyParent, meta
     const [variableBindings, setVariableBindings] = React.useState<SeedBindings>({inputs:[],outputs:[],parameters:[]});
 
     useEffect(() => {
-        console.log("Workflow has changed!", workflow);
         if (methods && workflow) {
             let selectedMethod: Method = methods.filter(m => m.link === workflow.link)![0];
             if (selectedMethod) {

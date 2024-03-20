@@ -3,7 +3,6 @@ import { Fragment, useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import ThreeDRotationIcon from '@mui/icons-material/ThreeDRotation';
 import { BrainCfgItem, BrainVisualization } from "./BrainVisualization";
-import { useGetPrivateFileAsTextQuery } from "redux/apis/server";
 
 interface BrainModalProps {
     brainCfg: string,

@@ -1,6 +1,5 @@
 import { Button, Dialog, DialogTitle, IconButton, DialogContent, Typography } from "@mui/material";
 import { WorkflowInstantiation } from "DISK/interfaces"
-import { WorkflowSeedList } from "components/methods/WorkflowSeedList";
 import { useState, Fragment, useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { SimpleTable } from "components/SimpleTable";

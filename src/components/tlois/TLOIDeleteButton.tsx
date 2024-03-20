@@ -17,7 +17,6 @@ export const TLOIDeleteButton = ({tloi}:TLOIDeleteButtonProps) => {
     const [deleteTLOI, {}] = useDeleteTLOIMutation();
 
     const deleteTLOIById = (id:string) => {
-        console.log("DELETING: ", id);
         dispatch(openBackdrop());
         deleteTLOI({id:id})
             .then(() => {

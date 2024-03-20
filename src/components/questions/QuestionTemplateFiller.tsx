@@ -1,5 +1,5 @@
 import { Box } from "@mui/material"
-import { AnyQuestionVariable, Question, QuestionVariable, toMultiValueAssignation } from "DISK/interfaces"
+import { AnyQuestionVariable, Question, toMultiValueAssignation } from "DISK/interfaces"
 import React from "react"
 import { BoundingBoxMap } from "./BoundingBoxMap"
 import { createTemplateFragments, TemplateFragment, TextPart } from "./QuestionHelpers"
