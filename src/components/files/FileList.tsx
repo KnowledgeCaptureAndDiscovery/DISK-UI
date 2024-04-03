@@ -12,54 +12,62 @@ interface FileListProps {
     renderFiles?: boolean,
 }
 
-interface RunStatus extends Execution {
-    source: Endpoint,
+export interface DefinitionAndFile {
+    def: VariableBinding | undefined,
+    file: VariableBinding
 }
 
 export const FileList = ({type:displayType, tloi, label: title, renderFiles} : FileListProps) => {
     const [open, setOpen] = useState(false);
     const [total, setTotal] = useState(0);
-    const [runs, setRuns] = useState<RunStatus[]>([]);
-    
-    const getFileList : (run:RunStatus|Execution) => VariableBinding[] = (run) => {
-        if (displayType === 'input') {
-            return (run.inputs || []).filter(run => run.type === 'DISK_DATA', {});
-        }
+    const [runs, setRuns] = useState<Execution[]>([]);
+    const [files, setFiles] = useState<Record<string, DefinitionAndFile[]>>({});
 
-        let doNoStore : string[] = [];
-        if (tloi) [...tloi.workflows, ...tloi.metaWorkflows].forEach((wf) => {
-            wf.outputs.forEach((b) => {
-                if (b.type === 'DROP')
-                    doNoStore.push(b.variable);
-            })
-        });
-        return (run.outputs || []).filter(binding => !doNoStore.some(n => n === binding.variable));
-    }
-
-    // Adds source and all runs
     useEffect(() => {
+        let allRuns : Execution[] = [];
+        let map : Record<string, DefinitionAndFile[]> = {};
+        let count = 0;
         if (tloi) {
             let allWfs : WorkflowInstantiation[] = [ ...(tloi.workflows ? tloi.workflows : []) , ...(tloi.metaWorkflows ? tloi.metaWorkflows : []) ];
-            let allRuns : RunStatus[] = [];
-            let i = 0;
             allWfs.forEach(wf => {
+                let varDefinitions = displayType === 'input' ? wf.dataBindings : wf.outputs;
+                let doNotStore : string[] = [];
+                varDefinitions.forEach((b) => {
+                    if (b.type === 'DROP')
+                        doNotStore.push(b.variable);
+                });
+
                 (wf.executions || []).forEach(run => {
-                    let list = getFileList(run);
+                    let list = displayType === 'input' ?
+                            (run.inputs || []).filter(input => input.type === 'DISK_DATA')
+                            : (run.outputs || []).filter(binding => !doNotStore.some(n => n === binding.variable));
+
+                    let list2 = list.map<DefinitionAndFile>((file) => {
+                        let definition = displayType == 'input' ?
+                            wf.dataBindings.find(d => file.variable.startsWith(d.variable.substring(1)))
+                            : (run.result && run.result.extras ? run.result.extras : wf.outputs).find(d => file.variable.startsWith(d.variable));
+                        
+                        return {
+                            def: definition,
+                            file: file
+                        }
+                    });
+
                     if (list.length >0) {
-                        allRuns.push({
-                            ...run,
-                            source: wf.source
-                        });
-                        list.forEach(vb => i+=vb.binding.length);
+                        allRuns.push(run);
+                        map[run.externalId] = list2;
+                        list.forEach(vb => count+=vb.binding.length);
                     }
                 });
             });
-            setTotal(i);
-            setRuns(allRuns);
         }
-    }, [tloi])
+        setTotal(count);
+        setFiles(map);
+        setRuns(allRuns);
+    }, [displayType, tloi])
 
-    const renderRunTitle = (run:RunStatus) => {
+
+    const renderRunTitle = (run:Execution) => {
         return run.externalId.replace(/.*#/,'').replace(/--.*/,'');
     }
 
@@ -82,7 +90,7 @@ export const FileList = ({type:displayType, tloi, label: title, renderFiles} : F
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                    {runs.map((run:RunStatus, i:number) =>
+                    {runs.map((run:Execution, i:number) =>
                     <Box key={`table_${i}`} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                         <TableContainer sx={{display: "flex", justifyContent: "center"}}>
                             <Table sx={{width:"unset", border: "1px solid rgb(223 223 223)", borderRadius: "5px", mt:"4px"}}>
@@ -98,14 +106,14 @@ export const FileList = ({type:displayType, tloi, label: title, renderFiles} : F
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {getFileList(run).map((value) => 
-                                        (value.binding||[]).map((v,i) => 
+                                    {files[run.externalId].map(({def, file}) => 
+                                        (file.binding||[]).map((v,i) => 
                                         <TableRow key={`row_${i}`}>
                                             <TableCell key={`x_${i}`} sx={{padding: "0 10px", textAlign:"end", verticalAlign:"top"}}>
-                                                {value.variable} {value.isArray ? i+1 : ""}
+                                                {file.variable} {file.isArray ? i+1 : ""}
                                             </TableCell>
                                             <TableCell key={`y_${i}`} sx={{padding: "0 10px"}}>
-                                                <PrivateLink source={run.source.url} filename={getFilename(v)} url={value.binding[0]} preview={renderFiles}/>
+                                                <PrivateLink filename={getFilename(v)} url={file.binding[i]} preview={renderFiles} value={def?.binding[i]}/>
                                                 {/*renderFile(run, id)*/}
                                             </TableCell>
                                         </TableRow>)

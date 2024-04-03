@@ -1,56 +1,42 @@
-import { Link as MuiLink } from "@mui/material"
-import { useState } from "react";
-import { DISK } from "redux/apis/DISK";
+import { Link as MuiLink, Tooltip } from "@mui/material"
+import { useEffect, useState } from "react";
+import { downloadPlainText } from "./download";
 
 interface PrivateLinkProp {
     filename: string,
     url: string,
-    source: string,
     preview?: boolean,
+    value: string | undefined
 }
 
-export const PrivateLink = ({filename, url, source, preview}:PrivateLinkProp) => {
-    //const [getPrivateFile] = useLazyGetPrivateFileQuery();
-    const [blob, setBlob] = useState<string>("");
-    const [cType, setCType] = useState<string>("");
+export const PrivateLink = ({filename, url, preview, value}:PrivateLinkProp) => {
+    const [isURL, setIsURL] = useState<boolean>(false);
+
+    useEffect(() => {
+        setIsURL(!!value && value.startsWith("http"));
+    }, [url, value]);
 
     const downloadFile = () => {
-        DISK.downloadPrivateFile({source:source, dataId: url.replace(/.*#/,"")})
-            .then((response) => {
-                if (response.status === 200) {
-                    let contentType = response.headers.has('content-type') ? response.headers.get('content-type') as string: "";
-                    setCType(contentType);
-                    response.blob().then((file) => {
-                        const link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(file);
-
-                        if (contentType.startsWith('application')) {
-                            file.text().then(setBlob);
-                        } else {
-                            setBlob(link.href);
-                        }
-                        link.setAttribute('download', filename);
-                        link.style.display = 'none';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
-                } else {
-                    setBlob("");
-                    setCType("");
-                }
-            })
+        if (value !== undefined) {
+            downloadPlainText(value, filename);
+        }
     }
 
+    if (value === undefined) {
+        return <Tooltip arrow title="File is not available to download">
+            <MuiLink color="inherit" sx={{ cursor: "not-allowed" }}>
+                {filename}
+            </MuiLink>
+        </Tooltip>
+    }
+
+    //TODO: preview was removed, check if we need it here.
     return <div>
-        <MuiLink color="inherit" onClick={downloadFile} sx={{cursor:"pointer"}}>
-            {filename}
-        </MuiLink>
-        {preview && cType && blob && 
-            (cType.startsWith("image") ? 
-                <img src={blob} style={{maxWidth: "400px", display:"block"}}/>
-                : (cType.startsWith("application") ? <div style={{whiteSpace: 'pre-line'}}>{blob}</div> : null)
-            )
+        {isURL ? 
+            <a href={value} target="_blank" rel="noreferrer"> {filename} </a> :
+            <MuiLink color="inherit" onClick={downloadFile} sx={{cursor:"pointer"}}>
+                {filename}
+            </MuiLink>
         }
     </div>
 }

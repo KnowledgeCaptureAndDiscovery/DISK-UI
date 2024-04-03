@@ -121,7 +121,7 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
     }, [tloi])
 
     const renderName = (text:string) => {
-        return text.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}/,'');
+        return text.replace(/.*#/, '').replace(/SHA[\d\w]{6}_/,'').replace(/-\w{24,25}/,'').replace(" (E)","");
     }
 
     const renderRunTitle = (id:string) => {
@@ -153,7 +153,7 @@ export const TLOIEditButton = ({tloi, label: title} : FileListProps) => {
                 </DialogTitle>
                 <DialogContent dividers>
                     {editableWfs.map((wf:WorkflowInstantiation, i:number) =>
-                    <Box key={`table_${i}`} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <Box key={`table_${i}`} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: "600px"}}>
                         <Box sx={{p: '0 10px'}}> <b>Editing workflow:</b> {renderRunTitle(wf.executions && wf.executions.length > 0 ? wf.executions[0].externalId : wf.link)}</Box>
                         <TableContainer sx={{display: "flex", justifyContent: "center"}}>
                             <Table sx={{width:"unset", border: "1px solid rgb(223 223 223)", borderRadius: "5px", mt:"4px"}}>

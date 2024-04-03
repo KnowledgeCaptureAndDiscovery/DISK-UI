@@ -182,7 +182,7 @@ export interface WorkflowInstantiation extends WorkflowSeed {
 
 export interface Execution extends ExecutionRecord {
     externalId:     string ;
-    result:         GoalResult ;
+    result:         GoalResult | null;
     steps:          ExecutionRecord[];
     inputs:         VariableBinding[];
     outputs:        VariableBinding[];

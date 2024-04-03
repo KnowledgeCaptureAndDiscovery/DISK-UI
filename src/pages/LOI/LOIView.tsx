@@ -1,9 +1,8 @@
 import { Box, Button, Card, Divider, FormHelperText, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { DataEndpoint } from "DISK/interfaces";
-import { Fragment, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useParams } from 'react-router-dom'
 import EditIcon from '@mui/icons-material/Edit';
-import { styled } from '@mui/material/styles';
 import { PATH_LOIS } from "constants/routes";
 import { useAuthenticated } from "redux/hooks";
 import { QuestionLinker } from "components/questions/QuestionLinker";
@@ -151,7 +150,7 @@ export const LOIView = () => {
                     {loading ? 
                         <Skeleton sx={{display:"inline-block", width: "400px"}}/> :
                         (LOI?.dataQueryTemplate?.variablesToShow ? 
-                            <TypographyInline> {LOI.dataQueryTemplate.variablesToShow} </TypographyInline> :
+                            <TypographyInline> {LOI.dataQueryTemplate.variablesToShow.join(", ")} </TypographyInline> :
                             <InfoInline> None specified </InfoInline>
                         )
                     }

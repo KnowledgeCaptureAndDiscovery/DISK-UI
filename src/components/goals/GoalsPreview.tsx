@@ -123,9 +123,13 @@ export const HypothesisPreview = ({hypothesis, displayDeleteButton=true, display
                         </ConfirmDialog>
                     </Box>
                 </Tooltip>)}
-                <IconButton sx={{ padding: "4px" }} onClick={() => downloadJSON(JSON.stringify(hypothesis), getId(hypothesis))}>
-                    <DownloadIcon />
-                </IconButton>
+                <Tooltip arrow title="Download Goal as JSON">
+                    <Box sx={{display:"inline-block"}}>
+                        <IconButton sx={{ padding: "4px", mt: "1px" }} onClick={() => downloadJSON(JSON.stringify(hypothesis), getId(hypothesis))}>
+                            <DownloadIcon />
+                        </IconButton>
+                    </Box>
+                </Tooltip>
             </Box>
         </Box>
         <Divider/>

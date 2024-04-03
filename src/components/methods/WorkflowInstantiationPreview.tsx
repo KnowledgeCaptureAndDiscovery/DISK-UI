@@ -5,6 +5,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useEffect, useState } from "react";
 import { ExecutionOutput } from "components/files/ExecutionOutputs";
 import { WorkflowInstantiationModal } from "components/modal/WorkflowInstantiationModal";
+import { SimpleTable } from "components/SimpleTable";
 
 const TypographyLabel = styled(Typography)(({ theme }) => ({
     color: 'gray',
@@ -15,26 +16,31 @@ const TypographyLabel = styled(Typography)(({ theme }) => ({
 
 interface WorkflowInstantiationPreviewProps {
     workflow: WorkflowInstantiation,
-    meta?: boolean
+    meta?: boolean,
+    minimal?:boolean
 }
 
-export const WorkflowInstantiationPreview = ({workflow:wf, meta=false} : WorkflowInstantiationPreviewProps) => {
+export const WorkflowInstantiationPreview = ({workflow:wf, meta=false,minimal=false} : WorkflowInstantiationPreviewProps) => {
     const [valuesMap, setValuesMap] = useState<Record<string, VariableBinding>>({});
     const [hasArray, setHasArray] = useState<boolean>(false);
+    const [table, setTable] = useState<{[varName: string]: string[]}>({});
 
     useEffect(() => {
         if (wf && wf.dataBindings) {
             let map : Record<string, VariableBinding> = {};
             let arrayFound = false;
+            let maxLen = 0;
             for (let dataB of wf.dataBindings) {
                 map[dataB.variable] = dataB;
+                if (dataB.binding.length > maxLen)
+                    maxLen = dataB.binding.length;
                 if (dataB.isArray && dataB.binding.length > 3)
                     arrayFound = true;
             }
             // This is for the outputs.
             if (wf.executions && wf.executions.length > 0) {
                 for (let e of wf.executions) {
-                    if (e.result.extras) for (let ex of e.result.extras) {
+                    if (e.result && e.result.extras) for (let ex of e.result.extras) {
                         map[ex.variable] = ex;
                     }
                 }
@@ -45,6 +51,27 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false} : Workflo
                 map[name.substring(1)] = map[name];
             }
 
+            // Create table for minimal representation.
+            let inputTable : {[varName: string]: string[]} = {};
+            let outputNames = wf.outputs.map(o => o.variable);
+            Object.keys(map)
+                    .filter(varName => !varName.startsWith("_") && !outputNames.some(o => varName === o))
+                    .sort((a,b) => map[a].binding.length - map[b].binding.length  )
+                    .forEach(varName => {
+                        let value = map[varName];
+                        inputTable[varName] = [];
+                        for (let i = 0; i < maxLen; i++) {
+                            if (value.isArray) {
+                                inputTable[varName].push(
+                                    i < value.binding.length ?
+                                    value.binding[i] : "-");
+                            } else {
+                                inputTable[varName].push(value.binding[0]);
+                            }
+                        }
+                    });
+
+            setTable(inputTable);
             setValuesMap(map);
             setHasArray(arrayFound);
         } else {
@@ -84,17 +111,15 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false} : Workflo
         }
     }
 
-    return (
-        <Card key={`wf_${wf.link}`} variant="outlined" sx={{mb: "5px"}}>
-            <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                <a target="_blank" rel="noreferrer" href={wf.link} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
-                    <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />
-                    <Typography sx={{padding:"0 10px", fontWeight: 500}}>{wf.name}</Typography>
-                    <OpenInNewIcon sx={{fontSize: "1rem"}}/>
-                </a>
-            </Box>
-            <Divider/>
-            {wf.description && (<Typography sx={{p:"0 10px", fontSize:"0.95em", color:"#333"}}>{wf.description}</Typography>)}
+    const renderInputTable = () => {
+        return <Box style={{paddingBottom: "6px", paddingLeft: "4px"}}>
+            <b>Datasets retrieved:</b>
+            <SimpleTable data={table}/>
+        </Box>
+    }
+
+    const renderParametersAndInputs = () => {
+        return <>
             {wf.parameters.length > 0 && <Box>
                 <TypographyLabel sx={{ padding: "20px", fontSize: "1em"}}>
                     {meta ? "Meta-workflow" : "Workflow"} parameters:
@@ -135,6 +160,21 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false} : Workflo
                 </Box>
             }
 
+        </>
+    }
+
+    return (
+        <Card key={`wf_${wf.link}`} variant="outlined" sx={{mb: "5px"}}>
+            <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                <a target="_blank" rel="noreferrer" href={wf.link} style={{display: "inline-flex", alignItems: "center", textDecoration: "none", color: "black"}}>
+                    <DisplaySettingsIcon sx={{ marginLeft: "10px" , color: "darkgreen"}} />
+                    <Typography sx={{padding:"0 10px", fontWeight: 500}}>{wf.name}</Typography>
+                    <OpenInNewIcon sx={{fontSize: "1rem"}}/>
+                </a>
+            </Box>
+            <Divider/>
+            {wf.description && (<Typography sx={{p:"0 10px", fontSize:"0.95em", color:"#333"}}>{wf.description}</Typography>)}
+            {minimal ? renderInputTable() : renderParametersAndInputs()}
             {wf.outputs.length > 0 && <Box>
                 <Divider/>
                 <TypographyLabel sx={{ padding: "20px", fontSize: "1em"}}>
@@ -143,12 +183,13 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false} : Workflo
                 {wf.executions && wf.executions.length > 0 ?
                     wf.executions.map(e => 
                         <Box style={{padding:"5px"}} key={e.externalId}>
-                            <ExecutionOutput execution={e} outputs={wf.outputs} source={wf.source}/>
+                            <ExecutionOutput execution={e} outputs={wf.outputs} source={wf.source} noModals={minimal}/>
                         </Box>
                     )
-                    : <Box sx={{fontSize:".85rem"}}>
+                    :
+                    <Box sx={{fontSize:".85rem"}}>
                         { wf.outputs.map((binding:VariableBinding) =>
-                            <Grid key={`var_${binding.variable}`} container spacing={1}>
+                            <Grid key={`var_${binding.variable}`} container spacing={2} columnSpacing={2}> 
                                 <Grid item xs={3} md={2} sx={{textAlign: "right"}}>
                                     <b>{binding.variable}: </b>
                                 </Grid>

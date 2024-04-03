@@ -60,7 +60,7 @@ const renderOptionalButtons = (cur: TriggeredLineOfInquiry) => {
             .forEach(b => variables[b.variable] = b.binding[0] as RenderableOutput);
         (wf.executions || [])
             .filter(e => e.result && e.result.extras)
-            .map(e => e.result.extras).flat()
+            .map(e => e.result!.extras).flat()
             .forEach(b => {
                 let key = variables[b.variable];
                 if (key && b.binding && b.binding.length >0) {
@@ -82,7 +82,7 @@ export const ALL_COLUMNS: Record<ColumnName, TLOICell> = {
         </Box>,
     'Date': (tloi: TriggeredLineOfInquiry, i: number) =>
         <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black" }}>
-            {tloi.dateCreated}
+            {tloi.dateCreated ? tloi.dateCreated.replace("T"," ") : ""}
         </Box>,
     'Run Status': (tloi: TriggeredLineOfInquiry, i: number) =>
         <Box component={Link} to={PATH_TLOIS + "/" + getId(tloi)} sx={{ textDecoration: "none", color: "black", display: 'flex', alignItems: 'center' }}>
