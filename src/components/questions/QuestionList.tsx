@@ -34,12 +34,14 @@ export const normalizeURI = (uri:string) => {
 
 export const normalizeTextValue = (text:string) => {
     if (!text) return "";
-    if (text === "Precentral") return "Precentral Cortex";
+    if (text.startsWith("has")) return text.substring(3) ;
+    if (text === "PrecentralCortex") return "Precentral Cortex";
     if (text === "SA") return "Surface Area";
     if (text === "TH") return "Thickness";
     //If is an url use the last part of the path
     if (text.startsWith("http") || text.startsWith("www"))
         text = getId({id:text});
+    text = text.replaceAll("enigma#", "");
     text = text.replaceAll("Pages2k2_1_2#", "").replaceAll(".Location", "");
     text = text.replaceAll('-28', '(').replaceAll('-29', ')').replaceAll('-3A', ':');
     text = text.replaceAll("_(E)", "").replaceAll("Property:", "");

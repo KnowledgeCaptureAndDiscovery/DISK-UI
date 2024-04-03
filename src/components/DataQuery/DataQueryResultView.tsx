@@ -63,7 +63,7 @@ export const DataQueryResultView = ({result} : DataQueryResultViewProps) => {
             {formalView && <Fragment>
                 <TypographySection>Data query:</TypographySection>
                 <Box sx={{fontSize: "0.94rem"}} >
-                    <CodeMirror readOnly value={result.query}
+                    <CodeMirror value={result.query}
                         extensions={[StreamLanguage.define(sparql)]}
                         onChange={(value, viewUpdate) => {
                         }}

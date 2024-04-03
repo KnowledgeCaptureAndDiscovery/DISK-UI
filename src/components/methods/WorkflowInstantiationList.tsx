@@ -7,45 +7,50 @@ import { WorkflowInstantiationPreview } from "./WorkflowInstantiationPreview"
 interface WorkflowInstantiationListProps {
     workflows: WorkflowInstantiation[],
     metaWorkflows: WorkflowInstantiation[]
+    minimal?:boolean
 }
 
-export const WorkflowInstantiationList = ({workflows, metaWorkflows}:WorkflowInstantiationListProps) => {
+export const WorkflowInstantiationList = ({workflows, metaWorkflows,minimal=false}:WorkflowInstantiationListProps) => {
     return <Box>
-        <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"start", mb:"5px"}}>
-            <Box>
-                <Typography sx={{fontWeight: "500"}}>Workflows:</Typography>
-                <FormHelperText sx={{fontSize: ".9rem"}}>
-                    The data analysis methods are represented in the following workflows:
-                </FormHelperText>
-            </Box>
-        </Box> 
+        { !minimal &&
+            <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"start", mb:"5px"}}>
+                <Box>
+                    <Typography sx={{fontWeight: "500"}}>Workflows:</Typography>
+                    <FormHelperText sx={{fontSize: ".9rem"}}>
+                        The data analysis methods are represented in the following workflows:
+                    </FormHelperText>
+                </Box>
+            </Box> 
+        }
 
         {workflows.length > 0 ?
             <Box>
                 {workflows.map((wf, i) =>
-                    <WorkflowInstantiationPreview key={`wf_${wf.link}-${i}`} workflow={wf} />
+                    <WorkflowInstantiationPreview key={`wf_${wf.link}-${i}`} workflow={wf} minimal={minimal}/>
                 )}
             </Box>
-            :
-            <Card variant="outlined" sx={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }}>
-                <Typography> No workflows specified. </Typography>
-            </Card>
+            : !minimal &&
+                <Card variant="outlined" sx={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }}>
+                    <Typography> No workflows specified. </Typography>
+                </Card>
         }
 
-        <Box>
-            <Typography sx={{ fontWeight: "500" }}>Meta workflows:</Typography>
-            <FormHelperText sx={{ fontSize: ".9rem" }}>
-                The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
-            </FormHelperText>
-        </Box>
+        {!minimal &&
+            <Box>
+                <Typography sx={{ fontWeight: "500" }}>Meta workflows:</Typography>
+                <FormHelperText sx={{ fontSize: ".9rem" }}>
+                    The results of all the data analysis methods are aggregated by these meta-methods, represented in the following meta-workflows:
+                </FormHelperText>
+            </Box>
+        }
 
         {metaWorkflows.length > 0 ?
             <Box>
                 {metaWorkflows.map((wf, i) => 
-                    <WorkflowInstantiationPreview meta key={`mwf_${wf.link}${i}`} workflow={wf}/>
+                    <WorkflowInstantiationPreview meta key={`mwf_${wf.link}${i}`} workflow={wf} minimal={minimal}/>
                 )}
             </Box> 
-        :   
+        :   !minimal &&
             <Card variant="outlined" sx={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }}>
                 <Typography>
                     No meta-workflows specified

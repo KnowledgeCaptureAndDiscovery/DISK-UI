@@ -16,7 +16,7 @@ export const SimpleTable = ({data,showIndex=true,perPage=10}:SimpleTableProps) =
         if (data) {
             let cols: number = Object.values(data).length;
             setNCols(cols);
-            setTotal(Object.values(data)[0].length);
+            setTotal(cols > 0 ? Object.values(data)[0].length : 0);
         } else {
             setNCols(0);
             setTotal(0);
@@ -25,13 +25,16 @@ export const SimpleTable = ({data,showIndex=true,perPage=10}:SimpleTableProps) =
 
     const renderText = (txt: string) => {
         if (txt) {
-            let name: string = txt.replace(/.*\//g, "").replace(/.*#/g, "");
+            let name: string = txt.replace(/.*\//g, "").replace(/.*#/g, "").replaceAll("_", " ");
             if (txt.startsWith("http"))
                 return (
                     <MuiLink target="_blank" href={txt}>
                         {name}
                     </MuiLink>
                 );
+            name = name.replaceAll(" (E)", "");
+            if (name.startsWith("Has"))
+                name = name.substring(3);
             return <span>{name}</span>;
         }
     };

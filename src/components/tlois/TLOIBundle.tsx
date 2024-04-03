@@ -58,7 +58,7 @@ export const TLOIBundle = ({loiId, goal}:TLOIBundleProps) => {
                 [...last.workflows, ...last.metaWorkflows]
                     .filter(wf => wf.executions.length > 0 && wf.executions[0].result)
                     .forEach((wf) => {
-                        (wf.executions[0].result.extras || []).forEach(binding => {
+                        (wf.executions[0].result!.extras || []).forEach(binding => {
                             visualizations.forEach(varName => {
                                 if (binding.variable === varName && binding.binding.length > 0) {
                                     vizMap[varName] = binding.binding[binding.binding.length-1];

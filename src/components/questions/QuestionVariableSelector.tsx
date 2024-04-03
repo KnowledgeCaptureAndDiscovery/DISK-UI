@@ -63,7 +63,8 @@ export const QuestionVariableSelector = ({questionId, variable, showErrors}: Que
     }
 
     function fixOptionLabel (opt:VariableOption) : string {
-        if (opt.label === "Precentral") return "Precentral Cortex";
+        if (opt.label.startsWith("has")) return opt.label.substring(3);
+        if (opt.label === "PrecentralCortex") return "Precentral Cortex";
         if (opt.label === "SA") return "Surface Area";
         if (opt.label === "TH") return "Thickness";
         return opt.label;

@@ -5,6 +5,7 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Goal, Status, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { WorkflowSeedList } from "../methods/WorkflowSeedList";
 import { useGetGoalByIdQuery } from "redux/apis/goals";
+import { WorkflowInstantiationList } from "components/methods/WorkflowInstantiationList";
 
 interface NarrativeModalProps {
     tloi: TriggeredLineOfInquiry,
@@ -29,6 +30,11 @@ export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
         if (status === 'RUNNING') return "gray";
     }
 
+    const renderRunStatus = () => {
+        let text = tloi.status === 'SUCCESSFUL' ? 'SUCCESSFULLY' : tloi.status;
+        return <span style={{color: getColor(tloi.status) }}>{text} </span>
+    }
+
     return (
         <Fragment>
             <Tooltip arrow placement="top" title="Provenance">
@@ -49,8 +55,8 @@ export const NarrativeModal = ({tloi} : NarrativeModalProps) => {
                     The Hypothesis "<span style={{fontWeight:"bold"}}>{hypothesis.name}</span>" was tested with the line of inquiry
                     "<span style={{fontWeight:"bold"}}>{tloi.name.replace("Triggered: ", "")}</span>".
 
-                    The analysis was <span style={{color: getColor(tloi.status) }}>{tloi.status}</span>run on {tloi.dateCreated} with the following datasets:
-                    <WorkflowSeedList editable={false} workflows={[]} metaworkflows={[]} options={[]} minimal/>
+                    The analysis was {renderRunStatus()} run on {tloi.dateCreated?.replace("T"," at ")} with the following datasets:
+                    <WorkflowInstantiationList workflows={tloi.workflows} metaWorkflows={tloi.metaWorkflows} minimal/>
                     {tloi.status === 'SUCCESSFUL' && false && (
                         <span>
                             The resulting p-value

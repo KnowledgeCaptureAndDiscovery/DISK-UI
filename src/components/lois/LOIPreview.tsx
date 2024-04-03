@@ -90,9 +90,13 @@ export const LOIPreview = ({loi, displayDeleteButton=true, displayEditButton=tru
                         </ConfirmDialog>
                     </Box>
                 </Tooltip>)}
-                <IconButton sx={{ padding: "4px" }} onClick={() => downloadJSON(JSON.stringify(loi), getId(loi))}>
-                    <DownloadIcon />
-                </IconButton>
+                <Tooltip arrow title="Download Line of Inquiry as JSON">
+                    <Box sx={{display:"inline-block"}}>
+                        <IconButton sx={{ padding: "4px", mt: "1px" }} onClick={() => downloadJSON(JSON.stringify(loi), getId(loi))}>
+                            <DownloadIcon />
+                        </IconButton>
+                    </Box>
+                </Tooltip>
             </Box>
         </Box>
         <Divider/>
