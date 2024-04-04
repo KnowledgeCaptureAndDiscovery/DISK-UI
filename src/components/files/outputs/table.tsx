@@ -71,7 +71,7 @@ const renderOptionalButtons = (cur: TriggeredLineOfInquiry) => {
 
     return (<Fragment>
         {!!values['_SHINY_LOG_'] && (<ShinyModal shinyLog={values['_SHINY_LOG_']}/>)}
-        {!!values['_BRAIN_VISUALIZATION_'] && (<BrainModal brainCfg={values['_BRAIN_VISUALIZATION_']}/>)}
+        {!!values['_BRAIN_VISUALIZATION_'] && values['_BRAIN_VISUALIZATION_'] !== "[]\n" && (<BrainModal brainCfg={values['_BRAIN_VISUALIZATION_']}/>)}
     </Fragment>);
 }
 
