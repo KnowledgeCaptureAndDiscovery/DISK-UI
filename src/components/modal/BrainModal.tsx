@@ -15,7 +15,7 @@ export const BrainModal = ({brainCfg: brainCfgTxt, iconOnly=true} : BrainModalPr
 
     useEffect(() => {
         if (brainCfgTxt && open) {
-            if (brainCfgTxt.startsWith('[')) {
+            if (brainCfgTxt !== "[]\n" && brainCfgTxt.startsWith('[')) {
                 let cfg: BrainCfgItem[] = JSON.parse(brainCfgTxt.replaceAll('\n', ' ').replaceAll('\t', ''));
                 setBrainCfg(cfg);
             } else {
