@@ -14,39 +14,50 @@ interface QuestionVariableProps {
 export const QuestionVariableSelector = ({questionId, variable, showErrors}: QuestionVariableProps) => {
     const dispatch = useAppDispatch();
     const bindings = useQuestionBindings();
-    const { data, isLoading, refetch } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:toMultiValueAssignation(bindings)}});
+    const { data, isLoading, refetch, isFetching } = useGetDynamicOptionsQuery({cfg: {id:questionId, bindings:toMultiValueAssignation(bindings)}});
     const [options, setOptions] = useState<VariableOption[]>([]);
+    const [error, setError] = useState<boolean>(false);
     const [selectedOption, setSelectedOption] = useState<VariableOption|null>(null);
     const [selectedOptionLabel, setSelectedOptionLabel] = useState<string>("");
 
     useEffect(() => {
         if (data && variable && data[variable.variableName]) {
-            setOptions(data[variable.variableName]);
-            if (selectedOption && !data[variable.variableName].some(v => v.value === selectedOption.value)) {
-                setSelectedOption(null);
-                setSelectedOptionLabel("");
-            }
+            let options = data[variable.variableName];
+            setOptions(options);
+            // See what to do when opt.len = 0
+            //let selected = options.find(opt => selectedOption && opt.value === selectedOption.value);
+            //if (selectedOption && !selected) {
+            //    console.warn(`Value ${selectedOption} not found on ${options}`)
+            //    //setSelectedOption(null);
+            //    //setSelectedOptionLabel("");
+            //}
         }
     }, [data, variable]);
 
     useEffect(() => {
-        if (options && bindings) {
-            let curValues : string[] = bindings[variable.id]?.values || [];
-            if (options.length === 0 || !curValues || curValues.length === 0) {
+        if (!isLoading && options && bindings) {
+            let curValues = bindings[variable.id]?.values || [];
+            if (curValues.length === 0) {
                 setSelectedOption(null);
                 setSelectedOptionLabel("");
-            } else if (!options.some(opt => curValues.some(val => val === opt.value)) ) { 
-                //TODO: cuValues exists but its value is not on the available options.
-                setSelectedOption(null); 
-                setSelectedOptionLabel(curValues.join(','));
+                setError(false);
             } else {
-                //TODO: All of the multiple option stuff is WIP, lets assume we only have one value.
-                let selectedOption : VariableOption = options.filter(o => o.value === curValues[0])[0];
-                setSelectedOption(selectedOption);
-                setSelectedOptionLabel(selectedOption.label);
+                // Theres something selected.
+                let value = curValues[0];
+                let curOption = options.find(opt => opt.value === value);
+                if (curOption) {
+                    setSelectedOption(curOption);
+                    setSelectedOptionLabel(curOption.label);
+                    setError(false);
+                } else {
+                    // Option was selected but is NOT on the available options.
+                    setError(true);
+                    setSelectedOption(null); 
+                    setSelectedOptionLabel(value);
+                }
             }
         }
-    }, [bindings, options]);
+    }, [options, bindings, isLoading]);
 
     function onOptionChange(value: VariableOption|null): void {
         let newBindings = { ...bindings };
@@ -63,7 +74,7 @@ export const QuestionVariableSelector = ({questionId, variable, showErrors}: Que
     }
 
     function fixOptionLabel (opt:VariableOption) : string {
-        if (opt.label.startsWith("has")) return opt.label.substring(3);
+        if (opt.label.startsWith("Has") && opt.label.endsWith(" (E)")) return opt.label.substring(3,opt.label.length-4);
         if (opt.label === "PrecentralCortex") return "Precentral Cortex";
         if (opt.label === "SA") return "Surface Area";
         if (opt.label === "TH") return "Thickness";
@@ -82,12 +93,12 @@ export const QuestionVariableSelector = ({questionId, variable, showErrors}: Que
             loading={isLoading}
             renderInput={(params) => (
                 <TextField {...params} label={variable.variableName} variant="standard" 
-                    error={showErrors && !selectedOption}
+                    error={error || showErrors && !selectedOption}
                     InputProps={{
                     ...params.InputProps,
                     endAdornment: (
                         <React.Fragment>
-                            {isLoading && (<CircularProgress color="inherit" size={20} style={{marginRight: "30px"}} />)}
+                            {isLoading || isFetching && (<CircularProgress color="inherit" size={20} style={{marginRight: "30px"}} />)}
                             {params.InputProps.endAdornment}
                         </React.Fragment>
                     ),

@@ -93,6 +93,6 @@ export const QuestionPreview = ({selected:selectedId, bindings, label} : Questio
                 </Tooltip>
             </Box>
         </Card>
-        {formalView && <FormalExpressionView triplePattern={triplePattern} />}
+        {formalView && <FormalExpressionView triplePattern={triplePattern} question={selectedQuestion}/>}
     </Box>;
 }

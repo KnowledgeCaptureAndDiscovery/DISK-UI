@@ -34,7 +34,7 @@ export const normalizeURI = (uri:string) => {
 
 export const normalizeTextValue = (text:string) => {
     if (!text) return "";
-    if (text.startsWith("has")) return text.substring(3) ;
+    if (text.startsWith("Has") && text.endsWith(" (E)")) return text.substring(3,text.length-4);
     if (text === "PrecentralCortex") return "Precentral Cortex";
     if (text === "SA") return "Surface Area";
     if (text === "TH") return "Thickness";

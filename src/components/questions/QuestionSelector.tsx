@@ -74,6 +74,6 @@ export const QuestionSelector = ({questionId, bindings, onChange, required=false
                 </Tooltip>
             </Box>
         </Card>
-        {showGraph && <FormalExpressionView triplePattern={graph}/>}
+        {showGraph && <FormalExpressionView triplePattern={graph} question={selectedQuestion}/>}
     </Box>;
 }

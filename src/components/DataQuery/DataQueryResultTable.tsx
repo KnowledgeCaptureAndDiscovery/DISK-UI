@@ -1,6 +1,7 @@
 import { DataQueryResult } from "DISK/interfaces";
 import { SimpleTable } from "components/SimpleTable";
 import { useEffect, useState } from "react";
+import { useGetEndpointsQuery, useGetVocabulariesQuery } from "redux/apis/server";
 
 interface DataQueryResultTableProps {
     result: DataQueryResult
@@ -8,6 +9,7 @@ interface DataQueryResultTableProps {
 
 export const DataQueryResultTable = ({result}:DataQueryResultTableProps) => {
     const [csv, setCSV] = useState<{[varName: string]: string[]}>({});
+    const {data:endpoints, isLoading:loadingEndpoints} = useGetEndpointsQuery();
 
     useEffect(() => {
         if (result.results && result.variablesToShow && result.variablesToShow.length > 0) {
@@ -28,7 +30,12 @@ export const DataQueryResultTable = ({result}:DataQueryResultTableProps) => {
                 } else {
                     for (let i = 0; i < cells.length; i++) {
                         if (!!indexToName[i]) {
-                            csvMap[indexToName[i]].push(cells[i]);
+                            let toAdd = cells[i];
+                            let source = (endpoints || []).find(e => e.url === result.endpoint.url);
+                            if (source && source.namespace && source.prefixResolution) {
+                                toAdd = toAdd.replaceAll(source.namespace, source.prefixResolution);
+                            }
+                            csvMap[indexToName[i]].push(toAdd);
                         }
                     }
                 }
@@ -37,7 +44,7 @@ export const DataQueryResultTable = ({result}:DataQueryResultTableProps) => {
         } else {
             setCSV({});
         }
-    }, [result])
+    }, [result, endpoints])
 
     if (Object.keys(csv).length === 0)
         return <></>;

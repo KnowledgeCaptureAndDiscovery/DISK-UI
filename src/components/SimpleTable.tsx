@@ -35,6 +35,8 @@ export const SimpleTable = ({data,showIndex=true,perPage=10}:SimpleTableProps) =
             name = name.replaceAll(" (E)", "");
             if (name.startsWith("Has"))
                 name = name.substring(3);
+            if (name.startsWith("Has") && name.endsWith(" (E)"))
+                name = name.substring(3,name.length-4);
             return <span>{name}</span>;
         }
     };

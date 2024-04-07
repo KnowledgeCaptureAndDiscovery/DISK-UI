@@ -1,5 +1,5 @@
 import { Card, FormHelperText, TableContainer, Table, TableBody, TableRow, TableCell } from "@mui/material"
-import { Triple } from "DISK/interfaces"
+import { Question, Triple } from "DISK/interfaces"
 import { getId } from "DISK/util";
 
 const displayURI = (uri: string) => {
@@ -11,7 +11,7 @@ const displayURI = (uri: string) => {
         uri = uri.replace("Property-3A", "").replace("-28E-29", "");
 
     uri = uri.replaceAll("_", "");
-    return uri;
+    return uri.replaceAll(/.*?#/g, '');
 }
 
 const displayObj = (obj: Triple["object"]) => {
@@ -21,15 +21,16 @@ const displayObj = (obj: Triple["object"]) => {
 
 interface FormalExpressionViewProps {
     triplePattern: Triple[],
+    question: Question | null,
 }
-export const FormalExpressionView = ({triplePattern}:FormalExpressionViewProps) => {
+export const FormalExpressionView = ({triplePattern, question}:FormalExpressionViewProps) => {
     return <Card variant="outlined" sx={{mt: "8px", p: "0px 10px 10px;", position:"relative", overflow:"visible"}}>
         <FormHelperText sx={{position: 'absolute', background: 'white', padding: '0 4px', margin: '-9px 0 0 0'}}> Formal expression: </FormHelperText>
         <TableContainer sx={{mt:"6px", fontFamily:"monospace", display: "flex", justifyContent: "center"}}>
             <Table aria-label="Hypothesis graph" sx={{width: "auto"}}>
                 <TableBody>
                     {triplePattern.map((triple:Triple, index:number) => <TableRow key={`row_${index}`}>
-                        <TableCell sx={{padding: "2px 10px"}}> {triple.subject ? displayURI(triple.subject) : ":goal" } </TableCell>
+                        <TableCell sx={{padding: "2px 10px"}}> {triple.subject ? displayURI(triple.subject) : ":effectSize" } </TableCell>
                         <TableCell sx={{padding: "2px 10px"}}> {displayURI(triple.predicate)} </TableCell>
                         <TableCell sx={{padding: "2px 10px"}}> {displayObj(triple.object)} </TableCell>
                     </TableRow>)}
