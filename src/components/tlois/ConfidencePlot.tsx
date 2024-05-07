@@ -3,7 +3,7 @@ import { Goal, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from 
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
     Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, LogarithmicScale } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Scatter } from 'react-chartjs-2';
 import { findOutputInRuns } from "DISK/util";
 import { DISK } from "redux/apis/DISK";
 import { useFilteredTLOIs, useOutputs } from "redux/hooks/tloi";
@@ -28,7 +28,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
     const [idToLabel, setIdToLabel] = useState<{[id:string]: string}>({});
     const [contentType, setContentType] = useState<string>("");
     const [content, setContent] = useState<{[label:string]: any}>({});
-    const [data, setData] = useState<ChartData<"line", number[], unknown>>();
+    const [data, setData] = useState<ChartData<"scatter", {x:number, y:number}[], unknown>>();
 
     const x = useOutputs({data:visibleTLOIs});
 
@@ -49,7 +49,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
 
         visibleTLOIs
             .forEach((tloi: TriggeredLineOfInquiry) => {
-                // We analyse only the first execution of the first wf
+                // We analyze only the first execution of the first wf
                 for (const wf of [...tloi.workflows, ...tloi.metaWorkflows]) {
                     for (const exec of wf.executions) {
                         if (exec.result && exec.result.confidenceValue > 0) {
@@ -58,7 +58,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
                                 if (nInputs < db.binding.length)
                                     nInputs = db.binding.length;
                             });
-                            let label = "N = " + String(nInputs);
+                            let label = String(nInputs);
                             labels.push(label);
                             labelDic[tloi.id] = label;
                             pValues[label] = exec.result.confidenceValue;
@@ -68,11 +68,16 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
                 }
             });
 
+        let d : {x:number, y:number}[] = Object.keys(pValues).map((key)=>({
+            x: Number(key),
+            y: -Math.log10(pValues[key]),
+        }));
+
         setData({
             labels: labels,
             datasets: [{
-                label: "p-value",
-                data: Object.values(pValues),
+                label: "- log p-value",
+                data: d,
                 borderColor: 'rgb(255, 99, 132)',
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 pointRadius: 8,
@@ -141,7 +146,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
         return tooltipEl;
     };
 
-    const externalTooltipHandler = ({ chart, tooltip }: { chart: Chart, tooltip: TooltipModel<"line"> }) => {
+    const externalTooltipHandler = ({ chart, tooltip }: { chart: Chart, tooltip: TooltipModel<"scatter"> }) => {
         // Tooltip Element
         const tooltipEl = getOrCreateTooltip(chart);
 
@@ -248,11 +253,15 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
     };
 
     // Plot config
-    const options: ChartOptions<"line"> = {
+    const options: ChartOptions<"scatter"> = {
         responsive: true,
+        showLine: true,
         scales: {
             y: {
-                type: "logarithmic",
+                type: "linear",
+            },
+            x: {
+                type: "linear"
             }
         },
         aspectRatio: 4,
@@ -263,7 +272,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
             },
             title: {
                 display: true,
-                text: '[Number of Inputs] vs [p-value]',
+                text: '[Number of Inputs] vs [-log(p-value)]',
             },
             tooltip: {
                 enabled: false,
@@ -313,7 +322,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
         {data &&
             <Box>
                 <Box style={{height:"250px"}}>
-                    <Line options={options} data={data}/>
+                    <Scatter options={options} data={data}/>
                 </Box>
             </Box>
         }
