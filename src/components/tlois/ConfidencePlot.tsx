@@ -3,7 +3,7 @@ import { Goal, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from 
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
     Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, LogarithmicScale } from 'chart.js';
-import { Line, Scatter } from 'react-chartjs-2';
+import { Scatter } from 'react-chartjs-2';
 import { findOutputInRuns } from "DISK/util";
 import { DISK } from "redux/apis/DISK";
 import { useFilteredTLOIs, useOutputs } from "redux/hooks/tloi";

@@ -64,7 +64,7 @@ export const QuestionVariableSelector = ({questionId, variable, showErrors}: Que
         if (value) {
             newBindings[variable.id] = {
                 values: [value.value],
-                type: value.value === value.label || ["TH","SA"].some(s=>s===value.value) ? "http://www.w3.org/2001/XMLSchema#string" : "http://www.w3.org/2001/XMLSchema#anyURI"
+                type: value.value === value.label || ["TH","SA"].some(s=>s===value.value) || value.label.endsWith("Ancestry") ? "http://www.w3.org/2001/XMLSchema#string" : "http://www.w3.org/2001/XMLSchema#anyURI"
             }
         } else if (bindings[variable.id]) {
             delete newBindings[variable.id];
