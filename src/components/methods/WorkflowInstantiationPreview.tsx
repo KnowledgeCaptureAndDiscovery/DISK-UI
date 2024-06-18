@@ -14,6 +14,13 @@ const TypographyLabel = styled(Typography)(({ theme }) => ({
     fontSize: '0.9em',
 }));
 
+const InlineButton = styled('a')(({ theme }) => ({
+    cursor: 'pointer',
+    ':hover': {
+        'textDecoration': 'underline'
+    }
+}));
+
 interface WorkflowInstantiationPreviewProps {
     workflow: WorkflowInstantiation,
     meta?: boolean,
@@ -24,6 +31,7 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false,minimal=fa
     const [valuesMap, setValuesMap] = useState<Record<string, VariableBinding>>({});
     const [hasArray, setHasArray] = useState<boolean>(false);
     const [table, setTable] = useState<{[varName: string]: string[]}>({});
+    const [showMore, setShowMore] = useState<Record<string,boolean>>({});
 
     useEffect(() => {
         if (wf && wf.dataBindings) {
@@ -92,17 +100,29 @@ export const WorkflowInstantiationPreview = ({workflow:wf, meta=false,minimal=fa
 
     const renderWorkflowVariableBinding = (binding:VariableBinding) => {
         let values = valuesMap[binding.variable] ? valuesMap[binding.variable].binding : binding.binding;
+        let show = showMore[binding.variable] || false;
         if (!values || values.length === 0)
             return;
         if (binding.isArray) {
             return <span style={{color:"rgba(0, 0, 0, 0.87)"}}>
                 [&nbsp;
-                    {values.filter((_,i) => i<3).map((v,i) => <span key={v+i}>
-                        {renderSingleBinding(binding, v)}
-                        { i !== values.length-1 && ", " }
-                    </span>)}
-                    {values.length>=3 &&
-                    <i> and {values.length - 3} more</i> } 
+                    {(show || values.length <= 3) ? 
+                        <> 
+                            {values.map((v,i) => <span key={v+i}>
+                                {renderSingleBinding(binding, v)}
+                                { i !== values.length-1 && ", " }
+                            </span> )}
+                            {values.length > 3 && (<InlineButton onClick={() => setShowMore((m) => ({...m, [binding.variable]: !show}))}> (show less)</InlineButton>)}
+                        </>
+                    :
+                        <>
+                            {values.filter((_,i) => i<3).map((v,i) => <span key={v+i}>
+                                {renderSingleBinding(binding, v)}
+                                { i !== values.length-1 && ", " }
+                            </span>)}
+                            {values.length > 3 && (<InlineButton onClick={() => setShowMore((m) => ({...m, [binding.variable]: !show}))}>and {values.length - 3} more</InlineButton>)}
+                        </>
+                    }
                 &nbsp;]
                 <span style={{marginLeft: '5px', color: 'darkgray', fontWeight: 'bold'}} >(List)</span>
             </span>
