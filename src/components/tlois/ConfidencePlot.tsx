@@ -1,5 +1,5 @@
-import { Box, FormControl, FormControlLabel, FormLabel, MenuItem, Radio, RadioGroup, Select, Skeleton } from "@mui/material";
-import { Goal, RunBinding, TriggeredLineOfInquiry, Workflow, WorkflowRun } from "DISK/interfaces";
+import { Box, FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton } from "@mui/material";
+import { RunBinding, TriggeredLineOfInquiry } from "DISK/interfaces";
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title,
     Tooltip, Legend, ChartData, ChartOptions, Chart, TooltipModel, LogarithmicScale } from 'chart.js';
@@ -24,6 +24,8 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
 
     const [files, setFiles] = useState<{ [key: string]: RunBinding }>({});
     const [selectedFile, setSelectedFile] = useState<string>("");
+    const [xAxis, setXAxis] = useState<'default'|'extra'>('default');
+    const [extraActive, setExtraActive] = useState<boolean>(false);
 
     const [idToLabel, setIdToLabel] = useState<{[id:string]: string}>({});
     const [contentType, setContentType] = useState<string>("");
@@ -43,7 +45,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
     //Sets output types, and create data for plot.
     useEffect(() => {
         let outputs: { [name: string]: RunBinding } = {};
-        let pValues: { [label: string]: number } = {};
+        let pValues: { [x: number]: number } = {};
         let labelDic: { [uri: string]: string } = {};
         let labels: string[] = [];
 
@@ -58,10 +60,17 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
                                 if (nInputs < db.binding.length)
                                     nInputs = db.binding.length;
                             });
-                            let label = String(nInputs);
+                            if (xAxis === 'extra') {
+                                for (let b of exec.result.extras) {
+                                    if (b.variable === 'X') {
+                                        nInputs = Number(b.binding[0]);
+                                    }
+                                }
+                            }
+                            let label = (xAxis === 'default' ?  "Number of Cohorts = " : "Sample Size = ") + String(nInputs)
                             labels.push(label);
                             labelDic[tloi.id] = label;
-                            pValues[label] = exec.result.confidenceValue;
+                            pValues[nInputs] = exec.result.confidenceValue;
                             break;
                         }
                     }
@@ -69,8 +78,8 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
             });
 
         let d : {x:number, y:number}[] = Object.keys(pValues).map((key)=>({
-            x: Number(key),
-            y: -Math.log10(pValues[key]),
+            x: key as unknown as number,
+            y: -Math.log10(pValues[key as unknown as number]),
         }));
 
         setData({
@@ -82,14 +91,14 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 pointRadius: 8,
                 pointHoverRadius: 10
-            }]
+            }],
         });
 
         setFiles(outputs);
         setIdToLabel(labelDic);
         //TODO: add a image selector for tooltip and a date option for labels.
         setSelectedFile(Object.keys(outputs).length > 0 ? Object.keys(outputs)[0] : "");
-    }, [visibleTLOIs])
+    }, [visibleTLOIs, xAxis])
 
     useEffect(() => {
         if (visibleTLOIs && visibleTLOIs.length > 0 && selectedFile) {
@@ -259,9 +268,17 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
         scales: {
             y: {
                 type: "linear",
+                title: {
+                    display: true,
+                    text: '-log(p-value)'
+                  },
             },
             x: {
-                type: "linear"
+                type: "linear",
+                title: {
+                    display: true,
+                    text: xAxis === 'default' ? 'Number of Cohorts' : 'Sample Size',
+                  },
             }
         },
         aspectRatio: 4,
@@ -272,7 +289,7 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
             },
             title: {
                 display: true,
-                text: '[Number of Inputs] vs [-log(p-value)]',
+                text: '[' + (xAxis === 'default' ? 'Number of Cohorts' : 'Accumulative Sample Size') + "] vs [-log(p-value)]",
             },
             tooltip: {
                 enabled: false,
@@ -296,8 +313,44 @@ export const ConfidencePlot = ({ goalId, loiId }: ConfidencePlotProps) => {
         }
     }
 
+    const handleXAxis = (event: SelectChangeEvent<"default" | "extra">) => {
+        if (event.target.value === 'default') {
+            setXAxis('default');
+        } else {
+            setXAxis('extra');
+        }
+    }
+
     return <Box>
         <Box>
+            <FormControl style={{ marginTop: '10px', minWidth: '300px' }} size="small">
+                <InputLabel id="demo-select-small-label">X Axis:</InputLabel>
+                <Select
+                    fullWidth
+                    labelId="demo-select-small-label"
+                    id="demo-select-small"
+                    value={xAxis}
+                    label="X Axis"
+                    onChange={handleXAxis}
+                >
+                    <MenuItem value={'default'}>Number of Cohorts</MenuItem>
+                    <MenuItem value={'extra'}>Accumulative Sample Size</MenuItem>
+                </Select>
+            </FormControl>
+
+            <FormControl style={{ marginTop: '10px', minWidth: '300px' }} size="small">
+                <InputLabel id="demo2-select-small-label">Y Axis:</InputLabel>
+                <Select
+                    fullWidth
+                    labelId="demo2-select-small-label"
+                    id="demo2-select-small"
+                    value={'p-value'}
+                    label="Y Axis"
+                >
+                    <MenuItem value={'p-value'}>-log( p-value )</MenuItem>
+                </Select>
+            </FormControl>
+
             {x.image !== undefined && Object.keys(x.image || {}).length === 1 && <Box>
                 Showing {Object.keys(x.image)[0]} file on previews.
             </Box>}
