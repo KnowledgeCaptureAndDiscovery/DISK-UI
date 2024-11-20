@@ -34,8 +34,6 @@ export const Home = () => {
             <Typography>
                 When you specify a question, DISK retrieves a line of inquiry that specifies what data and method would be appropriate for it. DISK will then execute the line of inquiry, and will show you the results.
             </Typography>
-
-            <iframe width="640" height="320" src="https://www.youtube.com/embed/LZJ-A3RyQcY" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
         </Box>
     )
 }
