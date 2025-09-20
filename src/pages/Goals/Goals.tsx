@@ -8,6 +8,7 @@ import { PATH_GOAL_NEW } from "constants/routes";
 import { Link } from "react-router-dom";
 import { HypothesisList } from "components/goals/GoalsList";
 import { useGetGoalsQuery } from "redux/apis/goals";
+import WarnIcon from '@mui/icons-material/Warning';
 
 type OrderType = 'date'|'author';
 
@@ -63,7 +64,10 @@ export const Goals = ({myPage=false} : ViewProps) => {
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :
                     (isError || !data? 
-                        <Box> Error loading Hypotheses </Box>
+                        <Card variant="outlined" sx={{display:'flex', justifyContent:'center', gap: ".5em", p: "10px"}}>
+                            <WarnIcon sx={{color:"orangered"}}></WarnIcon>
+                            Error loading Hypotheses 
+                        </Card>
                     :
                         <HypothesisList list={data.filter(applyFilters)} enableDeletion enableEdition/>
                     )

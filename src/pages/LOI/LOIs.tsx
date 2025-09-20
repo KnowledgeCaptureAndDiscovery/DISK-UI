@@ -8,6 +8,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router-dom";
 import { useGetLOIsQuery } from "redux/apis/lois";
 import { LOIList } from "components/lois/LOIList";
+import WarnIcon from '@mui/icons-material/Warning';
 
 type OrderType = 'date'|'author';
 
@@ -63,7 +64,10 @@ export const LinesOfInquiry = ({myPage=false} : ViewProps) => {
                     <Skeleton sx={{margin: "0px 10px"}} height={90}/>
                 :
                     (error || !LOIs? 
-                        <Box> Error loading Lines of Inquiry </Box>
+                        <Card variant="outlined" sx={{display:'flex', justifyContent:'center', gap: ".5em", p: "10px"}}>
+                            <WarnIcon sx={{color:"orangered"}}></WarnIcon>
+                            Error loading Lines of Inquiry
+                        </Card>
                     :
                         <LOIList list={LOIs.filter(applyFilters)} enableDeletion enableEdition/>
                     )

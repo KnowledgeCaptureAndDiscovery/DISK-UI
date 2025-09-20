@@ -14,6 +14,7 @@ import { useGetQuestionsQuery } from "redux/apis/questions";
 import { useGetLOIsQuery } from "redux/apis/lois";
 import { TextPart } from "./QuestionHelpers";
 import { getId } from "DISK/util";
+import WarnIcon from '@mui/icons-material/Warning';
 
 interface QuestionListProps {
     expanded?: boolean,
@@ -111,7 +112,7 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
             return null
          return <Fragment>
             <Divider/>
-            <Typography>Hypotheses based on this question:</Typography>
+            <Typography sx={{p:"6px 2px", fontWeight: "500", color:"#555"}}>Hypotheses based on this question:</Typography>
             <List sx={{p:0}}>
             {myHyp.map((h:Goal) => 
                 <ListItem sx={{p:"4px 16px"}} key={h.id}>
@@ -147,15 +148,17 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         });
         return <Fragment>
             <ScienceIcon sx={{mx: "5px", color:'darkorange'}}/>
-            {parts.map((part:string,i:number) => part.startsWith('?') ? 
-                <b key={`pv_${i}`} style={{color:'green', margin: '4px'}}>
-                    {normalizeTextValue(values[part])}
-                </b>
-            :
-                <TextPart key={`p_${i}`}>
-                    {part}
-                </TextPart>
-            )}
+            <Box sx={{display:'flex', flexWrap: "wrap", alignItems:'center', textDecoration: 'none', width:"100%"}}>
+                {parts.map((part:string,i:number) => part.startsWith('?') ? 
+                    <b key={`pv_${i}`} style={{color:'green', margin: '4px', whiteSpace: 'nowrap'}}>
+                        {normalizeTextValue(values[part])}
+                    </b>
+                :
+                    <TextPart key={`p_${i}`}>
+                        {part}
+                    </TextPart>
+                )}
+            </Box>
         </Fragment>
     }
 
@@ -182,14 +185,13 @@ export const QuestionList = ({expanded=false, kind} : QuestionListProps) => {
         {isLoading ? 
             <CircularProgress/>
         :  (isError ? 
-                <Box>
-                    <span style={{marginRight:'5px'}}>
-                        An error has ocurred while loading.
-                    </span>
+                <Card variant="outlined" sx={{mt:"1em", display:'flex', justifyContent:'center', gap: ".5em", p: "10px", width:"100%"}}>
+                    <WarnIcon sx={{color:"orangered"}}></WarnIcon>
+                    An error has ocurred while loading.
                     <MuiLink onClick={() => refetch()} sx={{cursor: 'pointer'}}>
                         Click here to reload
                     </MuiLink>
-                </Box>
+                </Card>
             :
                 <Box>
                     {sortedQuestions

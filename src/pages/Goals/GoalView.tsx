@@ -14,6 +14,8 @@ import { useExecuteHypothesisByIdMutation, useGetTLOIsQuery } from "redux/apis/t
 import { TypographyLabel, TypographyInline, InfoInline, TypographySubtitle } from "components/Styles";
 import { getId } from "DISK/util";
 import { TLOIBundle } from "components/tlois/TLOIBundle";
+import { useGetLOIsQuery } from "redux/apis/lois";
+import WarnIcon from '@mui/icons-material/Warning';
 
 
 export const HypothesisView = () => {
@@ -24,6 +26,8 @@ export const HypothesisView = () => {
     const { data:TLOIs, isLoading:TLOIloading } = useGetTLOIsQuery();
     const [execHypothesis, {}] = useExecuteHypothesisByIdMutation();
     const [LOIList, setLOIList] = useState<string[]>([]);
+    const { data:localLOIs, isError:error2, isLoading: loading2} = useGetLOIsQuery();
+    const [noQuery, setNoQuery] = useState<boolean>(true);
 
     useEffect(() => {
         let list : string[] = (TLOIs||[])
@@ -31,6 +35,17 @@ export const HypothesisView = () => {
                 .map((tloi) => tloi.parentLoi.id);
         setLOIList(Array.from(new Set(list)));
     }, [TLOIs, goalId]);
+
+    useEffect(() => {
+        let found = false;
+        if (localLOIs && hypothesis) {
+            localLOIs.forEach((loi) => {
+                if (loi.question.id === hypothesis.question.id)
+                    found = true;
+            })
+        }
+        setNoQuery(!found);
+    }, [localLOIs, hypothesis])
 
     const onTestHypothesisClicked = () => {
         if (goalId == undefined) 
@@ -119,16 +134,23 @@ export const HypothesisView = () => {
                     <CachedIcon sx={{mr:"5px"}}/> Update
                 </Button>
             </Box>
-            {TLOIloading ? (
+            {TLOIloading || loading2 ? (
                 <Skeleton/>
             ) : (
-                LOIList.length === 0 ? (
-                    <Card variant="outlined" sx={{display:'flex', justifyContent:'center'}}>
-                        No executions
+                noQuery ? (
+                    <Card variant="outlined" sx={{display:'flex', justifyContent:'center', gap: ".5em", p: "10px"}}>
+                        <WarnIcon sx={{color:"orangered"}}></WarnIcon>
+                        No lines of inquiry are configured to run this question.
                     </Card>
                 ) : (
-                    hypothesis && (
-                        LOIList.map((loiId:string) => <TLOIBundle loiId={loiId} key={loiId} goal={hypothesis} />)
+                    LOIList.length === 0 ? (
+                        <Card variant="outlined" sx={{display:'flex', justifyContent:'center', p: "10px"}}>
+                            No executions
+                        </Card>
+                    ) : (
+                        hypothesis && (
+                            LOIList.map((loiId:string) => <TLOIBundle loiId={loiId} key={loiId} goal={hypothesis} />)
+                        )
                     )
                 )
             )}
