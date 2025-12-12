@@ -13,7 +13,20 @@ This video shows a brief overview how a new hypothesis can be specified by a use
 
 ## Getting Started
 
-You can start to use DISK [here](https://disk.isi.edu), note that you will need to request an account.
+You can start to use DISK with our live demo [here](https://disk.isi.edu), note that you will need to request an account.
+
+Otherwise, we recommend you to check our GitHub repositories:
+
+- [UI](https://github.com/KnowledgeCaptureAndDiscovery/disk-ui)
+- [Backend](https://github.com/KnowledgeCaptureAndDiscovery/disk-web)
+
+and the [installation guide](https://disk.readthedocs.io/en/stable/admin-guide/installation/) for a local set up.
+
+Also check our our main project website and the NeuroDISK use case:
+
+- [DISK Website](https://disk-project.org/index.html)
+- [NeuroDISK Website](https://knowledgecaptureanddiscovery.github.io/NeuroDISK/index.html)
+- [NeuroDISK Demo Portal](https://disk.isi.edu)
 
 ### Target Users and Documentation
 
