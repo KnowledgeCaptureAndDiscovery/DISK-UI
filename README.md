@@ -8,8 +8,19 @@ periodically check for new data/methods available. When a method detects new dat
 a new workflow execution will be send. Each experiment execution is stored with its
 metadata and outputs for posterior analysis.
 
-## How to install?
+## Documentation and Links
 
+- Full documentation is available at [https://disk.readthedocs.io](https://disk.readthedocs.io)
+- The project website is available at [https://disk-project.org/index.html](https://disk-project.org/index.html)
+- Check our our ENIGMA DISK live demo at [https://disk.isi.edu](https://disk.isi.edu)
+
+## Related repositories
+
+- [DISK API](https://github.com/KnowledgeCaptureAndDiscovery/DISK-API) is the backend of this application.
+You need to install the backend if you want to run the DISK UI locally.
+- We use [WINGS](https://github.com/KnowledgeCaptureAndDiscovery/WINGS) as the workflow manager for the DISK runs.
+
+## How to install?
 
 ```bash
 $ yarn install
@@ -27,11 +38,3 @@ $ vim public/config.js
 ### Configuration parameters
 
 - `window.REACT_APP_DISK_API`: URL of the DISK API
-
-## Documentation
-
-Full documentation is available at [https://disk.readthedocs.io](https://disk.readthedocs.io)
-
-## Related repositories
-
-- [DISK API](https://github.com/KnowledgeCaptureAndDiscovery/DISK-API)
