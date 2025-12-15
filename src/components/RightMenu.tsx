@@ -31,7 +31,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import NewTabIcon from '@mui/icons-material/OpenInNew';
 import { useUsername } from "redux/hooks";
 import { Goal, LineOfInquiry } from 'DISK/interfaces';
-import { useKeycloak } from '@react-keycloak/web';
+//import { useKeycloak } from '@react-keycloak/web';
 import { Button } from '@mui/material';
 import { VERSION } from 'constants/config';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
@@ -188,13 +188,13 @@ export default function MiniDrawer(props: { children: string | number | boolean 
   const {data:selectedLOI} = useGetLOIByIdQuery(getId({id: location.pathname}), {skip: !location.pathname.startsWith(PATH_LOIS+ "/")});
   const {data:selectedTLOI} = useGetTLOIByIdQuery(getId({id: location.pathname}), {skip: !location.pathname.startsWith(PATH_TLOIS+ "/")});
 
-  const { keycloak, initialized } = useKeycloak();
+  //const { keycloak, initialized } = useKeycloak();
   const username = useUsername();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const logoutDialogOpen = Boolean(anchorEl);
 
-  React.useEffect(() => {
+  /*React.useEffect(() => {
     if (!initialized)
       return;
     if (!keycloak.authenticated) 
@@ -203,7 +203,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
     keycloak.onTokenExpired = () => {
       keycloak.updateToken(300);
     }
-   }, [keycloak.authenticated, initialized, keycloak]);
+   }, [keycloak.authenticated, initialized, keycloak]);*/
 
   const [open, setOpen] = React.useState(true);
 
@@ -245,23 +245,23 @@ export default function MiniDrawer(props: { children: string | number | boolean 
           </IconButton>
         </DrawerHeader>
 
-        {keycloak && keycloak.authenticated && (<React.Fragment>
+        {false /*keycloak && keycloak.authenticated*/ && (<React.Fragment>
           <Divider />
           <List>
             {open && <ListItem sx={{p: '0 10px', fontSize: "0.9em", fontWeight: "500", color: "#444"}}>My work:</ListItem>}
             <ListItemButton  key={PATH_MY_GOALS} component={Link} to={PATH_MY_GOALS}
                 sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center',
-                  color: (inLocation(PATH_MY_GOALS) || ((location.pathname !== PATH_GOALS && inLocation(PATH_GOALS) || inLocation(PATH_TLOIS)) && selectedGoal && selectedGoal.author?.email === username)) && !inLocation(PATH_HYP_QUESTIONS) ? "darkorange" : "orange" }} >
+                  color: (inLocation(PATH_MY_GOALS) || ((location.pathname !== PATH_GOALS && inLocation(PATH_GOALS) || inLocation(PATH_TLOIS)) && selectedGoal && selectedGoal?.author?.email === username)) && !inLocation(PATH_HYP_QUESTIONS) ? "darkorange" : "orange" }} >
                 <ScienceIcon />
               </ListItemIcon>
               <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                <Typography sx={{fontWeight:!inLocation(PATH_HYP_QUESTIONS) && (inLocation(PATH_MY_GOALS)|| ((location.pathname !== PATH_GOALS && inLocation(PATH_GOALS) || inLocation(PATH_TLOIS)) && selectedGoal && selectedGoal.author?.email === username)) ? 700 : 400}}>My Hypotheses</Typography>
+                <Typography sx={{fontWeight:!inLocation(PATH_HYP_QUESTIONS) && (inLocation(PATH_MY_GOALS)|| ((location.pathname !== PATH_GOALS && inLocation(PATH_GOALS) || inLocation(PATH_TLOIS)) && selectedGoal && selectedGoal?.author?.email === username)) ? 700 : 400}}>My Hypotheses</Typography>
               }/>
             </ListItemButton>
 
-            {selectedGoal && selectedGoal.author?.email === username && (inLocation(PATH_TLOIS) || (location.pathname != PATH_GOALS && inLocation(PATH_GOALS))) && !inLocation(PATH_HYP_QUESTIONS) &&
-              <ListItemButton  key={PATH_GOALS + selectedGoal.id} component={Link} to={PATH_GOALS + "/" + getId(selectedGoal)}
+            {selectedGoal && selectedGoal?.author?.email === username && (inLocation(PATH_TLOIS) || (location.pathname != PATH_GOALS && inLocation(PATH_GOALS))) && !inLocation(PATH_HYP_QUESTIONS) &&
+              <ListItemButton  key={PATH_GOALS + selectedGoal?.id} component={Link} to={PATH_GOALS + "/" + getId(selectedGoal||{id:""})}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '25px', py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                   <SubdirectoryArrowRightIcon/>
@@ -269,19 +269,19 @@ export default function MiniDrawer(props: { children: string | number | boolean 
                 <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
                   <Typography sx={{fontWeight: location.pathname != PATH_GOALS && inLocation(PATH_GOALS) || location.pathname != PATH_TLOIS && inLocation(PATH_TLOIS) ? 700 : 400,
                       textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>
-                    {selectedGoal.name}
+                    {selectedGoal?.name}
                   </Typography>
                 }/>
               </ListItemButton>
             }
-            {selectedTLOI && selectedGoal && selectedGoal.author?.email === username && inLocation(PATH_TLOIS) && (
-              <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + getId(selectedTLOI)}
+            {selectedTLOI && selectedGoal && selectedGoal?.author?.email === username && inLocation(PATH_TLOIS) && (
+              <ListItemButton  key={PATH_TLOIS} component={Link} to={PATH_TLOIS + "/" + getId(selectedTLOI||{id:""})}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: '50px', py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkorange"}} >
                   <SubdirectoryArrowRightIcon/>
                 </ListItemIcon>
                 <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                  <Typography sx={{fontWeight: inLocation(PATH_TLOIS) ? 700 : 400, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedTLOI.name}</Typography>
+                  <Typography sx={{fontWeight: inLocation(PATH_TLOIS) ? 700 : 400, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedTLOI?.name}</Typography>
                 }/>
               </ListItemButton>
             )}
@@ -289,22 +289,22 @@ export default function MiniDrawer(props: { children: string | number | boolean 
             <ListItemButton key={PATH_MY_LOIS} component={Link} to={PATH_MY_LOIS}
                 sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5, }}>
               <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', 
-                  color: (inLocation(PATH_MY_LOIS) || (inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && selectedLOI && selectedLOI.author?.email === username)) && !inLocation(PATH_LOI_QUESTIONS) ? "darkgreen" : "green" }} >
+                  color: (inLocation(PATH_MY_LOIS) || (inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && selectedLOI && selectedLOI?.author?.email === username)) && !inLocation(PATH_LOI_QUESTIONS) ? "darkgreen" : "green" }} >
                 <SettingIcon />
               </ListItemIcon>
               <ListItemText  sx={{ opacity: open ? 1 : 0 }} primary={
-                <Typography sx={{fontWeight: (inLocation(PATH_MY_LOIS)  || (location.pathname !== PATH_LOIS && inLocation(PATH_LOIS) && selectedLOI && selectedLOI.author?.email === username)) && !inLocation(PATH_LOI_QUESTIONS) ? 700 : 400}}>My Lines of Inquiry</Typography>
+                <Typography sx={{fontWeight: (inLocation(PATH_MY_LOIS)  || (location.pathname !== PATH_LOIS && inLocation(PATH_LOIS) && selectedLOI && selectedLOI?.author?.email === username)) && !inLocation(PATH_LOI_QUESTIONS) ? 700 : 400}}>My Lines of Inquiry</Typography>
               }/>
             </ListItemButton>
 
-            {selectedLOI && selectedLOI.author?.email === username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && !inLocation(PATH_LOI_QUESTIONS) &&
-              <ListItemButton  key={PATH_LOIS + selectedLOI.id} component={Link} to={PATH_LOIS + "/" + getId(selectedLOI)}
+            {selectedLOI && selectedLOI?.author?.email === username && inLocation(PATH_LOIS) && location.pathname !== PATH_LOIS && !inLocation(PATH_LOI_QUESTIONS) &&
+              <ListItemButton  key={PATH_LOIS + selectedLOI?.id} component={Link} to={PATH_LOIS + "/" + getId(selectedLOI||{id:""})}
                   sx={{ minHeight: 28, justifyContent: open ? 'initial' : 'center', pl: "25px", py: 0}}>
                 <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center', color: "darkgreen" }} >
                   <SubdirectoryArrowRightIcon/>
                 </ListItemIcon>
                 <ListItemText disableTypography sx={{ opacity: open ? 1 : 0}} primary={
-                  <Typography sx={{fontWeight: 700, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedLOI.name}</Typography>
+                  <Typography sx={{fontWeight: 700, textOverflow:'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{selectedLOI?.name}</Typography>
                 }/>
               </ListItemButton>
             }
@@ -420,15 +420,15 @@ export default function MiniDrawer(props: { children: string | number | boolean 
         <Box sx={{height: "100%", display:"flex", justifyContent: "end", flexDirection: "column"}}>
           <Divider />
           <Box sx={{height: "50px", display: "flex", alignItems: "center"}}>
-            <Box onClick={open ? undefined : (e) => keycloak && keycloak.authenticated ? setAnchorEl(e.currentTarget) : (keycloak ? keycloak.login() : undefined)}>
-              <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}} color={keycloak && keycloak.authenticated ? 'success' : 'info'}/>
+            <Box>
+              <AccountCircle sx={{fontSize: "2em", margin: "0px 16px"}} color={'success'}/>
             </Box>
-            {keycloak && !keycloak.authenticated &&
-              (<Button onClick={() => keycloak.login()}>
+            {false /*keycloak && !keycloak.authenticated*/ &&
+              (<Button>
                 LOGIN
               </Button>)
             }
-            {keycloak && keycloak.authenticated && username &&
+            {false /*keycloak && keycloak.authenticated*/ && username &&
               (<Box>
                 <Button onClick={(e) =>  setAnchorEl(e.currentTarget)  } endIcon={<KeyboardArrowDownIcon/>}>
                   {username}
@@ -440,7 +440,7 @@ export default function MiniDrawer(props: { children: string | number | boolean 
                 {username}
               </MenuItem>
               <MenuItem disableRipple>
-                <Button onClick={() => keycloak.logout()}>
+                <Button>
                   <LogoutIcon/> LOGOUT
                 </Button>
               </MenuItem>
